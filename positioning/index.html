@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Cross asset positioning · Positioning %.</title>
+    <title>Positioning desk · Positioning %.</title>
     <meta
       name="description"
-      content="Select Sector funds on their own cards, a soft-to-crowded map, and a check on whether the VIX looks cheap or rich. Sample figures. Education only, not advice."
+      content="A full desk of positioning reads: sectors, broad equity, retail and funds, prime book, options and vol, correlation, credit, policy, futures, and semis and AI. Sample figures. Education only, not advice."
     />
     <meta name="theme-color" content="#f4f5f7" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
@@ -23,26 +23,30 @@
           <a href="../options-flow/">Options Flow</a>
         </nav>
       </div>
+      <nav class="secnav" aria-label="Desk sections">
+        <div class="wrap secnav-in" id="secnav-links">
+          <a href="#overview" data-target="overview">Overview</a>
+        </div>
+      </nav>
     </header>
 
     <div class="wrap">
       <main id="content">
         <section class="page-head">
           <span class="pill">Sample series</span>
-          <h1>Cross asset positioning</h1>
+          <h1>Positioning desk</h1>
           <p class="lede">
-            The Select Sector funds, each on its own card, plus a soft-to-crowded map and a check on
-            whether the VIX looks cheap or rich against the S&amp;P 500. Weekly snapshots from a sample
-            file.
+            Ten categories of bank-style positioning reads, each redrawn on one Soft ↔ Crowded scale.
+            Green is light positioning. Dark is crowded. The triangle marks the week you pick.
           </p>
-          <p class="sample-line pill" id="sample-line">Sample · Oct 23, 2026 · JPM</p>
+          <p class="sample-line pill" id="sample-line">Sample week · Oct 23, 2026 · All sources</p>
         </section>
 
         <section class="controls" aria-label="Reading controls">
           <div class="control">
             <h2 class="control-label" id="source-label">Source</h2>
             <div class="chips" id="chips" role="radiogroup" aria-labelledby="source-label"></div>
-            <p class="hint">Your source choice stays on this device.</p>
+            <p class="hint">Pick a house to see only its reads. Your choice stays on this device.</p>
           </div>
           <div class="control">
             <div class="history-top">
@@ -50,82 +54,25 @@
               <p class="history-date" id="history-date">Oct 23, 2026</p>
             </div>
             <input id="week" type="range" min="0" max="7" value="7" aria-labelledby="history-label" />
-            <p class="hint">8 sample weeks. The cards, the map, the gauge, and the study notes follow the week you pick.</p>
+            <p class="hint">8 sample weeks. Every card, bar, and note follows the week you pick.</p>
           </div>
         </section>
 
-        <section class="block" aria-labelledby="cards-title">
+        <section class="desk-section overview" id="overview" aria-labelledby="overview-title">
           <div class="section-head">
-            <h2 id="cards-title">Sector readings</h2>
-            <p class="hint" id="cards-blurb">
-              One card per sector fund. The large number is the positioning percentile for the week
-              you select. XLF is the featured card.
-            </p>
+            <div class="section-title-row">
+              <h2 id="overview-title">Desk at a glance</h2>
+              <span class="section-count" id="overview-total"></span>
+            </div>
+            <p class="overview-headline" id="overview-headline"></p>
+            <p class="hint">Each tile places a category at the median of its reads. Tap a tile to jump to it.</p>
           </div>
-          <div id="cards"></div>
+          <div class="ov-grid" id="overview-grid"></div>
         </section>
 
-        <section class="block" aria-labelledby="map-title">
-          <div class="section-head">
-            <h2 id="map-title">Soft ↔ Crowded</h2>
-            <p class="hint">
-              Every sector on one scale, softest first. The triangle marks this week’s percentile.
-            </p>
-            <div class="legend" aria-hidden="true">
-              <span><i class="sw z-soft"></i>Soft</span>
-              <span><i class="sw z-mid"></i>Mid</span>
-              <span><i class="sw z-crowd"></i>Crowded</span>
-              <span><i class="tri"></i>This week</span>
-            </div>
-          </div>
-          <div class="map">
-            <div class="map-head" aria-hidden="true">
-              <span>Sector</span>
-              <span class="map-scale"><span>Soft</span><span>Crowded</span></span>
-              <span>This week</span>
-            </div>
-            <div id="map"></div>
-          </div>
-        </section>
+        <div id="desk"></div>
 
-        <section class="block" aria-labelledby="vol-title">
-          <div class="section-head">
-            <h2 id="vol-title">Soft Vol ↔ Stretched</h2>
-            <p class="hint">Whether the VIX looks cheap or rich against what the S&amp;P 500 usually implies.</p>
-          </div>
-          <div class="panel">
-            <div class="gauge-main">
-              <div>
-                <p class="vol-num"><span id="vol-value">1.4</span><span class="pts">pts</span></p>
-                <p class="vol-name" id="vol-name">Soft Vol</p>
-              </div>
-              <div>
-                <div class="g-labels">
-                  <span>Soft vol</span>
-                  <span>Fair</span>
-                  <span>Stretched</span>
-                </div>
-                <div class="g-track" id="g-track" role="img">
-                  <div class="g-zones">
-                    <i class="z z-soft"></i>
-                    <i class="z z-mid"></i>
-                    <i class="z z-crowd"></i>
-                  </div>
-                  <i class="sc-pin" id="vol-pin" style="left: 26.7%"></i>
-                </div>
-                <div class="g-scale"><span>−3</span><span>0</span><span>+3</span></div>
-              </div>
-              <span class="method-pill">Methods later</span>
-            </div>
-            <div class="gauge-copy">
-              <p>Soft Vol means the VIX is cheaper than the S&amp;P 500 usually implies. Stretched means the VIX is richer than fair.</p>
-              <p>Live history comes from desk-ingested bank notes. Public labels are bank names only.</p>
-              <p>Desk composite blends desk-ingested bank notes from multiple channels. The calculation note is not in this phase.</p>
-            </div>
-          </div>
-        </section>
-
-        <section class="block study" aria-labelledby="study-title">
+        <section class="desk-section study" id="study" aria-labelledby="study-title">
           <p class="edu-flag"><i aria-hidden="true"></i>Education only · not advice</p>
           <h2 id="study-title">Structures people study when a sector is soft</h2>
           <p class="study-lead" id="study-lead">
@@ -145,7 +92,11 @@
               <p>A long-dated call. Textbooks use it when a view is carried on a distant expiration instead of a contract that ends this week.</p>
             </article>
           </div>
-          <p class="closer">Education only · not advice. Nothing here names a size, and nothing here is a prompt to act.</p>
+          <p class="closer">
+            Education only · not advice. Nothing here names a size, and nothing here is a prompt to act.
+            Each card’s last print is read off a reference chart dated on the card. Earlier weeks are a
+            sample path. Cards marked illustrative are sample values throughout.
+          </p>
         </section>
       </main>
 
@@ -163,7 +114,7 @@
         </nav>
       </footer>
     </div>
-    <noscript>This reading needs JavaScript to swap the sample week and the bank source. The figures are a sample, not a live source. Education only, not advice.</noscript>
+    <noscript>This desk needs JavaScript to draw the sample reads. The figures are a sample, not a live source. Education only, not advice.</noscript>
     <script type="module" src="/src/positioning.js"></script>
   </body>
 </html>
