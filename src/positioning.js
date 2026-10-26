@@ -9,8 +9,6 @@ const state = {
   sector: "XLF",
 };
 
-const SVG_NS = "http://www.w3.org/2000/svg";
-
 function readStoredSource() {
   try {
     return localStorage.getItem(STORAGE_KEY);
@@ -193,7 +191,7 @@ function sectorCard(sector, hero) {
   kicker.className = "pct-kicker";
   kicker.textContent = "positioning percentile";
   const status = document.createElement("p");
-  status.className = "status";
+  status.className = `status lv-${sector.regime.toLowerCase()}`;
   const dot = document.createElement("i");
   dot.setAttribute("aria-hidden", "true");
   status.append(dot, document.createTextNode(sector.pill));
@@ -206,46 +204,7 @@ function sectorCard(sector, hero) {
   return card;
 }
 
-function sparkPoints(series, weekIndex) {
-  const shown = series.slice(0, weekIndex + 1);
-  const min = Math.min(...series);
-  const max = Math.max(...series);
-  const span = Math.max(8, max - min);
-  const points = shown.length === 1 ? [shown[0], shown[0]] : shown;
-  return points
-    .map((value, index) => {
-      const x = (index / (points.length - 1)) * 100;
-      const y = 11 - ((value - min) / span) * 7;
-      return `${x.toFixed(2)},${y.toFixed(2)}`;
-    })
-    .join(" ");
-}
-
-function mapSpark(series, weekIndex) {
-  const svg = document.createElementNS(SVG_NS, "svg");
-  svg.setAttribute("class", "map-spark");
-  svg.setAttribute("viewBox", "0 0 100 20");
-  svg.setAttribute("preserveAspectRatio", "none");
-  svg.setAttribute("aria-hidden", "true");
-  const points = sparkPoints(series, weekIndex);
-  for (const [stroke, width] of [
-    ["#f7f4ee", "3.2"],
-    ["#1c1915", "1.6"],
-  ]) {
-    const line = document.createElementNS(SVG_NS, "polyline");
-    line.setAttribute("fill", "none");
-    line.setAttribute("stroke", stroke);
-    line.setAttribute("stroke-width", width);
-    line.setAttribute("stroke-linejoin", "round");
-    line.setAttribute("stroke-linecap", "round");
-    line.setAttribute("vector-effect", "non-scaling-stroke");
-    line.setAttribute("points", points);
-    svg.append(line);
-  }
-  return svg;
-}
-
-function mapRow(sector, weekIndex) {
+function mapRow(sector) {
   const button = document.createElement("button");
   button.type = "button";
   button.className = sector.ticker === state.sector ? "map-row is-on" : "map-row";
@@ -262,13 +221,6 @@ function mapRow(sector, weekIndex) {
 
   const bar = document.createElement("span");
   bar.className = "map-bar";
-  const ends = document.createElement("span");
-  ends.className = "map-ends";
-  const soft = document.createElement("span");
-  soft.textContent = "Soft";
-  const crowded = document.createElement("span");
-  crowded.textContent = "Crowded";
-  ends.append(soft, crowded);
 
   const track = document.createElement("span");
   track.className = "map-track";
@@ -283,8 +235,8 @@ function mapRow(sector, weekIndex) {
   pin.className = "sc-pin";
   pin.style.left = `${pinLeft(sector.points)}%`;
   pin.setAttribute("aria-hidden", "true");
-  track.append(zones, mapSpark(sector.series, weekIndex), pin);
-  bar.append(ends, track);
+  track.append(zones, pin);
+  bar.append(track);
 
   const stat = document.createElement("span");
   stat.className = "map-stat";
@@ -380,7 +332,7 @@ function paint() {
     const delta = reading.sectors[a].points - reading.sectors[b].points;
     return delta || a.localeCompare(b);
   });
-  map.replaceChildren(...mapOrder.map((ticker) => mapRow(reading.sectors[ticker], reading.weekIndex)));
+  map.replaceChildren(...mapOrder.map((ticker) => mapRow(reading.sectors[ticker])));
 
   document.getElementById("vol-value").textContent = reading.volDisplay;
   document.getElementById("vol-name").textContent = reading.volName;

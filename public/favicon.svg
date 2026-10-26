@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#f4f1ea"/>
-  <text x="7" y="46" font-family="Times New Roman, Times, serif" font-size="38" fill="#1c1915">P</text>
-  <text x="30" y="30" font-family="Times New Roman, Times, serif" font-size="18" fill="#c4312c">%</text>
+  <rect width="64" height="64" rx="14" fill="#0b0d12"/>
+  <text x="9" y="46" font-family="Didot, Bodoni MT, Times New Roman, serif" font-size="38" fill="#ffffff">P</text>
+  <text x="33" y="46" font-family="Didot, Bodoni MT, Times New Roman, serif" font-weight="700" font-size="20" fill="#e0322b">%.</text>
 </svg>

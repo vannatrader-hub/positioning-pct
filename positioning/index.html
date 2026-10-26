@@ -8,83 +8,95 @@
       name="description"
       content="Select Sector funds on their own cards, a soft-to-crowded map, and a check on whether the VIX looks cheap or rich. Sample figures. Education only, not advice."
     />
-    <meta name="theme-color" content="#f4f1ea" />
+    <meta name="theme-color" content="#f4f5f7" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
-  <body class="dash">
+  <body>
     <a class="skip" href="#content">Skip to content</a>
-    <div class="wrap">
-      <header class="top">
+    <header class="topbar">
+      <div class="wrap topbar-in">
         <a class="lockup" href="../">Positioning<span class="mark">%.</span></a>
         <nav class="nav" aria-label="Pages">
           <a class="is-current" href="./" aria-current="page">Positioning</a>
           <a href="../spx-levels/">SPX Levels</a>
           <a href="../options-flow/">Options Flow</a>
         </nav>
-      </header>
+      </div>
+    </header>
 
+    <div class="wrap">
       <main id="content">
-        <p class="eyebrow">Sample series</p>
-        <h1>Cross asset positioning</h1>
-        <p class="lede">
-          The Select Sector funds, each on its own card, plus a soft-to-crowded map and a check on
-          whether the VIX looks cheap or rich against the S&amp;P 500. The figures are weekly
-          snapshots in a sample file. A longer series can replace them later.
-        </p>
-        <p class="sample-line" id="sample-line">Sample · Oct 23, 2026 · JPM</p>
-
-        <section class="block" aria-labelledby="source-label">
-          <h2 class="kicker" id="source-label">Source</h2>
-          <div class="chips" id="chips" role="radiogroup" aria-label="Source"></div>
-          <p class="hint">Your source choice stays on this device.</p>
+        <section class="page-head">
+          <span class="pill">Sample series</span>
+          <h1>Cross asset positioning</h1>
+          <p class="lede">
+            The Select Sector funds, each on its own card, plus a soft-to-crowded map and a check on
+            whether the VIX looks cheap or rich against the S&amp;P 500. Weekly snapshots from a sample
+            file.
+          </p>
+          <p class="sample-line pill" id="sample-line">Sample · Oct 23, 2026 · JPM</p>
         </section>
 
-        <section class="block history" aria-labelledby="history-label">
-          <div class="history-top">
-            <h2 class="history-name" id="history-label">History</h2>
-            <p class="history-date" id="history-date">Oct 23, 2026</p>
+        <section class="controls" aria-label="Reading controls">
+          <div class="control">
+            <h2 class="control-label" id="source-label">Source</h2>
+            <div class="chips" id="chips" role="radiogroup" aria-labelledby="source-label"></div>
+            <p class="hint">Your source choice stays on this device.</p>
           </div>
-          <input id="week" type="range" min="0" max="7" value="7" aria-label="Sample week" />
-          <p class="hint">8 sample weeks. The bars, the residual, and the study notes follow the week you park on.</p>
+          <div class="control">
+            <div class="history-top">
+              <h2 id="history-label">History</h2>
+              <p class="history-date" id="history-date">Oct 23, 2026</p>
+            </div>
+            <input id="week" type="range" min="0" max="7" value="7" aria-labelledby="history-label" />
+            <p class="hint">8 sample weeks. The cards, the map, the gauge, and the study notes follow the week you pick.</p>
+          </div>
         </section>
 
         <section class="block" aria-labelledby="cards-title">
-          <h2 id="cards-title">Sector readings</h2>
-          <p class="hint" id="cards-blurb">
-            One card per sector fund. The large number is the positioning percentile for the week you
-            select. XLF is the featured card.
-          </p>
+          <div class="section-head">
+            <h2 id="cards-title">Sector readings</h2>
+            <p class="hint" id="cards-blurb">
+              One card per sector fund. The large number is the positioning percentile for the week
+              you select. XLF is the featured card.
+            </p>
+          </div>
           <div id="cards"></div>
         </section>
 
         <section class="block" aria-labelledby="map-title">
-          <h2 id="map-title">Soft ↔ Crowded</h2>
-          <p class="hint">
-            Each bar is a positioning percentile for the week you select. The triangle marks the
-            print. Green is the soft end. Dark is crowded. Sparklines show only the shape of the
-            sample path.
-          </p>
-          <div class="map-legend" aria-hidden="true">
-            <i class="lg-soft"></i>
-            <span>Soft</span>
-            <i class="lg-line"></i>
-            <i class="lg-pin"></i>
-            <i class="lg-line"></i>
-            <span>Crowded</span>
+          <div class="section-head">
+            <h2 id="map-title">Soft ↔ Crowded</h2>
+            <p class="hint">
+              Every sector on one scale, softest first. The triangle marks this week’s percentile.
+            </p>
+            <div class="legend" aria-hidden="true">
+              <span><i class="sw z-soft"></i>Soft</span>
+              <span><i class="sw z-mid"></i>Mid</span>
+              <span><i class="sw z-crowd"></i>Crowded</span>
+              <span><i class="tri"></i>This week</span>
+            </div>
           </div>
-          <div id="map"></div>
+          <div class="map">
+            <div class="map-head" aria-hidden="true">
+              <span>Sector</span>
+              <span class="map-scale"><span>Soft</span><span>Crowded</span></span>
+              <span>This week</span>
+            </div>
+            <div id="map"></div>
+          </div>
         </section>
 
         <section class="block" aria-labelledby="vol-title">
-          <h2 id="vol-title">Soft Vol ↔ Stretched</h2>
-          <div class="panel gauge">
-            <div class="gauge-head">
-              <span class="method-pill">Methods later</span>
-            </div>
+          <div class="section-head">
+            <h2 id="vol-title">Soft Vol ↔ Stretched</h2>
+            <p class="hint">Whether the VIX looks cheap or rich against what the S&amp;P 500 usually implies.</p>
+          </div>
+          <div class="panel">
             <div class="gauge-main">
               <div>
-                <p class="vol-num"><span id="vol-value">1.4</span> <span class="pts">pts</span></p>
+                <p class="vol-num"><span id="vol-value">1.4</span><span class="pts">pts</span></p>
                 <p class="vol-name" id="vol-name">Soft Vol</p>
               </div>
               <div>
@@ -93,7 +105,7 @@
                   <span>Fair</span>
                   <span>Stretched</span>
                 </div>
-                <div class="g-track" id="g-track">
+                <div class="g-track" id="g-track" role="img">
                   <div class="g-zones">
                     <i class="z z-soft"></i>
                     <i class="z z-mid"></i>
@@ -101,19 +113,20 @@
                   </div>
                   <i class="sc-pin" id="vol-pin" style="left: 26.7%"></i>
                 </div>
-                <div class="g-scale"><span>−3</span><span>+3</span></div>
+                <div class="g-scale"><span>−3</span><span>0</span><span>+3</span></div>
               </div>
+              <span class="method-pill">Methods later</span>
             </div>
             <div class="gauge-copy">
               <p>Soft Vol means the VIX is cheaper than the S&amp;P 500 usually implies. Stretched means the VIX is richer than fair.</p>
               <p>Live history comes from desk-ingested bank notes. Public labels are bank names only.</p>
-              <p>Desk composite blends desk-ingested bank notes from multiple channels. The calculation note itself is not in this phase.</p>
+              <p>Desk composite blends desk-ingested bank notes from multiple channels. The calculation note is not in this phase.</p>
             </div>
           </div>
         </section>
 
         <section class="block study" aria-labelledby="study-title">
-          <p class="edu-flag"><i></i>Education only · not advice</p>
+          <p class="edu-flag"><i aria-hidden="true"></i>Education only · not advice</p>
           <h2 id="study-title">Structures people study when a sector is soft</h2>
           <p class="study-lead" id="study-lead">
             XLF (Financials) at the 18th percentile is inside the soft quartile this week, under the 25th percentile.
@@ -137,9 +150,11 @@
       </main>
 
       <footer class="site-footer">
-        <a class="lockup" href="../">Positioning<span class="mark">%.</span></a>
-        <p class="foot-note">Phase 1 public reading. Figures on a live page are a sample, not a live source.</p>
-        <p class="foot-edu">Education only · not advice.</p>
+        <div>
+          <a class="lockup" href="../">Positioning<span class="mark">%.</span></a>
+          <p class="foot-note">Phase 1 public reading. Figures on a live page are a sample, not a live source.</p>
+          <p class="foot-edu">Education only · not advice.</p>
+        </div>
         <nav class="foot-links" aria-label="Footer">
           <a href="../">Home</a>
           <a class="is-current" href="./" aria-current="page">Positioning</a>

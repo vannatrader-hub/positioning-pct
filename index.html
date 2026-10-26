@@ -8,66 +8,90 @@
       name="description"
       content="A public reading of where positioning sits. Phase 1. Education only, not advice."
     />
-    <meta name="theme-color" content="#f4f1ea" />
+    <meta name="theme-color" content="#f4f5f7" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
     <a class="skip" href="#content">Skip to content</a>
-    <div class="wrap">
-      <header class="home-head">
-        <h1 class="home-brand">
-          <a class="lockup lockup-hero" href="./">Positioning<span class="mark">%.</span></a>
-          <div class="rule" aria-hidden="true"></div>
-        </h1>
+    <header class="topbar">
+      <div class="wrap topbar-in">
+        <span class="phase"><i aria-hidden="true"></i>Phase 1 · Sample data</span>
         <nav class="nav" aria-label="Pages">
           <a href="positioning/">Positioning</a>
           <a href="spx-levels/">SPX Levels</a>
           <a href="options-flow/">Options Flow</a>
         </nav>
-      </header>
+      </div>
+    </header>
 
+    <div class="wrap">
       <main id="content">
-        <div class="intro">
-          <p>A public reading of where positioning sits — soft, crowded, or somewhere between.</p>
-          <p>Pick a page. It opens on its own.</p>
-        </div>
-        <hr class="sep" />
+        <section class="hero">
+          <span class="pill">Public reading</span>
+          <h1><a class="lockup" href="./">Positioning<span class="mark">%.</span></a></h1>
+          <p class="tagline">Where positioning sits — soft, crowded, or somewhere between.</p>
+          <p class="tagline-sub">Pick a page. It opens on its own.</p>
+        </section>
+
         <div class="tile-grid">
           <a class="tile" href="positioning/">
             <div class="tile-kicker">
-              <span>01</span>
-              <span class="badge is-live"><i></i>Live</span>
+              <span class="tile-num">01</span>
+              <span class="badge is-live"><i aria-hidden="true"></i>Live</span>
             </div>
+            <span class="tile-icon" aria-hidden="true">
+              <svg viewBox="0 0 28 28">
+                <path d="M5 4 L11 4 L8 9 Z" fill="#0b0d12" />
+                <rect x="1" y="12" width="8.4" height="10" rx="3" fill="#2f8a55" />
+                <rect x="9.8" y="12" width="8.4" height="10" rx="1.5" fill="#cdd1d8" />
+                <rect x="18.6" y="12" width="8.4" height="10" rx="3" fill="#464b54" />
+              </svg>
+            </span>
             <h2>Positioning</h2>
             <p>Sector funds from soft to crowded, each on its own card, and whether volatility looks cheap or rich.</p>
-            <span class="open">Open →</span>
+            <span class="open">Open <span class="arrow" aria-hidden="true">→</span></span>
           </a>
           <a class="tile" href="spx-levels/">
             <div class="tile-kicker">
-              <span>02</span>
-              <span class="badge is-soon">Soon</span>
+              <span class="tile-num">02</span>
+              <span class="badge">Soon</span>
             </div>
+            <span class="tile-icon" aria-hidden="true">
+              <svg viewBox="0 0 28 28" fill="none" stroke-linecap="round">
+                <path d="M4 8 H24" stroke="#464b54" stroke-width="2" />
+                <path d="M4 14 H24" stroke="#8b919c" stroke-width="2" stroke-dasharray="2 3" />
+                <path d="M4 20 H24" stroke="#464b54" stroke-width="2" />
+              </svg>
+            </span>
             <h2>SPX Levels</h2>
             <p>Index reference levels, written in plain language. This page is a placeholder in this phase.</p>
-            <span class="open">Open →</span>
+            <span class="open">Open <span class="arrow" aria-hidden="true">→</span></span>
           </a>
           <a class="tile" href="options-flow/">
             <div class="tile-kicker">
-              <span>03</span>
-              <span class="badge is-soon">Soon</span>
+              <span class="tile-num">03</span>
+              <span class="badge">Soon</span>
             </div>
+            <span class="tile-icon" aria-hidden="true">
+              <svg viewBox="0 0 28 28" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 9 H19 M15 5 L19 9 L15 13" stroke="#464b54" stroke-width="2" />
+                <path d="M24 19 H9 M13 15 L9 19 L13 23" stroke="#8b919c" stroke-width="2" />
+              </svg>
+            </span>
             <h2>Options Flow</h2>
             <p>Where options premium is concentrating. This page is a placeholder in this phase.</p>
-            <span class="open">Open →</span>
+            <span class="open">Open <span class="arrow" aria-hidden="true">→</span></span>
           </a>
         </div>
       </main>
 
       <footer class="site-footer">
-        <a class="lockup" href="./">Positioning<span class="mark">%.</span></a>
-        <p class="foot-note">Phase 1 public reading. Figures on a live page are a sample, not a live source.</p>
-        <p class="foot-edu">Education only · not advice.</p>
+        <div>
+          <a class="lockup" href="./">Positioning<span class="mark">%.</span></a>
+          <p class="foot-note">Phase 1 public reading. Figures on a live page are a sample, not a live source.</p>
+          <p class="foot-edu">Education only · not advice.</p>
+        </div>
         <nav class="foot-links" aria-label="Footer">
           <a class="is-current" href="./" aria-current="page">Home</a>
           <a href="positioning/">Positioning</a>
