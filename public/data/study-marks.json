@@ -1,0 +1,76 @@
+{
+  "asOf": "2026-10-23T20:15:00Z",
+  "asOfLabel": "Fri Oct 23, 2026 session close (CT)",
+  "sourceNote": "Broker marks snapshot for Study cards. Public site ships this JSON only — no live broker keys in the browser.",
+  "underlyings": {
+    "XLF": {
+      "name": "Financials",
+      "percentile": 0.18,
+      "spot": 55.90,
+      "spotBid": 55.84,
+      "spotAsk": 56.05,
+      "previousClose": 55.90
+    },
+    "XLP": {
+      "name": "Staples",
+      "percentile": 0.21,
+      "spot": 88.26,
+      "previousClose": 88.26
+    }
+  },
+  "softTickers": ["XLF", "XLP"],
+  "crowdedTickers": ["XLK"],
+  "chains": {
+    "XLF": {
+      "putStrip": {
+        "expiration": "2026-11-20",
+        "type": "put",
+        "rows": [
+          {"strike": 50, "bid": 0.08, "ask": 0.12, "mark": 0.10, "iv": 0.275, "oi": 49786, "volume": 12},
+          {"strike": 51, "bid": 0.13, "ask": 0.15, "mark": 0.14, "iv": 0.257, "oi": 29855, "volume": 260},
+          {"strike": 52, "bid": 0.17, "ask": 0.20, "mark": 0.185, "iv": 0.234, "oi": 58949, "volume": 306},
+          {"strike": 53, "bid": 0.27, "ask": 0.31, "mark": 0.29, "iv": 0.219, "oi": 145236, "volume": 6749},
+          {"strike": 54, "bid": 0.40, "ask": 0.51, "mark": 0.455, "iv": 0.208, "oi": 182570, "volume": 175},
+          {"strike": 55, "bid": 0.62, "ask": 0.70, "mark": 0.66, "iv": 0.186, "oi": 78949, "volume": 1258},
+          {"strike": 55.5, "bid": 0.78, "ask": 0.92, "mark": 0.85, "iv": 0.185, "oi": 3443, "volume": 2023},
+          {"strike": 56, "bid": 1.00, "ask": 1.09, "mark": 1.045, "iv": 0.178, "oi": 64599, "volume": 1135},
+          {"strike": 56.5, "bid": 1.13, "ask": 1.41, "mark": 1.27, "iv": 0.169, "oi": 3663, "volume": 103},
+          {"strike": 57, "bid": 1.47, "ask": 1.64, "mark": 1.555, "iv": 0.165, "oi": 11496, "volume": 11}
+        ]
+      },
+      "leapCalls": {
+        "expiration": "2028-01-21",
+        "type": "call",
+        "rows": [
+          {"strike": 55, "bid": 6.15, "ask": 6.75, "mark": 6.45, "iv": 0.178, "oi": 6390, "volume": 1},
+          {"strike": 56, "bid": 5.40, "ask": 6.05, "mark": 5.725, "iv": 0.171, "oi": 2540, "volume": 0},
+          {"strike": 57, "bid": 4.45, "ask": 5.75, "mark": 5.10, "iv": 0.166, "oi": 7898, "volume": 0},
+          {"strike": 60, "bid": 3.50, "ask": 4.00, "mark": 3.75, "iv": 0.167, "oi": 6298, "volume": 1}
+        ]
+      },
+      "structures": {
+        "shares": {
+          "label": "Shares",
+          "symbol": "XLF",
+          "last": 55.90,
+          "note": "Sector fund last / prior close."
+        },
+        "bullPut": {
+          "label": "Bull put",
+          "expiration": "2026-11-20",
+          "short": {"strike": 55, "type": "put", "mark": 0.66, "bid": 0.62, "ask": 0.70},
+          "long": {"strike": 53, "type": "put", "mark": 0.29, "bid": 0.27, "ask": 0.31},
+          "creditMid": 0.37,
+          "width": 2,
+          "note": "Example defined-risk credit: sell 55 put / buy 53 put. Mid credit ≈ short mark − long mark. No size."
+        },
+        "callLeap": {
+          "label": "Call LEAP",
+          "expiration": "2028-01-21",
+          "long": {"strike": 56, "type": "call", "mark": 5.725, "bid": 5.40, "ask": 6.05},
+          "note": "Example long-dated ATM call. Mark is mid. No size."
+        }
+      }
+    }
+  }
+}

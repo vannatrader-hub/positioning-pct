@@ -2,7 +2,8 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { HOUSES, INDICATORS, SECTIONS, readIndicator } from "../src/desk.js";
-import { WEEKS, buildReading, ordinal } from "../src/readings.js";
+import { CANON, WEEKS, buildReading, ordinal } from "../src/readings.js";
+import { bullPutMath, leapMath, price } from "../src/study.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
@@ -127,6 +128,44 @@ const eight = buildReading("jpm", 7, 8);
 assert(eight.sectors.XLF.pill === "extreme soft → easing", "8-week XLF still easing");
 assert(eight.sectors.XLU.pill === "soft → catching up", `8-week XLU ${eight.sectors.XLU.pill}`);
 
+const marks = JSON.parse(readFileSync(join(root, "public/data/study-marks.json"), "utf8"));
+assert(typeof marks.asOfLabel === "string" && marks.asOfLabel.length > 0, "marks need an asOfLabel");
+const latestJpm = buildReading("jpm", WEEKS.length - 1, 4).sectors;
+const softJpm = CANON.filter((ticker) => latestJpm[ticker].available && latestJpm[ticker].points < 25).sort();
+assert(
+  JSON.stringify(softJpm) === JSON.stringify([...marks.softTickers].sort()),
+  `soft JPM sectors ${softJpm} should match marks softTickers ${marks.softTickers}`,
+);
+for (const ticker of marks.softTickers) {
+  const underlying = marks.underlyings[ticker];
+  assert(underlying && typeof underlying.spot === "number", `${ticker} needs a spot price`);
+  assert(Math.round(underlying.percentile * 100) === latestJpm[ticker].points, `${ticker} percentile matches the JPM card`);
+}
+const xlf = marks.chains.XLF;
+assert(xlf?.putStrip?.rows?.length >= 5, "XLF put strip");
+assert(xlf?.leapCalls?.rows?.length >= 1, "XLF LEAP calls");
+for (const chain of [xlf.putStrip, xlf.leapCalls]) {
+  for (const row of chain.rows) {
+    assert(row.bid <= row.mark && row.mark <= row.ask, `${chain.type} ${row.strike} mark inside bid/ask`);
+    assert(Math.abs((row.bid + row.ask) / 2 - row.mark) < 0.0051, `${chain.type} ${row.strike} mark is mid`);
+    for (const key of ["iv", "oi", "volume"]) assert(typeof row[key] === "number", `${chain.type} ${row.strike} ${key}`);
+  }
+}
+const spread = xlf.structures.bullPut;
+for (const leg of [spread.short, spread.long]) {
+  const row = xlf.putStrip.rows.find((item) => item.strike === leg.strike);
+  assert(row && row.mark === leg.mark && row.bid === leg.bid && row.ask === leg.ask, `bull put ${leg.strike} matches the chain`);
+}
+assert(spread.expiration === xlf.putStrip.expiration, "bull put expiration matches the strip");
+const bp = bullPutMath(spread);
+assert(price(bp.credit) === "0.37" && price(bp.credit) === price(spread.creditMid), `bull put credit ${price(bp.credit)}`);
+assert(price(bp.maxLoss) === "1.63" && price(bp.breakeven) === "54.63", `bull put math ${price(bp.maxLoss)} ${price(bp.breakeven)}`);
+const leap = xlf.structures.callLeap;
+const leapRow = xlf.leapCalls.rows.find((item) => item.strike === leap.long.strike);
+assert(leapRow && leapRow.mark === leap.long.mark, "LEAP leg matches the chain");
+assert(price(leapMath(leap).premium) === "5.725", `LEAP mark ${price(leapMath(leap).premium)}`);
+assert(price(marks.underlyings.XLF.spot) === "55.90", "XLF spot 55.90");
+
 const banned = [
   "sentiment ai",
   "wallstjesus",
@@ -139,12 +178,13 @@ const banned = [
   "deutsche",
   "copy-trading",
   "copy trading",
+  "robinhood",
 ];
-const scanExt = new Set([".html", ".js", ".css", ".md", ".yml", ".svg"]);
+const scanExt = new Set([".html", ".js", ".css", ".md", ".yml", ".svg", ".json"]);
 
 function walk(dir) {
   for (const name of readdirSync(dir)) {
-    if (name === "node_modules" || name === "dist" || name === ".git" || name === "fonts") continue;
+    if (["node_modules", "dist", ".git", "fonts", "package-lock.json"].includes(name)) continue;
     const path = join(dir, name);
     const stat = statSync(path);
     if (stat.isDirectory()) {

@@ -1,4 +1,5 @@
-import { CANON, SOURCES, WEEKS, buildReading, ordinal, studyCopy } from "./readings.js";
+import { CANON, SOURCES, WEEKS, buildReading, ordinal } from "./readings.js";
+import { renderStudy } from "./study.js";
 import { HOUSES, INDICATORS, SECTIONS, leanOf, median, readIndicator } from "./desk.js";
 
 const STORAGE_KEY = "positioning-pct-source";
@@ -621,7 +622,6 @@ function renderChips() {
 
 function paint() {
   const reading = buildReading(state.source, state.weekIndex, state.windowWeeks);
-  const featured = reading.sectors[featuredTicker(reading)];
   const showAll = state.source === "all";
   const reads = INDICATORS.map((indicator) => readIndicator(indicator, reading.weekIndex)).filter(
     (read) => showAll || read.house === state.source,
@@ -686,9 +686,6 @@ function paint() {
   document.getElementById("overview-total").textContent =
     `${reads.length + printedSectors.length + (gaugeVisible ? 1 : 0)} reads on the desk this week`;
 
-  const study = studyCopy(featured.ticker, featured.short, featured.points);
-  document.getElementById("study-title").textContent = study.title;
-  document.getElementById("study-lead").textContent = study.lead;
 }
 
 function bind() {
@@ -699,9 +696,19 @@ function bind() {
   });
 }
 
+function startStudy() {
+  const latest = buildReading("jpm", WEEKS.length - 1, 4).sectors;
+  const printed = CANON.map((ticker) => latest[ticker]).filter((sector) => sector.available);
+  const soft = printed.filter((sector) => sector.points < 25).sort((a, b) => a.points - b.points);
+  const crowded = printed.filter((sector) => sector.points >= 75).sort((a, b) => b.points - a.points);
+  const selected = (new URLSearchParams(location.search).get("study") || "").toUpperCase();
+  renderStudy(document.getElementById("study"), { soft, crowded, selected });
+}
+
 readState();
 buildShells();
 renderChips();
 bind();
 paint();
 watchSections();
+startStudy();
