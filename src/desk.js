@@ -144,17 +144,41 @@ export const INDICATORS = [
 
   /* 2 · Broad equity & cross-asset */
   {
+    id: "jpm-cross-asset",
+    section: "broad",
+    house: "jpm",
+    title: "Cross Asset Positioning Monitor",
+    sub: "Current percentile for each asset class. 0 is the minimum, 1 the maximum.",
+    unit: "median",
+    show: (value) => (value / 100).toFixed(2),
+    ref: "06-Oct-26 (JPM)",
+    latest: "Bitcoin, EM equities, and the dollar are the most crowded lines. EM bonds/FX and credit are the softest.",
+    assets: [
+      { label: "Equities", path: [72, 79, 78, 70, 63, 68, 67, 66] },
+      { label: "Govt Bonds", path: [52, 53, 55, 56, 57, 58, 59, 60] },
+      { label: "Credit", path: [34, 33, 31, 30, 29, 27, 26, 24] },
+      { label: "Dollar", path: [70, 72, 73, 75, 76, 78, 80, 81] },
+      { label: "Commodities ex Gold", path: [66, 68, 70, 71, 73, 75, 76, 78] },
+      { label: "Gold", path: [52, 50, 48, 46, 44, 42, 40, 38] },
+      { label: "Bitcoin", path: [78, 80, 81, 83, 84, 85, 86, 87] },
+      { label: "EM Equities", path: [74, 76, 77, 79, 80, 81, 83, 84] },
+      { label: "EM Bonds/FX", path: [24, 23, 21, 20, 19, 18, 16, 15] },
+      { label: "Japan Equities", path: [58, 59, 61, 62, 63, 64, 66, 67] },
+      { label: "Europe Equities", path: [36, 35, 33, 32, 31, 29, 28, 26] },
+    ],
+  },
+  {
     id: "jpm-broad",
     section: "broad",
     house: "jpm",
     title: "Broad equity positioning",
-    sub: "Composite percentile from a cross-asset positioning monitor, since 2016.",
-    unit: "%ile",
-    show: whole,
-    values: [72, 79, 78, 70, 63, 68, 67, 65],
-    pcts: [72, 79, 78, 70, 63, 68, 67, 65],
-    ref: "Oct 22, 2026",
-    latest: "Off a September peak near the 80th percentile — the third peak this year.",
+    sub: "The Equities line of the cross-asset positioning monitor, as a percentile since 2016.",
+    unit: "percentile",
+    show: (value) => (value / 100).toFixed(2),
+    values: [72, 79, 78, 70, 63, 68, 67, 66],
+    pcts: [72, 79, 78, 70, 63, 68, 67, 66],
+    ref: "06-Oct-26 (JPM)",
+    latest: "Equities at 0.66 on the monitor, off a September peak near 0.80.",
   },
   {
     id: "gs-sentiment",
@@ -692,6 +716,13 @@ export const INDICATORS = [
   },
 ];
 
+for (const indicator of INDICATORS) {
+  if (!indicator.assets) continue;
+  const weeks = indicator.assets[0].path.length;
+  indicator.pcts = Array.from({ length: weeks }, (_, week) => median(indicator.assets.map((asset) => asset.path[week])));
+  indicator.values = [...indicator.pcts];
+}
+
 function zoneWord(pct, ends) {
   const [low, high] = ends.map((end) => end.toLowerCase());
   const scaled = ends[0] === "Soft" && ends[1] === "Crowded";
@@ -721,8 +752,20 @@ export function readIndicator(indicator, weekIndex, lookback = 4) {
   const ends = indicator.ends ?? ["Soft", "Crowded"];
   const zone = zoneWord(pct, ends);
   const isLatest = week === indicator.values.length - 1;
+  const assets = indicator.assets?.map((asset) => {
+    const now = asset.path[week];
+    const then = asset.path[Math.max(0, week - lookback)];
+    return {
+      label: asset.label,
+      pct: now,
+      display: (now / 100).toFixed(2),
+      tone: zoneWord(now, ends).tone,
+      delta: now - then,
+    };
+  });
   return {
     ...indicator,
+    assets,
     ends,
     pct,
     value: indicator.show(indicator.values[week]),

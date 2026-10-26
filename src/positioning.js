@@ -137,7 +137,40 @@ function weeksSelect() {
   return select;
 }
 
+function unavailableCard(sector) {
+  const card = el("article", "card is-unavailable");
+  card.dataset.ticker = sector.ticker;
+
+  const top = el("div", "card-top");
+  const ident = el("div", "ident");
+  const names = el("span");
+  names.append(el("span", "ticker", sector.ticker), el("span", "fund", sector.name));
+  ident.append(chartIcon(), names);
+  top.append(ident);
+
+  const body = el("div", "card-body");
+  const figure = el("div", "figure");
+  figure.append(
+    el("p", "pct", "—"),
+    el("p", "pct-kicker", "no JPM print"),
+    statusPill(sector.unavailable, "none"),
+  );
+  const track = el("div", "sc");
+  track.setAttribute("role", "img");
+  track.setAttribute("aria-label", `${sector.ticker} has no reading: ${sector.short} is not in the JPM Cross Asset Positioning Monitor.`);
+  const line = el("div", "sc-line");
+  const wrap = el("div", "sc-track-wrap");
+  wrap.append(zones(), el("div", "sc-caption", `${sector.short} is not on the JPM sector list`));
+  line.append(el("span", "sc-end", "Soft"), wrap, el("span", "sc-end", "Crowded"));
+  track.append(line);
+  body.append(figure, track);
+
+  card.append(top, body, el("p", "hint unavailable-note", "Switch the source to MS, GS, or BoA for a sample read."));
+  return card;
+}
+
 function sectorCard(sector, hero) {
+  if (!sector.available) return unavailableCard(sector);
   const card = el("article", hero ? "card is-hero" : "card");
   card.dataset.ticker = sector.ticker;
 
@@ -238,13 +271,57 @@ function rowsBlock(rows) {
   return list;
 }
 
-function indicatorCard(read) {
-  const card = el("article", "icard");
+function monitorCard(read, top) {
+  const card = el("article", "icard is-monitor");
   card.dataset.id = read.id;
   card.dataset.house = read.house;
 
+  const head = el("div", "icard-head");
+  head.append(el("h3", "icard-title", read.title), el("p", "icard-sub", read.sub));
+
+  const scale = el("div", "mon-row mon-scale");
+  scale.setAttribute("aria-hidden", "true");
+  const ends = el("span", "mon-ends");
+  ends.append(el("span", "", "Soft · min 0"), el("span", "", "Crowded · max 1"));
+  scale.append(el("span", "", "Asset"), ends, el("span", "", "Current"), el("span", "", `vs ${state.windowWeeks === 8 ? 8 : 4} wks`));
+
+  const list = el("div", "mon-list");
+  list.append(scale);
+  for (const asset of read.assets) {
+    const row = el("div", "mon-row");
+    row.dataset.asset = asset.label;
+    row.setAttribute("role", "img");
+    row.setAttribute("aria-label", `${asset.label}: current percentile ${asset.display}`);
+    const track = el("span", "map-track");
+    const lane = el("span", "map-zones");
+    for (const zone of ["z-soft", "z-mid", "z-crowd"]) lane.append(el("i", `z ${zone}`));
+    const pin = el("i", "sc-pin");
+    pin.style.left = `${pinLeft(asset.pct)}%`;
+    track.append(lane, pin);
+    const delta = asset.delta > 0 ? `▲ ${asset.delta}` : asset.delta < 0 ? `▼ ${Math.abs(asset.delta)}` : "·";
+    row.append(
+      el("span", "mon-label", asset.label),
+      track,
+      el("strong", `mon-value t-${asset.tone}`, asset.display),
+      el("span", "mon-delta", delta),
+    );
+    list.append(row);
+  }
+
+  const foot = el("div", "icard-foot");
+  if (read.latestNote) foot.append(el("p", "icard-latest", read.latestNote));
+  card.append(top, head, list, foot);
+  return card;
+}
+
+function indicatorCard(read) {
   const top = el("div", "icard-top");
   top.append(el("span", `house h-${read.house}`, HOUSES[read.house]), el("span", "basis", read.basis));
+  if (read.assets) return monitorCard(read, top);
+
+  const card = el("article", "icard");
+  card.dataset.id = read.id;
+  card.dataset.house = read.house;
 
   const head = el("div", "icard-head");
   head.append(el("h3", "icard-title", read.title), el("p", "icard-sub", read.sub));
@@ -411,8 +488,15 @@ function sectionCount(reads, extra = 0) {
   return `${total} read${total === 1 ? "" : "s"}${parts.length ? ` · ${parts.join(" · ")}` : ""}`;
 }
 
+function featuredTicker(reading) {
+  return reading.sectors[state.sector].available ? state.sector : "XLF";
+}
+
 function renderSectors(body, reading, reads, count) {
-  const order = [state.sector, ...CANON.filter((ticker) => ticker !== state.sector)];
+  const lead = featuredTicker(reading);
+  const printed = CANON.filter((ticker) => reading.sectors[ticker].available);
+  const missing = CANON.filter((ticker) => !reading.sectors[ticker].available);
+  const order = [lead, ...printed.filter((ticker) => ticker !== lead), ...missing];
   const cards = el("div", "sector-cards");
   cards.id = "cards";
   const grid = el("div", "card-grid");
@@ -440,11 +524,19 @@ function renderSectors(body, reading, reads, count) {
   header.append(el("span", "", "Sector"), scale, el("span", "", "This week"));
   const rows = el("div");
   rows.id = "map";
-  const ranked = [...CANON].sort((a, b) => {
+  const ranked = [...printed].sort((a, b) => {
     const delta = reading.sectors[a].points - reading.sectors[b].points;
     return delta || a.localeCompare(b);
   });
   rows.append(...ranked.map((ticker) => mapRow(reading.sectors[ticker])));
+  for (const ticker of missing) {
+    const sector = reading.sectors[ticker];
+    const row = el("div", "map-row is-missing");
+    const id = el("span", "map-id");
+    id.append(el("strong", "", sector.ticker), el("span", "", sector.short));
+    row.append(id, el("span", "map-missing", `${sector.unavailable}. No reading is shown.`));
+    rows.append(row);
+  }
   map.append(header, rows);
   mapWrap.append(mapHead, map);
 
@@ -455,7 +547,7 @@ function renderSectors(body, reading, reads, count) {
     body.append(extras);
   }
   body.append(mapWrap);
-  count.textContent = sectionCount(reads, 11);
+  count.textContent = sectionCount(reads, printed.length);
 }
 
 function overviewTile(section, index, pcts, reads, sourceId, extras = []) {
@@ -484,7 +576,10 @@ function overviewTile(section, index, pcts, reads, sourceId, extras = []) {
   pin.style.left = `${pinLeft(mid)}%`;
   mini.append(pin);
 
-  const candidates = [...extras, ...reads.map((read) => ({ name: read.title, pct: read.pct }))];
+  const candidates = [
+    ...extras,
+    ...reads.filter((read) => !read.assets).map((read) => ({ name: read.title, pct: read.pct })),
+  ];
   const highest = candidates.reduce((best, item) => (!best || item.pct > best.pct ? item : best), null);
   const meta = el("p", "ov-meta");
   meta.textContent = `Median ${ordinal(mid)} · highest: ${highest.name}, ${ordinal(highest.pct)}`;
@@ -526,7 +621,7 @@ function renderChips() {
 
 function paint() {
   const reading = buildReading(state.source, state.weekIndex, state.windowWeeks);
-  const featured = reading.sectors[state.sector];
+  const featured = reading.sectors[featuredTicker(reading)];
   const showAll = state.source === "all";
   const reads = INDICATORS.map((indicator) => readIndicator(indicator, reading.weekIndex)).filter(
     (read) => showAll || read.house === state.source,
@@ -548,7 +643,8 @@ function paint() {
     button.tabIndex = on ? 0 : -1;
   }
 
-  const sectorPcts = CANON.map((ticker) => reading.sectors[ticker].points);
+  const printedSectors = CANON.filter((ticker) => reading.sectors[ticker].available);
+  const sectorPcts = printedSectors.map((ticker) => reading.sectors[ticker].points);
   const tiles = [];
   const leans = { soft: 0, mid: 0, crowded: 0 };
 
@@ -578,8 +674,8 @@ function paint() {
     if (pcts.length) leans[leanOf(median(pcts)).tone] += 1;
     const extras =
       section.id === "sectors"
-        ? CANON.map((ticker) => ({ name: ticker, pct: reading.sectors[ticker].points }))
-        : [];
+        ? printedSectors.map((ticker) => ({ name: ticker, pct: reading.sectors[ticker].points }))
+        : sectionReads.flatMap((read) => (read.assets ?? []).map((asset) => ({ name: asset.label, pct: asset.pct })));
     tiles.push(overviewTile(section, index, pcts, sectionReads, state.source, extras));
   }
 
@@ -588,7 +684,7 @@ function paint() {
   document.getElementById("overview-headline").textContent =
     `${leans.crowded} of ${covered} sections lean crowded, ${leans.mid} sit mid, ${leans.soft} lean soft.`;
   document.getElementById("overview-total").textContent =
-    `${reads.length + 11 + (gaugeVisible ? 1 : 0)} reads on the desk this week`;
+    `${reads.length + printedSectors.length + (gaugeVisible ? 1 : 0)} reads on the desk this week`;
 
   const study = studyCopy(featured.ticker, featured.short, featured.points);
   document.getElementById("study-title").textContent = study.title;

@@ -14,29 +14,39 @@ function assert(condition, message) {
 }
 
 const reading = buildReading("jpm", 7, 4);
-const expected = {
-  XLF: { display: "0.18", pill: "extreme soft → easing", caption: "18th %ile · call skew soft", wow: "WoW −4 pts" },
-  XLK: { display: "0.82", pill: "crowded → still building", caption: "82nd %ile · crowded", wow: "WoW +2 pts" },
-  XLE: { display: "0.48", pill: "mid → firming", caption: "48th %ile · mid", wow: "WoW +1 pts" },
-  XLV: { display: "0.28", pill: "soft → easing", caption: "28th %ile · soft", wow: "WoW −2 pts" },
-  XLI: { display: "0.54", pill: "mid → firming", caption: "54th %ile · mid", wow: "WoW +1 pts" },
-  XLY: { display: "0.74", pill: "crowded → still building", caption: "74th %ile · crowded", wow: "WoW +2 pts" },
-  XLP: { display: "0.24", pill: "extreme soft → easing", caption: "24th %ile · soft", wow: "WoW −2 pts" },
-  XLU: { display: "0.22", pill: "extreme soft → catching up", caption: "22nd %ile · soft", wow: "WoW +2 pts" },
-  XLB: { display: "0.47", pill: "mid → easing", caption: "47th %ile · mid", wow: "WoW −1 pts" },
-  XLRE: { display: "0.81", pill: "crowded → still building", caption: "81st %ile · crowded", wow: "WoW +1 pts" },
-  XLC: { display: "0.49", pill: "mid → firming", caption: "49th %ile · mid", wow: "WoW +1 pts" },
+const monitor = {
+  XLE: "0.69",
+  XLB: "0.46",
+  XLI: "0.35",
+  XLY: "0.48",
+  XLP: "0.21",
+  XLV: "0.34",
+  XLF: "0.18",
+  XLK: "0.75",
+  XLC: "0.49",
+  XLU: "0.33",
 };
 
 assert(Object.keys(reading.sectors).length === 11, "expected 11 sector funds");
-for (const [ticker, want] of Object.entries(expected)) {
+for (const [ticker, display] of Object.entries(monitor)) {
   const got = reading.sectors[ticker];
-  assert(got, `${ticker} missing`);
-  if (!got) continue;
-  assert(got.display === want.display, `${ticker} display ${got.display} !== ${want.display}`);
-  assert(got.pill === want.pill, `${ticker} pill "${got.pill}" !== "${want.pill}"`);
-  assert(got.caption === want.caption, `${ticker} caption "${got.caption}" !== "${want.caption}"`);
-  assert(got.wowText === want.wow, `${ticker} wow "${got.wowText}" !== "${want.wow}"`);
+  assert(got?.available, `${ticker} should have a JPM print`);
+  assert(got?.display === display, `${ticker} JPM latest ${got?.display} !== ${display}`);
+}
+assert(reading.sectors.XLF.caption === "18th %ile · call skew soft", "XLF caption");
+assert(reading.sectors.XLF.pill === "extreme soft → easing", "XLF pill");
+assert(reading.sectors.XLRE.available === false, "XLRE has no JPM print");
+assert(reading.sectors.XLRE.display === "—", "XLRE shows no number under JPM");
+assert(reading.sectors.XLRE.unavailable === "Not in JPM monitor", "XLRE unavailable label");
+for (let week = 0; week < WEEKS.length; week += 1) {
+  for (const source of ["jpm", "all"]) {
+    const sectors = buildReading(source, week, 4).sectors;
+    assert(sectors.XLRE.points === null, `XLRE has a ${source} value on week ${week}`);
+  }
+  for (const source of ["ms", "gs", "boa", "desk"]) {
+    const xlre = buildReading(source, week, 4).sectors.XLRE;
+    assert(xlre.available && xlre.points !== 81, `${source} XLRE week ${week} should be a sample read, not 81`);
+  }
 }
 
 assert(reading.volDisplay === "1.4", `soft vol display ${reading.volDisplay}`);
@@ -83,6 +93,29 @@ for (const section of SECTIONS) {
 for (const house of houses) {
   assert(INDICATORS.some((indicator) => indicator.house === house), `no reads from ${house}`);
 }
+const cross = readIndicator(INDICATORS.find((indicator) => indicator.id === "jpm-cross-asset"), 7);
+const crossWant = {
+  Equities: "0.66",
+  "Govt Bonds": "0.60",
+  Credit: "0.24",
+  Dollar: "0.81",
+  "Commodities ex Gold": "0.78",
+  Gold: "0.38",
+  Bitcoin: "0.87",
+  "EM Equities": "0.84",
+  "EM Bonds/FX": "0.15",
+  "Japan Equities": "0.67",
+  "Europe Equities": "0.26",
+};
+assert(cross.assets.length === 11, "cross-asset monitor has 11 lines");
+for (const [label, display] of Object.entries(crossWant)) {
+  const asset = cross.assets.find((item) => item.label === label);
+  assert(asset?.display === display, `cross-asset ${label} ${asset?.display} !== ${display}`);
+}
+assert(cross.basis === "Sample · ref chart 06-Oct-26 (JPM)", `cross-asset basis ${cross.basis}`);
+const broad = readIndicator(INDICATORS.find((indicator) => indicator.id === "jpm-broad"), 7);
+assert(broad.value === "0.66" && broad.basis === cross.basis, `JPM broad equity ${broad.value} ${broad.basis}`);
+
 const fms = readIndicator(INDICATORS.find((indicator) => indicator.id === "boa-fms-crowded"), 7);
 assert(fms.value === "53" && fms.unit === "%", "FMS crowded trade reads 53%");
 const ndx = readIndicator(INDICATORS.find((indicator) => indicator.id === "desk-cftc-ndx"), 7);
@@ -92,7 +125,7 @@ assert(cor.value === "7.41" && cor.tone === "crowded", `COR1M ${cor.value} ${cor
 
 const eight = buildReading("jpm", 7, 8);
 assert(eight.sectors.XLF.pill === "extreme soft → easing", "8-week XLF still easing");
-assert(eight.sectors.XLU.pill === "extreme soft → catching up", "8-week XLU still catching up");
+assert(eight.sectors.XLU.pill === "soft → catching up", `8-week XLU ${eight.sectors.XLU.pill}`);
 
 const banned = [
   "sentiment ai",

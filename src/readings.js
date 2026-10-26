@@ -1,6 +1,8 @@
 import {
   CANON,
+  HOUSE_ONLY_BASE,
   JPM,
+  JPM_MONITOR_REF,
   JPM_VOL,
   SECTORS,
   SHIFTS,
@@ -10,7 +12,7 @@ import {
   WEEKS,
 } from "./sample.js";
 
-export { CANON, SECTORS, SOURCES, WEEKS };
+export { CANON, JPM_MONITOR_REF, SECTORS, SOURCES, WEEKS };
 
 const BANKS = ["jpm", "ms", "boa", "gs"];
 
@@ -43,17 +45,19 @@ export function formatWeek(iso) {
   }).format(new Date(Date.UTC(year, month - 1, day)));
 }
 
+/** Returns null when the house has no print for the sector. */
 export function sectorSeries(sourceId, ticker) {
-  const base = JPM[ticker];
-  if (!base) throw new Error(`Unknown sector ${ticker}`);
+  if (!CANON.includes(ticker)) throw new Error(`Unknown sector ${ticker}`);
   if (sourceId === "all") return sectorSeries("jpm", ticker);
   if (sourceId === "desk") {
-    return base.map((_, index) => {
-      const values = BANKS.map((id) => sectorSeries(id, ticker)[index]);
-      return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
-    });
+    const houses = BANKS.map((id) => sectorSeries(id, ticker)).filter(Boolean);
+    return WEEKS.map((_, index) =>
+      Math.round(houses.reduce((sum, series) => sum + series[index], 0) / houses.length),
+    );
   }
   if (!SOURCE_IDS.includes(sourceId)) throw new Error(`Unknown source ${sourceId}`);
+  if (sourceId === "jpm") return JPM[ticker] ? [...JPM[ticker]] : null;
+  const base = JPM[ticker] ?? HOUSE_ONLY_BASE[ticker];
   const shift = SHIFTS[sourceId][ticker] ?? 0;
   return base.map((value) => clamp(value + shift, 2, 98));
 }
@@ -157,7 +161,8 @@ function sourceLabel(sourceId) {
 }
 
 export function sectorSourceLabel(sourceId) {
-  if (sourceId === "all") return "JPM, the default house when All is picked";
+  if (sourceId === "all") return `the JPM Cross Asset Positioning Monitor (ref chart ${JPM_MONITOR_REF}), the default house when All is picked`;
+  if (sourceId === "jpm") return `the JPM Cross Asset Positioning Monitor (ref chart ${JPM_MONITOR_REF})`;
   if (sourceId === "desk") return "Desk composite";
   return sourceLabel(sourceId);
 }
@@ -169,6 +174,17 @@ export function buildReading(sourceId, weekIndex, windowWeeks) {
 
   for (const meta of SECTORS) {
     const series = sectorSeries(sourceId, meta.ticker);
+    if (!series) {
+      sectors[meta.ticker] = {
+        ...meta,
+        available: false,
+        series: null,
+        points: null,
+        display: "—",
+        unavailable: "Not in JPM monitor",
+      };
+      continue;
+    }
     const points = series[week];
     const past = series[Math.max(0, week - lookback)];
     const previous = series[Math.max(0, week - 1)];
@@ -176,6 +192,7 @@ export function buildReading(sourceId, weekIndex, windowWeeks) {
     const direction = directionOf(level, points - past);
     sectors[meta.ticker] = {
       ...meta,
+      available: true,
       series,
       points,
       display: (points / 100).toFixed(2),

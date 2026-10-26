@@ -1381,6 +1381,71 @@ input[type="range"]::-moz-range-thumb {
   color: var(--muted);
 }
 
+.icard.is-monitor { grid-column: 1 / -1; }
+
+.mon-list { display: grid; gap: 2px; }
+
+.mon-row {
+  display: grid;
+  grid-template-columns: minmax(130px, 180px) minmax(0, 1fr) 52px 52px;
+  gap: 16px;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13.5px;
+}
+
+.mon-row:last-child { border-bottom: 0; }
+
+.mon-scale {
+  padding: 0 0 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--faint);
+}
+
+.mon-ends {
+  display: flex;
+  justify-content: space-between;
+}
+
+.mon-label { font-weight: 600; color: var(--ink-2); }
+
+.mon-value {
+  font-size: 15px;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.mon-value.t-soft { color: #1f7a45; }
+
+.mon-delta {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.status.lv-none { background: #f0f1f4; color: var(--muted); }
+.status.lv-none i { background: var(--faint); }
+
+.card.is-unavailable { background: #fafbfc; box-shadow: none; border-style: dashed; }
+.card.is-unavailable .pct { color: var(--faint); }
+.card.is-unavailable .sc-track { opacity: 0.35; }
+.unavailable-note { margin: 12px 0 0; }
+
+.map-row.is-missing { cursor: default; opacity: 0.75; }
+.map-row.is-missing:hover { background: transparent; }
+
+.map-missing {
+  grid-column: 2 / -1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
 .empty {
   margin: 0;
   padding: 18px 20px;
@@ -1524,6 +1589,8 @@ input[type="range"]::-moz-range-thumb {
   .tagline { font-size: 17px; }
   .card-grid { grid-template-columns: 1fr; }
   .icard-grid { grid-template-columns: 1fr; }
+  .mon-row { grid-template-columns: 96px minmax(0, 1fr) 40px; gap: 10px; font-size: 12.5px; }
+  .mon-delta, .mon-scale > :last-child { display: none; }
   .section-count { margin-left: 0; width: 100%; }
   .desk-section { scroll-margin-top: 150px; }
   .card.is-hero { padding: 20px; }

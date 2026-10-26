@@ -32,19 +32,30 @@ export const SECTORS = [
 
 export const CANON = SECTORS.map((sector) => sector.ticker);
 
-/** JPM path, oldest week first. The last print is the Oct 23, 2026 sample. */
+export const JPM_MONITOR_REF = "06-Oct-26";
+
+/**
+ * JPM path, oldest week first. The last print of each series is the current
+ * percentile on the JPM Cross Asset Positioning Monitor as of 06-Oct-26;
+ * earlier weeks are illustrative. Real Estate is not on that monitor, so XLRE
+ * has no JPM series.
+ */
 export const JPM = {
   XLF: [36, 34, 32, 30, 28, 25, 22, 18],
-  XLK: [70, 72, 73, 74, 76, 78, 80, 82],
-  XLE: [41, 42, 43, 44, 45, 46, 47, 48],
-  XLV: [40, 38, 37, 36, 34, 32, 30, 28],
-  XLI: [46, 47, 48, 49, 50, 52, 53, 54],
-  XLY: [62, 64, 65, 66, 68, 70, 72, 74],
-  XLP: [35, 34, 33, 31, 29, 27, 26, 24],
-  XLU: [14, 15, 15, 16, 18, 19, 20, 22],
-  XLB: [56, 55, 54, 52, 51, 50, 48, 47],
-  XLRE: [73, 74, 75, 75, 77, 78, 80, 81],
+  XLK: [64, 66, 67, 69, 70, 72, 74, 75],
+  XLE: [58, 60, 61, 63, 64, 66, 67, 69],
+  XLV: [44, 43, 41, 40, 38, 37, 35, 34],
+  XLI: [42, 41, 40, 39, 38, 37, 36, 35],
+  XLY: [56, 55, 54, 53, 52, 50, 49, 48],
+  XLP: [30, 29, 28, 27, 25, 24, 22, 21],
+  XLU: [26, 27, 28, 29, 30, 31, 32, 33],
+  XLB: [52, 51, 51, 50, 49, 48, 47, 46],
   XLC: [42, 43, 44, 44, 45, 47, 48, 49],
+};
+
+/** Illustrative base for sectors JPM does not print, shifted per house like the rest. */
+export const HOUSE_ONLY_BASE = {
+  XLRE: [44, 45, 46, 46, 47, 48, 49, 50],
 };
 
 /** Added to the JPM path, in percentile points. */
