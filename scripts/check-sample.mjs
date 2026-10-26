@@ -1,7 +1,8 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildReading, ordinal } from "../src/readings.js";
+import { HOUSES, INDICATORS, SECTIONS, readIndicator } from "../src/desk.js";
+import { WEEKS, buildReading, ordinal } from "../src/readings.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
@@ -45,13 +46,67 @@ assert(ordinal(18) === "18th" && ordinal(22) === "22nd" && ordinal(21) === "21st
 
 const desk = buildReading("desk", 7, 4);
 assert(desk.sectors.XLF.points !== reading.sectors.XLF.points, "desk composite should blend banks");
-assert(desk.sourceLabel === "Desk composite", "desk label");
+assert(desk.sectorSource === "Desk composite", "desk sector label");
+const all = buildReading("all", 7, 4);
+assert(all.sectors.XLF.points === 18 && all.sectors.XLF.display === "0.18", "All uses JPM for sectors, XLF 0.18");
+
+const houses = new Set(Object.keys(HOUSES));
+assert(
+  JSON.stringify(Object.values(HOUSES)) === JSON.stringify(["JPM", "MS", "GS", "BoA", "Desk"]),
+  "public house labels are JPM, MS, GS, BoA, Desk",
+);
+assert(SECTIONS.length === 10, `expected 10 desk sections, got ${SECTIONS.length}`);
+const sectionIds = new Set(SECTIONS.map((section) => section.id));
+const seen = new Set();
+for (const indicator of INDICATORS) {
+  assert(!seen.has(indicator.id), `${indicator.id} duplicated`);
+  seen.add(indicator.id);
+  assert(sectionIds.has(indicator.section), `${indicator.id} has unknown section`);
+  assert(houses.has(indicator.house), `${indicator.id} has unknown house ${indicator.house}`);
+  assert(indicator.values.length === WEEKS.length, `${indicator.id} needs ${WEEKS.length} values`);
+  assert(indicator.pcts.length === WEEKS.length, `${indicator.id} needs ${WEEKS.length} pcts`);
+  assert(indicator.pcts.every((pct) => pct >= 0 && pct <= 100), `${indicator.id} pct out of range`);
+  if (indicator.ref) assert(Boolean(indicator.latest), `${indicator.id} references a chart but has no latest note`);
+  for (let week = 0; week < WEEKS.length; week += 1) {
+    const read = readIndicator(indicator, week);
+    assert(typeof read.value === "string" && read.value.length > 0, `${indicator.id} week ${week} value`);
+    assert(/→ (building|easing|steady)$/.test(read.pill), `${indicator.id} pill "${read.pill}"`);
+  }
+  const early = readIndicator(indicator, 0);
+  assert(early.latestNote === "", `${indicator.id} shows its latest-print note on an earlier week`);
+}
+for (const section of SECTIONS) {
+  if (section.id === "sectors") continue;
+  const count = INDICATORS.filter((indicator) => indicator.section === section.id).length;
+  assert(count >= 3, `${section.id} has only ${count} reads`);
+}
+for (const house of houses) {
+  assert(INDICATORS.some((indicator) => indicator.house === house), `no reads from ${house}`);
+}
+const fms = readIndicator(INDICATORS.find((indicator) => indicator.id === "boa-fms-crowded"), 7);
+assert(fms.value === "53" && fms.unit === "%", "FMS crowded trade reads 53%");
+const ndx = readIndicator(INDICATORS.find((indicator) => indicator.id === "desk-cftc-ndx"), 7);
+assert(ndx.value === "−11.8k", `NDX hedgers ${ndx.value}`);
+const cor = readIndicator(INDICATORS.find((indicator) => indicator.id === "desk-cor1m"), 7);
+assert(cor.value === "7.41" && cor.tone === "crowded", `COR1M ${cor.value} ${cor.tone}`);
 
 const eight = buildReading("jpm", 7, 8);
 assert(eight.sectors.XLF.pill === "extreme soft → easing", "8-week XLF still easing");
 assert(eight.sectors.XLU.pill === "extreme soft → catching up", "8-week XLU still catching up");
 
-const banned = ["sentiment ai", "wallstjesus", "optionshawk", "volland", "copy-trading", "copy trading"];
+const banned = [
+  "sentiment ai",
+  "wallstjesus",
+  "jesus",
+  "optionshawk",
+  "hawk",
+  "volland",
+  "darkroom",
+  "sentimentrader",
+  "deutsche",
+  "copy-trading",
+  "copy trading",
+];
 const scanExt = new Set([".html", ".js", ".css", ".md", ".yml", ".svg"]);
 
 function walk(dir) {

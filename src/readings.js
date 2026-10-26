@@ -46,6 +46,7 @@ export function formatWeek(iso) {
 export function sectorSeries(sourceId, ticker) {
   const base = JPM[ticker];
   if (!base) throw new Error(`Unknown sector ${ticker}`);
+  if (sourceId === "all") return sectorSeries("jpm", ticker);
   if (sourceId === "desk") {
     return base.map((_, index) => {
       const values = BANKS.map((id) => sectorSeries(id, ticker)[index]);
@@ -58,7 +59,7 @@ export function sectorSeries(sourceId, ticker) {
 }
 
 export function volSeries(sourceId) {
-  if (sourceId === "desk") {
+  if (sourceId === "desk" || sourceId === "all") {
     return JPM_VOL.map((_, index) => {
       const values = BANKS.map((id) => volSeries(id)[index]);
       return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
@@ -155,6 +156,12 @@ function sourceLabel(sourceId) {
   return SOURCES.find((source) => source.id === sourceId)?.label ?? sourceId;
 }
 
+export function sectorSourceLabel(sourceId) {
+  if (sourceId === "all") return "JPM, the default house when All is picked";
+  if (sourceId === "desk") return "Desk composite";
+  return sourceLabel(sourceId);
+}
+
 export function buildReading(sourceId, weekIndex, windowWeeks) {
   const week = clamp(weekIndex, 0, WEEKS.length - 1);
   const lookback = windowWeeks === 8 ? 8 : 4;
@@ -190,6 +197,7 @@ export function buildReading(sourceId, weekIndex, windowWeeks) {
   return {
     sourceId,
     sourceLabel: sourceLabel(sourceId),
+    sectorSource: sectorSourceLabel(sourceId),
     weekIndex: week,
     weekIso: WEEKS[week],
     weekLabel: formatWeek(WEEKS[week]),

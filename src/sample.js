@@ -65,11 +65,12 @@ export const VOL_SHIFT = {
 };
 
 export const SOURCES = [
+  { id: "all", label: "All" },
   { id: "jpm", label: "JPM" },
-  { id: "ms", label: "Morgan Stanley" },
-  { id: "boa", label: "BoA" },
+  { id: "ms", label: "MS" },
   { id: "gs", label: "GS" },
-  { id: "desk", label: "Desk composite" },
+  { id: "boa", label: "BoA" },
+  { id: "desk", label: "Desk" },
 ];
 
 export const SOURCE_IDS = SOURCES.map((source) => source.id);
