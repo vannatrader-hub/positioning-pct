@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cross asset positioning · Positioning %.</title>
+    <meta
+      name="description"
+      content="Select Sector funds on their own cards, a soft-to-crowded map, and a check on whether the VIX looks cheap or rich. Sample figures. Education only, not advice."
+    />
+    <meta name="theme-color" content="#f4f1ea" />
+    <link rel="icon" href="%BASE_URL%favicon.svg" />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body class="dash">
+    <a class="skip" href="#content">Skip to content</a>
+    <div class="wrap">
+      <header class="top">
+        <a class="lockup" href="../">Positioning<span class="mark">%.</span></a>
+        <nav class="nav" aria-label="Pages">
+          <a class="is-current" href="./" aria-current="page">Positioning</a>
+          <a href="../spx-levels/">SPX Levels</a>
+          <a href="../options-flow/">Options Flow</a>
+        </nav>
+      </header>
+
+      <main id="content">
+        <p class="eyebrow">Sample series</p>
+        <h1>Cross asset positioning</h1>
+        <p class="lede">
+          The Select Sector funds, each on its own card, plus a soft-to-crowded map and a check on
+          whether the VIX looks cheap or rich against the S&amp;P 500. The figures are weekly
+          snapshots in a sample file. A longer series can replace them later.
+        </p>
+        <p class="sample-line" id="sample-line">Sample · Oct 23, 2026 · JPM</p>
+
+        <section class="block" aria-labelledby="source-label">
+          <h2 class="kicker" id="source-label">Source</h2>
+          <div class="chips" id="chips" role="radiogroup" aria-label="Source"></div>
+          <p class="hint">Your source choice stays on this device.</p>
+        </section>
+
+        <section class="block history" aria-labelledby="history-label">
+          <div class="history-top">
+            <h2 class="history-name" id="history-label">History</h2>
+            <p class="history-date" id="history-date">Oct 23, 2026</p>
+          </div>
+          <input id="week" type="range" min="0" max="7" value="7" aria-label="Sample week" />
+          <p class="hint">8 sample weeks. The bars, the residual, and the study notes follow the week you park on.</p>
+        </section>
+
+        <section class="block" aria-labelledby="cards-title">
+          <h2 id="cards-title">Sector readings</h2>
+          <p class="hint" id="cards-blurb">
+            One card per sector fund. The large number is the positioning percentile for the week you
+            select. XLF is the featured card.
+          </p>
+          <div id="cards"></div>
+        </section>
+
+        <section class="block" aria-labelledby="map-title">
+          <h2 id="map-title">Soft ↔ Crowded</h2>
+          <p class="hint">
+            Each bar is a positioning percentile for the week you select. The triangle marks the
+            print. Green is the soft end. Dark is crowded. Sparklines show only the shape of the
+            sample path.
+          </p>
+          <div class="map-legend" aria-hidden="true">
+            <i class="lg-soft"></i>
+            <span>Soft</span>
+            <i class="lg-line"></i>
+            <i class="lg-pin"></i>
+            <i class="lg-line"></i>
+            <span>Crowded</span>
+          </div>
+          <div id="map"></div>
+        </section>
+
+        <section class="block" aria-labelledby="vol-title">
+          <h2 id="vol-title">Soft Vol ↔ Stretched</h2>
+          <div class="panel gauge">
+            <div class="gauge-head">
+              <span class="method-pill">Methods later</span>
+            </div>
+            <div class="gauge-main">
+              <div>
+                <p class="vol-num"><span id="vol-value">1.4</span> <span class="pts">pts</span></p>
+                <p class="vol-name" id="vol-name">Soft Vol</p>
+              </div>
+              <div>
+                <div class="g-labels">
+                  <span>Soft vol</span>
+                  <span>Fair</span>
+                  <span>Stretched</span>
+                </div>
+                <div class="g-track" id="g-track">
+                  <div class="g-zones">
+                    <i class="z z-soft"></i>
+                    <i class="z z-mid"></i>
+                    <i class="z z-crowd"></i>
+                  </div>
+                  <i class="sc-pin" id="vol-pin" style="left: 26.7%"></i>
+                </div>
+                <div class="g-scale"><span>−3</span><span>+3</span></div>
+              </div>
+            </div>
+            <div class="gauge-copy">
+              <p>Soft Vol means the VIX is cheaper than the S&amp;P 500 usually implies. Stretched means the VIX is richer than fair.</p>
+              <p>Live history comes from desk-ingested bank notes. Public labels are bank names only.</p>
+              <p>Desk composite blends desk-ingested bank notes from multiple channels. The calculation note itself is not in this phase.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="block study" aria-labelledby="study-title">
+          <p class="edu-flag"><i></i>Education only · not advice</p>
+          <h2 id="study-title">Structures people study when a sector is soft</h2>
+          <p class="study-lead" id="study-lead">
+            XLF (Financials) at the 18th percentile is inside the soft quartile this week, under the 25th percentile.
+          </p>
+          <div class="study-grid">
+            <article>
+              <h3>Shares</h3>
+              <p>The sector fund itself. Lessons treat this as the plain way to hold the basket, with no contract attached.</p>
+            </article>
+            <article>
+              <h3>Bull put</h3>
+              <p>A defined-risk structure in the options curriculum: two puts of the same expiration, so the example has a floor. A name to recognize. No strikes and no size.</p>
+            </article>
+            <article>
+              <h3>Call LEAP</h3>
+              <p>A long-dated call. Textbooks use it when a view is carried on a distant expiration instead of a contract that ends this week.</p>
+            </article>
+          </div>
+          <p class="closer">Education only · not advice. Nothing here names a size, and nothing here is a prompt to act.</p>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <a class="lockup" href="../">Positioning<span class="mark">%.</span></a>
+        <p class="foot-note">Phase 1 public reading. Figures on a live page are a sample, not a live source.</p>
+        <p class="foot-edu">Education only · not advice.</p>
+        <nav class="foot-links" aria-label="Footer">
+          <a href="../">Home</a>
+          <a class="is-current" href="./" aria-current="page">Positioning</a>
+          <a href="../spx-levels/">SPX Levels</a>
+          <a href="../options-flow/">Options Flow</a>
+        </nav>
+      </footer>
+    </div>
+    <noscript>This reading needs JavaScript to swap the sample week and the bank source. The figures are a sample, not a live source. Education only, not advice.</noscript>
+    <script type="module" src="/src/positioning.js"></script>
+  </body>
+</html>
