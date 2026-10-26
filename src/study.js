@@ -18,8 +18,10 @@ function el(tag, className, text) {
 
 export function price(value) {
   if (value === null || value === undefined || Number.isNaN(value)) return "—";
-  const fixed = value.toFixed(3);
-  return fixed.endsWith("0") ? value.toFixed(2) : fixed;
+  const rounded = Math.round(value * 1000) / 1000;
+  const fixed = Math.abs(rounded).toFixed(3);
+  const text = fixed.endsWith("0") ? Math.abs(rounded).toFixed(2) : fixed;
+  return rounded < 0 ? `−${text}` : text;
 }
 
 export function strike(value) {
@@ -36,29 +38,79 @@ export function expiry(iso) {
   );
 }
 
-/** Study math for a short put spread, per share, at expiration. */
-export function bullPutMath(spread) {
+/**
+ * Study math for a vertical credit spread, per share, at expiration.
+ * Puts: short strike above long (bull put). Calls: short strike below long (bear call).
+ */
+export function creditSpreadMath(spread) {
   const credit = spread.short.mark - spread.long.mark;
   const natural = spread.short.bid - spread.long.ask;
-  const width = spread.short.strike - spread.long.strike;
+  const width = Math.abs(spread.short.strike - spread.long.strike);
+  const isPut = spread.short.type === "put";
   return {
     credit,
     natural,
     width,
     maxLoss: width - credit,
-    breakeven: spread.short.strike - credit,
+    breakeven: isPut ? spread.short.strike - credit : spread.short.strike + credit,
   };
 }
 
+export const bullPutMath = creditSpreadMath;
+
 export function leapMath(leap) {
-  return { premium: leap.long.mark, breakeven: leap.long.strike + leap.long.mark };
+  const premium = leap.long.mark;
+  const breakeven = leap.long.type === "put" ? leap.long.strike - premium : leap.long.strike + premium;
+  return { premium, breakeven };
 }
+
+/** Which structures and chains each side of the curriculum reads. */
+export const CURRICULUM = {
+  soft: { spread: "bullPut", leap: "callLeap", strip: "putStrip", leapRows: "leapCalls" },
+  crowded: { spread: "bearCall", leap: "putLeap", strip: "callStrip", leapRows: "leapPuts" },
+};
+
+const COPY = {
+  soft: {
+    spreadTitle: "Bull put",
+    spreadCopy: (s) =>
+      `An example studied when a sector is soft: short the ${strike(s.short.strike)} put and long the ${strike(s.long.strike)} put, same expiration. The long put sets a floor, so the most it can lose is known up front.`,
+    spreadEmpty: "A defined-risk structure: two puts, same expiration, the short strike above the long strike.",
+    leapTitle: "Call LEAP",
+    leapCopy: (l) =>
+      `An example long-dated call near the money: long the ${strike(l.long.strike)} call expiring ${expiry(l.expiration)}.`,
+    leapEmpty: "A long-dated call. Textbooks use it to carry a view on a distant expiration instead of one that ends this month.",
+    stripTitle: "Put chain strip",
+    stripKicker: "the bull put curriculum",
+    lead: (sector) =>
+      `${sector.ticker} (${sector.short}) reads ${sector.display} on the JPM monitor, inside the soft quartile under 0.25. These are the structures people study when a sector sits on the soft side.`,
+  },
+  crowded: {
+    spreadTitle: "Bear call",
+    spreadCopy: (s) =>
+      `An example studied when a sector is crowded: short the ${strike(s.short.strike)} call and long the ${strike(s.long.strike)} call, same expiration. The long call sets a ceiling on the loss, so the most it can lose is known up front.`,
+    spreadEmpty: "A defined-risk structure: two calls, same expiration, the short strike below the long strike.",
+    leapTitle: "Put LEAP",
+    leapCopy: (l) =>
+      `An example long-dated put near the money: long the ${strike(l.long.strike)} put expiring ${expiry(l.expiration)}. Textbooks use it as distant protection when positioning is full.`,
+    leapEmpty: "A long-dated put. Textbooks use it as distant protection when positioning is full.",
+    stripTitle: "Call chain strip",
+    stripKicker: "the bear call curriculum",
+    lead: (sector) =>
+      `${sector.ticker} (${sector.short}) reads ${sector.display} on the JPM monitor, at the 0.75 line where the crowded quartile starts. These are the structures people study when a sector sits on the crowded side.`,
+  },
+};
 
 function stamp(marks) {
   const node = el("p", "marks-stamp");
   const dot = el("i");
   dot.setAttribute("aria-hidden", "true");
-  node.append(dot, el("span", "", `Marks as of ${marks.asOfLabel}`), el("span", "stamp-note", "Snapshot · not streaming"));
+  node.append(
+    dot,
+    el("span", "", `Marks as of ${marks.asOfLabel}`),
+    document.createTextNode(" "),
+    el("span", "stamp-note", "Snapshot · not streaming"),
+  );
   return node;
 }
 
@@ -126,25 +178,11 @@ function legsTable(legs) {
   return wrap;
 }
 
-function bullPutCard(ticker, structures, marks) {
-  if (!structures?.bullPut) {
-    return studyCard(
-      "Bull put",
-      ticker,
-      el("p", "study-copy", "A defined-risk structure: two puts, same expiration, the short strike above the long strike."),
-      pending(`No ${ticker} put marks in this snapshot yet.`),
-    );
-  }
-  const spread = structures.bullPut;
-  const math = bullPutMath(spread);
-  return studyCard(
-    "Bull put",
-    `${ticker} ${expiry(spread.expiration)} · ${strike(spread.short.strike)} / ${strike(spread.long.strike)}`,
-    el(
-      "p",
-      "study-copy",
-      `An example studied when a sector is soft: short the ${strike(spread.short.strike)} put and long the ${strike(spread.long.strike)} put, same expiration. The long put sets a floor, so the most it can lose is known up front.`,
-    ),
+function spreadCard(ticker, spread, copy, marks) {
+  if (!spread) return studyCard(copy.spreadTitle, ticker, el("p", "study-copy", copy.spreadEmpty), pending(`No ${ticker} spread marks in this snapshot yet.`));
+  const math = creditSpreadMath(spread);
+  const children = [
+    el("p", "study-copy", copy.spreadCopy(spread)),
     legsTable([
       ["Short", spread.short],
       ["Long", spread.long],
@@ -156,14 +194,33 @@ function bullPutCard(ticker, structures, marks) {
       ["Max loss at expiry", price(math.maxLoss)],
       ["Breakeven at expiry", price(math.breakeven)],
     ]),
-    el("p", "study-fine", "Per share, at expiration, from the marks shown. No size."),
-    stamp(marks),
+  ];
+  if (math.natural <= 0) {
+    children.push(
+      el("p", "study-fine is-warn", "Quotes are wide here: at bid/ask the spread collects no credit. Mid marks are a reference, not a fill."),
+    );
+  }
+  children.push(el("p", "study-fine", "Per share, at expiration, from the marks shown. No size."), stamp(marks));
+  return studyCard(
+    copy.spreadTitle,
+    `${ticker} ${expiry(spread.expiration)} · ${strike(spread.short.strike)} / ${strike(spread.long.strike)}`,
+    ...children,
   );
+}
+
+function spotRow(spot) {
+  const tr = el("tr", "spot-row");
+  const td = el("td");
+  td.append(el("span", "", `Spot ${price(spot)}`));
+  td.colSpan = 7;
+  tr.append(td);
+  return tr;
 }
 
 function chainTable(chain, { spot, highlight = {}, caption }) {
   const wrap = el("div", "chain-wrap");
   const table = el("table", "chain");
+  table.dataset.type = chain.type;
   table.append(el("caption", "", caption));
   const head = el("tr");
   for (const label of ["Strike", "Bid", "Ask", "Mark", "IV", "OI", "Volume"]) head.append(el("th", "", label));
@@ -202,32 +259,12 @@ function chainTable(chain, { spot, highlight = {}, caption }) {
   return wrap;
 }
 
-function spotRow(spot) {
-  const tr = el("tr", "spot-row");
-  const td = el("td");
-  td.append(el("span", "", `Spot ${price(spot)}`));
-  td.colSpan = 7;
-  tr.append(td);
-  return tr;
-}
-
-function leapCard(ticker, structures, chains, underlying, marks) {
-  if (!structures?.callLeap) {
-    return studyCard(
-      "Call LEAP",
-      ticker,
-      el("p", "study-copy", "A long-dated call. Textbooks use it to carry a view on a distant expiration instead of one that ends this month."),
-      pending(`No ${ticker} LEAP marks in this snapshot yet.`),
-    );
-  }
-  const leap = structures.callLeap;
+function leapCard(ticker, leap, leapRows, underlying, copy, marks) {
+  if (!leap) return studyCard(copy.leapTitle, ticker, el("p", "study-copy", copy.leapEmpty), pending(`No ${ticker} LEAP marks in this snapshot yet.`));
   const math = leapMath(leap);
+  const side = leap.long.type === "put" ? "P" : "C";
   const children = [
-    el(
-      "p",
-      "study-copy",
-      `An example long-dated call near the money: long the ${strike(leap.long.strike)} call expiring ${expiry(leap.expiration)}.`,
-    ),
+    el("p", "study-copy", copy.leapCopy(leap)),
     legsTable([["Long", leap.long]]),
     quoteGrid([
       ["Premium at mid", price(math.premium), "accent"],
@@ -235,57 +272,58 @@ function leapCard(ticker, structures, chains, underlying, marks) {
       ["Max loss", `${price(math.premium)} premium`],
     ]),
   ];
-  if (chains?.leapCalls) {
+  if (leapRows) {
     children.push(
-      chainTable(chains.leapCalls, {
+      chainTable(leapRows, {
         spot: underlying.spot,
         highlight: { [leap.long.strike]: "Long" },
-        caption: `${ticker} ${expiry(chains.leapCalls.expiration)} calls`,
+        caption: `${ticker} ${expiry(leapRows.expiration)} ${leapRows.type}s`,
       }),
     );
   }
   children.push(el("p", "study-fine", "Per share, from the marks shown. No size."), stamp(marks));
-  return studyCard("Call LEAP", `${ticker} ${expiry(leap.expiration)} · ${strike(leap.long.strike)}C`, ...children);
+  return studyCard(copy.leapTitle, `${ticker} ${expiry(leap.expiration)} · ${strike(leap.long.strike)}${side}`, ...children);
 }
 
 function panel(sector, marks) {
-  const ticker = sector.ticker;
+  const { ticker, side } = sector;
+  const plan = CURRICULUM[side];
+  const copy = COPY[side];
   const underlying = marks.underlyings[ticker] ?? {};
-  const chains = marks.chains?.[ticker];
-  const structures = chains?.structures;
+  const chains = marks.chains?.[ticker] ?? {};
+  const structures = chains.structures ?? {};
+  const spread = structures[plan.spread];
+  const strip = chains[plan.strip];
 
-  const root = el("div", "study-panel");
+  const root = el("div", `study-panel is-${side}`);
   root.id = `study-panel-${ticker}`;
+  root.dataset.side = side;
   root.setAttribute("role", "tabpanel");
   root.setAttribute("aria-labelledby", `study-tab-${ticker}`);
 
-  const lead = el(
-    "p",
-    "study-lead",
-    `${ticker} (${sector.short}) reads ${sector.display} on the JPM monitor, inside the soft quartile under 0.25. These are the structures people study when a sector sits on the soft side.`,
+  const grid = el("div", "study-cards");
+  grid.append(
+    sharesCard(ticker, underlying, marks),
+    spreadCard(ticker, spread, copy, marks),
+    leapCard(ticker, structures[plan.leap], chains[plan.leapRows], underlying, copy, marks),
   );
 
-  const grid = el("div", "study-cards");
-  grid.append(sharesCard(ticker, underlying, marks), bullPutCard(ticker, structures, marks), leapCard(ticker, structures, chains, underlying, marks));
-
-  const strip = el("div", "chain-block");
-  const stripHead = el("div", "chain-head");
-  stripHead.append(el("h3", "", "Put chain strip"));
-  if (chains?.putStrip) {
-    stripHead.append(el("span", "study-kicker", `${ticker} ${expiry(chains.putStrip.expiration)} puts · the bull put curriculum`));
-    const legs = structures?.bullPut
-      ? { [structures.bullPut.short.strike]: "Short", [structures.bullPut.long.strike]: "Long" }
-      : {};
-    strip.append(
-      stripHead,
-      chainTable(chains.putStrip, { spot: underlying.spot, highlight: legs, caption: `${ticker} ${expiry(chains.putStrip.expiration)} puts` }),
+  const block = el("div", "chain-block");
+  const head = el("div", "chain-head");
+  head.append(el("h3", "", copy.stripTitle));
+  if (strip) {
+    head.append(el("span", "study-kicker", `${ticker} ${expiry(strip.expiration)} ${strip.type}s · ${copy.stripKicker}`));
+    const legs = spread ? { [spread.short.strike]: "Short", [spread.long.strike]: "Long" } : {};
+    block.append(
+      head,
+      chainTable(strip, { spot: underlying.spot, highlight: legs, caption: `${ticker} ${expiry(strip.expiration)} ${strip.type}s` }),
       stamp(marks),
     );
   } else {
-    strip.append(stripHead, pending(`The ${ticker} chain lands with the next marks snapshot.`));
+    block.append(head, pending(`The ${ticker} chain lands with the next marks snapshot.`));
   }
 
-  root.append(lead, grid, strip);
+  root.append(el("p", "study-lead", copy.lead(sector)), grid, block);
   return root;
 }
 
@@ -295,15 +333,24 @@ export async function loadMarks() {
   return response.json();
 }
 
-/** soft: sector readings under 0.25 from the JPM latest week; crowded: sectors at 0.75 and up. */
+function tabGroup(label, side) {
+  const group = el("div", `study-tab-group is-${side}`);
+  group.setAttribute("role", "presentation");
+  group.append(el("span", "study-tab-label", label));
+  return group;
+}
+
+/** soft: JPM sector reads under 0.25 this week; crowded: 0.75 and up. */
 export async function renderStudy(root, { soft, crowded, selected }) {
   const tabs = root.querySelector("#study-tabs");
   const body = root.querySelector("#study-body");
   const summary = root.querySelector("#study-summary");
 
-  summary.textContent = soft.length
-    ? `Soft JPM sectors this week: ${soft.map((sector) => `${sector.ticker} ${sector.display}`).join(" · ")}.`
-    : "No JPM sector is under 0.25 this week.";
+  const list = (items) => items.map((sector) => `${sector.ticker} ${sector.display}`).join(" · ");
+  const parts = [];
+  parts.push(soft.length ? `Soft JPM sectors this week: ${list(soft)}.` : "No JPM sector is under 0.25 this week.");
+  if (crowded.length) parts.push(`Crowded: ${list(crowded)}.`);
+  summary.textContent = parts.join(" ");
 
   let marks;
   try {
@@ -313,13 +360,26 @@ export async function renderStudy(root, { soft, crowded, selected }) {
     return;
   }
 
-  let current = soft.some((sector) => sector.ticker === selected) ? selected : soft[0]?.ticker;
+  const sectors = [
+    ...soft.map((sector) => ({ ...sector, side: "soft" })),
+    ...crowded.map((sector) => ({ ...sector, side: "crowded" })),
+  ];
+  let current = sectors.some((sector) => sector.ticker === selected) ? selected : sectors[0]?.ticker;
+
+  const choose = (ticker) => {
+    current = ticker;
+    const url = new URL(location.href);
+    url.searchParams.set("study", current);
+    history.replaceState(null, "", url);
+    draw();
+  };
 
   const draw = () => {
     tabs.replaceChildren();
-    for (const sector of soft) {
+    const groups = { soft: tabGroup("Soft", "soft"), crowded: tabGroup("Crowded", "crowded") };
+    for (const sector of sectors) {
       const on = sector.ticker === current;
-      const tab = el("button", on ? "study-tab is-on" : "study-tab");
+      const tab = el("button", on ? `study-tab is-${sector.side} is-on` : `study-tab is-${sector.side}`);
       tab.type = "button";
       tab.id = `study-tab-${sector.ticker}`;
       tab.setAttribute("role", "tab");
@@ -327,36 +387,22 @@ export async function renderStudy(root, { soft, crowded, selected }) {
       tab.setAttribute("aria-controls", `study-panel-${sector.ticker}`);
       tab.tabIndex = on ? 0 : -1;
       tab.append(el("strong", "", sector.ticker), el("span", "", sector.short), el("em", "", sector.display));
-      tab.addEventListener("click", () => {
-        current = sector.ticker;
-        const url = new URL(location.href);
-        url.searchParams.set("study", current);
-        history.replaceState(null, "", url);
-        draw();
-      });
-      tabs.append(tab);
+      tab.addEventListener("click", () => choose(sector.ticker));
+      groups[sector.side].append(tab);
     }
-    const sector = soft.find((item) => item.ticker === current);
-    const nodes = sector ? [panel(sector, marks)] : [];
-    if (crowded.length) {
-      nodes.push(
-        el(
-          "p",
-          "crowded-note",
-          `Crowded side: ${crowded.map((item) => `${item.ticker} ${item.display}`).join(" · ")}. Notes on what people study when a sector is crowded come in a later phase.`,
-        ),
-      );
+    for (const side of ["soft", "crowded"]) {
+      if (groups[side].querySelector(".study-tab")) tabs.append(groups[side]);
     }
-    body.replaceChildren(...nodes);
+    const sector = sectors.find((item) => item.ticker === current);
+    body.replaceChildren(...(sector ? [panel(sector, marks)] : []));
   };
 
   tabs.addEventListener("keydown", (event) => {
     if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
     event.preventDefault();
-    const ids = soft.map((sector) => sector.ticker);
+    const ids = sectors.map((sector) => sector.ticker);
     const step = event.key === "ArrowRight" ? 1 : -1;
-    current = ids[(ids.indexOf(current) + step + ids.length) % ids.length];
-    draw();
+    choose(ids[(ids.indexOf(current) + step + ids.length) % ids.length]);
     tabs.querySelector(`#study-tab-${current}`)?.focus();
   });
 

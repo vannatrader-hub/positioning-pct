@@ -3,7 +3,7 @@ import { dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { HOUSES, INDICATORS, SECTIONS, readIndicator } from "../src/desk.js";
 import { CANON, WEEKS, buildReading, ordinal } from "../src/readings.js";
-import { bullPutMath, leapMath, price } from "../src/study.js";
+import { CURRICULUM, creditSpreadMath, leapMath, price } from "../src/study.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
@@ -129,42 +129,93 @@ assert(eight.sectors.XLF.pill === "extreme soft → easing", "8-week XLF still e
 assert(eight.sectors.XLU.pill === "soft → catching up", `8-week XLU ${eight.sectors.XLU.pill}`);
 
 const marks = JSON.parse(readFileSync(join(root, "public/data/study-marks.json"), "utf8"));
-assert(typeof marks.asOfLabel === "string" && marks.asOfLabel.length > 0, "marks need an asOfLabel");
+assert(marks.asOfLabel === "Fri Oct 23, 2026 session close (CT)", `marks asOfLabel ${marks.asOfLabel}`);
 const latestJpm = buildReading("jpm", WEEKS.length - 1, 4).sectors;
-const softJpm = CANON.filter((ticker) => latestJpm[ticker].available && latestJpm[ticker].points < 25).sort();
+const printedJpm = CANON.filter((ticker) => latestJpm[ticker].available);
+const softJpm = printedJpm.filter((ticker) => latestJpm[ticker].points < 25).sort();
+const crowdedJpm = printedJpm.filter((ticker) => latestJpm[ticker].points >= 75).sort();
 assert(
   JSON.stringify(softJpm) === JSON.stringify([...marks.softTickers].sort()),
   `soft JPM sectors ${softJpm} should match marks softTickers ${marks.softTickers}`,
 );
-for (const ticker of marks.softTickers) {
+assert(
+  JSON.stringify(crowdedJpm) === JSON.stringify([...marks.crowdedTickers].sort()),
+  `crowded JPM sectors ${crowdedJpm} should match marks crowdedTickers ${marks.crowdedTickers}`,
+);
+
+const sides = [
+  ...marks.softTickers.map((ticker) => [ticker, "soft"]),
+  ...marks.crowdedTickers.map((ticker) => [ticker, "crowded"]),
+];
+for (const [ticker, side] of sides) {
+  const plan = CURRICULUM[side];
   const underlying = marks.underlyings[ticker];
   assert(underlying && typeof underlying.spot === "number", `${ticker} needs a spot price`);
+  assert(underlying.spotBid <= underlying.spotAsk, `${ticker} spot bid/ask`);
   assert(Math.round(underlying.percentile * 100) === latestJpm[ticker].points, `${ticker} percentile matches the JPM card`);
-}
-const xlf = marks.chains.XLF;
-assert(xlf?.putStrip?.rows?.length >= 5, "XLF put strip");
-assert(xlf?.leapCalls?.rows?.length >= 1, "XLF LEAP calls");
-for (const chain of [xlf.putStrip, xlf.leapCalls]) {
-  for (const row of chain.rows) {
-    assert(row.bid <= row.mark && row.mark <= row.ask, `${chain.type} ${row.strike} mark inside bid/ask`);
-    assert(Math.abs((row.bid + row.ask) / 2 - row.mark) < 0.0051, `${chain.type} ${row.strike} mark is mid`);
-    for (const key of ["iv", "oi", "volume"]) assert(typeof row[key] === "number", `${chain.type} ${row.strike} ${key}`);
+
+  const chains = marks.chains[ticker];
+  assert(chains, `${ticker} has no chains`);
+  if (!chains) continue;
+  const strip = chains[plan.strip];
+  const leapRows = chains[plan.leapRows];
+  const spread = chains.structures?.[plan.spread];
+  const leap = chains.structures?.[plan.leap];
+  assert(strip?.rows?.length >= 5, `${ticker} ${plan.strip}`);
+  assert(leapRows?.rows?.length >= 1, `${ticker} ${plan.leapRows}`);
+  assert(spread && leap, `${ticker} needs ${plan.spread} and ${plan.leap}`);
+  if (!strip || !leapRows || !spread || !leap) continue;
+  assert(strip.type === (side === "soft" ? "put" : "call"), `${ticker} strip type ${strip.type}`);
+  assert(leapRows.type === (side === "soft" ? "call" : "put"), `${ticker} LEAP rows type ${leapRows.type}`);
+
+  for (const chain of [strip, leapRows]) {
+    const strikes = chain.rows.map((row) => row.strike);
+    assert(strikes.every((value, index) => index === 0 || value > strikes[index - 1]), `${ticker} ${chain.type} strikes ascend`);
+    for (const row of chain.rows) {
+      const where = `${ticker} ${chain.type} ${row.strike}`;
+      assert(row.bid <= row.mark && row.mark <= row.ask, `${where} mark inside bid/ask`);
+      assert(Math.abs((row.bid + row.ask) / 2 - row.mark) < 0.0051, `${where} mark is mid`);
+      for (const key of ["iv", "oi", "volume"]) assert(typeof row[key] === "number", `${where} ${key}`);
+    }
   }
+
+  assert(spread.expiration === strip.expiration, `${ticker} spread expiration matches the strip`);
+  for (const leg of [spread.short, spread.long]) {
+    assert(leg.type === strip.type, `${ticker} spread leg type`);
+    const row = strip.rows.find((item) => item.strike === leg.strike);
+    assert(row && row.mark === leg.mark && row.bid === leg.bid && row.ask === leg.ask, `${ticker} spread ${leg.strike} matches the chain`);
+  }
+  const math = creditSpreadMath(spread);
+  assert(price(math.credit) === price(spread.creditMid), `${ticker} credit ${price(math.credit)} vs ${spread.creditMid}`);
+  assert(math.width === spread.width, `${ticker} width ${math.width} vs ${spread.width}`);
+  if (side === "soft") assert(spread.short.strike > spread.long.strike, `${ticker} bull put short strike above long`);
+  else assert(spread.short.strike < spread.long.strike, `${ticker} bear call short strike below long`);
+
+  assert(leap.expiration === leapRows.expiration && leap.long.type === leapRows.type, `${ticker} LEAP matches its rows`);
+  const leapRow = leapRows.rows.find((item) => item.strike === leap.long.strike);
+  assert(leapRow && leapRow.mark === leap.long.mark && leapRow.bid === leap.long.bid && leapRow.ask === leap.long.ask, `${ticker} LEAP leg matches the chain`);
 }
-const spread = xlf.structures.bullPut;
-for (const leg of [spread.short, spread.long]) {
-  const row = xlf.putStrip.rows.find((item) => item.strike === leg.strike);
-  assert(row && row.mark === leg.mark && row.bid === leg.bid && row.ask === leg.ask, `bull put ${leg.strike} matches the chain`);
+
+const studyWant = {
+  XLF: { credit: "0.37", maxLoss: "1.63", breakeven: "54.63", leap: "5.725", leapBreakeven: "61.725", spot: "55.90" },
+  XLP: { credit: "0.60", maxLoss: "1.40", breakeven: "87.40", leap: "8.00", leapBreakeven: "96.00", spot: "88.26" },
+  XLK: { credit: "2.125", maxLoss: "2.875", breakeven: "187.125", leap: "17.60", leapBreakeven: "162.40", spot: "183.26" },
+};
+for (const [ticker, want] of Object.entries(studyWant)) {
+  const side = marks.crowdedTickers.includes(ticker) ? "crowded" : "soft";
+  const structures = marks.chains[ticker].structures;
+  const math = creditSpreadMath(structures[CURRICULUM[side].spread]);
+  const leap = leapMath(structures[CURRICULUM[side].leap]);
+  const got = {
+    credit: price(math.credit),
+    maxLoss: price(math.maxLoss),
+    breakeven: price(math.breakeven),
+    leap: price(leap.premium),
+    leapBreakeven: price(leap.breakeven),
+    spot: price(marks.underlyings[ticker].spot),
+  };
+  assert(JSON.stringify(got) === JSON.stringify(want), `${ticker} study math ${JSON.stringify(got)}`);
 }
-assert(spread.expiration === xlf.putStrip.expiration, "bull put expiration matches the strip");
-const bp = bullPutMath(spread);
-assert(price(bp.credit) === "0.37" && price(bp.credit) === price(spread.creditMid), `bull put credit ${price(bp.credit)}`);
-assert(price(bp.maxLoss) === "1.63" && price(bp.breakeven) === "54.63", `bull put math ${price(bp.maxLoss)} ${price(bp.breakeven)}`);
-const leap = xlf.structures.callLeap;
-const leapRow = xlf.leapCalls.rows.find((item) => item.strike === leap.long.strike);
-assert(leapRow && leapRow.mark === leap.long.mark, "LEAP leg matches the chain");
-assert(price(leapMath(leap).premium) === "5.725", `LEAP mark ${price(leapMath(leap).premium)}`);
-assert(price(marks.underlyings.XLF.spot) === "55.90", "XLF spot 55.90");
 
 const banned = [
   "sentiment ai",

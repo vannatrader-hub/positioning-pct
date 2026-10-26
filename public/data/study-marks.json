@@ -1,74 +1,617 @@
 {
   "asOf": "2026-10-23T20:15:00Z",
   "asOfLabel": "Fri Oct 23, 2026 session close (CT)",
-  "sourceNote": "Broker marks snapshot for Study cards. Public site ships this JSON only — no live broker keys in the browser.",
+  "sourceNote": "Broker marks snapshot for Study cards. Public site ships this JSON only \u2014 no live broker keys in the browser.",
   "underlyings": {
     "XLF": {
       "name": "Financials",
       "percentile": 0.18,
-      "spot": 55.90,
+      "spot": 55.9,
       "spotBid": 55.84,
       "spotAsk": 56.05,
-      "previousClose": 55.90
+      "previousClose": 55.9
     },
     "XLP": {
       "name": "Staples",
       "percentile": 0.21,
       "spot": 88.26,
+      "spotBid": 88.26,
+      "spotAsk": 88.52,
       "previousClose": 88.26
+    },
+    "XLK": {
+      "name": "Technology",
+      "percentile": 0.75,
+      "spot": 183.26,
+      "spotBid": 182.98,
+      "spotAsk": 183.25,
+      "previousClose": 183.23
     }
   },
-  "softTickers": ["XLF", "XLP"],
-  "crowdedTickers": ["XLK"],
+  "softTickers": [
+    "XLF",
+    "XLP"
+  ],
+  "crowdedTickers": [
+    "XLK"
+  ],
   "chains": {
     "XLF": {
       "putStrip": {
         "expiration": "2026-11-20",
         "type": "put",
         "rows": [
-          {"strike": 50, "bid": 0.08, "ask": 0.12, "mark": 0.10, "iv": 0.275, "oi": 49786, "volume": 12},
-          {"strike": 51, "bid": 0.13, "ask": 0.15, "mark": 0.14, "iv": 0.257, "oi": 29855, "volume": 260},
-          {"strike": 52, "bid": 0.17, "ask": 0.20, "mark": 0.185, "iv": 0.234, "oi": 58949, "volume": 306},
-          {"strike": 53, "bid": 0.27, "ask": 0.31, "mark": 0.29, "iv": 0.219, "oi": 145236, "volume": 6749},
-          {"strike": 54, "bid": 0.40, "ask": 0.51, "mark": 0.455, "iv": 0.208, "oi": 182570, "volume": 175},
-          {"strike": 55, "bid": 0.62, "ask": 0.70, "mark": 0.66, "iv": 0.186, "oi": 78949, "volume": 1258},
-          {"strike": 55.5, "bid": 0.78, "ask": 0.92, "mark": 0.85, "iv": 0.185, "oi": 3443, "volume": 2023},
-          {"strike": 56, "bid": 1.00, "ask": 1.09, "mark": 1.045, "iv": 0.178, "oi": 64599, "volume": 1135},
-          {"strike": 56.5, "bid": 1.13, "ask": 1.41, "mark": 1.27, "iv": 0.169, "oi": 3663, "volume": 103},
-          {"strike": 57, "bid": 1.47, "ask": 1.64, "mark": 1.555, "iv": 0.165, "oi": 11496, "volume": 11}
+          {
+            "strike": 50,
+            "bid": 0.08,
+            "ask": 0.12,
+            "mark": 0.1,
+            "iv": 0.275,
+            "oi": 49786,
+            "volume": 12
+          },
+          {
+            "strike": 51,
+            "bid": 0.13,
+            "ask": 0.15,
+            "mark": 0.14,
+            "iv": 0.257,
+            "oi": 29855,
+            "volume": 260
+          },
+          {
+            "strike": 52,
+            "bid": 0.17,
+            "ask": 0.2,
+            "mark": 0.185,
+            "iv": 0.234,
+            "oi": 58949,
+            "volume": 306
+          },
+          {
+            "strike": 53,
+            "bid": 0.27,
+            "ask": 0.31,
+            "mark": 0.29,
+            "iv": 0.219,
+            "oi": 145236,
+            "volume": 6749
+          },
+          {
+            "strike": 54,
+            "bid": 0.4,
+            "ask": 0.51,
+            "mark": 0.455,
+            "iv": 0.208,
+            "oi": 182570,
+            "volume": 175
+          },
+          {
+            "strike": 55,
+            "bid": 0.62,
+            "ask": 0.7,
+            "mark": 0.66,
+            "iv": 0.186,
+            "oi": 78949,
+            "volume": 1258
+          },
+          {
+            "strike": 55.5,
+            "bid": 0.78,
+            "ask": 0.92,
+            "mark": 0.85,
+            "iv": 0.185,
+            "oi": 3443,
+            "volume": 2023
+          },
+          {
+            "strike": 56,
+            "bid": 1.0,
+            "ask": 1.09,
+            "mark": 1.045,
+            "iv": 0.178,
+            "oi": 64599,
+            "volume": 1135
+          },
+          {
+            "strike": 56.5,
+            "bid": 1.13,
+            "ask": 1.41,
+            "mark": 1.27,
+            "iv": 0.169,
+            "oi": 3663,
+            "volume": 103
+          },
+          {
+            "strike": 57,
+            "bid": 1.47,
+            "ask": 1.64,
+            "mark": 1.555,
+            "iv": 0.165,
+            "oi": 11496,
+            "volume": 11
+          }
         ]
       },
       "leapCalls": {
         "expiration": "2028-01-21",
         "type": "call",
         "rows": [
-          {"strike": 55, "bid": 6.15, "ask": 6.75, "mark": 6.45, "iv": 0.178, "oi": 6390, "volume": 1},
-          {"strike": 56, "bid": 5.40, "ask": 6.05, "mark": 5.725, "iv": 0.171, "oi": 2540, "volume": 0},
-          {"strike": 57, "bid": 4.45, "ask": 5.75, "mark": 5.10, "iv": 0.166, "oi": 7898, "volume": 0},
-          {"strike": 60, "bid": 3.50, "ask": 4.00, "mark": 3.75, "iv": 0.167, "oi": 6298, "volume": 1}
+          {
+            "strike": 55,
+            "bid": 6.15,
+            "ask": 6.75,
+            "mark": 6.45,
+            "iv": 0.178,
+            "oi": 6390,
+            "volume": 1
+          },
+          {
+            "strike": 56,
+            "bid": 5.4,
+            "ask": 6.05,
+            "mark": 5.725,
+            "iv": 0.171,
+            "oi": 2540,
+            "volume": 0
+          },
+          {
+            "strike": 57,
+            "bid": 4.45,
+            "ask": 5.75,
+            "mark": 5.1,
+            "iv": 0.166,
+            "oi": 7898,
+            "volume": 0
+          },
+          {
+            "strike": 60,
+            "bid": 3.5,
+            "ask": 4.0,
+            "mark": 3.75,
+            "iv": 0.167,
+            "oi": 6298,
+            "volume": 1
+          }
         ]
       },
       "structures": {
         "shares": {
           "label": "Shares",
           "symbol": "XLF",
-          "last": 55.90,
+          "last": 55.9,
           "note": "Sector fund last / prior close."
         },
         "bullPut": {
           "label": "Bull put",
           "expiration": "2026-11-20",
-          "short": {"strike": 55, "type": "put", "mark": 0.66, "bid": 0.62, "ask": 0.70},
-          "long": {"strike": 53, "type": "put", "mark": 0.29, "bid": 0.27, "ask": 0.31},
+          "short": {
+            "strike": 55,
+            "type": "put",
+            "mark": 0.66,
+            "bid": 0.62,
+            "ask": 0.7
+          },
+          "long": {
+            "strike": 53,
+            "type": "put",
+            "mark": 0.29,
+            "bid": 0.27,
+            "ask": 0.31
+          },
           "creditMid": 0.37,
           "width": 2,
-          "note": "Example defined-risk credit: sell 55 put / buy 53 put. Mid credit ≈ short mark − long mark. No size."
+          "note": "Example defined-risk credit: sell 55 put / buy 53 put. Mid credit \u2248 short mark \u2212 long mark. No size."
         },
         "callLeap": {
           "label": "Call LEAP",
           "expiration": "2028-01-21",
-          "long": {"strike": 56, "type": "call", "mark": 5.725, "bid": 5.40, "ask": 6.05},
+          "long": {
+            "strike": 56,
+            "type": "call",
+            "mark": 5.725,
+            "bid": 5.4,
+            "ask": 6.05
+          },
           "note": "Example long-dated ATM call. Mark is mid. No size."
+        }
+      }
+    },
+    "XLP": {
+      "putStrip": {
+        "expiration": "2026-11-20",
+        "type": "put",
+        "rows": [
+          {
+            "strike": 80,
+            "bid": 0.05,
+            "ask": 0.35,
+            "mark": 0.2,
+            "iv": 0.266,
+            "oi": 10486,
+            "volume": 5
+          },
+          {
+            "strike": 81,
+            "bid": 0.03,
+            "ask": 0.56,
+            "mark": 0.295,
+            "iv": 0.268,
+            "oi": 12887,
+            "volume": 15
+          },
+          {
+            "strike": 82,
+            "bid": 0.05,
+            "ask": 0.28,
+            "mark": 0.165,
+            "iv": 0.207,
+            "oi": 11210,
+            "volume": 1194
+          },
+          {
+            "strike": 83,
+            "bid": 0.1,
+            "ask": 0.53,
+            "mark": 0.315,
+            "iv": 0.217,
+            "oi": 14789,
+            "volume": 56
+          },
+          {
+            "strike": 84,
+            "bid": 0.22,
+            "ask": 0.45,
+            "mark": 0.335,
+            "iv": 0.192,
+            "oi": 13239,
+            "volume": 205
+          },
+          {
+            "strike": 85,
+            "bid": 0.3,
+            "ask": 0.89,
+            "mark": 0.595,
+            "iv": 0.203,
+            "oi": 15526,
+            "volume": 1153
+          },
+          {
+            "strike": 86,
+            "bid": 0.42,
+            "ask": 1.28,
+            "mark": 0.85,
+            "iv": 0.201,
+            "oi": 42065,
+            "volume": 2626
+          },
+          {
+            "strike": 87,
+            "bid": 0.35,
+            "ask": 1.3,
+            "mark": 0.825,
+            "iv": 0.16,
+            "oi": 14448,
+            "volume": 726
+          },
+          {
+            "strike": 88,
+            "bid": 1.2,
+            "ask": 1.7,
+            "mark": 1.45,
+            "iv": 0.184,
+            "oi": 10967,
+            "volume": 234
+          },
+          {
+            "strike": 89,
+            "bid": 1.36,
+            "ask": 2.68,
+            "mark": 2.02,
+            "iv": 0.19,
+            "oi": 1142,
+            "volume": 1228
+          },
+          {
+            "strike": 90,
+            "bid": 1.98,
+            "ask": 3.35,
+            "mark": 2.665,
+            "iv": 0.196,
+            "oi": 376,
+            "volume": 35
+          }
+        ]
+      },
+      "leapCalls": {
+        "expiration": "2028-01-21",
+        "type": "call",
+        "rows": [
+          {
+            "strike": 85,
+            "bid": 7.0,
+            "ask": 12.0,
+            "mark": 9.5,
+            "iv": 0.119,
+            "oi": 10320,
+            "volume": 2
+          },
+          {
+            "strike": 87,
+            "bid": 7.5,
+            "ask": 9.45,
+            "mark": 8.475,
+            "iv": 0.129,
+            "oi": 70,
+            "volume": 0
+          },
+          {
+            "strike": 88,
+            "bid": 5.5,
+            "ask": 10.5,
+            "mark": 8.0,
+            "iv": 0.133,
+            "oi": 135,
+            "volume": 0
+          },
+          {
+            "strike": 90,
+            "bid": 4.6,
+            "ask": 8.8,
+            "mark": 6.7,
+            "iv": 0.128,
+            "oi": 3191,
+            "volume": 0
+          },
+          {
+            "strike": 95,
+            "bid": 3.4,
+            "ask": 5.9,
+            "mark": 4.65,
+            "iv": 0.136,
+            "oi": 9036,
+            "volume": 291
+          }
+        ]
+      },
+      "structures": {
+        "shares": {
+          "label": "Shares",
+          "symbol": "XLP",
+          "last": 88.26,
+          "note": "Sector fund last / prior close."
+        },
+        "bullPut": {
+          "label": "Bull put",
+          "expiration": "2026-11-20",
+          "short": {
+            "strike": 88,
+            "type": "put",
+            "mark": 1.45,
+            "bid": 1.2,
+            "ask": 1.7
+          },
+          "long": {
+            "strike": 86,
+            "type": "put",
+            "mark": 0.85,
+            "bid": 0.42,
+            "ask": 1.28
+          },
+          "creditMid": 0.6,
+          "width": 2,
+          "note": "Example defined-risk credit: short 88 put / long 86 put. Mid credit \u2248 short mark \u2212 long mark. No size."
+        },
+        "callLeap": {
+          "label": "Call LEAP",
+          "expiration": "2028-01-21",
+          "long": {
+            "strike": 88,
+            "type": "call",
+            "mark": 8.0,
+            "bid": 5.5,
+            "ask": 10.5
+          },
+          "note": "Example long-dated ATM call. Mark is mid. No size."
+        }
+      }
+    },
+    "XLK": {
+      "callStrip": {
+        "expiration": "2026-11-20",
+        "type": "call",
+        "rows": [
+          {
+            "strike": 175,
+            "bid": 11.6,
+            "ask": 12.65,
+            "mark": 12.125,
+            "iv": 0.357,
+            "oi": 23,
+            "volume": 2
+          },
+          {
+            "strike": 180,
+            "bid": 8.15,
+            "ask": 9.15,
+            "mark": 8.65,
+            "iv": 0.338,
+            "oi": 297,
+            "volume": 5
+          },
+          {
+            "strike": 181,
+            "bid": 7.8,
+            "ask": 8.65,
+            "mark": 8.225,
+            "iv": 0.346,
+            "oi": 8,
+            "volume": 2
+          },
+          {
+            "strike": 182,
+            "bid": 6.9,
+            "ask": 7.85,
+            "mark": 7.375,
+            "iv": 0.329,
+            "oi": 60,
+            "volume": 2
+          },
+          {
+            "strike": 183,
+            "bid": 6.55,
+            "ask": 7.05,
+            "mark": 6.8,
+            "iv": 0.326,
+            "oi": 172,
+            "volume": 5
+          },
+          {
+            "strike": 184,
+            "bid": 5.75,
+            "ask": 6.7,
+            "mark": 6.225,
+            "iv": 0.322,
+            "oi": 265,
+            "volume": 31
+          },
+          {
+            "strike": 185,
+            "bid": 5.35,
+            "ask": 5.85,
+            "mark": 5.6,
+            "iv": 0.314,
+            "oi": 2501,
+            "volume": 41
+          },
+          {
+            "strike": 186,
+            "bid": 4.85,
+            "ask": 5.55,
+            "mark": 5.2,
+            "iv": 0.316,
+            "oi": 408,
+            "volume": 2
+          },
+          {
+            "strike": 188,
+            "bid": 4.0,
+            "ask": 4.65,
+            "mark": 4.325,
+            "iv": 0.313,
+            "oi": 511,
+            "volume": 9
+          },
+          {
+            "strike": 190,
+            "bid": 3.2,
+            "ask": 3.75,
+            "mark": 3.475,
+            "iv": 0.305,
+            "oi": 2453,
+            "volume": 23
+          },
+          {
+            "strike": 200,
+            "bid": 0.7,
+            "ask": 0.93,
+            "mark": 0.815,
+            "iv": 0.27,
+            "oi": 1821,
+            "volume": 53
+          }
+        ]
+      },
+      "leapPuts": {
+        "expiration": "2028-01-21",
+        "type": "put",
+        "rows": [
+          {
+            "strike": 180,
+            "bid": 15.6,
+            "ask": 19.6,
+            "mark": 17.6,
+            "iv": 0.292,
+            "oi": 3667,
+            "volume": 0
+          },
+          {
+            "strike": 182.5,
+            "bid": 17.1,
+            "ask": 20.8,
+            "mark": 18.95,
+            "iv": 0.294,
+            "oi": 31,
+            "volume": 0
+          },
+          {
+            "strike": 185,
+            "bid": 17.5,
+            "ask": 22.0,
+            "mark": 19.75,
+            "iv": 0.288,
+            "oi": 3115,
+            "volume": 0
+          },
+          {
+            "strike": 190,
+            "bid": 20.35,
+            "ask": 24.35,
+            "mark": 22.35,
+            "iv": 0.287,
+            "oi": 224,
+            "volume": 0
+          },
+          {
+            "strike": 200,
+            "bid": 25.25,
+            "ask": 29.65,
+            "mark": 27.45,
+            "iv": 0.277,
+            "oi": 216,
+            "volume": 0
+          }
+        ]
+      },
+      "structures": {
+        "shares": {
+          "label": "Shares",
+          "symbol": "XLK",
+          "last": 183.26,
+          "note": "Sector fund last / prior close."
+        },
+        "bearCall": {
+          "label": "Bear call",
+          "expiration": "2026-11-20",
+          "short": {
+            "strike": 185,
+            "type": "call",
+            "mark": 5.6,
+            "bid": 5.35,
+            "ask": 5.85
+          },
+          "long": {
+            "strike": 190,
+            "type": "call",
+            "mark": 3.475,
+            "bid": 3.2,
+            "ask": 3.75
+          },
+          "creditMid": 2.125,
+          "width": 5,
+          "note": "Example defined-risk credit when crowded: short 185 call / long 190 call. Mid credit \u2248 short mark \u2212 long mark. No size."
+        },
+        "putLeap": {
+          "label": "Put LEAP",
+          "expiration": "2028-01-21",
+          "long": {
+            "strike": 180,
+            "type": "put",
+            "mark": 17.6,
+            "bid": 15.6,
+            "ask": 19.6
+          },
+          "note": "Example long-dated put near spot. Mark is mid. No size."
         }
       }
     }
