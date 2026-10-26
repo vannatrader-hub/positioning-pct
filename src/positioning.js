@@ -89,8 +89,9 @@ function zones() {
 }
 
 /** The Soft ↔ Crowded bar: zoned track, a marker at the percentile, labelled ends, caption below. */
-function bar({ pct, caption, ends = ["Soft", "Crowded"], name = "", hero = false, label }) {
+function bar({ pct, caption, ends = ["Soft", "Crowded"], name = "", hero = false, crowded = false, label }) {
   const root = el("div", hero ? "sc is-hero" : "sc");
+  if (crowded) root.classList.add("is-crowded");
   root.setAttribute("role", "img");
   root.setAttribute("aria-label", label ?? `${caption}. ${ends[0]} on the left, ${ends[1]} on the right.`);
 
@@ -111,6 +112,10 @@ function bar({ pct, caption, ends = ["Soft", "Crowded"], name = "", hero = false
   line.append(el("span", "sc-end", ends[0]), wrap, el("span", "sc-end", ends[1]));
   root.append(line);
   return root;
+}
+
+function isCrowdedSector(sector) {
+  return sector.regime === "Crowded" || sector.points >= 75;
 }
 
 function statusPill(text, tone) {
@@ -174,6 +179,8 @@ function sectorCard(sector, hero) {
   if (!sector.available) return unavailableCard(sector);
   const card = el("article", hero ? "card is-hero" : "card");
   card.dataset.ticker = sector.ticker;
+  const crowded = isCrowdedSector(sector);
+  if (crowded) card.classList.add("is-crowded");
 
   const top = el("div", "card-top");
   const ident = el("button", "feature ident");
@@ -203,6 +210,7 @@ function sectorCard(sector, hero) {
       caption: sector.caption,
       name: hero ? sector.ticker : "",
       hero,
+      crowded,
       label: `${sector.ticker}, ${sector.caption}. Soft on the left, crowded on the right.`,
     }),
   );
@@ -215,6 +223,7 @@ function sectorCard(sector, hero) {
 function mapRow(sector) {
   const on = sector.ticker === state.sector;
   const button = el("button", on ? "map-row is-on" : "map-row");
+  if (isCrowdedSector(sector)) button.classList.add("is-crowded");
   button.type = "button";
   button.setAttribute("aria-pressed", on ? "true" : "false");
   button.addEventListener("click", () => feature(sector.ticker));
@@ -289,7 +298,7 @@ function monitorCard(read, top) {
   const list = el("div", "mon-list");
   list.append(scale);
   for (const asset of read.assets) {
-    const row = el("div", "mon-row");
+    const row = el("div", asset.tone === "crowded" ? "mon-row is-crowded" : "mon-row");
     row.dataset.asset = asset.label;
     row.setAttribute("role", "img");
     row.setAttribute("aria-label", `${asset.label}: current percentile ${asset.display}`);
@@ -340,6 +349,7 @@ function indicatorCard(read) {
       pct: read.pct,
       caption: read.caption,
       ends: read.ends,
+      crowded: read.tone === "crowded",
       label: `${read.title}: ${read.value} ${read.unit}, ${read.caption}. ${read.ends[0]} on the left, ${read.ends[1]} on the right.`,
     }),
   );
@@ -569,6 +579,7 @@ function overviewTile(section, index, pcts, reads, sourceId, extras = []) {
   const mid = median(pcts);
   const lean = leanOf(mid);
   top.append(el("span", `ov-lean lv-${lean.tone}`, lean.word));
+  if (lean.tone === "crowded") tile.classList.add("is-crowded");
 
   const mini = el("div", "ov-bar");
   mini.setAttribute("aria-hidden", "true");

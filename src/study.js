@@ -323,7 +323,19 @@ function panel(sector, marks) {
     block.append(head, pending(`The ${ticker} chain lands with the next marks snapshot.`));
   }
 
-  root.append(el("p", "study-lead", copy.lead(sector)), grid, block);
+  root.append(lead(sector, copy.lead(sector)), grid, block);
+  return root;
+}
+
+function lead(sector, text) {
+  const root = el("p", "study-lead");
+  const mark = ` ${sector.display} `;
+  const at = text.indexOf(mark);
+  if (sector.side !== "crowded" || at < 0) {
+    root.textContent = text;
+    return root;
+  }
+  root.append(text.slice(0, at + 1), el("strong", "", sector.display), text.slice(at + mark.length - 1));
   return root;
 }
 
@@ -347,10 +359,10 @@ export async function renderStudy(root, { soft, crowded, selected }) {
   const summary = root.querySelector("#study-summary");
 
   const list = (items) => items.map((sector) => `${sector.ticker} ${sector.display}`).join(" · ");
-  const parts = [];
-  parts.push(soft.length ? `Soft JPM sectors this week: ${list(soft)}.` : "No JPM sector is under 0.25 this week.");
-  if (crowded.length) parts.push(`Crowded: ${list(crowded)}.`);
-  summary.textContent = parts.join(" ");
+  summary.replaceChildren(
+    soft.length ? `Soft JPM sectors this week: ${list(soft)}.` : "No JPM sector is under 0.25 this week.",
+  );
+  if (crowded.length) summary.append(" ", el("span", "study-summary-crowded", `Crowded: ${list(crowded)}.`));
 
   let marks;
   try {
