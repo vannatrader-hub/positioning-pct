@@ -255,6 +255,23 @@ for (const play of flow.plays) {
   assert(levels.window.length >= 110 && levels.window.length <= 135, `${where} six-month window ${levels.window.length}`);
 }
 const flowBy = Object.fromEntries(flow.plays.map((play) => [play.ticker, play]));
+for (const play of flow.plays) {
+  const rows = play.customerPurchased;
+  assert(Array.isArray(rows), `${play.ticker} customerPurchased is a list`);
+  for (const line of rows ?? []) {
+    assert(line.contract && line.detail, `${play.ticker} customerPurchased row needs contract and detail`);
+    assert(/\d{1,2}\/\d{1,2}$|last week$/.test(line.detail), `${play.ticker} customerPurchased "${line.detail}" names when it traded`);
+  }
+}
+assert(
+  JSON.stringify(flowBy.JCI.customerPurchased) ===
+    JSON.stringify([{ contract: "Dec $160 calls", detail: "2,000 bought @ $3.54 · 10/26" }]),
+  "JCI customer purchased is the 10/26 Dec $160 call buy only",
+);
+assert(flowBy.QCOM.customerPurchased.length === 0, "QCOM flow names no recent customer trade");
+for (const ticker of ["COIN", "ALAB"]) {
+  assert(flowBy[ticker].customerPurchased.every((line) => line.detail.includes("sold")), `${ticker} short puts read as sold`);
+}
 const beWant = { JCI: 163.54, MMM: 179.8, COIN: 123.5, ALAB: 183.8, CRWD: null, DDOG: null, CORT: null, QCOM: null, CSCO: null };
 for (const [ticker, want] of Object.entries(beWant)) {
   assert(breakeven(flowBy[ticker].lead) === want, `${ticker} break-even ${breakeven(flowBy[ticker].lead)} !== ${want}`);

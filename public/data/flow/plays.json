@@ -18,6 +18,9 @@
         "JCI also has 700 September 2027 $170 calls bought on 9/16 holding in open interest, and saw 300 September 2027 $145 short puts open on 10/9 and 225 September 2027 $190 calls bought on 10/13.",
         "JCI shares are +30% YTD and have held above the 200 day moving average for more than a year, and after reclaiming the 50 day on Monday shares are back near the $160 October high, resistance for a breakout."
       ],
+      "customerPurchased": [
+        { "contract": "Dec $160 calls", "detail": "2,000 bought @ $3.54 · 10/26" }
+      ],
       "oi": [
         { "contract": "Dec $160 calls", "detail": "3,500 OI · 2,000 bought 10/26" },
         { "contract": "Sep 2027 $170 calls", "detail": "700 holding · bought 9/16" }
@@ -40,6 +43,9 @@
         "CrowdStrike (CRWD) on 10/20 with a late opening buy of 3000 January 2028 $255 calls for $17M that is holding in open interest.",
         "Put sellers followed on 10/23 with 325 December 2027 $180 and 350 January 2028 $170 short puts opening, while 1880 September 2027 $360 calls bought 9/21 and 350 December 2028 $225 short puts sit in open interest.",
         "CRWD shares are +119.8% YTD and reclaimed the 50 day moving average on 10/21 after a pullback to the 10/20 low, with the 10/6 high at $286.99 the next upside target."
+      ],
+      "customerPurchased": [
+        { "contract": "Jan 2028 $255 calls", "detail": "3,000 bought · $17M · 10/20" }
       ],
       "oi": [
         { "contract": "Jan 2028 $255 calls", "detail": "3,000 holding · $17M" },
@@ -65,6 +71,10 @@
         "DDOG also has long January 2028 $260 calls in open interest valued near $15M and 2000 December $130 calls worth $34M.",
         "DDOG is forming a cup and handle pattern pulling back recently but holding AVWAP off September low as support. A move through $300 would measure to a $390 upside target and Fibonacci extension targets sit at $315, $328.5 and $350."
       ],
+      "customerPurchased": [
+        { "contract": "Dec $230 puts", "detail": "800 sold to open · last week" },
+        { "contract": "Dec $220 puts", "detail": "600 sold to open · last week" }
+      ],
       "oi": [
         { "contract": "Jan 2028 $260 calls", "detail": "Long · valued near $15M" },
         { "contract": "Dec $130 calls", "detail": "2,000 · worth $34M" }
@@ -88,6 +98,9 @@
         "CORT still has 4200 January $140/$95 short strangles in open interest from a 9/29 trade and a 5/27 trade bought 1000 January $80 calls and sits on a $4M position up 450%.",
         "CORT shares are on a massive run since the March 2026 low and have now formed a large flag stalling just under the 1.618 extension level at $129 with $170 the next upside target."
       ],
+      "customerPurchased": [
+        { "contract": "Jan $120/$160 call spreads", "detail": "2,560 bought · ~$2.8M debit · 10/20" }
+      ],
       "oi": [
         { "contract": "Jan $140/$95 short strangles", "detail": "4,200 OI · 9/29" },
         { "contract": "Jan $80 calls", "detail": "1,000 · ~$4M position · 5/27" }
@@ -109,6 +122,7 @@
       "flow": [
         "Qualcomm (QCOM) will report on 11-3 and shares forming a two-week basing pattern on a breakout retest and key AVWAP level have seen plenty of bullish options positioning."
       ],
+      "customerPurchased": [],
       "oi": [],
       "recommendation": "QCOM has a clear $169 level to trade against providing a real nice risk-reward here and put sales seem more popular that call buys.",
       "lead": { "type": "call", "action": "bought", "qty": 3500, "strike": 250, "expiry": "February", "price": null },
@@ -128,6 +142,9 @@
         "3M (MMM) on 10/20 saw a buyer of 1000 December $175 calls at $4.80 on earnings day, now 2,591 in open interest.",
         "The 400 January 2028 $170 calls bought on 9/28 hold 466 in open interest, and the 425 June 2027 $140 puts sold to open on 10/8 hold 753.",
         "Shares are +9.1% YTD and reclaimed the 200 day on 10/12, then closed back above the 50 day on 10/20 with the 8/13 high at $184.69 the next upside target."
+      ],
+      "customerPurchased": [
+        { "contract": "Dec $175 calls", "detail": "1,000 bought @ $4.80 · 10/20" }
       ],
       "oi": [
         { "contract": "Dec $175 calls", "detail": "2,591 OI · 1,000 bought 10/20" },
@@ -153,6 +170,9 @@
         "COIN also has 9325 December $185 calls bought at $23 on 10/5 still holding in open interest.",
         "Shares closed above all four of their key moving averages on 10/15 and slipped back below them the next session. COIN is -25.5% YTD and 55% below its 52 week high, with the July low at $139 as key support and the September high near $208 as resistance."
       ],
+      "customerPurchased": [
+        { "contract": "Sep 2027 $150 puts", "detail": "300 sold / short @ $26.50 · 10/19" }
+      ],
       "oi": [
         { "contract": "Dec $185 calls", "detail": "9,325 holding · bought 10/5 at $23" }
       ],
@@ -175,6 +195,9 @@
         "ALAB September $200 short puts opened 600X on 10/13 while 500 of the $320 calls bought, March $230 short puts 4000X, March $220 short puts 350X, January $250 short puts 850X, March $280 short puts 500X, January $260 puts 400X and January 2028 $300 short puts have all opened in the last two weeks.",
         "ALAB on the weekly is in a longer-term rising channel pattern and the past six-months a bull pennant forming. On more weakness, monthly lower value and rising 200MA support at $248.5 should hold."
       ],
+      "customerPurchased": [
+        { "contract": "Sep 2027 $220 puts", "detail": "600 sold / short @ $36.20 · 10/14" }
+      ],
       "oi": [],
       "recommendation": "ALAB valuation will make for a bumpy ride but reminds me of SNOW years ago, dips will find buyers which is why put sales attractive when RSI gets oversold.",
       "lead": { "type": "put", "action": "sold", "qty": 600, "strike": 220, "expiry": "September 2027", "price": 36.2 },
@@ -194,6 +217,9 @@
         "Cisco (CSCO) on 10/12 with a buyer of 1950 December 2028 $140 calls for $3.8M and also with 1000 March $110 short puts opening.",
         "These bull trades follow size buys in September $135 calls for $2.7M, June $170 way OTM calls 2500X and 2000 December $110 calls, accumulation of bull positioning with 11-12 the next earnings date.",
         "CSCO shares are +50% YTD and recently pulled back to $105 support from $130 post-earnings highs but recently showing relative strength with $121 and $127.5 key overhead levels. The weekly is forming a large bull pennant that measures to $170 above $125."
+      ],
+      "customerPurchased": [
+        { "contract": "Dec 2028 $140 calls", "detail": "1,950 bought · $3.8M · 10/12" }
       ],
       "oi": [],
       "recommendation": "CSCO looks positioned for more upside in 2027 as the AI story plays out and a safer way to play the theme with re-rate potential.",
