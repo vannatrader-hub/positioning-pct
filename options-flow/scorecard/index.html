@@ -8,87 +8,149 @@
       name="description"
       content="Weekly flow scorecard: names ranked by a composite of flow and technicals, each with a trade card and flow intelligence panels. Advisory only, education only, not advice."
     />
-    <meta name="theme-color" content="#070b14" />
+    <meta name="theme-color" content="#f4f5f7" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
+    <link rel="stylesheet" href="/src/styles.css" />
     <link rel="stylesheet" href="/src/scorecard.css" />
   </head>
   <body>
-    <a class="skip" href="#grid">Skip to the board</a>
-    <div class="wrap">
-      <div class="site-top">
+    <a class="skip" href="#content">Skip to content</a>
+    <header class="topbar">
+      <div class="wrap topbar-in">
         <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
-        <nav class="top" aria-label="Pages">
+        <nav class="nav" aria-label="Pages">
           <a href="../../positioning/">Positioning</a>
           <a href="../../spx-levels/">SPX Levels</a>
-          <a class="on" href="../" aria-current="true">Options Flow</a>
+          <a class="is-current" href="../" aria-current="true">Options Flow</a>
         </nav>
       </div>
-      <header class="header">
-        <div class="brand">
-          <div class="brand-row">
-            <span class="logo">Flow Desk</span>
-            <div id="brand-badges"></div>
+    </header>
+    <div class="wrap">
+      <main id="content">
+        <nav class="subnav" aria-label="Options Flow">
+          <a class="subnav-back" href="../"><span aria-hidden="true">←</span> Options Flow</a>
+          <a href="../dollar/">$$$ watchlist</a>
+          <a href="../spotlights/">Spotlight trades</a>
+          <a class="is-current" href="./" aria-current="page">Weekly scorecard</a>
+        </nav>
+        <section class="page-head">
+          <span class="pill">Weekly scorecard <span id="sb-badge"></span></span>
+          <h1>Weekly scorecard</h1>
+          <p class="lede">
+            The week's flow names ranked by a composite of flow and technicals. Open a name for its trade card: the desk
+            analysis, scores, a six-month chart, and the flow intelligence panels. Advisory only.
+          </p>
+          <p class="sample-line pill" id="sb-asof">Loading the board…</p>
+        </section>
+
+        <section class="sb-week" aria-label="This week's board">
+          <dl class="sb-meta" id="sb-meta">
+            <div class="sb-meta-item"><dt>Week of</dt><dd id="week-of">—</dd><dd class="sb-meta-sub" id="iso-week"></dd></div>
+            <div class="sb-meta-item"><dt>Updated</dt><dd id="last-updated">—</dd><dd class="sb-meta-sub" id="last-updated-et"></dd></div>
+            <div class="sb-meta-item is-blend"><dt>Composite blend</dt><dd id="blend-note">0.65 flow / 0.35 tech</dd><dd class="sb-meta-sub">Composite = 0.65 × flow + 0.35 × tech</dd></div>
+          </dl>
+          <p class="sb-lookback" id="lookback"></p>
+        </section>
+
+        <section class="desk-section sb-section" aria-labelledby="board-title">
+          <div class="section-head">
+            <div class="section-title-row">
+              <h2 id="board-title">Ranked board</h2>
+              <span class="section-count" id="board-count"></span>
+            </div>
+            <p class="hint">
+              Ranked by composite, highest first. Each row shows the why, the composite with its flow (F) and tech (T)
+              scores, and the last 30 sessions. Open a name for the trade card and flow intelligence panels.
+            </p>
           </div>
-          <h1 class="title">Weekly Flow Scorecard</h1>
-          <div class="meta">
-            <span>Week of <strong id="week-of">—</strong></span>
-            <span id="iso-week"></span>
-            <span>Updated <strong id="last-updated">—</strong></span>
-            <span id="last-updated-et"></span>
+          <div class="sb-head" aria-hidden="true">
+            <span>Rank</span>
+            <span>Name</span>
+            <span>Why</span>
+            <span>Composite · F / T</span>
+            <span>30 sessions</span>
           </div>
-          <div class="meta" style="margin-top: 4px">
-            <span id="lookback" style="max-width: 720px"></span>
+          <ol class="sb-list" id="sb-list" aria-labelledby="board-title">
+            <li class="sb-empty">Loading the board…</li>
+          </ol>
+        </section>
+
+        <section class="desk-section sb-section" id="sb-watch-section" aria-labelledby="watch-title" hidden>
+          <div class="section-head">
+            <div class="section-title-row">
+              <h2 id="watch-title">Spotlight watch</h2>
+              <span class="section-count" id="watch-count"></span>
+            </div>
+            <p class="hint">Spotlight tickets in this board's lookback. A live ticket opens its card on Spotlight trades.</p>
           </div>
+          <ul class="spot-grid sb-watch" id="sb-watch"></ul>
+        </section>
+
+        <section class="sb-advisory" aria-label="Advisory">
+          <p class="sb-advisory-line" id="advisory">Advisory only — not an order ticket.</p>
+          <p class="sb-advisory-sub">Weekly snapshot committed to the site, not a live feed. Education only · not advice.</p>
+          <details class="sb-gaps" id="gaps" hidden>
+            <summary>Data gaps (this board)</summary>
+            <ul></ul>
+          </details>
+        </section>
+      </main>
+
+      <dialog class="cc sb-cc" id="board-card" aria-labelledby="bc-ticker" aria-describedby="bc-title">
+        <div class="cc-frame">
+          <header class="cc-head">
+            <div class="cc-ident">
+              <h2 class="cc-ticker" id="bc-ticker"></h2>
+              <span class="sb-rank-pill" id="bc-rank"></span>
+              <span class="sb-chips" id="bc-chips"></span>
+            </div>
+            <div class="sb-head-right">
+              <span class="sb-spot-pill" id="bc-spot"></span>
+              <button class="cc-close" type="button" id="bc-close" aria-label="Close trade card">
+                <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+                  <path d="M5 5 L15 15 M15 5 L5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+              </button>
+            </div>
+          </header>
+          <div class="cc-body">
+            <section class="cc-left" aria-label="Trade card" id="trade-card"></section>
+            <section class="cc-right sb-right" aria-labelledby="bc-kicker">
+              <div class="tl-top">
+                <span class="tl-kicker" id="bc-kicker">Trade card</span>
+                <span class="tl-contract" id="bc-contract"></span>
+              </div>
+              <dl class="tl-tiles" id="bc-tiles"></dl>
+              <div class="tl-panel">
+                <p class="tl-chart-head" id="bc-head"></p>
+                <div class="cc-chart" id="bc-chart"></div>
+                <div class="tl-foot">
+                  <span class="tl-legend" id="bc-legend"></span>
+                  <span class="tl-move" id="bc-range"></span>
+                </div>
+              </div>
+              <p class="cc-chart-note" id="bc-note"></p>
+              <div class="fi" id="flow-intel"></div>
+            </section>
+          </div>
+          <p class="cc-foot">Weekly Flow Scorecard · advisory only · not an order ticket. Education only · not advice.</p>
         </div>
-        <div class="header-right">
-          <div class="blend-note" id="blend-note">Composite blend · <em>LOCKED v1: 0.65 flow / 0.35 tech</em></div>
-          <div class="poll-status" id="poll-status">loading…</div>
+      </dialog>
+
+      <footer class="site-footer">
+        <div>
+          <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+          <p class="foot-note">The weekly scorecard is a snapshot committed to the site. Advisory only: not advice and not an order ticket.</p>
+          <p class="foot-edu">Education only · not advice.</p>
         </div>
-      </header>
-
-      <nav class="tabs" aria-label="Options Flow">
-        <a class="tab back" href="../"><span aria-hidden="true">←</span> Options Flow</a>
-        <a class="tab active" href="./" aria-current="page">Scorecard <span class="tab-count" id="tab-count"></span></a>
-        <a class="tab" href="../dollar/">$$$ Watchlist</a>
-        <a class="tab" href="../spotlights/">Spotlight trades</a>
-      </nav>
-
-      <section id="tab-scorecard" aria-label="Scorecard">
-        <p class="hint">Click a name for the trade card · Flow Intelligence panels on the right</p>
-        <main id="grid" class="board-list"><div class="empty">Loading the board…</div></main>
-        <div id="watch-section"></div>
-      </section>
-
-      <footer class="footer">
-        <p class="advisory" id="advisory">Advisory only — not an order ticket.</p>
-        <p class="edu">Weekly snapshot committed to the site, not a live feed. Education only · not advice.</p>
-        <p>Composite = 0.65 × flow + 0.35 × tech (LOCKED v1) · Positioning %.</p>
-        <details class="gaps" id="gaps" style="display: none">
-          <summary>Data gaps (this board)</summary>
-          <ul></ul>
-        </details>
+        <nav class="foot-links" aria-label="Footer">
+          <a href="../../">Home</a>
+          <a href="../../positioning/">Positioning</a>
+          <a href="../../spx-levels/">SPX Levels</a>
+          <a class="is-current" href="../" aria-current="true">Options Flow</a>
+        </nav>
       </footer>
     </div>
-
-    <div id="detail-overlay" class="detail-overlay" hidden>
-      <div class="detail-shell" role="dialog" aria-modal="true" aria-labelledby="detail-ticker">
-        <div class="detail-topbar">
-          <div class="detail-topbar-left">
-            <span class="detail-kicker">TRADE CARD</span>
-            <span class="detail-sub">Weekly Flow Scorecard · Positioning %.</span>
-          </div>
-          <div class="detail-topbar-right">
-            <span id="detail-spot-pill" class="spot-pill"></span>
-            <button type="button" class="close-btn" id="detail-close" aria-label="Close">×</button>
-          </div>
-        </div>
-        <div class="detail-body">
-          <section class="trade-card" id="trade-card"></section>
-          <aside class="flow-intel" id="flow-intel"></aside>
-        </div>
-      </div>
-    </div>
-
     <noscript>The scorecard needs JavaScript to draw. Advisory only, education only, not advice.</noscript>
     <script type="module" src="/src/scorecard.js"></script>
   </body>

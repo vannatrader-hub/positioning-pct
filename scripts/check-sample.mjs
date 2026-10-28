@@ -268,7 +268,7 @@ for (const play of flow.plays) {
   assert(Array.isArray(rows), `${play.ticker} customerPurchased is a list`);
   for (const line of rows ?? []) {
     assert(line.contract && line.detail, `${play.ticker} customerPurchased row needs contract and detail`);
-    assert(/\d{1,2}\/\d{1,2}$|last week$/.test(line.detail), `${play.ticker} customerPurchased "${line.detail}" names when it traded`);
+    assert(/\d{1,2}\/\d{1,2}$|last week$|more recently$/.test(line.detail), `${play.ticker} customerPurchased "${line.detail}" names when it traded`);
     const kind = /\bputs?\b/.test(line.contract) ? "puts" : "calls";
     const act = /\b(sold|short)\b/.test(line.detail) ? "sold" : "bought";
     assert(line.side === `${kind}_${act}`, `${play.ticker} ${line.contract} side ${line.side} should be ${kind}_${act}`);
@@ -280,11 +280,18 @@ assert(
     JSON.stringify([{ contract: "Dec $160 calls", detail: "2,000 bought @ $3.54 · 10/26", side: "calls_bought" }]),
   "JCI customer purchased is the 10/26 Dec $160 call buy only",
 );
-assert(flowBy.QCOM.customerPurchased.length === 0, "QCOM flow names no recent customer trade");
-assert(flowBy.QCOM.lead === null, "QCOM has no lead without a recent customer trade");
+const qcomRows = Object.fromEntries(flowBy.QCOM.customerPurchased.map((line) => [line.contract, line]));
+assert(flowBy.QCOM.customerPurchased[0]?.contract === "Feb $200 calls", "QCOM most recent customer print is the Feb $200 call buy");
+assert(/^1,200 bought · \$1\.3M/.test(qcomRows["Feb $200 calls"]?.detail) && qcomRows["Feb $200 calls"].side === "calls_bought", "QCOM Feb $200 calls: 1,200 bought for $1.3M");
+assert(/^3,500 bought · \$4\.4M · 9\/25$/.test(qcomRows["Feb $250 calls"]?.detail) && qcomRows["Feb $250 calls"].side === "calls_bought", "QCOM Feb $250 calls: 3,500 bought for $4.4M on 9/25");
+assert(
+  JSON.stringify(flowBy.QCOM.lead) === JSON.stringify({ type: "call", action: "bought", qty: 1200, strike: 200, expiry: "February", price: null }),
+  `QCOM lead is the Feb $200 call buy ${JSON.stringify(flowBy.QCOM.lead)}`,
+);
 const qcomBars = JSON.parse(readFileSync(join(root, "public/data/flow/bars/QCOM.json"), "utf8")).bars;
 const qcomLevels = chartLevels(flowBy.QCOM, qcomBars);
-assert(qcomLevels.lines.length === 0 && !qcomLevels.expiryInView, "QCOM chart draws price only");
+assert(JSON.stringify(qcomLevels.lines.map((line) => line.value)) === "[200]", "QCOM chart draws the $200 strike");
+assert(qcomLevels.expiry === "2027-02-19", `QCOM February expiry ${qcomLevels.expiry}`);
 const cortBars = JSON.parse(readFileSync(join(root, "public/data/flow/bars/CORT.json"), "utf8")).bars;
 assert(
   JSON.stringify(chartLevels(flowBy.CORT, cortBars).lines.map((line) => line.value)) === JSON.stringify([120, 160, 130.94]),
@@ -293,7 +300,7 @@ assert(
 for (const ticker of ["COIN", "ALAB"]) {
   assert(flowBy[ticker].customerPurchased.every((line) => line.detail.includes("sold")), `${ticker} short puts read as sold`);
 }
-const beWant = { JCI: 163.54, MMM: 179.8, COIN: 123.5, ALAB: 183.8, CORT: 130.94, CRWD: null, DDOG: null, CSCO: null };
+const beWant = { JCI: 163.54, MMM: 179.8, COIN: 123.5, ALAB: 183.8, CORT: 130.94, CRWD: null, DDOG: null, CSCO: null, QCOM: null };
 for (const [ticker, want] of Object.entries(beWant)) {
   assert(breakeven(flowBy[ticker].lead) === want, `${ticker} break-even ${breakeven(flowBy[ticker].lead)} !== ${want}`);
 }
@@ -417,6 +424,21 @@ board.names.forEach((name, index) => {
 });
 assert(/^Advisory only/.test(board.advisory), "scorecard keeps the advisory-only footer");
 for (const item of board.spotlight_watch) assert(item.ticker && item.title && item.structure, `spotlight watch ${item.ticker}`);
+const boardPage = readFileSync(join(root, "options-flow/scorecard/index.html"), "utf8");
+assert(boardPage.includes('href="/src/styles.css"') && boardPage.includes('class="topbar"') && boardPage.includes('class="site-footer"'), "scorecard sits in the Positioning % shell");
+assert(boardPage.includes('class="subnav"') && boardPage.includes('class="is-current" href="./" aria-current="page">Weekly scorecard'), "scorecard is the current Options Flow subpage");
+for (const id of ["sb-meta", "week-of", "blend-note", "lookback", "sb-list", "sb-watch", "advisory", "gaps", "board-card", "trade-card", "bc-chart", "bc-tiles", "flow-intel"]) {
+  assert(boardPage.includes(`id="${id}"`), `scorecard page keeps #${id}`);
+}
+const boardScript = readFileSync(join(root, "src/scorecard.js"), "utf8");
+for (const piece of ["renderSpark", "renderChips", "renderFlowIntel", "renderOiHorizon", "renderTradeCard", "watchCard", "drawLevelsChart", "data_gaps", "flow_lookback"]) {
+  assert(boardScript.includes(piece), `scorecard keeps ${piece}`);
+}
+for (const file of ["options-flow/index.html", "options-flow/scorecard/index.html", "src/scorecard.js", "src/options-flow-hub.js"]) {
+  const text = readFileSync(join(root, file), "utf8");
+  assert(!/netlify|desk-flow-board/i.test(text), `${file} points off-site`);
+  assert(!/http-equiv="refresh"|location\.(href|assign)\s*=|location\.replace\((?!`dollar\/)/.test(text), `${file} redirects away`);
+}
 
 const banned = [
   "sentiment ai",
