@@ -275,7 +275,7 @@ function fillChart(dialog, play, levels) {
 
   const expiryNote = levels.expiry ? ` Expiry read as the ${shortDate(levels.expiry, true)} monthly.` : "";
   dialog.querySelector("#sl-note").textContent =
-    `Daily closes from a committed snapshot through ${dateLabel(levels.spotDate)}, not a stream. Levels come from the Spotlight ticket.${expiryNote}`;
+    `Daily closes through ${dateLabel(levels.spotDate)}. Levels come from the Spotlight ticket.${expiryNote}`;
 }
 
 function headBadge(play) {

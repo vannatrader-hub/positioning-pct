@@ -360,13 +360,6 @@ button, select { font: inherit; color: inherit; }
   max-width: 520px;
 }
 
-.foot-edu {
-  margin: 6px 0 0;
-  font-size: 13px;
-  font-weight: 650;
-  color: var(--ink-2);
-}
-
 .foot-links {
   display: flex;
   flex-wrap: wrap;
@@ -1474,27 +1467,6 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* Study */
-.edu-flag {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 16px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(224, 50, 43, 0.08);
-  border: 1px solid rgba(224, 50, 43, 0.2);
-  color: #b4231d;
-  font-size: 12.5px;
-  font-weight: 650;
-}
-
-.edu-flag i {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--red);
-}
-
 .study-lead {
   margin: 0 0 16px;
   max-width: 78ch;
@@ -1809,13 +1781,6 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 50%;
   background: var(--faint);
   vertical-align: middle;
-}
-
-.stamp-note {
-  margin-left: 10px;
-  font-weight: 600;
-  color: var(--faint);
-  white-space: nowrap;
 }
 
 .chain-pending {
@@ -2502,15 +2467,6 @@ body:has(.cc[open]) { overflow: hidden; }
   padding: 0 2px;
   font-size: 11.5px;
   color: #8b919c;
-}
-
-.cc-foot {
-  margin: 0;
-  padding: 10px 24px;
-  border-top: 1px solid var(--line);
-  font-size: 12px;
-  font-weight: 650;
-  color: var(--ink-2);
 }
 
 /* Options Flow hub and subpages */
