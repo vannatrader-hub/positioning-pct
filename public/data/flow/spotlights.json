@@ -1,17 +1,49 @@
 {
   "live": true,
-  "asOf": "2026-10-27",
-  "asOfStamp": "2026-10-27T20:10:00-05:00",
-  "activeWindow": { "start": "2026-10-06", "end": "2026-10-27" },
+  "asOf": "2026-10-28",
+  "asOfStamp": "2026-10-28T08:30:00-05:00",
+  "barsThrough": "2026-10-27",
+  "activeWindow": { "start": "2026-10-06", "end": "2026-10-28" },
   "note": "Spotlight trade tickets for education. Advisory only, not advice and not an order ticket.",
-  "sourceNote": "Member Spotlight PDFs pulled 2026-10-27; V close from public X bank note 2026-10-12.",
+  "sourceNote": "Member Spotlight PDFs pulled 2026-10-28 (XYZ posted 2026-10-27 evening); no new close notes for GLD, FCX, or HOOD; V close from public X bank note 2026-10-12. Chart bars through the 2026-10-27 close.",
   "sections": [
     {
       "id": "active",
       "title": "Active",
-      "hint": "Open Spotlights from October's current three-week window (Oct 6 – Oct 27) — still working.",
+      "hint": "Open Spotlights from October's current three-week window (Oct 6 – Oct 28) — still working.",
       "defaultOpen": true,
       "plays": [
+        {
+          "ticker": "XYZ",
+          "name": "Block",
+          "title": "Call Spreads in Payments Winner in the AI Era",
+          "published": "2026-10-27",
+          "status": "active",
+          "side": "calls",
+          "structure": "Long December $75/$85 call spreads",
+          "entry": "Dec $75/$85 call spreads @ $3.50",
+          "debit": 3.5,
+          "spotAtPost": 75,
+          "stop": 70,
+          "target": 90,
+          "breakeven": 78.5,
+          "expiryNote": "December OpEx",
+          "timeframe": "2 months",
+          "idea": [
+            "A payments winner in the AI era: +15% YTD and pulled back from highs that stalled at anchored VWAP off the high, forming a cup and handle on the weekly.",
+            "Shares hold well above key retracements and anchored VWAP from the low in a bullish trend. A monthly move above $87.5 opens a $100–$120 zone; the 11/3 earnings report lands inside the December window.",
+            "Call spreads cut the debit to $3.50 in exchange for capping the gain at the $85 short strike. Exits are set on the stock: a $70 stop and a $90 target."
+          ],
+          "recommendation": "Long XYZ December $75/$85 call spreads at $3.50. Cup-and-handle / AVWAP setup with 11/3 earnings ahead; stock stop $70, stock target $90.",
+          "levels": [
+            { "label": "Stop", "price": 70 },
+            { "label": "Spot at post", "price": 75 },
+            { "label": "Long strike", "price": 75 },
+            { "label": "B/E Dec OpEx", "price": 78.5 },
+            { "label": "Short strike", "price": 85 },
+            { "label": "Target", "price": 90 }
+          ]
+        },
         {
           "ticker": "GLD",
           "name": "Gold Trust",
