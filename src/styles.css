@@ -3051,16 +3051,6 @@ body:has(.cc[open]) { overflow: hidden; }
 .is-vault .nav a { color: var(--muted); }
 .is-vault .nav a:hover { color: var(--ink); background: rgba(255, 255, 255, 0.06); }
 
-.nav-tag {
-  padding: 0 6px 0 10px;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--faint);
-  white-space: nowrap;
-}
-
 .is-vault .pill { background: rgba(255, 255, 255, 0.04); }
 .is-vault .tile-icon { background: #0e1218; }
 .is-vault .badge { background: rgba(255, 255, 255, 0.05); }
@@ -3883,5 +3873,4 @@ body:has(.cc[open]) { overflow: hidden; }
   .desk-section { scroll-margin-top: 150px; }
   .site-footer { grid-template-columns: 1fr; }
   .topbar .lockup { font-size: 22px; }
-  .nav-tag { display: none; }
 }
