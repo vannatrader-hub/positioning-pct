@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Weekly scorecard · Options Flow · Positioning %.</title>
+    <meta
+      name="description"
+      content="Weekly flow scorecard: names ranked by a composite of flow and technicals, each with a trade card and flow intelligence panels. Advisory only, education only, not advice."
+    />
+    <meta name="theme-color" content="#070b14" />
+    <link rel="icon" href="%BASE_URL%favicon.svg" />
+    <link rel="stylesheet" href="/src/scorecard.css" />
+  </head>
+  <body>
+    <a class="skip" href="#grid">Skip to the board</a>
+    <div class="wrap">
+      <div class="site-top">
+        <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+        <nav class="top" aria-label="Pages">
+          <a href="../../positioning/">Positioning</a>
+          <a href="../../spx-levels/">SPX Levels</a>
+          <a class="on" href="../" aria-current="true">Options Flow</a>
+        </nav>
+      </div>
+      <header class="header">
+        <div class="brand">
+          <div class="brand-row">
+            <span class="logo">Flow Desk</span>
+            <div id="brand-badges"></div>
+          </div>
+          <h1 class="title">Weekly Flow Scorecard</h1>
+          <div class="meta">
+            <span>Week of <strong id="week-of">—</strong></span>
+            <span id="iso-week"></span>
+            <span>Updated <strong id="last-updated">—</strong></span>
+            <span id="last-updated-et"></span>
+          </div>
+          <div class="meta" style="margin-top: 4px">
+            <span id="lookback" style="max-width: 720px"></span>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="blend-note" id="blend-note">Composite blend · <em>LOCKED v1: 0.65 flow / 0.35 tech</em></div>
+          <div class="poll-status" id="poll-status">loading…</div>
+        </div>
+      </header>
+
+      <nav class="tabs" aria-label="Options Flow">
+        <a class="tab back" href="../"><span aria-hidden="true">←</span> Options Flow</a>
+        <a class="tab active" href="./" aria-current="page">Scorecard <span class="tab-count" id="tab-count"></span></a>
+        <a class="tab" href="../dollar/">$$$ Watchlist</a>
+        <a class="tab" href="../spotlights/">Spotlight trades</a>
+      </nav>
+
+      <section id="tab-scorecard" aria-label="Scorecard">
+        <p class="hint">Click a name for the trade card · Flow Intelligence panels on the right</p>
+        <main id="grid" class="board-list"><div class="empty">Loading the board…</div></main>
+        <div id="watch-section"></div>
+      </section>
+
+      <footer class="footer">
+        <p class="advisory" id="advisory">Advisory only — not an order ticket.</p>
+        <p class="edu">Weekly snapshot committed to the site, not a live feed. Education only · not advice.</p>
+        <p>Composite = 0.65 × flow + 0.35 × tech (LOCKED v1) · Positioning %.</p>
+        <details class="gaps" id="gaps" style="display: none">
+          <summary>Data gaps (this board)</summary>
+          <ul></ul>
+        </details>
+      </footer>
+    </div>
+
+    <div id="detail-overlay" class="detail-overlay" hidden>
+      <div class="detail-shell" role="dialog" aria-modal="true" aria-labelledby="detail-ticker">
+        <div class="detail-topbar">
+          <div class="detail-topbar-left">
+            <span class="detail-kicker">TRADE CARD</span>
+            <span class="detail-sub">Weekly Flow Scorecard · Positioning %.</span>
+          </div>
+          <div class="detail-topbar-right">
+            <span id="detail-spot-pill" class="spot-pill"></span>
+            <button type="button" class="close-btn" id="detail-close" aria-label="Close">×</button>
+          </div>
+        </div>
+        <div class="detail-body">
+          <section class="trade-card" id="trade-card"></section>
+          <aside class="flow-intel" id="flow-intel"></aside>
+        </div>
+      </div>
+    </div>
+
+    <noscript>The scorecard needs JavaScript to draw. Advisory only, education only, not advice.</noscript>
+    <script type="module" src="/src/scorecard.js"></script>
+  </body>
+</html>
