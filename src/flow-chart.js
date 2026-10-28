@@ -245,10 +245,19 @@ export function drawLevelsChart(host, ticker, levels) {
       if (marker.line !== false) {
         svg.append(node("line", { x1: mx, x2: mx, y1: pad.top, y2: pad.top + plotH, stroke: COLORS.marker, "stroke-dasharray": "1 4", "stroke-width": 1.2 }));
       }
-      const leftSide = marker.side === "left";
-      const box = { left: leftSide ? mx - 5 - tagWidth(marker.label) : mx + 5, right: leftSide ? mx - 5 : mx + 5 + tagWidth(marker.label) };
+      const tagW = tagWidth(marker.label);
+      const boxFor = (left) => ({ left: left ? mx - 5 - tagW : mx + 5, right: left ? mx - 5 : mx + 5 + tagW });
+      const clear = (box, ty) => !taken.some((other) => Math.abs(other.y - ty) < 13 && other.left < box.right && box.left < other.right);
+      const fits = (left) => (left ? mx - 5 - tagW >= pad.left : mx + 5 + tagW <= right);
+      const preferLeft = marker.side === "left";
+      const sides = [preferLeft, !preferLeft].filter(fits);
+      if (!sides.length) sides.push(preferLeft);
+      let leftSide = sides[0];
       let my = pad.top + 10;
-      while (taken.some((other) => Math.abs(other.y - my) < 12 && other.left < box.right && box.left < other.right)) my += 13;
+      const free = sides.find((left) => clear(boxFor(left), my));
+      if (free !== undefined) leftSide = free;
+      else while (!clear(boxFor(leftSide), my)) my += 13;
+      const box = boxFor(leftSide);
       taken.push({ y: my, ...box });
       svg.append(
         node("text", { x: leftSide ? mx - 5 : mx + 5, y: my, "text-anchor": leftSide ? "end" : "start", fill: COLORS.marker, class: "tl-tag" }, marker.label),
