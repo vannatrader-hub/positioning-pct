@@ -1,9 +1,9 @@
 {
   "week_of": "Mon 2026-10-12 → Fri 2026-10-16 (America/Chicago) — score week ends Friday (ISO week runs through Sun Oct 18)",
   "iso_week": "2026-W42",
-  "generated": "2026-10-28 11:31 CT (12:31 ET)",
-  "last_updated": "2026-10-28 11:31 CT",
-  "last_updated_et": "2026-10-28 12:31 ET",
+  "generated": "2026-10-28 12:15 CT (13:15 ET)",
+  "last_updated": "2026-10-28 12:15 CT",
+  "last_updated_et": "2026-10-28 13:15 ET",
   "label": "SNAPSHOT",
   "live": false,
   "composite_blend": {
@@ -109,7 +109,305 @@
         "expected_move": "±$24.15 (±7.0%) to Nov 20, IV-derived",
         "as_of": "2026-10-28 11:31 CT"
       },
-      "oi_levels": null,
+      "oi_levels": {
+        "as_of": "2026-10-28 11:50 CT",
+        "monthly_opex": {
+          "label": "Monthly OpEx",
+          "expiry": "2026-11-20",
+          "walls": "400 (−$641.57K)",
+          "floors": "335 (+$1.55M)",
+          "pins": "355 (+$6.90M)",
+          "dealer_positioning": "Dealers net short gamma above spot at 400, which acts as a call wall that can accelerate moves; long-gamma support near 335; largest +γ pin at 355.",
+          "call_wall": {
+            "strike": 400,
+            "usd": 641567.47
+          },
+          "put_floor": {
+            "strike": 335,
+            "usd": 1550568.57
+          },
+          "pin": {
+            "strike": 355,
+            "usd": 6896947.29
+          },
+          "gamma_pos": [
+            {
+              "strike": 355,
+              "usd": 6896947.29,
+              "display": "$6.90M",
+              "sign": "+"
+            },
+            {
+              "strike": 365,
+              "usd": 4568725.53,
+              "display": "$4.57M",
+              "sign": "+"
+            },
+            {
+              "strike": 360,
+              "usd": 3985027.11,
+              "display": "$3.99M",
+              "sign": "+"
+            },
+            {
+              "strike": 350,
+              "usd": 3250262.82,
+              "display": "$3.25M",
+              "sign": "+"
+            },
+            {
+              "strike": 335,
+              "usd": 1550568.57,
+              "display": "$1.55M",
+              "sign": "+"
+            }
+          ],
+          "gamma_neg": [
+            {
+              "strike": 330,
+              "usd": 4151424.73,
+              "display": "$4.15M",
+              "sign": "-"
+            },
+            {
+              "strike": 300,
+              "usd": 2165566.17,
+              "display": "$2.17M",
+              "sign": "-"
+            },
+            {
+              "strike": 305,
+              "usd": 1183979.07,
+              "display": "$1.18M",
+              "sign": "-"
+            },
+            {
+              "strike": 345,
+              "usd": 923950.87,
+              "display": "$923.95K",
+              "sign": "-"
+            },
+            {
+              "strike": 325,
+              "usd": 808626.89,
+              "display": "$808.63K",
+              "sign": "-"
+            }
+          ],
+          "vanna_pos": [
+            {
+              "strike": 365,
+              "usd": 3261519.78,
+              "display": "$3.26M",
+              "sign": "+"
+            },
+            {
+              "strike": 300,
+              "usd": 2985292.58,
+              "display": "$2.99M",
+              "sign": "+"
+            },
+            {
+              "strike": 355,
+              "usd": 2349162.22,
+              "display": "$2.35M",
+              "sign": "+"
+            },
+            {
+              "strike": 330,
+              "usd": 2260076.74,
+              "display": "$2.26M",
+              "sign": "+"
+            },
+            {
+              "strike": 360,
+              "usd": 2104307.75,
+              "display": "$2.10M",
+              "sign": "+"
+            }
+          ],
+          "vanna_neg": [
+            {
+              "strike": 400,
+              "usd": 1106262.05,
+              "display": "$1.11M",
+              "sign": "-"
+            },
+            {
+              "strike": 335,
+              "usd": 580277.96,
+              "display": "$580.28K",
+              "sign": "-"
+            },
+            {
+              "strike": 367.5,
+              "usd": 504885.18,
+              "display": "$504.89K",
+              "sign": "-"
+            },
+            {
+              "strike": 362.5,
+              "usd": 178641.02,
+              "display": "$178.64K",
+              "sign": "-"
+            },
+            {
+              "strike": 395,
+              "usd": 146892.03,
+              "display": "$146.89K",
+              "sign": "-"
+            }
+          ]
+        },
+        "all_expiry": {
+          "label": "All expiry",
+          "expiry": "All expirations",
+          "walls": "347.5 (−$24.35M)",
+          "floors": "327.5 (+$554.40K)",
+          "pins": "350 (+$41.74M)",
+          "dealer_positioning": "Dealers net short gamma above spot at 347.5, which acts as a call wall that can accelerate moves; long-gamma support near 327.5; largest +γ pin at 350.",
+          "call_wall": {
+            "strike": 347.5,
+            "usd": 24352729.1
+          },
+          "put_floor": {
+            "strike": 327.5,
+            "usd": 554395.04
+          },
+          "pin": {
+            "strike": 350,
+            "usd": 41736951.14
+          },
+          "gamma_pos": [
+            {
+              "strike": 350,
+              "usd": 41736951.14,
+              "display": "$41.74M",
+              "sign": "+"
+            },
+            {
+              "strike": 355,
+              "usd": 15261058.52,
+              "display": "$15.26M",
+              "sign": "+"
+            },
+            {
+              "strike": 380,
+              "usd": 9399714.84,
+              "display": "$9.40M",
+              "sign": "+"
+            },
+            {
+              "strike": 370,
+              "usd": 6510644.61,
+              "display": "$6.51M",
+              "sign": "+"
+            },
+            {
+              "strike": 365,
+              "usd": 6350921.86,
+              "display": "$6.35M",
+              "sign": "+"
+            }
+          ],
+          "gamma_neg": [
+            {
+              "strike": 345,
+              "usd": 48979892.32,
+              "display": "$48.98M",
+              "sign": "-"
+            },
+            {
+              "strike": 347.5,
+              "usd": 24352729.1,
+              "display": "$24.35M",
+              "sign": "-"
+            },
+            {
+              "strike": 300,
+              "usd": 18991975.23,
+              "display": "$18.99M",
+              "sign": "-"
+            },
+            {
+              "strike": 340,
+              "usd": 14428807.73,
+              "display": "$14.43M",
+              "sign": "-"
+            },
+            {
+              "strike": 342.5,
+              "usd": 14299760.62,
+              "display": "$14.30M",
+              "sign": "-"
+            }
+          ],
+          "vanna_pos": [
+            {
+              "strike": 300,
+              "usd": 30453270.66,
+              "display": "$30.45M",
+              "sign": "+"
+            },
+            {
+              "strike": 310,
+              "usd": 14632482.29,
+              "display": "$14.63M",
+              "sign": "+"
+            },
+            {
+              "strike": 380,
+              "usd": 12736134.49,
+              "display": "$12.74M",
+              "sign": "+"
+            },
+            {
+              "strike": 260,
+              "usd": 9620321.3,
+              "display": "$9.62M",
+              "sign": "+"
+            },
+            {
+              "strike": 280,
+              "usd": 9328660.26,
+              "display": "$9.33M",
+              "sign": "+"
+            }
+          ],
+          "vanna_neg": [
+            {
+              "strike": 450,
+              "usd": 3402182.89,
+              "display": "$3.40M",
+              "sign": "-"
+            },
+            {
+              "strike": 530,
+              "usd": 1388394.41,
+              "display": "$1.39M",
+              "sign": "-"
+            },
+            {
+              "strike": 440,
+              "usd": 1218064.45,
+              "display": "$1.22M",
+              "sign": "-"
+            },
+            {
+              "strike": 347.5,
+              "usd": 1128065.07,
+              "display": "$1.13M",
+              "sign": "-"
+            },
+            {
+              "strike": 460,
+              "usd": 939410.36,
+              "display": "$939.41K",
+              "sign": "-"
+            }
+          ]
+        }
+      },
       "fundamental": null,
       "candles": [
         {
@@ -3833,7 +4131,169 @@
         "expected_move": "±$90.91 (±16.0%) to Nov 20, IV-derived",
         "as_of": "2026-10-28 11:31 CT"
       },
-      "oi_levels": null,
+      "oi_levels": {
+        "as_of": "2026-10-28 12:01 CT",
+        "monthly_opex": {
+          "label": "Monthly OpEx",
+          "expiry": "2026-11-20",
+          "walls": "620 (−$1.19M)",
+          "floors": "530 (+$558.54K)",
+          "pins": "650 (+$1.37M)",
+          "dealer_positioning": "Dealers net short gamma above spot at 620, which acts as a call wall that can accelerate moves; long-gamma support near 530; largest +γ pin at 650.",
+          "call_wall": {
+            "strike": 620,
+            "usd": 1187198.28
+          },
+          "put_floor": {
+            "strike": 530,
+            "usd": 558540.74
+          },
+          "pin": {
+            "strike": 650,
+            "usd": 1372597.69
+          },
+          "gamma_pos": [
+            {
+              "strike": 650,
+              "usd": 1372597.69,
+              "display": "$1.37M",
+              "sign": "+"
+            },
+            {
+              "strike": 580,
+              "usd": 728236.47,
+              "display": "$728.24K",
+              "sign": "+"
+            },
+            {
+              "strike": 530,
+              "usd": 558540.74,
+              "display": "$558.54K",
+              "sign": "+"
+            },
+            {
+              "strike": 610,
+              "usd": 479726.43,
+              "display": "$479.73K",
+              "sign": "+"
+            },
+            {
+              "strike": 520,
+              "usd": 299833.7,
+              "display": "$299.83K",
+              "sign": "+"
+            }
+          ],
+          "gamma_neg": [
+            {
+              "strike": 620,
+              "usd": 1187198.28,
+              "display": "$1.19M",
+              "sign": "-"
+            },
+            {
+              "strike": 560,
+              "usd": 1054069.05,
+              "display": "$1.05M",
+              "sign": "-"
+            },
+            {
+              "strike": 500,
+              "usd": 552116.76,
+              "display": "$552.12K",
+              "sign": "-"
+            },
+            {
+              "strike": 540,
+              "usd": 446292.85,
+              "display": "$446.29K",
+              "sign": "-"
+            },
+            {
+              "strike": 660,
+              "usd": 255449.94,
+              "display": "$255.45K",
+              "sign": "-"
+            }
+          ],
+          "vanna_pos": [
+            {
+              "strike": 650,
+              "usd": 1738509.02,
+              "display": "$1.74M",
+              "sign": "+"
+            },
+            {
+              "strike": 500,
+              "usd": 609909.22,
+              "display": "$609.91K",
+              "sign": "+"
+            },
+            {
+              "strike": 750,
+              "usd": 506358.85,
+              "display": "$506.36K",
+              "sign": "+"
+            },
+            {
+              "strike": 720,
+              "usd": 479776.19,
+              "display": "$479.78K",
+              "sign": "+"
+            },
+            {
+              "strike": 460,
+              "usd": 427561.95,
+              "display": "$427.56K",
+              "sign": "+"
+            }
+          ],
+          "vanna_neg": [
+            {
+              "strike": 620,
+              "usd": 1002125.13,
+              "display": "$1.00M",
+              "sign": "-"
+            },
+            {
+              "strike": 660,
+              "usd": 357607.12,
+              "display": "$357.61K",
+              "sign": "-"
+            },
+            {
+              "strike": 440,
+              "usd": 348317.9,
+              "display": "$348.32K",
+              "sign": "-"
+            },
+            {
+              "strike": 530,
+              "usd": 327131.11,
+              "display": "$327.13K",
+              "sign": "-"
+            },
+            {
+              "strike": 410,
+              "usd": 312497.31,
+              "display": "$312.50K",
+              "sign": "-"
+            }
+          ]
+        },
+        "all_expiry": {
+          "label": "All expiry",
+          "expiry": "All expirations",
+          "walls": "OPEN",
+          "floors": "OPEN",
+          "pins": "OPEN",
+          "dealer_positioning": "OPEN — Highcharts accessibility blank (>200 strikes)",
+          "gamma_pos": [],
+          "gamma_neg": [],
+          "vanna_pos": [],
+          "vanna_neg": []
+        }
+      },
       "fundamental": null,
       "candles": [
         {
@@ -5690,7 +6150,305 @@
         "expected_move": "±$32.42 (±10.1%) to Nov 20, IV-derived",
         "as_of": "2026-10-28 11:31 CT"
       },
-      "oi_levels": null,
+      "oi_levels": {
+        "as_of": "2026-10-28 12:02 CT",
+        "monthly_opex": {
+          "label": "Monthly OpEx",
+          "expiry": "2026-11-20",
+          "walls": "335 (−$1.21M)",
+          "floors": "315 (+$3.13M)",
+          "pins": "315 (+$3.13M)",
+          "dealer_positioning": "Dealers net short gamma above spot at 335, which acts as a call wall that can accelerate moves; long-gamma support near 315; largest +γ pin at 315.",
+          "call_wall": {
+            "strike": 335,
+            "usd": 1213017.62
+          },
+          "put_floor": {
+            "strike": 315,
+            "usd": 3132418.26
+          },
+          "pin": {
+            "strike": 315,
+            "usd": 3132418.26
+          },
+          "gamma_pos": [
+            {
+              "strike": 315,
+              "usd": 3132418.26,
+              "display": "$3.13M",
+              "sign": "+"
+            },
+            {
+              "strike": 350,
+              "usd": 1504443.57,
+              "display": "$1.50M",
+              "sign": "+"
+            },
+            {
+              "strike": 380,
+              "usd": 1122824.65,
+              "display": "$1.12M",
+              "sign": "+"
+            },
+            {
+              "strike": 365,
+              "usd": 840204.14,
+              "display": "$840.20K",
+              "sign": "+"
+            },
+            {
+              "strike": 360,
+              "usd": 745216.58,
+              "display": "$745.22K",
+              "sign": "+"
+            }
+          ],
+          "gamma_neg": [
+            {
+              "strike": 335,
+              "usd": 1213017.62,
+              "display": "$1.21M",
+              "sign": "-"
+            },
+            {
+              "strike": 320,
+              "usd": 1048377.42,
+              "display": "$1.05M",
+              "sign": "-"
+            },
+            {
+              "strike": 305,
+              "usd": 831282.3,
+              "display": "$831.28K",
+              "sign": "-"
+            },
+            {
+              "strike": 330,
+              "usd": 621166.05,
+              "display": "$621.17K",
+              "sign": "-"
+            },
+            {
+              "strike": 340,
+              "usd": 412164.68,
+              "display": "$412.16K",
+              "sign": "-"
+            }
+          ],
+          "vanna_pos": [
+            {
+              "strike": 380,
+              "usd": 1407205.87,
+              "display": "$1.41M",
+              "sign": "+"
+            },
+            {
+              "strike": 350,
+              "usd": 1056998.33,
+              "display": "$1.06M",
+              "sign": "+"
+            },
+            {
+              "strike": 365,
+              "usd": 846435.34,
+              "display": "$846.44K",
+              "sign": "+"
+            },
+            {
+              "strike": 360,
+              "usd": 674542,
+              "display": "$674.54K",
+              "sign": "+"
+            },
+            {
+              "strike": 370,
+              "usd": 576582.24,
+              "display": "$576.58K",
+              "sign": "+"
+            }
+          ],
+          "vanna_neg": [
+            {
+              "strike": 285,
+              "usd": 535633.64,
+              "display": "$535.63K",
+              "sign": "-"
+            },
+            {
+              "strike": 315,
+              "usd": 520903.34,
+              "display": "$520.90K",
+              "sign": "-"
+            },
+            {
+              "strike": 335,
+              "usd": 419851.35,
+              "display": "$419.85K",
+              "sign": "-"
+            },
+            {
+              "strike": 280,
+              "usd": 291990.12,
+              "display": "$291.99K",
+              "sign": "-"
+            },
+            {
+              "strike": 420,
+              "usd": 251241.78,
+              "display": "$251.24K",
+              "sign": "-"
+            }
+          ]
+        },
+        "all_expiry": {
+          "label": "All expiry",
+          "expiry": "All expirations",
+          "walls": "360 (−$2.04M)",
+          "floors": "315 (+$1.17M)",
+          "pins": "340 (+$4.76M)",
+          "dealer_positioning": "Dealers net short gamma above spot at 360, which acts as a call wall that can accelerate moves; long-gamma support near 315; largest +γ pin at 340.",
+          "call_wall": {
+            "strike": 360,
+            "usd": 2038287.03
+          },
+          "put_floor": {
+            "strike": 315,
+            "usd": 1170195.65
+          },
+          "pin": {
+            "strike": 340,
+            "usd": 4759382.76
+          },
+          "gamma_pos": [
+            {
+              "strike": 340,
+              "usd": 4759382.76,
+              "display": "$4.76M",
+              "sign": "+"
+            },
+            {
+              "strike": 400,
+              "usd": 2503799.23,
+              "display": "$2.50M",
+              "sign": "+"
+            },
+            {
+              "strike": 345,
+              "usd": 1537859.09,
+              "display": "$1.54M",
+              "sign": "+"
+            },
+            {
+              "strike": 335,
+              "usd": 1522458.28,
+              "display": "$1.52M",
+              "sign": "+"
+            },
+            {
+              "strike": 365,
+              "usd": 1452823.98,
+              "display": "$1.45M",
+              "sign": "+"
+            }
+          ],
+          "gamma_neg": [
+            {
+              "strike": 320,
+              "usd": 8293551.15,
+              "display": "$8.29M",
+              "sign": "-"
+            },
+            {
+              "strike": 300,
+              "usd": 5650464.12,
+              "display": "$5.65M",
+              "sign": "-"
+            },
+            {
+              "strike": 290,
+              "usd": 2606798.52,
+              "display": "$2.61M",
+              "sign": "-"
+            },
+            {
+              "strike": 360,
+              "usd": 2038287.03,
+              "display": "$2.04M",
+              "sign": "-"
+            },
+            {
+              "strike": 305,
+              "usd": 1889055.19,
+              "display": "$1.89M",
+              "sign": "-"
+            }
+          ],
+          "vanna_pos": [
+            {
+              "strike": 400,
+              "usd": 4952615.79,
+              "display": "$4.95M",
+              "sign": "+"
+            },
+            {
+              "strike": 300,
+              "usd": 3546804.56,
+              "display": "$3.55M",
+              "sign": "+"
+            },
+            {
+              "strike": 290,
+              "usd": 2820704.77,
+              "display": "$2.82M",
+              "sign": "+"
+            },
+            {
+              "strike": 340,
+              "usd": 2383050.4,
+              "display": "$2.38M",
+              "sign": "+"
+            },
+            {
+              "strike": 270,
+              "usd": 1579128.28,
+              "display": "$1.58M",
+              "sign": "+"
+            }
+          ],
+          "vanna_neg": [
+            {
+              "strike": 360,
+              "usd": 2266980.31,
+              "display": "$2.27M",
+              "sign": "-"
+            },
+            {
+              "strike": 450,
+              "usd": 1875753.27,
+              "display": "$1.88M",
+              "sign": "-"
+            },
+            {
+              "strike": 440,
+              "usd": 1863773.19,
+              "display": "$1.86M",
+              "sign": "-"
+            },
+            {
+              "strike": 500,
+              "usd": 1565824.96,
+              "display": "$1.57M",
+              "sign": "-"
+            },
+            {
+              "strike": 410,
+              "usd": 891010.54,
+              "display": "$891.01K",
+              "sign": "-"
+            }
+          ]
+        }
+      },
       "fundamental": null,
       "candles": [
         {
@@ -7542,7 +8300,305 @@
         "expected_move": "±$37.96 (±8.7%) to Nov 20, IV-derived",
         "as_of": "2026-10-28 11:31 CT"
       },
-      "oi_levels": null,
+      "oi_levels": {
+        "as_of": "2026-10-28 12:03 CT",
+        "monthly_opex": {
+          "label": "Monthly OpEx",
+          "expiry": "2026-11-20",
+          "walls": "440 (−$379.64K)",
+          "floors": "360 (+$776.94K)",
+          "pins": "450 (+$3.54M)",
+          "dealer_positioning": "Dealers net short gamma above spot at 440, which acts as a call wall that can accelerate moves; long-gamma support near 360; largest +γ pin at 450.",
+          "call_wall": {
+            "strike": 440,
+            "usd": 379642.57
+          },
+          "put_floor": {
+            "strike": 360,
+            "usd": 776944.38
+          },
+          "pin": {
+            "strike": 450,
+            "usd": 3542795.88
+          },
+          "gamma_pos": [
+            {
+              "strike": 450,
+              "usd": 3542795.88,
+              "display": "$3.54M",
+              "sign": "+"
+            },
+            {
+              "strike": 480,
+              "usd": 969514.65,
+              "display": "$969.51K",
+              "sign": "+"
+            },
+            {
+              "strike": 360,
+              "usd": 776944.38,
+              "display": "$776.94K",
+              "sign": "+"
+            },
+            {
+              "strike": 460,
+              "usd": 742294.91,
+              "display": "$742.29K",
+              "sign": "+"
+            },
+            {
+              "strike": 470,
+              "usd": 707309.83,
+              "display": "$707.31K",
+              "sign": "+"
+            }
+          ],
+          "gamma_neg": [
+            {
+              "strike": 410,
+              "usd": 540040.83,
+              "display": "$540.04K",
+              "sign": "-"
+            },
+            {
+              "strike": 390,
+              "usd": 521118.85,
+              "display": "$521.12K",
+              "sign": "-"
+            },
+            {
+              "strike": 400,
+              "usd": 410106.85,
+              "display": "$410.11K",
+              "sign": "-"
+            },
+            {
+              "strike": 440,
+              "usd": 379642.57,
+              "display": "$379.64K",
+              "sign": "-"
+            },
+            {
+              "strike": 420,
+              "usd": 346241.86,
+              "display": "$346.24K",
+              "sign": "-"
+            }
+          ],
+          "vanna_pos": [
+            {
+              "strike": 480,
+              "usd": 1138498.81,
+              "display": "$1.14M",
+              "sign": "+"
+            },
+            {
+              "strike": 450,
+              "usd": 1135073.4,
+              "display": "$1.14M",
+              "sign": "+"
+            },
+            {
+              "strike": 500,
+              "usd": 1049005.34,
+              "display": "$1.05M",
+              "sign": "+"
+            },
+            {
+              "strike": 520,
+              "usd": 813965.24,
+              "display": "$813.97K",
+              "sign": "+"
+            },
+            {
+              "strike": 390,
+              "usd": 685072.86,
+              "display": "$685.07K",
+              "sign": "+"
+            }
+          ],
+          "vanna_neg": [
+            {
+              "strike": 360,
+              "usd": 1390163.75,
+              "display": "$1.39M",
+              "sign": "-"
+            },
+            {
+              "strike": 350,
+              "usd": 669753.33,
+              "display": "$669.75K",
+              "sign": "-"
+            },
+            {
+              "strike": 380,
+              "usd": 455748.63,
+              "display": "$455.75K",
+              "sign": "-"
+            },
+            {
+              "strike": 510,
+              "usd": 268380.03,
+              "display": "$268.38K",
+              "sign": "-"
+            },
+            {
+              "strike": 405,
+              "usd": 247065.02,
+              "display": "$247.07K",
+              "sign": "-"
+            }
+          ]
+        },
+        "all_expiry": {
+          "label": "All expiry",
+          "expiry": "All expirations",
+          "walls": "460 (−$4.86M)",
+          "floors": "432.5 (+$1.01M)",
+          "pins": "450 (+$3.76M)",
+          "dealer_positioning": "Dealers net short gamma above spot at 460, which acts as a call wall that can accelerate moves; long-gamma support near 432.5; largest +γ pin at 450.",
+          "call_wall": {
+            "strike": 460,
+            "usd": 4857876.12
+          },
+          "put_floor": {
+            "strike": 432.5,
+            "usd": 1014882.22
+          },
+          "pin": {
+            "strike": 450,
+            "usd": 3759451.18
+          },
+          "gamma_pos": [
+            {
+              "strike": 450,
+              "usd": 3759451.18,
+              "display": "$3.76M",
+              "sign": "+"
+            },
+            {
+              "strike": 440,
+              "usd": 2200891.33,
+              "display": "$2.20M",
+              "sign": "+"
+            },
+            {
+              "strike": 560,
+              "usd": 1797809.61,
+              "display": "$1.80M",
+              "sign": "+"
+            },
+            {
+              "strike": 470,
+              "usd": 1669204.19,
+              "display": "$1.67M",
+              "sign": "+"
+            },
+            {
+              "strike": 455,
+              "usd": 1279007.91,
+              "display": "$1.28M",
+              "sign": "+"
+            }
+          ],
+          "gamma_neg": [
+            {
+              "strike": 460,
+              "usd": 4857876.12,
+              "display": "$4.86M",
+              "sign": "-"
+            },
+            {
+              "strike": 380,
+              "usd": 2323087.89,
+              "display": "$2.32M",
+              "sign": "-"
+            },
+            {
+              "strike": 430,
+              "usd": 1773841.65,
+              "display": "$1.77M",
+              "sign": "-"
+            },
+            {
+              "strike": 420,
+              "usd": 1759708.94,
+              "display": "$1.76M",
+              "sign": "-"
+            },
+            {
+              "strike": 490,
+              "usd": 1685777.58,
+              "display": "$1.69M",
+              "sign": "-"
+            }
+          ],
+          "vanna_pos": [
+            {
+              "strike": 560,
+              "usd": 5563842.93,
+              "display": "$5.56M",
+              "sign": "+"
+            },
+            {
+              "strike": 380,
+              "usd": 3791603.79,
+              "display": "$3.79M",
+              "sign": "+"
+            },
+            {
+              "strike": 370,
+              "usd": 2105633.44,
+              "display": "$2.11M",
+              "sign": "+"
+            },
+            {
+              "strike": 390,
+              "usd": 2048967.51,
+              "display": "$2.05M",
+              "sign": "+"
+            },
+            {
+              "strike": 330,
+              "usd": 1470516.37,
+              "display": "$1.47M",
+              "sign": "+"
+            }
+          ],
+          "vanna_neg": [
+            {
+              "strike": 600,
+              "usd": 5094573.4,
+              "display": "$5.09M",
+              "sign": "-"
+            },
+            {
+              "strike": 520,
+              "usd": 3648082.49,
+              "display": "$3.65M",
+              "sign": "-"
+            },
+            {
+              "strike": 460,
+              "usd": 3034270.35,
+              "display": "$3.03M",
+              "sign": "-"
+            },
+            {
+              "strike": 490,
+              "usd": 2498742.05,
+              "display": "$2.50M",
+              "sign": "-"
+            },
+            {
+              "strike": 540,
+              "usd": 2263207.12,
+              "display": "$2.26M",
+              "sign": "-"
+            }
+          ]
+        }
+      },
       "fundamental": null,
       "candles": [
         {
@@ -9409,7 +10465,305 @@
         "expected_move": "±$55.97 (±10.3%) to Nov 20, IV-derived",
         "as_of": "2026-10-28 11:31 CT"
       },
-      "oi_levels": null,
+      "oi_levels": {
+        "as_of": "2026-10-28 12:04 CT",
+        "monthly_opex": {
+          "label": "Monthly OpEx",
+          "expiry": "2026-11-20",
+          "walls": "630 (−$51.61K)",
+          "floors": "540 (+$16.64K)",
+          "pins": "600 (+$84.58K)",
+          "dealer_positioning": "Dealers net short gamma above spot at 630, which acts as a call wall that can accelerate moves; long-gamma support near 540; largest +γ pin at 600.",
+          "call_wall": {
+            "strike": 630,
+            "usd": 51610.98
+          },
+          "put_floor": {
+            "strike": 540,
+            "usd": 16641.56
+          },
+          "pin": {
+            "strike": 600,
+            "usd": 84577.6
+          },
+          "gamma_pos": [
+            {
+              "strike": 600,
+              "usd": 84577.6,
+              "display": "$84.58K",
+              "sign": "+"
+            },
+            {
+              "strike": 542.5,
+              "usd": 48070.41,
+              "display": "$48.07K",
+              "sign": "+"
+            },
+            {
+              "strike": 540,
+              "usd": 16641.56,
+              "display": "$16.64K",
+              "sign": "+"
+            },
+            {
+              "strike": 532.5,
+              "usd": 14502.65,
+              "display": "$14.50K",
+              "sign": "+"
+            },
+            {
+              "strike": 450,
+              "usd": 13887.74,
+              "display": "$13.89K",
+              "sign": "+"
+            }
+          ],
+          "gamma_neg": [
+            {
+              "strike": 500,
+              "usd": 117681.73,
+              "display": "$117.68K",
+              "sign": "-"
+            },
+            {
+              "strike": 520,
+              "usd": 77816.81,
+              "display": "$77.82K",
+              "sign": "-"
+            },
+            {
+              "strike": 630,
+              "usd": 51610.98,
+              "display": "$51.61K",
+              "sign": "-"
+            },
+            {
+              "strike": 470,
+              "usd": 39000.88,
+              "display": "$39.00K",
+              "sign": "-"
+            },
+            {
+              "strike": 485,
+              "usd": 34672.76,
+              "display": "$34.67K",
+              "sign": "-"
+            }
+          ],
+          "vanna_pos": [
+            {
+              "strike": 600,
+              "usd": 127995.89,
+              "display": "$128.00K",
+              "sign": "+"
+            },
+            {
+              "strike": 500,
+              "usd": 121077.84,
+              "display": "$121.08K",
+              "sign": "+"
+            },
+            {
+              "strike": 470,
+              "usd": 66981.18,
+              "display": "$66.98K",
+              "sign": "+"
+            },
+            {
+              "strike": 485,
+              "usd": 49144.29,
+              "display": "$49.14K",
+              "sign": "+"
+            },
+            {
+              "strike": 480,
+              "usd": 47476.58,
+              "display": "$47.48K",
+              "sign": "+"
+            }
+          ],
+          "vanna_neg": [
+            {
+              "strike": 630,
+              "usd": 104424.32,
+              "display": "$104.42K",
+              "sign": "-"
+            },
+            {
+              "strike": 620,
+              "usd": 41427.17,
+              "display": "$41.43K",
+              "sign": "-"
+            },
+            {
+              "strike": 590,
+              "usd": 36708.93,
+              "display": "$36.71K",
+              "sign": "-"
+            },
+            {
+              "strike": 580,
+              "usd": 32892.01,
+              "display": "$32.89K",
+              "sign": "-"
+            },
+            {
+              "strike": 640,
+              "usd": 29980.07,
+              "display": "$29.98K",
+              "sign": "-"
+            }
+          ]
+        },
+        "all_expiry": {
+          "label": "All expiry",
+          "expiry": "All expirations",
+          "walls": "555 (−$364.17K)",
+          "floors": "540 (+$201.06K)",
+          "pins": "550 (+$325.16K)",
+          "dealer_positioning": "Dealers net short gamma above spot at 555, which acts as a call wall that can accelerate moves; long-gamma support near 540; largest +γ pin at 550.",
+          "call_wall": {
+            "strike": 555,
+            "usd": 364166.61
+          },
+          "put_floor": {
+            "strike": 540,
+            "usd": 201055.77
+          },
+          "pin": {
+            "strike": 550,
+            "usd": 325155.21
+          },
+          "gamma_pos": [
+            {
+              "strike": 550,
+              "usd": 325155.21,
+              "display": "$325.16K",
+              "sign": "+"
+            },
+            {
+              "strike": 540,
+              "usd": 201055.77,
+              "display": "$201.06K",
+              "sign": "+"
+            },
+            {
+              "strike": 500,
+              "usd": 167375.6,
+              "display": "$167.38K",
+              "sign": "+"
+            },
+            {
+              "strike": 460,
+              "usd": 119785.36,
+              "display": "$119.79K",
+              "sign": "+"
+            },
+            {
+              "strike": 630,
+              "usd": 91325.38,
+              "display": "$91.33K",
+              "sign": "+"
+            }
+          ],
+          "gamma_neg": [
+            {
+              "strike": 555,
+              "usd": 364166.61,
+              "display": "$364.17K",
+              "sign": "-"
+            },
+            {
+              "strike": 520,
+              "usd": 176447.31,
+              "display": "$176.45K",
+              "sign": "-"
+            },
+            {
+              "strike": 580,
+              "usd": 107167.43,
+              "display": "$107.17K",
+              "sign": "-"
+            },
+            {
+              "strike": 590,
+              "usd": 100541.85,
+              "display": "$100.54K",
+              "sign": "-"
+            },
+            {
+              "strike": 575,
+              "usd": 94766.65,
+              "display": "$94.77K",
+              "sign": "-"
+            }
+          ],
+          "vanna_pos": [
+            {
+              "strike": 1100,
+              "usd": 497517.77,
+              "display": "$497.52K",
+              "sign": "+"
+            },
+            {
+              "strike": 630,
+              "usd": 236123.25,
+              "display": "$236.12K",
+              "sign": "+"
+            },
+            {
+              "strike": 770,
+              "usd": 131515.9,
+              "display": "$131.52K",
+              "sign": "+"
+            },
+            {
+              "strike": 600,
+              "usd": 113279.86,
+              "display": "$113.28K",
+              "sign": "+"
+            },
+            {
+              "strike": 490,
+              "usd": 112915.82,
+              "display": "$112.92K",
+              "sign": "+"
+            }
+          ],
+          "vanna_neg": [
+            {
+              "strike": 460,
+              "usd": 247974.61,
+              "display": "$247.97K",
+              "sign": "-"
+            },
+            {
+              "strike": 800,
+              "usd": 150051.18,
+              "display": "$150.05K",
+              "sign": "-"
+            },
+            {
+              "strike": 700,
+              "usd": 134124.92,
+              "display": "$134.12K",
+              "sign": "-"
+            },
+            {
+              "strike": 555,
+              "usd": 120310.15,
+              "display": "$120.31K",
+              "sign": "-"
+            },
+            {
+              "strike": 580,
+              "usd": 118478.66,
+              "display": "$118.48K",
+              "sign": "-"
+            }
+          ]
+        }
+      },
       "fundamental": null,
       "candles": [
         {
@@ -11288,109 +12642,151 @@
         }
       },
       "oi_levels": {
-        "as_of": "2026-09-30 10:07 CT",
+        "as_of": "2026-10-28 12:04 CT",
         "monthly_opex": {
           "label": "Monthly OpEx",
-          "expiry": "2026-10-16",
-          "walls": "120 (−$0.74M)",
-          "floors": "110 (+$5.03M)",
-          "pins": "115 (+$1.25M)",
-          "dealer_positioning": "Mixed near spot: large +γ at 110/125, −γ immediately above at 120 and far wall 160.",
+          "expiry": "2026-11-20",
+          "walls": "98 (−$620.54K)",
+          "floors": "92.5 (+$1.22M)",
+          "pins": "110 (+$4.35M)",
+          "dealer_positioning": "Dealers net short gamma above spot at 98, which acts as a call wall that can accelerate moves; long-gamma support near 92.5; largest +γ pin at 110.",
+          "call_wall": {
+            "strike": 98,
+            "usd": 620542.97
+          },
+          "put_floor": {
+            "strike": 92.5,
+            "usd": 1217696.93
+          },
+          "pin": {
+            "strike": 110,
+            "usd": 4351633.09
+          },
           "gamma_pos": [
             {
               "strike": 110,
-              "usd": 5028090.05,
-              "display": "$5.03M",
+              "usd": 4351633.09,
+              "display": "$4.35M",
               "sign": "+"
             },
             {
               "strike": 125,
-              "usd": 2864893.04,
-              "display": "$2.86M",
-              "sign": "+"
-            },
-            {
-              "strike": 100,
-              "usd": 1816388.65,
-              "display": "$1.82M",
+              "usd": 2998604.1,
+              "display": "$3.00M",
               "sign": "+"
             },
             {
               "strike": 115,
-              "usd": 1246134.91,
-              "display": "$1.25M",
+              "usd": 2606423.74,
+              "display": "$2.61M",
               "sign": "+"
             },
             {
-              "strike": 130,
-              "usd": 1201960.75,
-              "display": "$1.20M",
+              "strike": 100,
+              "usd": 2210453.99,
+              "display": "$2.21M",
+              "sign": "+"
+            },
+            {
+              "strike": 95,
+              "usd": 2093539.94,
+              "display": "$2.09M",
               "sign": "+"
             }
           ],
           "gamma_neg": [
             {
-              "strike": 110,
-              "usd": 5028090.05,
-              "display": "$5.03M",
+              "strike": 90,
+              "usd": 3331649.35,
+              "display": "$3.33M",
               "sign": "-"
             },
             {
-              "strike": 160,
-              "usd": 850469.25,
-              "display": "$0.85M",
+              "strike": 70,
+              "usd": 3167184.76,
+              "display": "$3.17M",
               "sign": "-"
             },
             {
-              "strike": 120,
-              "usd": 740486.62,
-              "display": "$0.74M",
+              "strike": 77.5,
+              "usd": 649995.95,
+              "display": "$650.00K",
               "sign": "-"
             },
             {
-              "strike": 104,
-              "usd": 498424.08,
-              "display": "$0.50M",
+              "strike": 75,
+              "usd": 636923.11,
+              "display": "$636.92K",
+              "sign": "-"
+            },
+            {
+              "strike": 82.5,
+              "usd": 621544.32,
+              "display": "$621.54K",
               "sign": "-"
             }
           ],
           "vanna_pos": [
             {
-              "strike": 125,
-              "usd": 318975,
-              "display": "$0.32M",
+              "strike": 70,
+              "usd": 1127913.28,
+              "display": "$1.13M",
               "sign": "+"
             },
             {
-              "strike": 140,
-              "usd": 281528.01,
-              "display": "$0.28M",
+              "strike": 125,
+              "usd": 1079410.29,
+              "display": "$1.08M",
+              "sign": "+"
+            },
+            {
+              "strike": 110,
+              "usd": 978326.25,
+              "display": "$978.33K",
+              "sign": "+"
+            },
+            {
+              "strike": 115,
+              "usd": 720079.63,
+              "display": "$720.08K",
               "sign": "+"
             },
             {
               "strike": 130,
-              "usd": 215379.28,
-              "display": "$0.22M",
+              "usd": 614462.13,
+              "display": "$614.46K",
               "sign": "+"
             }
           ],
           "vanna_neg": [
             {
-              "strike": 110,
-              "usd": 657845.92,
-              "display": "$0.66M",
+              "strike": 60,
+              "usd": 59823.13,
+              "display": "$59.82K",
               "sign": "-"
             },
             {
-              "strike": 100,
-              "usd": 524815.03,
-              "display": "$0.52M",
+              "strike": 98,
+              "usd": 44999.1,
+              "display": "$45.00K",
               "sign": "-"
             },
             {
-              "strike": 160,
-              "usd": 376456.02,
-              "display": "$0.38M",
+              "strike": 87.5,
+              "usd": 43188.79,
+              "display": "$43.19K",
+              "sign": "-"
+            },
+            {
+              "strike": 170,
+              "usd": 32874,
+              "display": "$32.87K",
+              "sign": "-"
+            },
+            {
+              "strike": 65,
+              "usd": 25979.54,
+              "display": "$25.98K",
               "sign": "-"
             }
           ]
@@ -11398,117 +12794,147 @@
         "all_expiry": {
           "label": "All expiry",
           "expiry": "All expirations",
-          "walls": "120 (−$3.16M)",
-          "floors": "110 (+$7.86M)",
-          "pins": "119 (+$15.46M)",
-          "dealer_positioning": "+γ concentrated 110–119 (pin ~119); −γ dominates just above spot at 120.",
+          "walls": "97.5 (−$165.40K)",
+          "floors": "94 (+$1.35M)",
+          "pins": "100 (+$10.09M)",
+          "dealer_positioning": "Dealers net short gamma above spot at 97.5, which acts as a call wall that can accelerate moves; long-gamma support near 94; largest +γ pin at 100.",
+          "call_wall": {
+            "strike": 97.5,
+            "usd": 165402.76
+          },
+          "put_floor": {
+            "strike": 94,
+            "usd": 1348881.65
+          },
+          "pin": {
+            "strike": 100,
+            "usd": 10094282.89
+          },
           "gamma_pos": [
             {
-              "strike": 119,
-              "usd": 15464746.9,
-              "display": "$15.46M",
-              "sign": "+"
-            },
-            {
-              "strike": 125,
-              "usd": 9688233.3,
-              "display": "$9.69M",
-              "sign": "+"
-            },
-            {
-              "strike": 121,
-              "usd": 9003330.49,
-              "display": "$9.00M",
-              "sign": "+"
-            },
-            {
-              "strike": 115,
-              "usd": 8147531.11,
-              "display": "$8.15M",
+              "strike": 100,
+              "usd": 10094282.89,
+              "display": "$10.09M",
               "sign": "+"
             },
             {
               "strike": 110,
-              "usd": 7862731.71,
-              "display": "$7.86M",
+              "usd": 6226134.43,
+              "display": "$6.23M",
+              "sign": "+"
+            },
+            {
+              "strike": 120,
+              "usd": 5981911.96,
+              "display": "$5.98M",
+              "sign": "+"
+            },
+            {
+              "strike": 105,
+              "usd": 5852356.88,
+              "display": "$5.85M",
+              "sign": "+"
+            },
+            {
+              "strike": 115,
+              "usd": 5265521.56,
+              "display": "$5.27M",
               "sign": "+"
             }
           ],
           "gamma_neg": [
             {
-              "strike": 120,
-              "usd": 3164620.51,
-              "display": "$3.16M",
+              "strike": 80,
+              "usd": 8753385.49,
+              "display": "$8.75M",
               "sign": "-"
             },
             {
               "strike": 70,
-              "usd": 2810549.82,
-              "display": "$2.81M",
+              "usd": 6711426.26,
+              "display": "$6.71M",
               "sign": "-"
             },
             {
-              "strike": 80,
-              "usd": 1959577.15,
-              "display": "$1.96M",
+              "strike": 90,
+              "usd": 4803837.14,
+              "display": "$4.80M",
               "sign": "-"
             },
             {
-              "strike": 129,
-              "usd": 1739935.62,
-              "display": "$1.74M",
+              "strike": 75,
+              "usd": 2359176.42,
+              "display": "$2.36M",
+              "sign": "-"
+            },
+            {
+              "strike": 65,
+              "usd": 2115406.72,
+              "display": "$2.12M",
               "sign": "-"
             }
           ],
           "vanna_pos": [
             {
               "strike": 70,
-              "usd": 2133727.14,
-              "display": "$2.13M",
+              "usd": 2830463.6,
+              "display": "$2.83M",
+              "sign": "+"
+            },
+            {
+              "strike": 125,
+              "usd": 2512209.16,
+              "display": "$2.51M",
               "sign": "+"
             },
             {
               "strike": 150,
-              "usd": 1398735.83,
-              "display": "$1.40M",
+              "usd": 2391935.44,
+              "display": "$2.39M",
               "sign": "+"
             },
             {
-              "strike": 80,
-              "usd": 1269933.01,
-              "display": "$1.27M",
+              "strike": 120,
+              "usd": 2187766.79,
+              "display": "$2.19M",
               "sign": "+"
             },
             {
-              "strike": 140,
-              "usd": 1097917.72,
-              "display": "$1.10M",
+              "strike": 110,
+              "usd": 1844898.15,
+              "display": "$1.84M",
               "sign": "+"
             }
           ],
           "vanna_neg": [
             {
-              "strike": 100,
-              "usd": 906999.71,
-              "display": "$0.91M",
+              "strike": 90,
+              "usd": 178044.34,
+              "display": "$178.04K",
               "sign": "-"
             },
             {
-              "strike": 110,
-              "usd": 886623.84,
-              "display": "$0.89M",
+              "strike": 165,
+              "usd": 117207.63,
+              "display": "$117.21K",
               "sign": "-"
             },
             {
-              "strike": 115,
-              "usd": 462949.68,
-              "display": "$0.46M",
+              "strike": 195,
+              "usd": 92978.28,
+              "display": "$92.98K",
               "sign": "-"
             },
             {
-              "strike": 160,
-              "usd": 457091.76,
-              "display": "$0.46M",
+              "strike": 210,
+              "usd": 53419.53,
+              "display": "$53.42K",
+              "sign": "-"
+            },
+            {
+              "strike": 15,
+              "usd": 50920.41,
+              "display": "$50.92K",
               "sign": "-"
             }
           ]
@@ -13366,7 +14792,305 @@
         "expected_move": "±$32.96 (±19.7%) to Nov 20, IV-derived",
         "as_of": "2026-10-28 11:31 CT"
       },
-      "oi_levels": null,
+      "oi_levels": {
+        "as_of": "2026-10-28 12:05 CT",
+        "monthly_opex": {
+          "label": "Monthly OpEx",
+          "expiry": "2026-11-20",
+          "walls": "170 (−$152.70K)",
+          "floors": "140 (+$172.79K)",
+          "pins": "200 (+$278.25K)",
+          "dealer_positioning": "Dealers net short gamma above spot at 170, which acts as a call wall that can accelerate moves; long-gamma support near 140; largest +γ pin at 200.",
+          "call_wall": {
+            "strike": 170,
+            "usd": 152698.63
+          },
+          "put_floor": {
+            "strike": 140,
+            "usd": 172793.18
+          },
+          "pin": {
+            "strike": 200,
+            "usd": 278254.21
+          },
+          "gamma_pos": [
+            {
+              "strike": 200,
+              "usd": 278254.21,
+              "display": "$278.25K",
+              "sign": "+"
+            },
+            {
+              "strike": 140,
+              "usd": 172793.18,
+              "display": "$172.79K",
+              "sign": "+"
+            },
+            {
+              "strike": 150,
+              "usd": 168254.01,
+              "display": "$168.25K",
+              "sign": "+"
+            },
+            {
+              "strike": 105,
+              "usd": 153543.94,
+              "display": "$153.54K",
+              "sign": "+"
+            },
+            {
+              "strike": 180,
+              "usd": 140297.04,
+              "display": "$140.30K",
+              "sign": "+"
+            }
+          ],
+          "gamma_neg": [
+            {
+              "strike": 170,
+              "usd": 152698.63,
+              "display": "$152.70K",
+              "sign": "-"
+            },
+            {
+              "strike": 175,
+              "usd": 125863.5,
+              "display": "$125.86K",
+              "sign": "-"
+            },
+            {
+              "strike": 165,
+              "usd": 116724.39,
+              "display": "$116.72K",
+              "sign": "-"
+            },
+            {
+              "strike": 195,
+              "usd": 76874.52,
+              "display": "$76.87K",
+              "sign": "-"
+            },
+            {
+              "strike": 210,
+              "usd": 63902.45,
+              "display": "$63.90K",
+              "sign": "-"
+            }
+          ],
+          "vanna_pos": [
+            {
+              "strike": 200,
+              "usd": 116957.14,
+              "display": "$116.96K",
+              "sign": "+"
+            },
+            {
+              "strike": 190,
+              "usd": 33362.7,
+              "display": "$33.36K",
+              "sign": "+"
+            },
+            {
+              "strike": 180,
+              "usd": 26519.76,
+              "display": "$26.52K",
+              "sign": "+"
+            },
+            {
+              "strike": 130,
+              "usd": 21117.29,
+              "display": "$21.12K",
+              "sign": "+"
+            },
+            {
+              "strike": 110,
+              "usd": 20484.26,
+              "display": "$20.48K",
+              "sign": "+"
+            }
+          ],
+          "vanna_neg": [
+            {
+              "strike": 105,
+              "usd": 123853.54,
+              "display": "$123.85K",
+              "sign": "-"
+            },
+            {
+              "strike": 140,
+              "usd": 60296.58,
+              "display": "$60.30K",
+              "sign": "-"
+            },
+            {
+              "strike": 210,
+              "usd": 33918.74,
+              "display": "$33.92K",
+              "sign": "-"
+            },
+            {
+              "strike": 150,
+              "usd": 33916.77,
+              "display": "$33.92K",
+              "sign": "-"
+            },
+            {
+              "strike": 195,
+              "usd": 27930.97,
+              "display": "$27.93K",
+              "sign": "-"
+            }
+          ]
+        },
+        "all_expiry": {
+          "label": "All expiry",
+          "expiry": "All expirations",
+          "walls": "195 (−$212.57K)",
+          "floors": "165 (+$1.59M)",
+          "pins": "165 (+$1.59M)",
+          "dealer_positioning": "Dealers net short gamma above spot at 195, which acts as a call wall that can accelerate moves; long-gamma support near 165; largest +γ pin at 165.",
+          "call_wall": {
+            "strike": 195,
+            "usd": 212568.73
+          },
+          "put_floor": {
+            "strike": 165,
+            "usd": 1593967.38
+          },
+          "pin": {
+            "strike": 165,
+            "usd": 1593967.38
+          },
+          "gamma_pos": [
+            {
+              "strike": 165,
+              "usd": 1593967.38,
+              "display": "$1.59M",
+              "sign": "+"
+            },
+            {
+              "strike": 177.5,
+              "usd": 965672.38,
+              "display": "$965.67K",
+              "sign": "+"
+            },
+            {
+              "strike": 150,
+              "usd": 712248.59,
+              "display": "$712.25K",
+              "sign": "+"
+            },
+            {
+              "strike": 140,
+              "usd": 583881.89,
+              "display": "$583.88K",
+              "sign": "+"
+            },
+            {
+              "strike": 180,
+              "usd": 536258.03,
+              "display": "$536.26K",
+              "sign": "+"
+            }
+          ],
+          "gamma_neg": [
+            {
+              "strike": 145,
+              "usd": 4974096.75,
+              "display": "$4.97M",
+              "sign": "-"
+            },
+            {
+              "strike": 157.5,
+              "usd": 1172852.77,
+              "display": "$1.17M",
+              "sign": "-"
+            },
+            {
+              "strike": 135,
+              "usd": 275008.18,
+              "display": "$275.01K",
+              "sign": "-"
+            },
+            {
+              "strike": 195,
+              "usd": 212568.73,
+              "display": "$212.57K",
+              "sign": "-"
+            },
+            {
+              "strike": 100,
+              "usd": 175364.35,
+              "display": "$175.36K",
+              "sign": "-"
+            }
+          ],
+          "vanna_pos": [
+            {
+              "strike": 145,
+              "usd": 1577715.71,
+              "display": "$1.58M",
+              "sign": "+"
+            },
+            {
+              "strike": 100,
+              "usd": 194684.54,
+              "display": "$194.68K",
+              "sign": "+"
+            },
+            {
+              "strike": 157.5,
+              "usd": 141346.07,
+              "display": "$141.35K",
+              "sign": "+"
+            },
+            {
+              "strike": 200,
+              "usd": 133975.97,
+              "display": "$133.98K",
+              "sign": "+"
+            },
+            {
+              "strike": 135,
+              "usd": 125624.21,
+              "display": "$125.62K",
+              "sign": "+"
+            }
+          ],
+          "vanna_neg": [
+            {
+              "strike": 140,
+              "usd": 201199.97,
+              "display": "$201.20K",
+              "sign": "-"
+            },
+            {
+              "strike": 150,
+              "usd": 136879.1,
+              "display": "$136.88K",
+              "sign": "-"
+            },
+            {
+              "strike": 165,
+              "usd": 124811.86,
+              "display": "$124.81K",
+              "sign": "-"
+            },
+            {
+              "strike": 230,
+              "usd": 117458.76,
+              "display": "$117.46K",
+              "sign": "-"
+            },
+            {
+              "strike": 115,
+              "usd": 112173.78,
+              "display": "$112.17K",
+              "sign": "-"
+            }
+          ]
+        }
+      },
       "fundamental": null,
       "candles": [
         {
@@ -15130,15 +16854,9 @@
     }
   ],
   "data_gaps": [
-    "AAPL: oi_levels need dealer-positioning pull",
-    "META: oi_levels need dealer-positioning pull",
-    "AMD: oi_levels need dealer-positioning pull",
-    "GOOG: oi_levels need dealer-positioning pull",
-    "TSM: oi_levels need dealer-positioning pull",
-    "SPOT: oi_levels need dealer-positioning pull",
-    "SHOP: oi_levels need dealer-positioning pull",
+    "META: oi_levels OPEN — dealer-positioning pull 2026-10-28 12:12 CT failed (chart data blank, >200 strikes); no levels recorded",
+    "AMD: all-expiry oi_levels OPEN (chart data blank, >200 strikes); monthly OpEx filled",
     "iv30/skew/hv30: no 30-day constant-maturity IV source; atm_iv is single Nov 20 ATM call",
-    "INTC oi_levels stale (2026-09-30, Oct 16 expiry)",
     "next earnings for META/TSM/SPOT not yet announced",
     "fundamental: left null for all names"
   ]
