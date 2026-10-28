@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Spotlight trades · Options Flow · Positioning %.</title>
+    <meta
+      name="description"
+      content="Spotlight trades: sample trade cards with the idea, the structure, a recommendation, and the trade levels. Education only, not advice."
+    />
+    <meta name="theme-color" content="#f4f5f7" />
+    <link rel="icon" href="%BASE_URL%favicon.svg" />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <a class="skip" href="#content">Skip to content</a>
+    <header class="topbar">
+      <div class="wrap topbar-in">
+        <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+        <nav class="nav" aria-label="Pages">
+          <a href="../../positioning/">Positioning</a>
+          <a href="../../spx-levels/">SPX Levels</a>
+          <a class="is-current" href="../" aria-current="true">Options Flow</a>
+        </nav>
+      </div>
+    </header>
+    <div class="wrap">
+      <main id="content">
+        <nav class="subnav" aria-label="Options Flow">
+          <a class="subnav-back" href="../"><span aria-hidden="true">←</span> Options Flow</a>
+          <a href="../dollar/">$$$ watchlist</a>
+          <a class="is-current" href="./" aria-current="page">Spotlight trades</a>
+          <a href="../scorecard/">Weekly scorecard</a>
+        </nav>
+        <section class="page-head">
+          <span class="pill">Spotlight trades <span class="badge is-sample">Sample</span></span>
+          <h1>Spotlight trades</h1>
+          <p class="lede">
+            Trade cards built around one idea each. Open a card for the idea, the structure, a Recommendation, and the
+            trade levels the card names. Phase 1 shows a small sample set for education.
+          </p>
+          <p class="sample-line pill" id="spot-asof">Loading sample cards…</p>
+        </section>
+
+        <section class="desk-section" aria-labelledby="spot-title">
+          <div class="section-head">
+            <div class="section-title-row">
+              <h2 id="spot-title">Spotlight cards</h2>
+              <span class="section-count" id="spot-count"></span>
+            </div>
+            <p class="hint">
+              Newest card first. Trade levels are drawn only when the card names them — no stop or target is filled in
+              for a card that does not carry one.
+            </p>
+          </div>
+          <ul class="spot-grid" id="spot-list" aria-labelledby="spot-title"></ul>
+        </section>
+      </main>
+
+      <dialog class="cc spot-cc" id="spot-card" aria-labelledby="sc-ticker" aria-describedby="sc-title">
+        <div class="cc-frame">
+          <header class="cc-head">
+            <div class="cc-ident">
+              <h2 class="cc-ticker" id="sc-ticker"></h2>
+              <span class="badge is-sample">Sample</span>
+              <span class="cc-name" id="sc-name"></span>
+            </div>
+            <button class="cc-close" type="button" id="sc-close" aria-label="Close Spotlight card">
+              <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+                <path d="M5 5 L15 15 M15 5 L5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+            </button>
+          </header>
+          <div class="cc-body">
+            <section class="cc-left" aria-label="Idea">
+              <p class="cc-meta">
+                <time class="cc-alert" id="sc-date"></time>
+                <span class="spot-status" id="sc-status"></span>
+              </p>
+              <h3 class="cc-title" id="sc-title"></h3>
+              <div class="cc-block">
+                <h4 class="cc-label">The idea</h4>
+                <div class="cc-flow" id="sc-idea"></div>
+              </div>
+              <div class="cc-block">
+                <h4 class="cc-label">Structure</h4>
+                <dl class="cc-oi" id="sc-structure"></dl>
+              </div>
+              <div class="cc-rec">
+                <h4 class="cc-label">Recommendation</h4>
+                <p id="sc-rec"></p>
+              </div>
+            </section>
+            <section class="cc-right" aria-labelledby="sl-kicker">
+              <div class="tl-top">
+                <span class="tl-kicker" id="sl-kicker">Trade levels</span>
+                <span class="tl-contract" id="sl-contract"></span>
+              </div>
+              <dl class="tl-tiles" id="sl-tiles"></dl>
+              <div class="tl-panel">
+                <p class="tl-chart-head" id="sl-head"></p>
+                <div class="cc-chart spot-ladder" id="sl-ladder"></div>
+                <div class="tl-foot">
+                  <span class="tl-legend" id="sl-legend"></span>
+                  <span class="tl-move" id="sl-move"></span>
+                </div>
+              </div>
+              <p class="cc-chart-note" id="sl-note"></p>
+            </section>
+          </div>
+          <p class="cc-foot">Sample card · education only · not advice. Not a live list and not an order ticket.</p>
+        </div>
+      </dialog>
+
+      <footer class="site-footer">
+        <div>
+          <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+          <p class="foot-note">Phase 1 public reading. Spotlight cards on this page are a labeled sample, not a live source.</p>
+          <p class="foot-edu">Education only · not advice.</p>
+        </div>
+        <nav class="foot-links" aria-label="Footer">
+          <a href="../../">Home</a>
+          <a href="../../positioning/">Positioning</a>
+          <a href="../../spx-levels/">SPX Levels</a>
+          <a class="is-current" href="../" aria-current="true">Options Flow</a>
+        </nav>
+      </footer>
+    </div>
+    <noscript>Spotlight cards need JavaScript to draw. Education only, not advice.</noscript>
+    <script type="module" src="/src/spotlights.js"></script>
+  </body>
+</html>

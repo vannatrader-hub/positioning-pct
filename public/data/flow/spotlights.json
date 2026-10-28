@@ -1,0 +1,56 @@
+{
+  "sample": true,
+  "asOf": "2026-10-14",
+  "window": "Sep 7 – Oct 14, 2026",
+  "note": "Sample Spotlight trade cards for education. Not a live list, not advice.",
+  "cards": [
+    {
+      "ticker": "FCX",
+      "name": "Freeport-McMoRan",
+      "date": "2026-10-14",
+      "title": "Upside Calls Cheap in Metals Leader for AI Buildout",
+      "structure": "Long calls",
+      "bias": "calls",
+      "status": "filled",
+      "idea": [
+        "A copper leader framed as an AI-buildout supplier: grid, data-center wiring, and power all pull on the metal.",
+        "The card prefers upside calls while implied volatility is described as cheap, and puts the exit on the stock, not on the option price."
+      ],
+      "recommendation": "Sample read: long calls, managed on the stock. Respect the $63 stock stop; the $80 stock target is the planned exit. Size is not on the card.",
+      "levels": {
+        "stop": 63,
+        "target": 80
+      }
+    },
+    {
+      "ticker": "V",
+      "name": "Visa",
+      "date": "2026-09-29",
+      "title": "Call Spreads into the Payments Quarter",
+      "structure": "Call spreads",
+      "bias": "calls",
+      "status": "open",
+      "idea": [
+        "Payments volume into the quarter, with the card choosing call spreads to lower the cost of upside exposure.",
+        "A spread caps the gain at the short strike in exchange for a smaller debit."
+      ],
+      "recommendation": "Sample read: call spreads into the print. The card names no strikes, stop, or target, so no trade levels are drawn.",
+      "levels": null
+    },
+    {
+      "ticker": "NU",
+      "name": "Nu Holdings",
+      "date": "2026-09-07",
+      "title": "Long Calls in Brazilian Financial Growth Leader",
+      "structure": "Long calls",
+      "bias": "calls",
+      "status": "open",
+      "idea": [
+        "A Latin American digital bank growing customers and deposits faster than the incumbents it competes with.",
+        "The card frames long calls as the way to hold the growth story with a defined cost."
+      ],
+      "recommendation": "Sample read: long calls with defined risk. The card names no stock stop or target, so no trade levels are drawn.",
+      "levels": null
+    }
+  ]
+}
