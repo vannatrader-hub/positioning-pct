@@ -10,8 +10,12 @@ Public sources are bank labels only: JPM, Morgan Stanley, BoA, GS, and a desk co
 
 Site nav, in order: Positioning | Options Flow | SPX Levels.
 
-- Home. Three destinations. Each tile opens its own page.
-- Positioning. Eleven Select Sector cards grouped into four columns on the Soft ↔ Crowded scale (Extreme soft, Soft, Mid, Crowded), a soft-to-crowded map, a soft-vol gauge, and a Study desk that only tabs sectors meeting its criteria (JPM under 0.25 or 0.75 and up).
+- Home. Three destinations. Each tile opens its own page: Positioning and Options Flow open hubs of calling cards.
+- Positioning (`/positioning/`). A hub with four calling cards, each opening the Soft ↔ Crowded desk at a real section id from `SECTIONS` in `src/desk.js`:
+  - Soft ↔ Crowded (`/positioning/desk/#sectors`). Eleven Select Sector cards grouped into four columns on the Soft ↔ Crowded scale (Extreme soft, Soft, Mid, Crowded) and a soft-to-crowded map, with JPM the default house for sector bars.
+  - Credit (`/positioning/desk/#credit`). CDX, BBB minus AAA, and high yield versus investment grade.
+  - Options & Soft Vol (`/positioning/desk/#vol`). The Soft Vol ↔ Stretched gauge, customer calls versus puts, and the vol panic index.
+  - Full desk (`/positioning/desk/`). The desk at a glance plus all ten categories, source chips, the history slider, and a Study desk that only tabs sectors meeting its criteria (JPM under 0.25 or 0.75 and up). Old `/positioning/?source=…` and `/positioning/#section` links forward here.
 - Options Flow (`/options-flow/`). A hub with three calling cards, each opening its own page:
   - $$$ Shopping List (`/options-flow/dollar/`). The last three weeks, newest alert first, with each name's industry (broad sector, focus underneath) and alert date and time (CT) on every row. Each row opens a calling card: condensed flow, Customer purchased (the most recent customer trade named in the alert, hidden when there is none), flow in open interest, and a Recommendation on the left; a trade-levels chart on the right (about six months of daily closes, the lead option strike, and break-even when the premium is known). Old `/options-flow/#TICKER` links forward here.
   - Spotlight trades (`/options-flow/spotlights/`). Live Spotlight tickets in three dropdown rows: Active (open, inside the current October window, expanded by default), Open (still open, posted earlier), and Closed (banked with a link to the public close note, or expired worthless at OpEx). Each card opens the idea, the structure, and a Recommendation on the left; on the right, the same six-month line chart as the $$$ calling cards, with the ticket's stop, strike, break-even, and target drawn across the price path, the expiry rule, and markers where the ticket posted and closed. An empty row reads "None".

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Positioning desk · Positioning %.</title>
+    <meta
+      name="description"
+      content="A full desk of positioning reads: sectors, broad equity, retail and funds, prime book, options and vol, correlation, credit, policy, futures, and semis and AI, each on one Soft ↔ Crowded scale."
+    />
+    <meta name="theme-color" content="#f4f5f7" />
+    <link rel="icon" href="%BASE_URL%favicon.svg" />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <a class="skip" href="#content">Skip to content</a>
+    <header class="topbar">
+      <div class="wrap topbar-in">
+        <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+        <nav class="nav" aria-label="Pages">
+          <a class="is-current" href="../" aria-current="true">Positioning</a>
+          <a href="../../options-flow/">Options Flow</a>
+          <a href="../../spx-levels/">SPX Levels</a>
+        </nav>
+      </div>
+      <nav class="secnav" aria-label="Desk sections">
+        <div class="wrap secnav-in" id="secnav-links">
+          <a href="#overview" data-target="overview">Overview</a>
+        </div>
+      </nav>
+    </header>
+
+    <div class="wrap">
+      <main id="content">
+        <nav class="subnav" aria-label="Positioning">
+          <a class="subnav-back" href="../"><span aria-hidden="true">←</span> Positioning</a>
+          <a class="is-current" href="./" aria-current="page">Soft ↔ Crowded desk</a>
+        </nav>
+        <section class="page-head">
+          <span class="pill">Weekly reads</span>
+          <h1>Positioning desk</h1>
+          <p class="lede">
+            Ten categories of bank-style positioning reads, each redrawn on one Soft ↔ Crowded scale.
+            Green is light positioning. Dark is crowded. The triangle marks the week you pick.
+          </p>
+          <p class="asof-line pill" id="asof-line">Week of Oct 23, 2026 · All sources</p>
+        </section>
+
+        <section class="controls" aria-label="Reading controls">
+          <div class="control">
+            <h2 class="control-label" id="source-label">Source</h2>
+            <div class="chips" id="chips" role="radiogroup" aria-labelledby="source-label"></div>
+            <p class="hint">Pick a house to see only its reads. Your choice stays on this device.</p>
+          </div>
+          <div class="control">
+            <div class="history-top">
+              <h2 id="history-label">History</h2>
+              <p class="history-date" id="history-date">Oct 23, 2026</p>
+            </div>
+            <input id="week" type="range" min="0" max="7" value="7" aria-labelledby="history-label" />
+            <p class="hint">8 weeks of history. Every card, bar, and note follows the week you pick.</p>
+          </div>
+        </section>
+
+        <section class="desk-section overview" id="overview" aria-labelledby="overview-title">
+          <div class="section-head">
+            <div class="section-title-row">
+              <h2 id="overview-title">Desk at a glance</h2>
+              <span class="section-count" id="overview-total"></span>
+            </div>
+            <p class="overview-headline" id="overview-headline"></p>
+            <p class="hint">Each tile places a category at the median of its reads. Tap a tile to jump to it.</p>
+          </div>
+          <div class="ov-grid" id="overview-grid"></div>
+        </section>
+
+        <div id="desk"></div>
+
+        <section class="desk-section study" id="study" aria-labelledby="study-title">
+          <div class="section-head">
+            <div class="section-title-row">
+              <h2 id="study-title">Study desk</h2>
+              <span class="section-count" id="study-count">JPM · week of Oct 23, 2026</span>
+            </div>
+            <p class="overview-headline" id="study-summary">Soft JPM sectors this week.</p>
+            <p class="hint">
+              Only sectors that meet the criteria get a tab: JPM reads under 0.25 (soft) or 0.75 and up (crowded),
+              with strikes and marks from the latest session close. The study desk stays on the latest week whatever
+              the history slider shows.
+            </p>
+          </div>
+          <div class="study-tabs" id="study-tabs" role="tablist" aria-label="Soft and crowded sectors"></div>
+          <div id="study-body"><p class="hint">Loading study marks…</p></div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+          <p class="foot-note">Phase 1 public reading.</p>
+        </div>
+        <nav class="foot-links" aria-label="Footer">
+          <a href="../../">Home</a>
+          <a class="is-current" href="../" aria-current="true">Positioning</a>
+          <a href="../../options-flow/">Options Flow</a>
+          <a href="../../spx-levels/">SPX Levels</a>
+        </nav>
+      </footer>
+    </div>
+    <noscript>This desk needs JavaScript to draw the reads.</noscript>
+    <script type="module" src="/src/positioning.js"></script>
+  </body>
+</html>

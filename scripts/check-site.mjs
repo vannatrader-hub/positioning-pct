@@ -348,6 +348,37 @@ for (const page of ["options-flow/index.html", "options-flow/dollar/index.html",
   if (page !== "options-flow/index.html") assert(html.includes('href="../"'), `${page} links back to the Options Flow hub`);
 }
 
+const posHub = readFileSync(join(root, "positioning/index.html"), "utf8");
+const posLinks = [...posHub.matchAll(/<a class="tile hub-tile[^"]*" href="([^"]+)"/g)].map((match) => match[1]);
+assert(
+  JSON.stringify(posLinks) === JSON.stringify(["desk/#sectors", "desk/#credit", "desk/#vol", "desk/"]),
+  `Positioning hub calling cards ${posLinks}`,
+);
+const posTitles = [...posHub.matchAll(/<h2>([^<]+)<\/h2>/g)].map((match) => match[1]);
+assert(
+  JSON.stringify(posTitles) === JSON.stringify(["Soft ↔ Crowded", "Credit", "Options &amp; Soft Vol", "Full desk"]),
+  `Positioning hub card titles ${posTitles}`,
+);
+for (const link of posLinks) {
+  const id = link.split("#")[1];
+  if (id) assert(sectionIds.has(id), `Positioning hub card ${link} lands on a missing section id`);
+}
+const posFacts = posHub.split('href="desk/"')[1].split("</a>")[0].replace(/&amp;/g, "&");
+for (const section of SECTIONS) assert(posFacts.includes(section.nav), `Full desk card lists ${section.nav}`);
+assert(posHub.includes('src="/src/positioning-hub.js"') && !posHub.includes('id="desk"'), "Positioning hub shows calling cards, not the desk");
+const deskPage = readFileSync(join(root, "positioning/desk/index.html"), "utf8");
+for (const id of ["secnav-links", "chips", "week", "overview", "overview-grid", "desk", "study", "study-tabs", "study-body"]) {
+  assert(deskPage.includes(`id="${id}"`), `Positioning desk keeps #${id}`);
+}
+assert(deskPage.includes('src="/src/positioning.js"'), "Positioning desk runs positioning.js");
+assert(deskPage.includes('class="subnav-back" href="../"'), "Positioning desk links back to the hub");
+assert(/class="lockup" href="\.\.\/\.\.\/"/.test(deskPage), "Positioning desk lockup links home");
+for (const page of ["positioning/index.html", "positioning/desk/index.html"]) {
+  assert(viteConfig.includes(`"${page}"`), `vite builds ${page}`);
+  const html = readFileSync(join(root, page), "utf8");
+  assert(/<nav class="nav"[\s\S]*?class="is-current"[^>]*>Positioning</.test(html), `${page} marks Positioning current`);
+}
+
 const spot = JSON.parse(readFileSync(join(root, "public/data/flow/spotlights.json"), "utf8"));
 assert(spot.live === true && !("sample" in spot), "Spotlight trades are live tickets");
 assert(JSON.stringify(spot.sections.map((section) => section.id)) === JSON.stringify(SECTION_ORDER), "Spotlight rows are Active, Open, Closed");
@@ -514,7 +545,7 @@ for (const source of ["jpm", "ms", "gs", "boa", "desk"]) {
 }
 
 const nav = /<nav class="nav" aria-label="Pages">[\s\S]*?<\/nav>/;
-const publicPages = ["index.html", "positioning/index.html", "spx-levels/index.html", "options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html"];
+const publicPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "spx-levels/index.html", "options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html"];
 for (const file of publicPages) {
   const html = readFileSync(join(root, file), "utf8");
   const order = [...(html.match(nav)?.[0] ?? "").matchAll(/>(Positioning|Options Flow|SPX Levels)</g)].map((m) => m[1]);

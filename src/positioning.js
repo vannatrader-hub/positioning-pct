@@ -714,6 +714,13 @@ function bind() {
   });
 }
 
+/** Section shells are built here, after the browser's own fragment scroll, so hub links land on them by hand. */
+function landOnHash() {
+  const id = decodeURIComponent(location.hash.slice(1));
+  const target = id && document.getElementById(id);
+  if (target) target.scrollIntoView({ behavior: "instant", block: "start" });
+}
+
 function startStudy() {
   const reading = buildReading("jpm", WEEKS.length - 1, 4);
   const latest = reading.sectors;
@@ -729,5 +736,6 @@ buildShells();
 renderChips();
 bind();
 paint();
+landOnHash();
 watchSections();
 startStudy();

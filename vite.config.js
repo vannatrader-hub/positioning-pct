@@ -11,6 +11,7 @@ export default defineConfig({
       input: {
         main: resolve(root, "index.html"),
         positioning: resolve(root, "positioning/index.html"),
+        positioningDesk: resolve(root, "positioning/desk/index.html"),
         spx: resolve(root, "spx-levels/index.html"),
         flow: resolve(root, "options-flow/index.html"),
         flowDollar: resolve(root, "options-flow/dollar/index.html"),
