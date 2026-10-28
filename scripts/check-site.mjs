@@ -8,6 +8,7 @@ import { breakeven, chartLevels, resolveExpiry } from "../src/flow-chart.js";
 import { SIDES, alertLabel, sortPlays } from "../src/options-flow.js";
 import { SECTION_ORDER, STATUS, allPlays, levelKind, outcomeLabel, sortCards, spotlightLevels, spotlightLines } from "../src/spotlights.js";
 import { activeSpotlights, earningsBoxes, spotlightStar, tradeDates } from "../src/scorecard.js";
+import { NT_SECTIONS, SOURCE_LABELS, deskDay, deskDayStart, deskWindow, itemsForDay } from "../src/new-today-window.js";
 import {
   CHARTS,
   CHART_IDS,
@@ -645,8 +646,66 @@ for (const source of ["jpm", "ms", "gs", "boa", "desk"]) {
   }
 }
 
+/* New Today: desk day is 5:00 AM CT to 4:59:59 AM CT the next morning, DST-aware. */
+const deskDayCases = {
+  "2026-10-28T04:59:59-05:00": "2026-10-27",
+  "2026-10-28T05:00:00-05:00": "2026-10-28",
+  "2026-10-29T04:59:59-05:00": "2026-10-28",
+  "2026-10-29T05:00:00-05:00": "2026-10-29",
+  "2026-10-28T23:03:00Z": "2026-10-28",
+  "2026-11-01T04:30:00-06:00": "2026-10-31",
+  "2026-11-01T05:00:00-06:00": "2026-11-01",
+  "2026-03-08T09:59:00Z": "2026-03-07",
+  "2026-03-08T10:00:00Z": "2026-03-08",
+};
+for (const [stamp, want] of Object.entries(deskDayCases)) assert(deskDay(stamp) === want, `desk day of ${stamp} ${deskDay(stamp)} !== ${want}`);
+assert(deskDayStart("2026-10-28") === "2026-10-28T05:00:00-05:00", `desk day start CDT ${deskDayStart("2026-10-28")}`);
+assert(deskDayStart("2026-11-02") === "2026-11-02T05:00:00-06:00", `desk day start CST ${deskDayStart("2026-11-02")}`);
+const fallBack = deskWindow("2026-10-31");
+assert(fallBack.end - fallBack.start === 25 * 3600000, "the desk day over the Nov 1 fall-back runs 25 hours");
+const springForward = deskWindow("2026-03-07");
+assert(springForward.end - springForward.start === 23 * 3600000, "the desk day over the Mar 8 spring-forward runs 23 hours");
+
+const ntPage = readFileSync(join(root, "new-today/index.html"), "utf8");
+assert(viteConfig.includes('"new-today/index.html"'), "vite builds new-today/index.html");
+assert(ntPage.includes('src="/src/new-today.js"') && ntPage.includes('id="nt-body"'), "New Today page runs new-today.js");
+for (const section of NT_SECTIONS) assert(ntPage.includes(`href="#nt-${section.id}"`), `New Today subnav jumps to ${section.title}`);
+assert(
+  JSON.stringify(NT_SECTIONS.map((section) => section.title)) === '["Positioning","Options Flow","SPX Levels","Research desk"]',
+  "New Today sections run Positioning, Options Flow, SPX Levels, Research desk",
+);
+assert(/<section class="hero">[\s\S]*?<div class="hero-row">[\s\S]*?class="lockup"[\s\S]*?<a class="nt-chip" href="new-today\/" data-new-today/.test(readFileSync(join(root, "index.html"), "utf8")), "home hero carries the New Today chip beside the wordmark");
+assert(readFileSync(join(root, "index.html"), "utf8").includes('src="/src/new-today-chip.js"'), "home runs new-today-chip.js");
+
+const nt = JSON.parse(readFileSync(join(root, "public/data/new-today.json"), "utf8"));
+assert(nt.timeZone === "America/Chicago" && nt.dayStartsAt === "05:00", "new-today.json documents the Chicago 5:00 AM desk day");
+assert(nt.dayStart === deskDayStart(deskDay(nt.dayStart)), `new-today.json dayStart ${nt.dayStart} is a 5:00 AM CT open`);
+assert(Array.isArray(nt.items), "new-today.json items is a list");
+const ntIds = new Set();
+const ntSectionIds = new Set(NT_SECTIONS.map((section) => section.id));
+for (const item of nt.items ?? []) {
+  const where = `new-today ${item.id}`;
+  assert(item.id && !ntIds.has(item.id), `${where} needs a unique id`);
+  ntIds.add(item.id);
+  assert(ntSectionIds.has(item.section), `${where} section ${item.section}`);
+  assert(item.title && item.summary, `${where} needs a title and a one-line summary`);
+  assert(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(Z|[+-]\d{2}:\d{2})$/.test(item.publishedAt ?? ""), `${where} publishedAt ${item.publishedAt} needs an ISO stamp with offset`);
+  assert(SOURCE_LABELS.includes(item.sourceLabel), `${where} sourceLabel ${item.sourceLabel} is not a public label`);
+  if (item.section !== "research") {
+    assert(item.href && !/^(https?:)?\/\//.test(item.href) && !item.href.startsWith("/"), `${where} deep links inside the site`);
+    const page = item.href.split("#")[0];
+    assert(statSync(join(root, page, "index.html"), { throwIfNoEntry: false })?.isFile(), `${where} href ${item.href} lands on a missing page`);
+  } else {
+    assert(item.href || item.thumb, `${where} research row needs a link or a chart thumb`);
+  }
+  if (item.href && /^https?:/.test(item.href)) assert(/^https:\/\//.test(item.href), `${where} external link uses https`);
+}
+const ntNewest = [...(nt.items ?? [])].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))[0];
+if (ntNewest) assert(deskDay(ntNewest.publishedAt) === deskDay(nt.dayStart), "new-today.json dayStart is the desk day of the newest item");
+assert(itemsForDay(nt.items ?? [], "2026-10-28").length === 5, "Oct 28 desk day seeds five items");
+
 const nav = /<nav class="nav" aria-label="Pages">[\s\S]*?<\/nav>/;
-const deskPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "positioning/charts/index.html", "spx-levels/index.html", "options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html"];
+const deskPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "positioning/charts/index.html", "spx-levels/index.html", "options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html", "new-today/index.html"];
 const publicPages = [...deskPages, "vault/index.html"];
 for (const file of publicPages) {
   const html = readFileSync(join(root, file), "utf8");
@@ -701,7 +760,7 @@ assert(!/opening later/i.test(vaultTopbar + vaultFooter), "Vault chrome no longe
 
 const monetization = /\b(free|paid|premium|subscri\w*|paywall\w*|upgrad\w*|trials?|pric(e|es|ed|ing)|members?hips?|unlock\w*)\b/i;
 const chromeCopy = [
-  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "vault/index.html", "404.html"].map((file) => [
+  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "404.html"].map((file) => [
     file,
     readFileSync(join(root, file), "utf8"),
   ]),
