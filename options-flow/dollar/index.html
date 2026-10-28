@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>$$$ watchlist · Options Flow · Positioning %.</title>
+    <title>$$$ Shopping List · Options Flow · Positioning %.</title>
     <meta
       name="description"
-      content="A $$$ options flow watchlist. Each name opens a calling card with the flow, the open interest that stayed, and a daily chart."
+      content="The $$$ Shopping List: high-confidence options flow by name and industry. Each name opens a calling card with the flow, the open interest that stayed, and a daily chart."
     />
     <meta name="theme-color" content="#f4f5f7" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
@@ -19,8 +19,8 @@
         <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
         <nav class="nav" aria-label="Pages">
           <a href="../../positioning/">Positioning</a>
-          <a href="../../spx-levels/">SPX Levels</a>
           <a class="is-current" href="../" aria-current="true">Options Flow</a>
+          <a href="../../spx-levels/">SPX Levels</a>
         </nav>
       </div>
     </header>
@@ -28,24 +28,25 @@
       <main id="content">
         <nav class="subnav" aria-label="Options Flow">
           <a class="subnav-back" href="../"><span aria-hidden="true">←</span> Options Flow</a>
-          <a class="is-current" href="./" aria-current="page">$$$ watchlist</a>
+          <a class="is-current" href="./" aria-current="page"><span class="conf">$$$</span> Shopping List</a>
           <a href="../spotlights/">Spotlight trades</a>
           <a href="../scorecard/">Weekly scorecard</a>
         </nav>
         <section class="page-head">
-          <span class="pill">$$$ watchlist</span>
-          <h1>Options Flow</h1>
+          <span class="pill">Options Flow</span>
+          <h1 class="logo-head"><span class="conf">$$$</span> Shopping List</h1>
           <p class="lede">
-            Names where large opening options trades lined up on one side. Open a name for its calling card:
-            the flow, the open interest that stayed, a recommendation, and the trade levels on a price chart.
+            Names where large opening options trades lined up on one side, with the industry each one sits in. Open a
+            name for its calling card: the flow, the open interest that stayed, a recommendation, and the trade levels
+            on a price chart.
           </p>
-          <p class="sample-line pill" id="flow-asof">Loading watchlist…</p>
+          <p class="asof-line pill" id="flow-asof">Loading the Shopping List…</p>
         </section>
 
         <section class="desk-section flow-list-section" aria-labelledby="watchlist-title">
           <div class="section-head">
             <div class="section-title-row">
-              <h2 id="watchlist-title">$$$ watchlist</h2>
+              <h2 id="watchlist-title" class="logo-head"><span class="conf">$$$</span> Shopping List</h2>
               <span class="section-count" id="flow-count"></span>
             </div>
             <p class="hint">
@@ -55,6 +56,7 @@
           </div>
           <div class="flow-head" aria-hidden="true">
             <span>Name</span>
+            <span>Industry</span>
             <span>Flow</span>
             <span>Alerted (CT)</span>
             <span>Last close</span>
@@ -132,12 +134,12 @@
         <nav class="foot-links" aria-label="Footer">
           <a href="../../">Home</a>
           <a href="../../positioning/">Positioning</a>
-          <a href="../../spx-levels/">SPX Levels</a>
           <a class="is-current" href="../" aria-current="true">Options Flow</a>
+          <a href="../../spx-levels/">SPX Levels</a>
         </nav>
       </footer>
     </div>
-    <noscript>This watchlist needs JavaScript to draw.</noscript>
+    <noscript>The Shopping List needs JavaScript to draw.</noscript>
     <script type="module" src="/src/options-flow.js"></script>
   </body>
 </html>

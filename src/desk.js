@@ -1,10 +1,10 @@
 /**
- * Phase 1 desk sample.
+ * Phase 1 positioning desk.
  *
- * Every read has eight sample weeks that line up with the history slider.
+ * Every read has eight weeks that line up with the history slider.
  * When `ref` is set, the last value was read off a reference chart dated `ref`
- * and the earlier weeks are a demo path toward it. When `ref` is null the whole
- * series is illustrative.
+ * and the earlier weeks are a path toward it. When `ref` is null the series is
+ * a desk estimate.
  *
  * `pcts` is where the read sits on its Soft ↔ Crowded bar, 0 to 100.
  * Houses are public labels only: jpm, ms, gs, boa, desk.
@@ -774,7 +774,7 @@ export function readIndicator(indicator, weekIndex, lookback = 4) {
     caption: `${ordinal(pct)} %ile`,
     change: changeText(pct - past, lookback),
     latestNote: isLatest ? indicator.latest ?? "" : "",
-    basis: indicator.ref ? `Sample · ref chart ${indicator.ref}` : "Sample · illustrative",
+    basis: indicator.ref ? `Ref chart ${indicator.ref}` : "Desk estimate",
   };
 }
 

@@ -1,6 +1,6 @@
 /**
- * Phase 1 public sample.
- * Eight weekly snapshots. Not a live source.
+ * Phase 1 weekly series.
+ * Eight weekly snapshots, committed with the site.
  * Percentile figures are stored as whole points (18 = 18th percentile = 0.18).
  * Soft vol is stored in tenths of a vol point. Negative means the VIX is cheap.
  */

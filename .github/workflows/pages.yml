@@ -27,7 +27,7 @@ jobs:
           cache: npm
       - name: Install
         run: npm ci
-      - name: Check sample readings
+      - name: Check site data and copy
         run: npm run check
       - name: Build
         run: npm run build
