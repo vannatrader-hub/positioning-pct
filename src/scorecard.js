@@ -431,7 +431,7 @@ function cardRow(label, value, sub, extra = "") {
   return `<div class="cc-oi-row${extra ? ` ${extra}` : ""}"><dt>${esc(label)}</dt><dd>${value}${sub ? `<span class="sb-row-sub">${sub}</span>` : ""}</dd></div>`;
 }
 
-function renderTradeCard(name, advisory) {
+function renderTradeCard(name) {
   const levels = name.levels || {};
   const prem = name.net_premium;
   const premLabel = premiumLabel(name);
@@ -469,11 +469,7 @@ function renderTradeCard(name, advisory) {
         ${cardRow("Rank", `#${esc(name.rank)} · ${isHighConf(name) ? "High conf" : esc(name.confidence || "OPEN")}`)}
       </dl>
     </div>
-    ${name.top_print ? `<div class="cc-block"><h4 class="cc-label">Top print</h4><p class="sb-print">${md(name.top_print)}</p></div>` : ""}
-    <div class="cc-rec">
-      <h4 class="cc-label">Advisory</h4>
-      <p>${esc(advisory)}</p>
-    </div>`;
+    ${name.top_print ? `<div class="cc-block"><h4 class="cc-label">Top print</h4><p class="sb-print">${md(name.top_print)}</p></div>` : ""}`;
 }
 
 function tile(label, value, sub, accent) {
@@ -516,7 +512,6 @@ function fillRight(dialog, name) {
 function setupCard(dialog, board) {
   const chartHost = $("#bc-chart", dialog);
   const byTicker = new Map((board.names || []).map((name) => [name.ticker, name]));
-  const advisory = board.advisory || "Advisory only — not an order ticket.";
   let trigger = null;
   let unmount = null;
 
@@ -535,7 +530,7 @@ function setupCard(dialog, board) {
     $("#bc-chips", dialog).innerHTML = renderChips(name.chips);
     $("#bc-spot", dialog).textContent =
       levels.spot != null ? `Spot ${fmtPx(levels.spot)}${levels.as_of ? ` · ${shortDate(levels.as_of)}` : ""}` : "Spot OPEN";
-    $("#trade-card", dialog).innerHTML = renderTradeCard(name, advisory);
+    $("#trade-card", dialog).innerHTML = renderTradeCard(name);
     const chart = fillRight(dialog, name);
     if (!dialog.open) dialog.showModal();
     $(".cc-left", dialog).scrollTop = 0;
@@ -596,7 +591,6 @@ function renderBoard(board, spotlightTickers) {
   $("#watch-count").textContent = watch.length ? `${watch.length} in lookback` : "";
   $("#sb-watch").innerHTML = watch.map((w) => watchCard(w, spotlightTickers.has(w.ticker))).join("");
 
-  $("#advisory").textContent = board.advisory || "Advisory only — not an order ticket.";
   const gaps = board.data_gaps || [];
   const gapsEl = $("#gaps");
   gapsEl.hidden = !gaps.length;
