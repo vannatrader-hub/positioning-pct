@@ -24,6 +24,9 @@ const COLORS = {
   breakeven: "#4ade80",
   expiry: "rgba(226, 232, 240, 0.42)",
   spot: "#e5e7eb",
+  stop: "#f87171",
+  target: "#7dd3fc",
+  marker: "rgba(245, 196, 81, 0.7)",
   hover: "rgba(226, 232, 240, 0.5)",
 };
 
@@ -130,13 +133,23 @@ export function chartLevels(play, bars) {
 
 /** Draws the chart into `host` and keeps it sized to the host. Returns an unmount function. */
 export function mountLevels(host, play, bars) {
-  const levels = chartLevels(play, bars);
+  return drawLevelsChart(host, play.ticker, chartLevels(play, bars));
+}
+
+/**
+ * Shared drawer behind every trade-levels chart: daily closes as one line, horizontal
+ * level lines (strike, short, breakeven, stop, target), an optional expiry rule, and
+ * optional dated markers ({ t, label, value, line }) such as when a trade posted or closed.
+ */
+export function drawLevelsChart(host, ticker, levels) {
   const { window: series, lines, expiry, expiryInView, spot } = levels;
+  const markers = levels.markers ?? [];
   const svg = node("svg", { class: "tl-svg", role: "img" });
   const summary = [
-    `${play.ticker} daily closes, ${shortDate(series[0].t, true)} to ${shortDate(levels.spotDate, true)}.`,
+    `${ticker} daily closes, ${shortDate(series[0].t, true)} to ${shortDate(levels.spotDate, true)}.`,
     `Spot ${usd(spot)}.`,
     ...lines.map((line) => `${line.label}.`),
+    ...markers.map((marker) => `${marker.label}.`),
   ];
   svg.setAttribute("aria-label", summary.join(" ").trim());
   host.replaceChildren(svg);
@@ -158,7 +171,7 @@ export function mountLevels(host, play, bars) {
     const plotH = height - pad.top - pad.bottom;
     const t0 = utc(series[0].t);
     const lastT = utc(series[series.length - 1].t);
-    const t1 = expiryInView ? utc(expiry) + 6 * DAY : lastT + 3 * DAY;
+    const t1 = expiryInView ? Math.max(utc(expiry) + 6 * DAY, lastT + 3 * DAY) : lastT + 3 * DAY;
     const closes = series.map((bar) => bar.c);
     const marks = lines.map((line) => line.value);
     let lo = Math.min(...closes, ...marks);
@@ -202,10 +215,14 @@ export function mountLevels(host, play, bars) {
     }
 
     const placed = [];
+    const taken = [];
+    const tagWidth = (text) => text.length * 6.4;
     const style = {
       strike: { color: COLORS.strike, dash: "6 5" },
       short: { color: COLORS.short, dash: "2 4" },
       breakeven: { color: COLORS.breakeven, dash: "none" },
+      stop: { color: COLORS.stop, dash: "6 5" },
+      target: { color: COLORS.target, dash: "8 4" },
     };
     let higherY = -Infinity;
     for (const line of [...lines].sort((a, b) => b.value - a.value)) {
@@ -215,10 +232,27 @@ export function mountLevels(host, play, bars) {
         node("line", { x1: pad.left, x2: right, y1: ly, y2: ly, stroke: color, "stroke-width": 1.4, "stroke-dasharray": dash, opacity: 0.95 }),
       );
       const above = ly - pad.top > 16 && ly - higherY > 20;
-      const ty = above ? ly - 6 : ly + 14;
+      let ty = above ? ly - 6 : ly + 14;
+      while (placed.some((other) => Math.abs(other - ty) < 12)) ty += 12;
       placed.push(ty);
+      taken.push({ y: ty, left: right - 4 - tagWidth(line.label), right: right - 4 });
       svg.append(node("text", { x: right - 4, y: ty, "text-anchor": "end", fill: color, class: "tl-tag" }, line.label));
       higherY = above ? ly : ty;
+    }
+
+    for (const marker of markers) {
+      const mx = x(utc(marker.t));
+      if (marker.line !== false) {
+        svg.append(node("line", { x1: mx, x2: mx, y1: pad.top, y2: pad.top + plotH, stroke: COLORS.marker, "stroke-dasharray": "1 4", "stroke-width": 1.2 }));
+      }
+      const leftSide = marker.side === "left";
+      const box = { left: leftSide ? mx - 5 - tagWidth(marker.label) : mx + 5, right: leftSide ? mx - 5 : mx + 5 + tagWidth(marker.label) };
+      let my = pad.top + 10;
+      while (taken.some((other) => Math.abs(other.y - my) < 12 && other.left < box.right && box.left < other.right)) my += 13;
+      taken.push({ y: my, ...box });
+      svg.append(
+        node("text", { x: leftSide ? mx - 5 : mx + 5, y: my, "text-anchor": leftSide ? "end" : "start", fill: COLORS.marker, class: "tl-tag" }, marker.label),
+      );
     }
 
     const points = series.map((bar) => `${x(utc(bar.t)).toFixed(1)},${y(bar.c).toFixed(1)}`);
@@ -232,6 +266,11 @@ export function mountLevels(host, play, bars) {
         "stroke-linecap": "round",
       }),
     );
+
+    for (const marker of markers) {
+      if (typeof marker.value !== "number") continue;
+      svg.append(node("circle", { cx: x(utc(marker.t)), cy: y(marker.value), r: 3.5, fill: "#0b0d12", stroke: COLORS.marker, "stroke-width": 1.8 }));
+    }
 
     const sx = x(lastT);
     const sy = y(spot);
