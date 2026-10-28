@@ -1,0 +1,80 @@
+{
+  "timeZone": "America/Chicago",
+  "dayStartsAt": "05:00",
+  "dayStart": "2026-10-28T05:00:00-05:00",
+  "updatedAt": "2026-10-28T17:32:00-05:00",
+  "items": [
+    {
+      "id": "2026-10-28-positioning-charts",
+      "section": "positioning",
+      "title": "Six interactive positioning charts",
+      "summary": "Soft Vol, sectors, broad equity, credit stress, fund managers, and GS risk appetite redrawn on one eight-week slider.",
+      "href": "positioning/charts/",
+      "publishedAt": "2026-10-28T14:30:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-28-positioning-hub",
+      "section": "positioning",
+      "title": "Positioning hub: four calling cards",
+      "summary": "Soft ↔ Crowded, Credit, Options & Soft Vol, and the full desk each open the desk at their own section.",
+      "href": "positioning/",
+      "publishedAt": "2026-10-28T13:39:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-28-scorecard-oi",
+      "section": "options-flow",
+      "title": "Weekly scorecard: OI and dealer levels filled",
+      "summary": "IV, volume vs OI, earnings boxes, and OI & dealer levels now sit on the W42 trade cards.",
+      "href": "options-flow/scorecard/",
+      "publishedAt": "2026-10-28T12:15:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-28-casy-dollar",
+      "section": "options-flow",
+      "title": "CASY joins the $$$ Shopping List",
+      "summary": "275 Dec 2027 $890 puts sold to open; alerted Oct 27, 8:10 PM CT.",
+      "href": "options-flow/dollar/#CASY",
+      "publishedAt": "2026-10-28T08:40:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-28-xyz-spotlight",
+      "section": "options-flow",
+      "title": "XYZ is an Active Spotlight",
+      "summary": "Long Dec $75/$85 call spreads in a payments name; posted Oct 27 evening, on the board with this morning's refresh.",
+      "href": "options-flow/spotlights/#XYZ",
+      "publishedAt": "2026-10-28T08:30:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-27-scorecard-chrome",
+      "section": "options-flow",
+      "title": "Weekly scorecard moves into Options Flow",
+      "summary": "The W42 board now opens from the Options Flow hub with trade cards and six-month charts.",
+      "href": "options-flow/scorecard/",
+      "publishedAt": "2026-10-27T21:47:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-27-fsly-closed",
+      "section": "options-flow",
+      "title": "FSLY Spotlight closed at October OpEx",
+      "summary": "The Oct $25 calls finished under the strike and expired worthless.",
+      "href": "options-flow/spotlights/#FSLY",
+      "publishedAt": "2026-10-27T20:58:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-27-spotlight-rows",
+      "section": "options-flow",
+      "title": "Spotlight trades in Active, Open, and Closed rows",
+      "summary": "Live tickets grouped by status, each with the idea, structure, and trade levels.",
+      "href": "options-flow/spotlights/",
+      "publishedAt": "2026-10-27T20:30:00-05:00",
+      "sourceLabel": "Desk"
+    }
+  ]
+}
