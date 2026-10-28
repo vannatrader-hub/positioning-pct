@@ -2354,6 +2354,8 @@ body:has(.cc[open]) { overflow: hidden; }
   gap: 8px;
 }
 
+.tl-tiles.is-spot-only { grid-template-columns: minmax(0, 1fr); max-width: 240px; }
+
 .tl-tile {
   min-width: 0;
   padding: 9px 11px 10px;
@@ -2476,6 +2478,7 @@ body:has(.cc[open]) { overflow: hidden; }
 
 .tl-sw.is-strike { border-top: 2px dashed #f59e0b; }
 .tl-sw.is-be { border-top-color: #4ade80; }
+.tl-sw.is-short { border-top: 2px dotted #fdba74; }
 .tl-sw.is-expiry { width: 0; height: 10px; border-top: 0; border-left: 1.5px dashed rgba(226, 232, 240, 0.5); }
 
 .tl-move { font-weight: 600; font-variant-numeric: tabular-nums; }

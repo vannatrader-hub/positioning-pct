@@ -110,10 +110,16 @@ function row(play, isLatest) {
   return item;
 }
 
+function isSpread(lead) {
+  return typeof lead.shortStrike === "number";
+}
+
 function contractLabel(play, expiry) {
   const { lead } = play;
   const when = expiry ? shortDate(expiry, true) : lead.expiry;
-  return `${play.ticker} ${when} $${lead.strike} ${lead.type === "put" ? "Put" : "Call"}`;
+  const kind = lead.type === "put" ? "Put" : "Call";
+  if (isSpread(lead)) return `${play.ticker} ${when} $${lead.strike}/$${lead.shortStrike} ${kind} Spread`;
+  return `${play.ticker} ${when} $${lead.strike} ${kind}`;
 }
 
 function actionLabel(lead) {
@@ -135,44 +141,71 @@ function swatch(kind, label) {
 }
 
 function fillLevels(dialog, play, levels) {
-  const { lead } = play;
-  const isPut = lead.type === "put";
-  dialog.querySelector("#tl-contract").textContent = contractLabel(play, levels.expiry);
-
+  const { lead } = levels;
   const tiles = dialog.querySelector("#tl-tiles");
+  const spotTile = tile("Spot", usd(levels.spot), `${shortDate(levels.spotDate)} close`);
+  const legend = dialog.querySelector("#tl-legend");
+  const move = dialog.querySelector("#tl-move");
+  const note = `Daily closes from a committed snapshot through ${dateLabel(levels.spotDate)}, not a stream.`;
+  move.replaceChildren();
+
+  if (!lead) {
+    dialog.querySelector("#tl-contract").textContent = "No recent customer trade";
+    tiles.classList.add("is-spot-only");
+    tiles.replaceChildren(spotTile);
+    dialog.querySelector("#tl-chart-head").textContent = `${play.ticker} — 6-month price`;
+    legend.replaceChildren(swatch("price", "Close"));
+    dialog.querySelector("#cc-chart-note").textContent =
+      `${note} No strike or break-even is drawn because the alert names no recent customer trade.`;
+    return;
+  }
+
+  const isPut = lead.type === "put";
+  const spread = isSpread(lead);
+  const kind = spread ? `${isPut ? "put" : "call"} spread` : isPut ? "puts" : "calls";
+  dialog.querySelector("#tl-contract").textContent = contractLabel(play, levels.expiry);
+  tiles.classList.remove("is-spot-only");
   tiles.replaceChildren(
-    tile("Lead", actionLabel(lead), `${lead.expiry || "Expiry n/a"} · ${isPut ? "puts" : "calls"}`),
-    tile("Premium", lead.price === null ? "—" : usd(lead.price), lead.price === null ? "Not in the flow note" : "per share"),
+    tile("Lead", actionLabel(lead), `${lead.expiry || "Expiry n/a"} · ${kind}`),
+    tile(
+      spread ? "Net debit" : "Premium",
+      lead.price === null ? "—" : usd(lead.price),
+      lead.price === null ? "Not in the flow note" : (lead.priceNote ?? "per share"),
+    ),
     tile(
       "Break-even",
       levels.breakeven === null ? "—" : usd(levels.breakeven),
-      levels.breakeven === null ? "Needs a premium" : isPut ? "Strike − premium" : "Strike + premium",
+      levels.breakeven === null
+        ? "Needs a premium"
+        : spread
+          ? `Long strike ${isPut ? "−" : "+"} debit`
+          : isPut
+            ? "Strike − premium"
+            : "Strike + premium",
       levels.breakeven === null ? "" : "be",
     ),
-    tile("Spot", usd(levels.spot), `${shortDate(levels.spotDate)} close`),
+    spotTile,
   );
 
-  const head = [`${play.ticker} — 6-month price`, `Strike ${usd(levels.strike)}`];
+  const head = [`${play.ticker} — 6-month price`];
+  head.push(spread ? `Strikes ${usd(lead.strike)} / ${usd(lead.shortStrike)}` : `Strike ${usd(lead.strike)}`);
   if (levels.breakeven !== null) head.push(`B/E ${usd(levels.breakeven)}`);
   dialog.querySelector("#tl-chart-head").textContent = head.join(" · ");
 
-  const legend = dialog.querySelector("#tl-legend");
-  legend.replaceChildren(swatch("price", "Close"), swatch("strike", "Strike"));
+  legend.replaceChildren(swatch("price", "Close"), swatch("strike", spread ? "Long" : "Strike"));
+  if (spread) legend.append(swatch("short", "Short"));
   if (levels.breakeven !== null) legend.append(swatch("be", "B/E"));
   if (levels.expiryInView) legend.append(swatch("expiry", "Expiry"));
 
-  const move = dialog.querySelector("#tl-move");
-  move.replaceChildren();
-  const target = levels.breakeven ?? levels.strike;
+  const target = levels.breakeven ?? lead.strike;
   const pct = ((target - levels.spot) / levels.spot) * 100;
   const sign = pct > 0 ? "+" : pct < 0 ? "−" : "";
   const label =
-    levels.breakeven === null ? "Spot to strike" : isPut ? "Cushion to B/E" : "Req. move to B/E";
+    levels.breakeven === null ? "Spot to strike" : isPut && lead.action === "sold" ? "Cushion to B/E" : "Req. move to B/E";
   move.append(`${label}: `, el("strong", "", `${sign}${Math.abs(pct).toFixed(1)}%`));
 
   const expiryNote = levels.expiry ? ` Expiry read as the ${shortDate(levels.expiry, true)} monthly.` : "";
-  dialog.querySelector("#cc-chart-note").textContent =
-    `Daily closes from a committed snapshot through ${dateLabel(levels.spotDate)}, not a stream.${expiryNote}`;
+  dialog.querySelector("#cc-chart-note").textContent = `${note}${expiryNote}`;
 }
 
 export const SIDES = {

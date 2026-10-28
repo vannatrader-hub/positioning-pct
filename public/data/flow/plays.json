@@ -80,7 +80,7 @@
         { "contract": "Dec $130 calls", "detail": "2,000 · worth $34M" }
       ],
       "recommendation": "DDOG has long been a favorite though valuation is tricky at these levels which supports the favored play being selling puts as a willing buyer on weakness.",
-      "lead": { "type": "call", "action": "long", "qty": null, "strike": 260, "expiry": "January 2028", "price": null },
+      "lead": { "type": "put", "action": "sold", "qty": 800, "strike": 230, "expiry": "December", "price": null },
       "quote": { "date": "2026-10-26", "last": 280.24, "prev": 269.65 }
     },
     {
@@ -106,7 +106,7 @@
         { "contract": "Jan $80 calls", "detail": "1,000 · ~$4M position · 5/27" }
       ],
       "recommendation": "CORT has a high-impact catalyst nearing but remains one of the most impressive mid-cap biotech growth names. I caught the bottom in shares earlier this year but wish I held the position. I like the set-up here for a move to $160.",
-      "lead": { "type": "call", "action": "bought", "qty": 1000, "strike": 80, "expiry": "January", "price": null },
+      "lead": { "type": "call", "action": "bought", "qty": 2560, "strike": 120, "shortStrike": 160, "expiry": "January", "price": 10.94, "priceNote": "~$2.8M total" },
       "quote": { "date": "2026-10-27", "last": 87.59, "prev": 87.125 }
     },
     {
@@ -125,7 +125,7 @@
       "customerPurchased": [],
       "oi": [],
       "recommendation": "QCOM has a clear $169 level to trade against providing a real nice risk-reward here and put sales seem more popular that call buys.",
-      "lead": { "type": "call", "action": "bought", "qty": 3500, "strike": 250, "expiry": "February", "price": null },
+      "lead": null,
       "quote": { "date": "2026-10-26", "last": 179.6, "prev": 175.91 }
     },
     {

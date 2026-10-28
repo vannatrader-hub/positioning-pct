@@ -1,6 +1,7 @@
 /**
  * Trade-levels chart for a calling card: about six months of daily closes as
- * one line, with the lead option's strike and break-even drawn across it.
+ * one line, with the lead option's strike(s) and break-even drawn across it.
+ * A play with no recent customer trade has no lead and draws the price only.
  * Drawn as SVG from the committed bars in public/data/flow/bars, so the page
  * needs no chart service and no account.
  */
@@ -19,6 +20,7 @@ const COLORS = {
   axis: "#6b7280",
   price: "#22c55e",
   strike: "#f59e0b",
+  short: "#fdba74",
   breakeven: "#4ade80",
   expiry: "rgba(226, 232, 240, 0.42)",
   spot: "#e5e7eb",
@@ -58,7 +60,7 @@ export function resolveExpiry(text, alertDate) {
   return date;
 }
 
-/** Calls: strike + premium. Puts: strike − premium. Unknown premium: no break-even. */
+/** Calls: strike + premium. Puts: strike − premium. Spreads use the long strike and net debit. */
 export function breakeven(lead) {
   if (lead.price === null || lead.price === undefined) return null;
   const value = lead.type === "put" ? lead.strike - lead.price : lead.strike + lead.price;
@@ -100,14 +102,25 @@ function node(tag, attrs = {}, text) {
  */
 export function chartLevels(play, bars) {
   const window = sixMonths(bars);
-  const lead = play.lead;
-  const expiry = resolveExpiry(lead.expiry, play.date);
+  const lead = play.lead ?? null;
   const last = window[window.length - 1];
+  const expiry = lead ? resolveExpiry(lead.expiry, play.date) : null;
   const expiryInView = Boolean(expiry) && utc(expiry) - utc(last.t) <= EXPIRY_REACH_DAYS * DAY && expiry > last.t;
+  const be = lead ? breakeven(lead) : null;
+  const lines = [];
+  if (lead) {
+    const spread = typeof lead.shortStrike === "number";
+    lines.push({ kind: "strike", value: lead.strike, label: `${spread ? "Long" : "Strike"} ${usd(lead.strike)}` });
+    if (spread) lines.push({ kind: "short", value: lead.shortStrike, label: `Short ${usd(lead.shortStrike)}` });
+    if (be !== null) lines.push({ kind: "breakeven", value: be, label: `B/E ${usd(be)}` });
+  }
   return {
     window,
-    strike: lead.strike,
-    breakeven: breakeven(lead),
+    lead,
+    strike: lead?.strike ?? null,
+    shortStrike: lead?.shortStrike ?? null,
+    breakeven: be,
+    lines,
     expiry,
     expiryInView,
     spot: last.c,
@@ -118,12 +131,12 @@ export function chartLevels(play, bars) {
 /** Draws the chart into `host` and keeps it sized to the host. Returns an unmount function. */
 export function mountLevels(host, play, bars) {
   const levels = chartLevels(play, bars);
-  const { window: series, strike, breakeven: be, expiry, expiryInView, spot } = levels;
+  const { window: series, lines, expiry, expiryInView, spot } = levels;
   const svg = node("svg", { class: "tl-svg", role: "img" });
   const summary = [
     `${play.ticker} daily closes, ${shortDate(series[0].t, true)} to ${shortDate(levels.spotDate, true)}.`,
-    `Spot ${usd(spot)}. Strike ${usd(strike)}.`,
-    be === null ? "" : `Break-even ${usd(be)}.`,
+    `Spot ${usd(spot)}.`,
+    ...lines.map((line) => `${line.label}.`),
   ];
   svg.setAttribute("aria-label", summary.join(" ").trim());
   host.replaceChildren(svg);
@@ -147,7 +160,7 @@ export function mountLevels(host, play, bars) {
     const lastT = utc(series[series.length - 1].t);
     const t1 = expiryInView ? utc(expiry) + 6 * DAY : lastT + 3 * DAY;
     const closes = series.map((bar) => bar.c);
-    const marks = [strike, ...(be === null ? [] : [be])];
+    const marks = lines.map((line) => line.value);
     let lo = Math.min(...closes, ...marks);
     let hi = Math.max(...closes, ...marks);
     const margin = (hi - lo) * 0.08 || 1;
@@ -189,18 +202,24 @@ export function mountLevels(host, play, bars) {
     }
 
     const placed = [];
-    const levelLine = (value, color, label, above, dash) => {
-      const ly = y(value);
+    const style = {
+      strike: { color: COLORS.strike, dash: "6 5" },
+      short: { color: COLORS.short, dash: "2 4" },
+      breakeven: { color: COLORS.breakeven, dash: "none" },
+    };
+    let higherY = -Infinity;
+    for (const line of [...lines].sort((a, b) => b.value - a.value)) {
+      const { color, dash } = style[line.kind];
+      const ly = y(line.value);
       svg.append(
-        node("line", { x1: pad.left, x2: right, y1: ly, y2: ly, stroke: color, "stroke-width": 1.4, "stroke-dasharray": dash ?? "none", opacity: 0.95 }),
+        node("line", { x1: pad.left, x2: right, y1: ly, y2: ly, stroke: color, "stroke-width": 1.4, "stroke-dasharray": dash, opacity: 0.95 }),
       );
+      const above = ly - pad.top > 16 && ly - higherY > 20;
       const ty = above ? ly - 6 : ly + 14;
       placed.push(ty);
-      svg.append(node("text", { x: right - 4, y: ty, "text-anchor": "end", fill: color, class: "tl-tag" }, label));
-    };
-    const strikeAbove = be === null ? y(strike) - pad.top > 22 : strike >= be;
-    levelLine(strike, COLORS.strike, `Strike ${usd(strike)}`, strikeAbove, "6 5");
-    if (be !== null) levelLine(be, COLORS.breakeven, `B/E ${usd(be)}`, be > strike);
+      svg.append(node("text", { x: right - 4, y: ty, "text-anchor": "end", fill: color, class: "tl-tag" }, line.label));
+      higherY = above ? ly : ty;
+    }
 
     const points = series.map((bar) => `${x(utc(bar.t)).toFixed(1)},${y(bar.c).toFixed(1)}`);
     svg.append(

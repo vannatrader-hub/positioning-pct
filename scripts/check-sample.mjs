@@ -239,10 +239,17 @@ for (const play of flow.plays) {
   assert(play.flow.length >= 1 && play.flow.length <= 3, `${where} keeps 1–3 flow paragraphs`);
   assert(typeof play.recommendation === "string" && play.recommendation.length > 20, `${where} recommendation`);
   assert(!("link" in play), `${where} carries a source link`);
-  assert(["call", "put"].includes(play.lead.type), `${where} lead type`);
-  assert(["bought", "sold", "long"].includes(play.lead.action), `${where} lead action`);
-  assert(play.lead.strike > 0, `${where} lead strike`);
-  assert(resolveExpiry(play.lead.expiry, play.date) > play.date, `${where} lead expiry ${play.lead.expiry}`);
+  const recent = play.customerPurchased?.[0];
+  assert((play.lead === null) === !recent, `${where} lead must exist exactly when Customer purchased has a row`);
+  if (play.lead && recent) {
+    assert(["call", "put"].includes(play.lead.type), `${where} lead type`);
+    assert(["bought", "sold"].includes(play.lead.action), `${where} lead action`);
+    assert(play.lead.strike > 0, `${where} lead strike`);
+    assert(resolveExpiry(play.lead.expiry, play.date) > play.date, `${where} lead expiry ${play.lead.expiry}`);
+    assert(recent.side === `${play.lead.type}s_${play.lead.action}`, `${where} lead ${play.lead.type} ${play.lead.action} vs ${recent.side}`);
+    const strikes = typeof play.lead.shortStrike === "number" ? `$${play.lead.strike}/$${play.lead.shortStrike}` : `$${play.lead.strike} `;
+    assert(`${recent.contract} `.includes(strikes), `${where} lead strikes ${strikes} not in "${recent.contract}"`);
+  }
 
   const bars = JSON.parse(readFileSync(join(root, `public/data/flow/bars/${play.ticker}.json`), "utf8")).bars;
   assert(bars.length >= 250, `${where} needs at least a year of bars`);
@@ -273,10 +280,19 @@ assert(
   "JCI customer purchased is the 10/26 Dec $160 call buy only",
 );
 assert(flowBy.QCOM.customerPurchased.length === 0, "QCOM flow names no recent customer trade");
+assert(flowBy.QCOM.lead === null, "QCOM has no lead without a recent customer trade");
+const qcomBars = JSON.parse(readFileSync(join(root, "public/data/flow/bars/QCOM.json"), "utf8")).bars;
+const qcomLevels = chartLevels(flowBy.QCOM, qcomBars);
+assert(qcomLevels.lines.length === 0 && !qcomLevels.expiryInView, "QCOM chart draws price only");
+const cortBars = JSON.parse(readFileSync(join(root, "public/data/flow/bars/CORT.json"), "utf8")).bars;
+assert(
+  JSON.stringify(chartLevels(flowBy.CORT, cortBars).lines.map((line) => line.value)) === JSON.stringify([120, 160, 130.94]),
+  "CORT chart draws the $120/$160 spread and its break-even",
+);
 for (const ticker of ["COIN", "ALAB"]) {
   assert(flowBy[ticker].customerPurchased.every((line) => line.detail.includes("sold")), `${ticker} short puts read as sold`);
 }
-const beWant = { JCI: 163.54, MMM: 179.8, COIN: 123.5, ALAB: 183.8, CRWD: null, DDOG: null, CORT: null, QCOM: null, CSCO: null };
+const beWant = { JCI: 163.54, MMM: 179.8, COIN: 123.5, ALAB: 183.8, CORT: 130.94, CRWD: null, DDOG: null, CSCO: null };
 for (const [ticker, want] of Object.entries(beWant)) {
   assert(breakeven(flowBy[ticker].lead) === want, `${ticker} break-even ${breakeven(flowBy[ticker].lead)} !== ${want}`);
 }
