@@ -256,8 +256,6 @@
 }
 
 .sb-advisory-line { margin: 0; font-size: 14.5px; font-weight: 700; color: #6b4600; }
-.sb-advisory-sub { margin: 4px 0 0; font-size: 13px; color: var(--ink-2); }
-
 .sb-gaps { margin-top: 10px; font-size: 13px; color: var(--muted); }
 .sb-gaps summary { cursor: pointer; font-weight: 650; color: var(--ink-2); }
 .sb-gaps ul { margin: 6px 0 0 18px; padding: 0; }

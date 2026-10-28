@@ -105,12 +105,7 @@ function stamp(marks) {
   const node = el("p", "marks-stamp");
   const dot = el("i");
   dot.setAttribute("aria-hidden", "true");
-  node.append(
-    dot,
-    el("span", "", `Marks as of ${marks.asOfLabel}`),
-    document.createTextNode(" "),
-    el("span", "stamp-note", "Snapshot · not streaming"),
-  );
+  node.append(dot, el("span", "", `Marks as of ${marks.asOfLabel}`));
   return node;
 }
 

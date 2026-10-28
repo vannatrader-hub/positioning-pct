@@ -146,7 +146,7 @@ function fillLevels(dialog, play, levels) {
   const spotTile = tile("Spot", usd(levels.spot), `${shortDate(levels.spotDate)} close`);
   const legend = dialog.querySelector("#tl-legend");
   const move = dialog.querySelector("#tl-move");
-  const note = `Daily closes from a committed snapshot through ${dateLabel(levels.spotDate)}, not a stream.`;
+  const note = `Daily closes through ${dateLabel(levels.spotDate)}.`;
   move.replaceChildren();
 
   if (!lead) {

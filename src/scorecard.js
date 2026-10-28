@@ -507,7 +507,7 @@ function fillRight(dialog, name) {
   const n = chart.window.length;
   $("#bc-range", dialog).textContent = n ? `${shortDate(chart.window[0].t, true)} → ${shortDate(chart.spotDate, true)} · ${n}d` : "";
   $("#bc-note", dialog).textContent = n
-    ? `Daily closes as of ${isoLabel(levels.as_of || chart.spotDate)} from the weekly snapshot, not a stream. Lines are the strikes and targets named in the flow.`
+    ? `Daily closes as of ${isoLabel(levels.as_of || chart.spotDate)} from the weekly snapshot. Lines are the strikes and targets named in the flow.`
     : "";
   $("#flow-intel", dialog).innerHTML = renderFlowIntel(name);
   return chart;
