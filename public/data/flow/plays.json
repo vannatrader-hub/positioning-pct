@@ -19,7 +19,7 @@
         "JCI shares are +30% YTD and have held above the 200 day moving average for more than a year, and after reclaiming the 50 day on Monday shares are back near the $160 October high, resistance for a breakout."
       ],
       "customerPurchased": [
-        { "contract": "Dec $160 calls", "detail": "2,000 bought @ $3.54 · 10/26" }
+        { "contract": "Dec $160 calls", "detail": "2,000 bought @ $3.54 · 10/26", "side": "calls_bought" }
       ],
       "oi": [
         { "contract": "Dec $160 calls", "detail": "3,500 OI · 2,000 bought 10/26" },
@@ -45,7 +45,7 @@
         "CRWD shares are +119.8% YTD and reclaimed the 50 day moving average on 10/21 after a pullback to the 10/20 low, with the 10/6 high at $286.99 the next upside target."
       ],
       "customerPurchased": [
-        { "contract": "Jan 2028 $255 calls", "detail": "3,000 bought · $17M · 10/20" }
+        { "contract": "Jan 2028 $255 calls", "detail": "3,000 bought · $17M · 10/20", "side": "calls_bought" }
       ],
       "oi": [
         { "contract": "Jan 2028 $255 calls", "detail": "3,000 holding · $17M" },
@@ -72,15 +72,15 @@
         "DDOG is forming a cup and handle pattern pulling back recently but holding AVWAP off September low as support. A move through $300 would measure to a $390 upside target and Fibonacci extension targets sit at $315, $328.5 and $350."
       ],
       "customerPurchased": [
-        { "contract": "Dec $230 puts", "detail": "800 sold to open · last week" },
-        { "contract": "Dec $220 puts", "detail": "600 sold to open · last week" }
+        { "contract": "Dec $230 puts", "detail": "800 sold to open · last week", "side": "puts_sold" },
+        { "contract": "Dec $220 puts", "detail": "600 sold to open · last week", "side": "puts_sold" }
       ],
       "oi": [
         { "contract": "Jan 2028 $260 calls", "detail": "Long · valued near $15M" },
         { "contract": "Dec $130 calls", "detail": "2,000 · worth $34M" }
       ],
       "recommendation": "DDOG has long been a favorite though valuation is tricky at these levels which supports the favored play being selling puts as a willing buyer on weakness.",
-      "lead": { "type": "call", "action": "long", "qty": null, "strike": 260, "expiry": "January 2028", "price": null },
+      "lead": { "type": "put", "action": "sold", "qty": 800, "strike": 230, "expiry": "December", "price": null },
       "quote": { "date": "2026-10-26", "last": 280.24, "prev": 269.65 }
     },
     {
@@ -99,14 +99,14 @@
         "CORT shares are on a massive run since the March 2026 low and have now formed a large flag stalling just under the 1.618 extension level at $129 with $170 the next upside target."
       ],
       "customerPurchased": [
-        { "contract": "Jan $120/$160 call spreads", "detail": "2,560 bought · ~$2.8M debit · 10/20" }
+        { "contract": "Jan $120/$160 call spreads", "detail": "2,560 bought · ~$2.8M debit · 10/20", "side": "calls_bought" }
       ],
       "oi": [
         { "contract": "Jan $140/$95 short strangles", "detail": "4,200 OI · 9/29" },
         { "contract": "Jan $80 calls", "detail": "1,000 · ~$4M position · 5/27" }
       ],
       "recommendation": "CORT has a high-impact catalyst nearing but remains one of the most impressive mid-cap biotech growth names. I caught the bottom in shares earlier this year but wish I held the position. I like the set-up here for a move to $160.",
-      "lead": { "type": "call", "action": "bought", "qty": 1000, "strike": 80, "expiry": "January", "price": null },
+      "lead": { "type": "call", "action": "bought", "qty": 2560, "strike": 120, "shortStrike": 160, "expiry": "January", "price": 10.94, "priceNote": "~$2.8M total" },
       "quote": { "date": "2026-10-27", "last": 87.59, "prev": 87.125 }
     },
     {
@@ -125,7 +125,7 @@
       "customerPurchased": [],
       "oi": [],
       "recommendation": "QCOM has a clear $169 level to trade against providing a real nice risk-reward here and put sales seem more popular that call buys.",
-      "lead": { "type": "call", "action": "bought", "qty": 3500, "strike": 250, "expiry": "February", "price": null },
+      "lead": null,
       "quote": { "date": "2026-10-26", "last": 179.6, "prev": 175.91 }
     },
     {
@@ -144,7 +144,7 @@
         "Shares are +9.1% YTD and reclaimed the 200 day on 10/12, then closed back above the 50 day on 10/20 with the 8/13 high at $184.69 the next upside target."
       ],
       "customerPurchased": [
-        { "contract": "Dec $175 calls", "detail": "1,000 bought @ $4.80 · 10/20" }
+        { "contract": "Dec $175 calls", "detail": "1,000 bought @ $4.80 · 10/20", "side": "calls_bought" }
       ],
       "oi": [
         { "contract": "Dec $175 calls", "detail": "2,591 OI · 1,000 bought 10/20" },
@@ -171,7 +171,7 @@
         "Shares closed above all four of their key moving averages on 10/15 and slipped back below them the next session. COIN is -25.5% YTD and 55% below its 52 week high, with the July low at $139 as key support and the September high near $208 as resistance."
       ],
       "customerPurchased": [
-        { "contract": "Sep 2027 $150 puts", "detail": "300 sold / short @ $26.50 · 10/19" }
+        { "contract": "Sep 2027 $150 puts", "detail": "300 sold / short @ $26.50 · 10/19", "side": "puts_sold" }
       ],
       "oi": [
         { "contract": "Dec $185 calls", "detail": "9,325 holding · bought 10/5 at $23" }
@@ -196,7 +196,7 @@
         "ALAB on the weekly is in a longer-term rising channel pattern and the past six-months a bull pennant forming. On more weakness, monthly lower value and rising 200MA support at $248.5 should hold."
       ],
       "customerPurchased": [
-        { "contract": "Sep 2027 $220 puts", "detail": "600 sold / short @ $36.20 · 10/14" }
+        { "contract": "Sep 2027 $220 puts", "detail": "600 sold / short @ $36.20 · 10/14", "side": "puts_sold" }
       ],
       "oi": [],
       "recommendation": "ALAB valuation will make for a bumpy ride but reminds me of SNOW years ago, dips will find buyers which is why put sales attractive when RSI gets oversold.",
@@ -219,7 +219,7 @@
         "CSCO shares are +50% YTD and recently pulled back to $105 support from $130 post-earnings highs but recently showing relative strength with $121 and $127.5 key overhead levels. The weekly is forming a large bull pennant that measures to $170 above $125."
       ],
       "customerPurchased": [
-        { "contract": "Dec 2028 $140 calls", "detail": "1,950 bought · $3.8M · 10/12" }
+        { "contract": "Dec 2028 $140 calls", "detail": "1,950 bought · $3.8M · 10/12", "side": "calls_bought" }
       ],
       "oi": [],
       "recommendation": "CSCO looks positioned for more upside in 2027 as the AI story plays out and a safer way to play the theme with re-rate potential.",

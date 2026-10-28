@@ -2237,6 +2237,62 @@ body:has(.cc[open]) { overflow: hidden; }
 .cc-oi dt { font-weight: 700; color: var(--ink); }
 .cc-oi dd { margin: 0; color: var(--muted); text-align: right; }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Customer purchased: outlined like the Recommendation, tinted by the trade side. */
+.side-calls_bought { --side: #22c55e; --side-ink: #1f7a45; --side-tint: #effaf3; --side-line: rgba(34, 197, 94, 0.24); }
+.side-calls_sold { --side: #4a6cf7; --side-ink: #2c3f9e; --side-tint: #f4f6fb; --side-line: rgba(74, 108, 247, 0.18); }
+.side-puts_bought { --side: #e0322b; --side-ink: #b4231d; --side-tint: #fdf2f1; --side-line: rgba(224, 50, 43, 0.2); }
+.side-puts_sold { --side: #eab308; --side-ink: #8a5a00; --side-tint: #fdf8e7; --side-line: rgba(234, 179, 8, 0.3); }
+
+.cc-buy {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--side-tint, #f6f7f9);
+  border: 1px solid var(--side-line, var(--line));
+  border-left: 3px solid var(--side, var(--ink));
+}
+
+.cc-buy-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.cc-buy .cc-label { color: var(--side-ink, var(--ink)); }
+
+.cc-side {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--side-ink, var(--muted));
+}
+
+.cc-buy .cc-oi {
+  background: var(--surface);
+  border-color: var(--side-line, var(--line));
+}
+
+.cc-buy .cc-oi-row + .cc-oi-row { border-top-color: var(--side-line, var(--line)); }
+
+.cc-side-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin: 0 8px 1px 0;
+  border-radius: 50%;
+  background: var(--side);
+  vertical-align: middle;
+}
+
 .cc-rec {
   margin-top: auto;
   padding: 14px 16px;
@@ -2297,6 +2353,8 @@ body:has(.cc[open]) { overflow: hidden; }
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
+
+.tl-tiles.is-spot-only { grid-template-columns: minmax(0, 1fr); max-width: 240px; }
 
 .tl-tile {
   min-width: 0;
@@ -2420,6 +2478,7 @@ body:has(.cc[open]) { overflow: hidden; }
 
 .tl-sw.is-strike { border-top: 2px dashed #f59e0b; }
 .tl-sw.is-be { border-top-color: #4ade80; }
+.tl-sw.is-short { border-top: 2px dotted #fdba74; }
 .tl-sw.is-expiry { width: 0; height: 10px; border-top: 0; border-left: 1.5px dashed rgba(226, 232, 240, 0.5); }
 
 .tl-move { font-weight: 600; font-variant-numeric: tabular-nums; }
