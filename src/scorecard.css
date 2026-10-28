@@ -1144,6 +1144,9 @@ nav.top a.on{color:#111;background:#f5a623;border-color:#f5a623}
   margin-left: 0.06em;
 }
 
+.tabs { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs .tab { flex: none; white-space: nowrap; }
 a.tab { text-decoration: none; }
 a.tab:hover { text-decoration: none; }
 .tab.back { color: var(--text); }
