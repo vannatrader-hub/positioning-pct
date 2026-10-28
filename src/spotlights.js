@@ -199,7 +199,7 @@ function sectionRow(section) {
   const body = el("div", "spot-row-body");
   const list = el("ul", "spot-grid");
   if (plays.length) list.append(...plays.map(cardItem));
-  else list.append(el("li", "spot-empty", `No ${section.title.toLowerCase()} Spotlights right now.`));
+  else list.append(el("li", "spot-empty", "None"));
   body.append(list);
 
   details.append(summary, body);

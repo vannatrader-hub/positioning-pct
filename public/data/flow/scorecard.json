@@ -9,7 +9,7 @@
  "composite_blend": {
   "flow": 0.65,
   "tech": 0.35,
-  "note": "LOCKED v1: 0.65 flow / 0.35 tech"
+  "note": "0.65 flow / 0.35 tech"
  },
  "flow_lookback": "Past 3 weeks ending today ≈ 2026-09-26 → 2026-10-16 (W1 Sep 26–Oct 2 · W2 Oct 3–9 · W3 Oct 10–16)",
  "names": [
@@ -21,15 +21,72 @@
    "tech": 83,
    "structure_bias": "short puts",
    "put_sale_only": true,
-   "why": "Biggest single put sale of the week plus a second Hub put sale today — put-sale only, not a long",
+   "why": "Biggest single put sale of the week (Oct 13, ~$12.45M January puts) plus a second put sale Oct 16 — put-sale only, not a long",
+   "desk_analysis": "Biggest single put sale of the week (Oct 13, ~$12.45M January puts) plus a second put sale Oct 16 — put-sale only, not a long",
    "confidence": "Med",
-   "spotlight": null,
-   "top_prints": [
-    "Desk A public · **~$12.45M** · 10,000× January short puts open 12.60–12.30 (2026-10-13)",
-    "Desk A trading hub · September put sale (2026-10-16, $ not stated); Desk A public 10,000× January calls sold 11.85–11.40 (2026-10-12, call sale — bearish/overwrite leg)"
+   "chips": [
+    "PUTS",
+    "MED",
+    "PUT-SALE ONLY"
    ],
-   "technicals_note": "vs EMA8 **$339.71** / EMA21 **$335.69**: **kiss 8, above 21** · vs 200-MA **$292.11**: **above (~+17%)** · weekly RSI **~64** · earnings: unknown",
-   "tech_why": "Strong: vs EMA8 $339.71 / EMA21 $335.69: kiss 8, above 21; vs 200-MA $292.11: above (~+17%); weekly RSI ~64.",
+   "net_premium": {
+    "raw": "~$12.45M",
+    "usd": 12450000,
+    "contracts": 10000,
+    "side": "collected"
+   },
+   "lead": {
+    "contract": "AAPL January puts · 10,000× sold to open",
+    "date": "2026-10-13"
+   },
+   "trades": [
+    {
+     "date": "2026-10-16",
+     "text": "September put sale ($ not stated)"
+    },
+    {
+     "date": "2026-10-13",
+     "text": "**~$12.45M** · 10,000× January short puts open 12.60–12.30"
+    },
+    {
+     "date": "2026-10-12",
+     "text": "10,000× January calls sold 11.85–11.40 (call sale — overwrite leg)"
+    }
+   ],
+   "technicals": {
+    "grade": "Strong",
+    "ema8": {
+     "value": 339.71,
+     "read": "Kiss"
+    },
+    "ema21": {
+     "value": 335.69,
+     "read": "Above"
+    },
+    "sma200": {
+     "value": 292.11,
+     "read": "Above (~+17%)"
+    },
+    "rsi_weekly": "~64"
+   },
+   "levels": {
+    "spot": 342,
+    "ema8": 339.7129,
+    "ema21": 335.8297,
+    "sma200": 292.1128,
+    "as_of": "2026-10-15",
+    "source": "Daily historicals"
+   },
+   "earnings": {
+    "past": [],
+    "next": null
+   },
+   "thesis": null,
+   "trade_lines": [],
+   "vol_oi": null,
+   "iv": null,
+   "oi_levels": null,
+   "fundamental": null,
    "candles": [
     {
      "date": "2026-09-03",
@@ -135,7 +192,7 @@
      "o": 334.77,
      "h": 338.34,
      "l": 330.18,
-     "c": 337.0,
+     "c": 337,
      "v": 36700225,
      "ema8": 329.92,
      "ema21": 323.52,
@@ -242,7 +299,7 @@
     },
     {
      "date": "2026-10-01",
-     "o": 330.0,
+     "o": 330,
      "h": 332.48,
      "l": 325.81,
      "c": 330.32,
@@ -324,7 +381,7 @@
      "l": 337.6,
      "c": 340.97,
      "v": 25900599,
-     "ema8": 337.0,
+     "ema8": 337,
      "ema21": 333.75,
      "sma200": 291.09
     },
@@ -355,7 +412,7 @@
      "o": 346.95,
      "h": 347.85,
      "l": 341.6,
-     "c": 342.0,
+     "c": 342,
      "v": 39767256,
      "ema8": 339.71,
      "ema21": 335.83,
@@ -365,7 +422,7 @@
    "chart": [
     {
      "date": "2026-04-09",
-     "o": 259.0,
+     "o": 259,
      "h": 261.12,
      "l": 256.07,
      "c": 260.49,
@@ -516,7 +573,7 @@
     {
      "date": "2026-04-30",
      "o": 270.5,
-     "h": 276.0,
+     "h": 276,
      "l": 268.14,
      "c": 271.35,
      "v": 91848230,
@@ -577,7 +634,7 @@
      "date": "2026-05-08",
      "o": 290.01,
      "h": 294.76,
-     "l": 290.0,
+     "l": 290,
      "c": 293.32,
      "v": 52692761,
      "ema8": 283.19,
@@ -724,7 +781,7 @@
     {
      "date": "2026-05-29",
      "o": 311.77,
-     "h": 315.0,
+     "h": 315,
      "l": 309.53,
      "c": 312.06,
      "v": 70026752,
@@ -740,7 +797,7 @@
      "c": 306.31,
      "v": 48849933,
      "ema8": 307.28,
-     "ema21": 298.0,
+     "ema21": 298,
      "sma200": 263.6
     },
     {
@@ -823,7 +880,7 @@
     {
      "date": "2026-06-11",
      "o": 293.72,
-     "h": 297.0,
+     "h": 297,
      "l": 289.59,
      "c": 295.63,
      "v": 42572497,
@@ -932,7 +989,7 @@
     },
     {
      "date": "2026-06-26",
-     "o": 275.0,
+     "o": 275,
      "h": 285.95,
      "l": 274.21,
      "c": 283.78,
@@ -989,7 +1046,7 @@
      "date": "2026-07-06",
      "o": 307.36,
      "h": 314.2,
-     "l": 307.0,
+     "l": 307,
      "c": 312.66,
      "v": 53589977,
      "ema8": 298.01,
@@ -1075,7 +1132,7 @@
     },
     {
      "date": "2026-07-16",
-     "o": 328.0,
+     "o": 328,
      "h": 334.68,
      "l": 326.79,
      "c": 333.26,
@@ -1088,7 +1145,7 @@
      "date": "2026-07-17",
      "o": 331.98,
      "h": 334.99,
-     "l": 329.0,
+     "l": 329,
      "c": 333.74,
      "v": 63407059,
      "ema8": 322.29,
@@ -1120,7 +1177,7 @@
     {
      "date": "2026-07-22",
      "o": 327.87,
-     "h": 329.0,
+     "h": 329,
      "l": 323.34,
      "c": 325.89,
      "v": 38755929,
@@ -1168,7 +1225,7 @@
      "l": 335.6,
      "c": 340.08,
      "v": 51859042,
-     "ema8": 331.0,
+     "ema8": 331,
      "ema21": 320.89,
      "sma200": 276.79
     },
@@ -1198,7 +1255,7 @@
      "date": "2026-07-31",
      "o": 304.81,
      "h": 310.69,
-     "l": 300.0,
+     "l": 300,
      "c": 308.91,
      "v": 132489137,
      "ema8": 327.48,
@@ -1232,7 +1289,7 @@
      "o": 309.36,
      "h": 311.71,
      "l": 305.67,
-     "c": 311.0,
+     "c": 311,
      "v": 49438763,
      "ema8": 317.45,
      "ema21": 318.66,
@@ -1278,7 +1335,7 @@
      "l": 302.79,
      "c": 304.91,
      "v": 37476746,
-     "ema8": 312.0,
+     "ema8": 312,
      "ema21": 315.72,
      "sma200": 279.87
     },
@@ -1296,7 +1353,7 @@
     {
      "date": "2026-08-13",
      "o": 304.21,
-     "h": 306.0,
+     "h": 306,
      "l": 302.05,
      "c": 305.26,
      "v": 40349289,
@@ -1306,7 +1363,7 @@
     },
     {
      "date": "2026-08-14",
-     "o": 306.0,
+     "o": 306,
      "h": 307.49,
      "l": 304.3,
      "c": 305.93,
@@ -1562,7 +1619,7 @@
      "o": 334.77,
      "h": 338.34,
      "l": 330.18,
-     "c": 337.0,
+     "c": 337,
      "v": 36700225,
      "ema8": 329.92,
      "ema21": 323.52,
@@ -1669,7 +1726,7 @@
     },
     {
      "date": "2026-10-01",
-     "o": 330.0,
+     "o": 330,
      "h": 332.48,
      "l": 325.81,
      "c": 330.32,
@@ -1751,7 +1808,7 @@
      "l": 337.6,
      "c": 340.97,
      "v": 25900599,
-     "ema8": 337.0,
+     "ema8": 337,
      "ema21": 333.75,
      "sma200": 291.09
     },
@@ -1782,135 +1839,13 @@
      "o": 346.95,
      "h": 347.85,
      "l": 341.6,
-     "c": 342.0,
+     "c": 342,
      "v": 39767256,
      "ema8": 339.71,
      "ema21": 335.83,
      "sma200": 292.11
     }
-   ],
-   "levels": {
-    "spot": 342.0,
-    "ema8": 339.7129,
-    "ema21": 335.8297,
-    "sma200": 292.1128,
-    "as_of": "2026-10-15",
-    "source": "Daily historicals"
-   },
-   "chips": [
-    "PUTS",
-    "MED",
-    "PUT-SALE ONLY"
-   ],
-   "net_premium": {
-    "raw": "~$12.45M",
-    "usd": 12450000.0,
-    "source_print": "Desk A public · **~$12.45M** · 10,000× January short puts open 12.60–12.30 (2026-10-13)"
-   },
-   "desk_analysis": "Biggest single put sale of the week plus a second Hub put sale today — put-sale only, not a long Strong: vs EMA8 $339.71 / EMA21 $335.69: kiss 8, above 21; vs 200-MA $292.11: above (~+17%); weekly RSI ~64.",
-   "panels": {
-    "trade_summary": {
-     "status": "real",
-     "structure": "short puts",
-     "why": "Biggest single put sale of the week plus a second Hub put sale today — put-sale only, not a long",
-     "top_prints": [
-      "Desk A public · **~$12.45M** · 10,000× January short puts open 12.60–12.30 (2026-10-13)",
-      "Desk A trading hub · September put sale (2026-10-16, $ not stated); Desk A public 10,000× January calls sold 11.85–11.40 (2026-10-12, call sale — bearish/overwrite leg)"
-     ],
-     "net_premium": {
-      "raw": "~$12.45M",
-      "usd": 12450000.0,
-      "source_print": "Desk A public · **~$12.45M** · 10,000× January short puts open 12.60–12.30 (2026-10-13)"
-     },
-     "confidence": "Med"
-    },
-    "iv_catalyst": {
-     "status": "open",
-     "summary": "IV not on desk for this name.",
-     "note": "No invented IV — label OPEN until dossier/Trade Card carries it."
-    },
-    "oi_levels": {
-     "status": "not_on_desk",
-     "summary": "OI levels not on desk.",
-     "as_of": null,
-     "note": "Placeholder until an OI read is on desk.",
-     "source": null,
-     "monthly_opex": {
-      "status": "not_on_desk",
-      "label": "Monthly OpEx",
-      "expiry": null,
-      "walls": null,
-      "floors": null,
-      "pins": null,
-      "dealer_positioning": null,
-      "summary": "NOT ON DESK — no OI read for this horizon.",
-      "gamma": null,
-      "vanna": null,
-      "gamma_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "vanna_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "gamma_pos": [],
-      "gamma_neg": [],
-      "vanna_pos": [],
-      "vanna_neg": [],
-      "note": null
-     },
-     "all_expiry": {
-      "status": "not_on_desk",
-      "label": "All expiry",
-      "expiry": null,
-      "walls": null,
-      "floors": null,
-      "pins": null,
-      "dealer_positioning": null,
-      "summary": "NOT ON DESK — no OI read for this horizon.",
-      "gamma": null,
-      "vanna": null,
-      "gamma_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "vanna_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "gamma_pos": [],
-      "gamma_neg": [],
-      "vanna_pos": [],
-      "vanna_neg": [],
-      "note": null
-     }
-    },
-    "technical": {
-     "status": "real",
-     "tech_why": "Strong: vs EMA8 $339.71 / EMA21 $335.69: kiss 8, above 21; vs 200-MA $292.11: above (~+17%); weekly RSI ~64.",
-     "technicals_note": "vs EMA8 **$339.71** / EMA21 **$335.69**: **kiss 8, above 21** · vs 200-MA **$292.11**: **above (~+17%)** · weekly RSI **~64** · earnings: unknown",
-     "levels": {
-      "spot": 342.0,
-      "ema8": 339.7129,
-      "ema21": 335.8297,
-      "sma200": 292.1128,
-      "as_of": "2026-10-15",
-      "source": "Daily historicals"
-     },
-     "tech_score": 83
-    },
-    "fundamental": {
-     "status": "open",
-     "summary": "No fundamental profile on dossier — thesis is flow/team only."
-    },
-    "spotlight": null,
-    "thesis_one_liner": null
-   },
-   "thesis_one_liner": null,
-   "top_print": "Desk A public · **~$12.45M** · 10,000× January short puts open 12.60–12.30 (2026-10-13)",
-   "trade_lines": [],
-   "vol_oi": null
+   ]
   },
   {
    "rank": 2,
@@ -1918,17 +1853,73 @@
    "composite": 75,
    "flow": 86,
    "tech": 55,
-   "structure_bias": "calls (+ Desk B put-sale)",
+   "structure_bias": "calls (+ put-sale)",
    "put_sale_only": false,
-   "why": "Desk A call buyers two weeks running (W2 $7.5M weekly calls, W3 Feb far-OTM calls) plus a Desk B Hub put sale today — Desk A+B team bump",
+   "why": "Call buyers two weeks running (Oct 6 ~$7.5M weekly calls, Oct 13 February far-OTM calls) plus a November put sale Oct 16",
+   "desk_analysis": "Call buyers two weeks running (Oct 6 ~$7.5M weekly calls, Oct 13 February far-OTM calls) plus a November put sale Oct 16",
    "confidence": "Med",
-   "spotlight": null,
-   "top_prints": [
-    "Desk A public · **~$0.88M** · 750× February far-OTM calls $11.50–12 (2026-10-13); W2 Desk A **~$7.5M** · 3000× Oct23 (W) calls (2026-10-06)",
-    "Desk B (Trading Hub) · November short puts (2026-10-16, $ not stated)"
+   "chips": [
+    "MIXED",
+    "MED"
    ],
-   "technicals_note": "vs EMA8 **$736.96** / EMA21 **$718.83**: **below 8, below 21** · vs 200-MA **$631.76**: **above (~+12%)** · weekly RSI **~59** · earnings: unknown",
-   "tech_why": "Mixed: vs EMA8 $736.96 / EMA21 $718.83: below 8, below 21; vs 200-MA $631.76: above (~+12%); weekly RSI ~59.",
+   "net_premium": {
+    "raw": "~$7.5M",
+    "usd": 7500000,
+    "contracts": 3000,
+    "side": "paid"
+   },
+   "lead": {
+    "contract": "META Oct 23 (W) calls · 3,000× bought",
+    "date": "2026-10-06"
+   },
+   "trades": [
+    {
+     "date": "2026-10-16",
+     "text": "November short puts ($ not stated)"
+    },
+    {
+     "date": "2026-10-13",
+     "text": "**~$0.88M** · 750× February far-OTM calls $11.50–12"
+    },
+    {
+     "date": "2026-10-06",
+     "text": "**~$7.5M** · 3,000× Oct 23 (W) calls"
+    }
+   ],
+   "technicals": {
+    "grade": "Mixed",
+    "ema8": {
+     "value": 736.96,
+     "read": "Below"
+    },
+    "ema21": {
+     "value": 718.83,
+     "read": "Below"
+    },
+    "sma200": {
+     "value": 631.76,
+     "read": "Above (~+12%)"
+    },
+    "rsi_weekly": "~59"
+   },
+   "levels": {
+    "spot": 736.72,
+    "ema8": 736.9622,
+    "ema21": 718.824,
+    "sma200": 631.7601,
+    "as_of": "2026-10-15",
+    "source": "Daily historicals"
+   },
+   "earnings": {
+    "past": [],
+    "next": null
+   },
+   "thesis": null,
+   "trade_lines": [],
+   "vol_oi": null,
+   "iv": null,
+   "oi_levels": null,
+   "fundamental": null,
    "candles": [
     {
      "date": "2026-09-03",
@@ -2054,7 +2045,7 @@
     {
      "date": "2026-09-21",
      "o": 680.29,
-     "h": 753.0,
+     "h": 753,
      "l": 679.6,
      "c": 741.25,
      "v": 48720457,
@@ -2066,7 +2057,7 @@
      "date": "2026-09-22",
      "o": 731.4,
      "h": 757.27,
-     "l": 730.0,
+     "l": 730,
      "c": 736.6,
      "v": 28122126,
      "ema8": 689.95,
@@ -2119,7 +2110,7 @@
     },
     {
      "date": "2026-09-29",
-     "o": 725.0,
+     "o": 725,
      "h": 740.45,
      "l": 715.1,
      "c": 738.79,
@@ -2236,7 +2227,7 @@
      "v": 22706229,
      "ema8": 736.89,
      "ema21": 714.98,
-     "sma200": 631.0
+     "sma200": 631
     },
     {
      "date": "2026-10-14",
@@ -2266,7 +2257,7 @@
      "date": "2026-04-09",
      "o": 626.97,
      "h": 637.5,
-     "l": 623.0,
+     "l": 623,
      "c": 628.39,
      "v": 19012912,
      "ema8": 592.21,
@@ -2285,7 +2276,7 @@
     {
      "date": "2026-04-13",
      "o": 629.5,
-     "h": 635.0,
+     "h": 635,
      "l": 624.4,
      "c": 634.53,
      "v": 9538931,
@@ -2304,7 +2295,7 @@
     },
     {
      "date": "2026-04-15",
-     "o": 667.0,
+     "o": 667,
      "h": 678.5,
      "l": 664.22,
      "c": 671.58,
@@ -2336,7 +2327,7 @@
      "date": "2026-04-20",
      "o": 681.36,
      "h": 683.38,
-     "l": 668.0,
+     "l": 668,
      "c": 670.91,
      "v": 12533951,
      "ema8": 656.27,
@@ -2344,7 +2335,7 @@
     },
     {
      "date": "2026-04-21",
-     "o": 671.0,
+     "o": 671,
      "h": 676.2,
      "l": 667.33,
      "c": 668.84,
@@ -2384,7 +2375,7 @@
     },
     {
      "date": "2026-04-27",
-     "o": 671.0,
+     "o": 671,
      "h": 682.5,
      "l": 670.84,
      "c": 678.62,
@@ -2416,7 +2407,7 @@
      "date": "2026-04-30",
      "o": 619.32,
      "h": 620.85,
-     "l": 600.0,
+     "l": 600,
      "c": 611.91,
      "v": 52764984,
      "ema8": 656.09,
@@ -2435,7 +2426,7 @@
     {
      "date": "2026-05-04",
      "o": 607.93,
-     "h": 614.0,
+     "h": 614,
      "l": 602.75,
      "c": 610.41,
      "v": 16203902,
@@ -2497,7 +2488,7 @@
      "o": 594.82,
      "h": 603.75,
      "l": 592.6,
-     "c": 603.0,
+     "c": 603,
      "v": 11351559,
      "ema8": 613.24,
      "ema21": 625.9
@@ -2514,9 +2505,9 @@
     },
     {
      "date": "2026-05-14",
-     "o": 616.0,
+     "o": 616,
      "h": 623.73,
-     "l": 615.0,
+     "l": 615,
      "c": 618.43,
      "v": 10651173,
      "ema8": 614.98,
@@ -2557,7 +2548,7 @@
     {
      "date": "2026-05-20",
      "o": 600.8,
-     "h": 608.0,
+     "h": 608,
      "l": 597.81,
      "c": 605.06,
      "v": 11329709,
@@ -2567,7 +2558,7 @@
     },
     {
      "date": "2026-05-21",
-     "o": 600.0,
+     "o": 600,
      "h": 609.6,
      "l": 594.81,
      "c": 607.38,
@@ -2602,7 +2593,7 @@
      "date": "2026-05-27",
      "o": 609.39,
      "h": 638.5,
-     "l": 609.0,
+     "l": 609,
      "c": 635.25,
      "v": 23143594,
      "ema8": 615.8,
@@ -2612,7 +2603,7 @@
     {
      "date": "2026-05-28",
      "o": 639.5,
-     "h": 643.0,
+     "h": 643,
      "l": 629.31,
      "c": 635.29,
      "v": 16772379,
@@ -2655,7 +2646,7 @@
     },
     {
      "date": "2026-06-03",
-     "o": 603.0,
+     "o": 603,
      "h": 624.15,
      "l": 600.27,
      "c": 622.98,
@@ -2680,7 +2671,7 @@
      "o": 623.46,
      "h": 629.14,
      "l": 582.91,
-     "c": 593.0,
+     "c": 593,
      "v": 30091610,
      "ema8": 612.6,
      "ema21": 616.43,
@@ -2688,8 +2679,8 @@
     },
     {
      "date": "2026-06-08",
-     "o": 592.0,
-     "h": 592.0,
+     "o": 592,
+     "h": 592,
      "l": 579.22,
      "c": 585.39,
      "v": 19512436,
@@ -2699,7 +2690,7 @@
     },
     {
      "date": "2026-06-09",
-     "o": 591.0,
+     "o": 591,
      "h": 597.63,
      "l": 581.01,
      "c": 584.59,
@@ -2756,7 +2747,7 @@
      "date": "2026-06-16",
      "o": 593.65,
      "h": 605.81,
-     "l": 592.0,
+     "l": 592,
      "c": 600.21,
      "v": 11344421,
      "ema8": 589.3,
@@ -2765,7 +2756,7 @@
     },
     {
      "date": "2026-06-17",
-     "o": 592.0,
+     "o": 592,
      "h": 593.81,
      "l": 566.19,
      "c": 567.58,
@@ -2842,9 +2833,9 @@
     },
     {
      "date": "2026-06-29",
-     "o": 560.0,
+     "o": 560,
      "h": 570.9,
-     "l": 558.0,
+     "l": 558,
      "c": 562.6,
      "v": 15011399,
      "ema8": 561.83,
@@ -2876,7 +2867,7 @@
     {
      "date": "2026-07-02",
      "o": 607.89,
-     "h": 610.0,
+     "h": 610,
      "l": 580.42,
      "c": 582.9,
      "v": 21750522,
@@ -2909,7 +2900,7 @@
     {
      "date": "2026-07-08",
      "o": 614.38,
-     "h": 616.0,
+     "h": 616,
      "l": 598.01,
      "c": 603.12,
      "v": 13606507,
@@ -2946,13 +2937,13 @@
      "l": 654.2,
      "c": 656.73,
      "v": 19840702,
-     "ema8": 625.0,
+     "ema8": 625,
      "ema21": 603.35,
      "sma200": 642.22
     },
     {
      "date": "2026-07-14",
-     "o": 652.0,
+     "o": 652,
      "h": 666.5,
      "l": 649.05,
      "c": 661.04,
@@ -2987,7 +2978,7 @@
      "date": "2026-07-17",
      "o": 647.7,
      "h": 652.2,
-     "l": 626.0,
+     "l": 626,
      "c": 646.01,
      "v": 22267862,
      "ema8": 647.84,
@@ -3019,8 +3010,8 @@
     {
      "date": "2026-07-22",
      "o": 647.7,
-     "h": 649.0,
-     "l": 624.0,
+     "h": 649,
+     "l": 624,
      "c": 627.17,
      "v": 11019559,
      "ema8": 642.28,
@@ -3063,8 +3054,8 @@
     {
      "date": "2026-07-28",
      "o": 596.82,
-     "h": 601.0,
-     "l": 587.0,
+     "h": 601,
+     "l": 587,
      "c": 593.41,
      "v": 12009255,
      "ema8": 612.94,
@@ -3084,7 +3075,7 @@
     },
     {
      "date": "2026-07-30",
-     "o": 526.0,
+     "o": 526,
      "h": 539.88,
      "l": 524.49,
      "c": 539.03,
@@ -3100,7 +3091,7 @@
      "l": 540.22,
      "c": 556.71,
      "v": 24261457,
-     "ema8": 584.0,
+     "ema8": 584,
      "ema21": 602.56,
      "sma200": 634.49
     },
@@ -3129,7 +3120,7 @@
     {
      "date": "2026-08-05",
      "o": 600.46,
-     "h": 601.0,
+     "h": 601,
      "l": 580.12,
      "c": 588.77,
      "v": 14897162,
@@ -3141,12 +3132,12 @@
      "date": "2026-08-06",
      "o": 586.95,
      "h": 595.31,
-     "l": 586.0,
+     "l": 586,
      "c": 589.9,
      "v": 11811461,
      "ema8": 587.32,
      "ema21": 598.33,
-     "sma200": 632.0
+     "sma200": 632
     },
     {
      "date": "2026-08-07",
@@ -3172,7 +3163,7 @@
     },
     {
      "date": "2026-08-11",
-     "o": 598.0,
+     "o": 598,
      "h": 612.43,
      "l": 593.4,
      "c": 599.12,
@@ -3188,7 +3179,7 @@
      "l": 578.21,
      "c": 578.85,
      "v": 16186915,
-     "ema8": 589.0,
+     "ema8": 589,
      "ema21": 595.94,
      "sma200": 629.16
     },
@@ -3317,7 +3308,7 @@
      "date": "2026-08-28",
      "o": 571.55,
      "h": 589.19,
-     "l": 571.0,
+     "l": 571,
      "c": 578.02,
      "v": 16042352,
      "ema8": 569.36,
@@ -3350,7 +3341,7 @@
      "date": "2026-09-02",
      "o": 578.78,
      "h": 600.38,
-     "l": 577.0,
+     "l": 577,
      "c": 592.85,
      "v": 16552678,
      "ema8": 576.57,
@@ -3481,7 +3472,7 @@
     {
      "date": "2026-09-21",
      "o": 680.29,
-     "h": 753.0,
+     "h": 753,
      "l": 679.6,
      "c": 741.25,
      "v": 48720457,
@@ -3493,7 +3484,7 @@
      "date": "2026-09-22",
      "o": 731.4,
      "h": 757.27,
-     "l": 730.0,
+     "l": 730,
      "c": 736.6,
      "v": 28122126,
      "ema8": 689.95,
@@ -3546,7 +3537,7 @@
     },
     {
      "date": "2026-09-29",
-     "o": 725.0,
+     "o": 725,
      "h": 740.45,
      "l": 715.1,
      "c": 738.79,
@@ -3663,7 +3654,7 @@
      "v": 22706229,
      "ema8": 736.89,
      "ema21": 714.98,
-     "sma200": 631.0
+     "sma200": 631
     },
     {
      "date": "2026-10-14",
@@ -3687,128 +3678,7 @@
      "ema21": 718.82,
      "sma200": 631.76
     }
-   ],
-   "levels": {
-    "spot": 736.72,
-    "ema8": 736.9622,
-    "ema21": 718.824,
-    "sma200": 631.7601,
-    "as_of": "2026-10-15",
-    "source": "Daily historicals"
-   },
-   "chips": [
-    "MIXED",
-    "MED"
-   ],
-   "net_premium": {
-    "raw": "~$7.5M",
-    "usd": 7500000.0,
-    "source_print": "Desk A public · **~$0.88M** · 750× February far-OTM calls $11.50–12 (2026-10-13); W2 Desk A **~$7.5M** · 3000× Oct23 (W) calls (2026-10-06)"
-   },
-   "desk_analysis": "Desk A call buyers two weeks running (W2 $7.5M weekly calls, W3 Feb far-OTM calls) plus a Desk B Hub put sale today — Desk A+B team bump Mixed: vs EMA8 $736.96 / EMA21 $718.83: below 8, below 21; vs 200-MA $631.76: above (~+12%); weekly RSI ~59.",
-   "panels": {
-    "trade_summary": {
-     "status": "real",
-     "structure": "calls (+ Desk B put-sale)",
-     "why": "Desk A call buyers two weeks running (W2 $7.5M weekly calls, W3 Feb far-OTM calls) plus a Desk B Hub put sale today — Desk A+B team bump",
-     "top_prints": [
-      "Desk A public · **~$0.88M** · 750× February far-OTM calls $11.50–12 (2026-10-13); W2 Desk A **~$7.5M** · 3000× Oct23 (W) calls (2026-10-06)",
-      "Desk B (Trading Hub) · November short puts (2026-10-16, $ not stated)"
-     ],
-     "net_premium": {
-      "raw": "~$7.5M",
-      "usd": 7500000.0,
-      "source_print": "Desk A public · **~$0.88M** · 750× February far-OTM calls $11.50–12 (2026-10-13); W2 Desk A **~$7.5M** · 3000× Oct23 (W) calls (2026-10-06)"
-     },
-     "confidence": "Med"
-    },
-    "iv_catalyst": {
-     "status": "open",
-     "summary": "IV not on desk for this name.",
-     "note": "No invented IV — label OPEN until dossier/Trade Card carries it."
-    },
-    "oi_levels": {
-     "status": "not_on_desk",
-     "summary": "OI levels not on desk.",
-     "as_of": null,
-     "note": "Placeholder until an OI read is on desk.",
-     "source": null,
-     "monthly_opex": {
-      "status": "not_on_desk",
-      "label": "Monthly OpEx",
-      "expiry": null,
-      "walls": null,
-      "floors": null,
-      "pins": null,
-      "dealer_positioning": null,
-      "summary": "NOT ON DESK — no OI read for this horizon.",
-      "gamma": null,
-      "vanna": null,
-      "gamma_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "vanna_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "gamma_pos": [],
-      "gamma_neg": [],
-      "vanna_pos": [],
-      "vanna_neg": [],
-      "note": null
-     },
-     "all_expiry": {
-      "status": "not_on_desk",
-      "label": "All expiry",
-      "expiry": null,
-      "walls": null,
-      "floors": null,
-      "pins": null,
-      "dealer_positioning": null,
-      "summary": "NOT ON DESK — no OI read for this horizon.",
-      "gamma": null,
-      "vanna": null,
-      "gamma_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "vanna_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "gamma_pos": [],
-      "gamma_neg": [],
-      "vanna_pos": [],
-      "vanna_neg": [],
-      "note": null
-     }
-    },
-    "technical": {
-     "status": "real",
-     "tech_why": "Mixed: vs EMA8 $736.96 / EMA21 $718.83: below 8, below 21; vs 200-MA $631.76: above (~+12%); weekly RSI ~59.",
-     "technicals_note": "vs EMA8 **$736.96** / EMA21 **$718.83**: **below 8, below 21** · vs 200-MA **$631.76**: **above (~+12%)** · weekly RSI **~59** · earnings: unknown",
-     "levels": {
-      "spot": 736.72,
-      "ema8": 736.9622,
-      "ema21": 718.824,
-      "sma200": 631.7601,
-      "as_of": "2026-10-15",
-      "source": "Daily historicals"
-     },
-     "tech_score": 55
-    },
-    "fundamental": {
-     "status": "open",
-     "summary": "No fundamental profile on dossier — thesis is flow/team only."
-    },
-    "spotlight": null,
-    "thesis_one_liner": null
-   },
-   "thesis_one_liner": null,
-   "top_print": "Desk A public · **~$0.88M** · 750× February far-OTM calls $11.50–12 (2026-10-13); W2 Desk A **~$7.5M** · 3000× Oct23 (W) calls (2026-10-06)",
-   "trade_lines": [],
-   "vol_oi": null
+   ]
   },
   {
    "rank": 3,
@@ -3818,15 +3688,92 @@
    "tech": 55,
    "structure_bias": "mixed (put-sale + calls)",
    "put_sale_only": false,
-   "why": "Fresh Desk A size put sale capturing earnings week, on top of last week's >$12M weekly calls and $15.6M April put sale",
+   "why": "Fresh size put sale Oct 16 capturing earnings week, on top of >$12M weekly calls Oct 7 and a $15.6M April put sale Oct 5",
+   "desk_analysis": "Fresh size put sale Oct 16 capturing earnings week, on top of >$12M weekly calls Oct 7 and a $15.6M April put sale Oct 5",
    "confidence": "Med",
-   "spotlight": null,
-   "top_prints": [
-    "Desk A Subs · **~$3.3M** · 1500× Nov 6 (W) short puts open @$22, captures earnings week (2026-10-16)",
-    "Desk A Subs W2 · **>$12M** · 4000× Oct30 (W) calls (2026-10-07); **~$15.6M** · 2500× April short puts (2026-10-05)"
+   "chips": [
+    "MIXED",
+    "MED"
    ],
-   "technicals_note": "vs EMA8 **$595.00** / EMA21 **$590.83**: **below 8, below 21** · vs 200-MA **$392.68**: **well above (~+36%)** · weekly RSI **~67** · earnings: **week of Nov 6** (per Desk A post)",
-   "tech_why": "Mixed: vs EMA8 $595.00 / EMA21 $590.83: below 8, below 21; vs 200-MA $392.68: well above (~+36%); weekly RSI ~67.",
+   "net_premium": {
+    "raw": "~$15.6M",
+    "usd": 15600000,
+    "contracts": 2500,
+    "side": "collected"
+   },
+   "lead": {
+    "contract": "AMD April puts · 2,500× sold to open",
+    "date": "2026-10-05"
+   },
+   "trades": [
+    {
+     "date": "2026-10-16",
+     "text": "**~$3.3M** · 1,500× Nov 6 (W) short puts open @ $22, captures earnings week"
+    },
+    {
+     "date": "2026-10-07",
+     "text": "**>$12M** · 4,000× Oct 30 (W) calls"
+    },
+    {
+     "date": "2026-10-05",
+     "text": "**~$15.6M** · 2,500× April short puts"
+    }
+   ],
+   "technicals": {
+    "grade": "Mixed",
+    "ema8": {
+     "value": 595,
+     "read": "Below"
+    },
+    "ema21": {
+     "value": 590.83,
+     "read": "Below"
+    },
+    "sma200": {
+     "value": 392.68,
+     "read": "Well above (~+36%)"
+    },
+    "rsi_weekly": "~67"
+   },
+   "levels": {
+    "spot": 562.23,
+    "ema8": 595.0034,
+    "ema21": 590.815,
+    "sma200": 392.6803,
+    "as_of": "2026-10-15",
+    "source": "Daily historicals"
+   },
+   "earnings": {
+    "past": [],
+    "next": {
+     "label": "Week of Nov 6",
+     "note": "Earnings week named in the Oct 16 put sale"
+    }
+   },
+   "thesis": null,
+   "trade_lines": [
+    {
+     "kind": "put",
+     "label": "Put strike",
+     "value": 580,
+     "note": "Apr $580p sold"
+    },
+    {
+     "kind": "call",
+     "label": "Call strike",
+     "value": 640,
+     "note": "Oct30 (W) $640c"
+    }
+   ],
+   "vol_oi": {
+    "contract": "AMD Oct30'26 $640C",
+    "volume": 472,
+    "oi": 6621,
+    "as_of": "2026-10-09 (option quotes, Oct 9 session)"
+   },
+   "iv": null,
+   "oi_levels": null,
+   "fundamental": null,
    "candles": [
     {
      "date": "2026-09-03",
@@ -3841,14 +3788,14 @@
     },
     {
      "date": "2026-09-04",
-     "o": 462.0,
+     "o": 462,
      "h": 478.83,
-     "l": 458.0,
+     "l": 458,
      "c": 477.57,
      "v": 19678742,
      "ema8": 467.78,
      "ema21": 475.5,
-     "sma200": 341.0
+     "sma200": 341
     },
     {
      "date": "2026-09-08",
@@ -3996,7 +3943,7 @@
     {
      "date": "2026-09-25",
      "o": 634.53,
-     "h": 639.0,
+     "h": 639,
      "l": 625.52,
      "c": 630.63,
      "v": 17632078,
@@ -4074,7 +4021,7 @@
      "date": "2026-10-06",
      "o": 648.04,
      "h": 658.52,
-     "l": 628.0,
+     "l": 628,
      "c": 649.42,
      "v": 24245863,
      "ema8": 623.67,
@@ -4107,7 +4054,7 @@
      "date": "2026-10-09",
      "o": 626.89,
      "h": 627.37,
-     "l": 606.0,
+     "l": 606,
      "c": 608.1,
      "v": 13733349,
      "ema8": 622.68,
@@ -4122,7 +4069,7 @@
      "c": 594.24,
      "v": 15379883,
      "ema8": 616.36,
-     "ema21": 595.0,
+     "ema21": 595,
      "sma200": 387.22
     },
     {
@@ -4140,7 +4087,7 @@
      "date": "2026-10-14",
      "o": 589.57,
      "h": 591.88,
-     "l": 567.0,
+     "l": 567,
      "c": 570.82,
      "v": 22319485,
      "ema8": 604.37,
@@ -4149,12 +4096,12 @@
     },
     {
      "date": "2026-10-15",
-     "o": 540.0,
+     "o": 540,
      "h": 568.62,
      "l": 530.09,
      "c": 562.23,
      "v": 28834576,
-     "ema8": 595.0,
+     "ema8": 595,
      "ema21": 590.82,
      "sma200": 392.68
     }
@@ -4172,7 +4119,7 @@
     },
     {
      "date": "2026-04-10",
-     "o": 239.0,
+     "o": 239,
      "h": 249.58,
      "l": 238.96,
      "c": 245.04,
@@ -4222,7 +4169,7 @@
     },
     {
      "date": "2026-04-17",
-     "o": 281.0,
+     "o": 281,
      "h": 281.05,
      "l": 274.14,
      "c": 278.39,
@@ -4234,7 +4181,7 @@
      "date": "2026-04-20",
      "o": 280.6,
      "h": 287.61,
-     "l": 272.0,
+     "l": 272,
      "c": 274.95,
      "v": 34833859,
      "ema8": 260.14,
@@ -4294,7 +4241,7 @@
      "date": "2026-04-28",
      "o": 311.86,
      "h": 327.5,
-     "l": 310.0,
+     "l": 310,
      "c": 323.21,
      "v": 43002479,
      "ema8": 308.6,
@@ -4378,7 +4325,7 @@
      "c": 455.19,
      "v": 58134868,
      "ema8": 387.79,
-     "ema21": 334.0
+     "ema21": 334
     },
     {
      "date": "2026-05-11",
@@ -4423,7 +4370,7 @@
     {
      "date": "2026-05-15",
      "o": 433.34,
-     "h": 439.0,
+     "h": 439,
      "l": 423.36,
      "c": 424.1,
      "v": 29131579,
@@ -4509,7 +4456,7 @@
     },
     {
      "date": "2026-05-28",
-     "o": 499.0,
+     "o": 499,
      "h": 527.2,
      "l": 493.52,
      "c": 518.09,
@@ -4521,7 +4468,7 @@
     {
      "date": "2026-05-29",
      "o": 520.8,
-     "h": 522.0,
+     "h": 522,
      "l": 503.43,
      "c": 516.1,
      "v": 30803236,
@@ -4580,13 +4527,13 @@
      "l": 463.95,
      "c": 466.38,
      "v": 46900606,
-     "ema8": 501.0,
+     "ema8": 501,
      "ema21": 463.95,
      "sma200": 245.97
     },
     {
      "date": "2026-06-08",
-     "o": 485.0,
+     "o": 485,
      "h": 494.97,
      "l": 477.71,
      "c": 490.33,
@@ -4598,7 +4545,7 @@
     {
      "date": "2026-06-09",
      "o": 502.75,
-     "h": 505.0,
+     "h": 505,
      "l": 437.23,
      "c": 475.5,
      "v": 37799812,
@@ -4632,7 +4579,7 @@
      "date": "2026-06-12",
      "o": 499.69,
      "h": 521.71,
-     "l": 494.0,
+     "l": 494,
      "c": 511.57,
      "v": 31618462,
      "ema8": 491.11,
@@ -4720,7 +4667,7 @@
      "date": "2026-06-25",
      "o": 543.93,
      "h": 550.88,
-     "l": 507.0,
+     "l": 507,
      "c": 532.57,
      "v": 27115339,
      "ema8": 523.52,
@@ -4775,7 +4722,7 @@
      "date": "2026-07-02",
      "o": 538.16,
      "h": 547.65,
-     "l": 506.0,
+     "l": 506,
      "c": 517.82,
      "v": 28228930,
      "ema8": 534.48,
@@ -4786,7 +4733,7 @@
      "date": "2026-07-06",
      "o": 535.35,
      "h": 572.5,
-     "l": 527.0,
+     "l": 527,
      "c": 552.05,
      "v": 30684180,
      "ema8": 538.39,
@@ -4828,7 +4775,7 @@
     },
     {
      "date": "2026-07-10",
-     "o": 544.0,
+     "o": 544,
      "h": 560.25,
      "l": 540.05,
      "c": 557.89,
@@ -4894,7 +4841,7 @@
     },
     {
      "date": "2026-07-20",
-     "o": 517.0,
+     "o": 517,
      "h": 522.44,
      "l": 502.36,
      "c": 503.57,
@@ -4905,7 +4852,7 @@
     },
     {
      "date": "2026-07-21",
-     "o": 526.0,
+     "o": 526,
      "h": 548.14,
      "l": 522.6,
      "c": 544.43,
@@ -4929,7 +4876,7 @@
      "date": "2026-07-23",
      "o": 544.74,
      "h": 556.49,
-     "l": 525.0,
+     "l": 525,
      "c": 539.69,
      "v": 27155083,
      "ema8": 532.29,
@@ -4939,8 +4886,8 @@
     {
      "date": "2026-07-24",
      "o": 546.92,
-     "h": 549.0,
-     "l": 518.0,
+     "h": 549,
+     "l": 518,
      "c": 521.95,
      "v": 27200730,
      "ema8": 529.99,
@@ -4950,7 +4897,7 @@
     {
      "date": "2026-07-27",
      "o": 527.5,
-     "h": 528.0,
+     "h": 528,
      "l": 476.93,
      "c": 494.95,
      "v": 31800253,
@@ -4960,7 +4907,7 @@
     },
     {
      "date": "2026-07-28",
-     "o": 467.0,
+     "o": 467,
      "h": 472.75,
      "l": 442.27,
      "c": 454.62,
@@ -4982,7 +4929,7 @@
     },
     {
      "date": "2026-07-30",
-     "o": 460.0,
+     "o": 460,
      "h": 498.2,
      "l": 457.68,
      "c": 485.39,
@@ -5015,7 +4962,7 @@
     },
     {
      "date": "2026-08-04",
-     "o": 504.0,
+     "o": 504,
      "h": 530.13,
      "l": 502.2,
      "c": 518.58,
@@ -5027,7 +4974,7 @@
     {
      "date": "2026-08-05",
      "o": 484.5,
-     "h": 502.0,
+     "h": 502,
      "l": 478.2,
      "c": 482.05,
      "v": 49615835,
@@ -5092,9 +5039,9 @@
     },
     {
      "date": "2026-08-13",
-     "o": 483.0,
+     "o": 483,
      "h": 497.99,
-     "l": 481.0,
+     "l": 481,
      "c": 483.01,
      "v": 18764893,
      "ema8": 482.53,
@@ -5117,7 +5064,7 @@
      "o": 514.16,
      "h": 517.35,
      "l": 504.52,
-     "c": 506.0,
+     "c": 506,
      "v": 20057628,
      "ema8": 493.25,
      "ema21": 495.6,
@@ -5137,7 +5084,7 @@
     {
      "date": "2026-08-19",
      "o": 486.08,
-     "h": 487.0,
+     "h": 487,
      "l": 462.55,
      "c": 466.42,
      "v": 19208418,
@@ -5171,7 +5118,7 @@
      "date": "2026-08-24",
      "o": 468.54,
      "h": 468.54,
-     "l": 451.0,
+     "l": 451,
      "c": 456.75,
      "v": 16602165,
      "ema8": 474.96,
@@ -5203,7 +5150,7 @@
     {
      "date": "2026-08-27",
      "o": 481.5,
-     "h": 483.0,
+     "h": 483,
      "l": 469.63,
      "c": 476.67,
      "v": 16441821,
@@ -5268,14 +5215,14 @@
     },
     {
      "date": "2026-09-04",
-     "o": 462.0,
+     "o": 462,
      "h": 478.83,
-     "l": 458.0,
+     "l": 458,
      "c": 477.57,
      "v": 19678742,
      "ema8": 467.78,
      "ema21": 475.5,
-     "sma200": 341.0
+     "sma200": 341
     },
     {
      "date": "2026-09-08",
@@ -5423,7 +5370,7 @@
     {
      "date": "2026-09-25",
      "o": 634.53,
-     "h": 639.0,
+     "h": 639,
      "l": 625.52,
      "c": 630.63,
      "v": 17632078,
@@ -5501,7 +5448,7 @@
      "date": "2026-10-06",
      "o": 648.04,
      "h": 658.52,
-     "l": 628.0,
+     "l": 628,
      "c": 649.42,
      "v": 24245863,
      "ema8": 623.67,
@@ -5534,7 +5481,7 @@
      "date": "2026-10-09",
      "o": 626.89,
      "h": 627.37,
-     "l": 606.0,
+     "l": 606,
      "c": 608.1,
      "v": 13733349,
      "ema8": 622.68,
@@ -5549,7 +5496,7 @@
      "c": 594.24,
      "v": 15379883,
      "ema8": 616.36,
-     "ema21": 595.0,
+     "ema21": 595,
      "sma200": 387.22
     },
     {
@@ -5567,7 +5514,7 @@
      "date": "2026-10-14",
      "o": 589.57,
      "h": 591.88,
-     "l": 567.0,
+     "l": 567,
      "c": 570.82,
      "v": 22319485,
      "ema8": 604.37,
@@ -5576,155 +5523,16 @@
     },
     {
      "date": "2026-10-15",
-     "o": 540.0,
+     "o": 540,
      "h": 568.62,
      "l": 530.09,
      "c": 562.23,
      "v": 28834576,
-     "ema8": 595.0,
+     "ema8": 595,
      "ema21": 590.82,
      "sma200": 392.68
     }
-   ],
-   "levels": {
-    "spot": 562.23,
-    "ema8": 595.0034,
-    "ema21": 590.815,
-    "sma200": 392.6803,
-    "as_of": "2026-10-15",
-    "source": "daily historicals day + get_equity_quotes (Oct 9 close)"
-   },
-   "chips": [
-    "MIXED",
-    "MED"
-   ],
-   "net_premium": {
-    "raw": "~$15.6M",
-    "usd": 15600000.0,
-    "source_print": "Desk A Subs W2 · **>$12M** · 4000× Oct30 (W) calls (2026-10-07); **~$15.6M** · 2500× April short puts (2026-10-05)"
-   },
-   "desk_analysis": "Fresh Desk A size put sale capturing earnings week, on top of last week's >$12M weekly calls and $15.6M April put sale Mixed: vs EMA8 $595.00 / EMA21 $590.83: below 8, below 21; vs 200-MA $392.68: well above (~+36%); weekly RSI ~67.",
-   "panels": {
-    "trade_summary": {
-     "status": "real",
-     "structure": "mixed (put-sale + calls)",
-     "why": "Fresh Desk A size put sale capturing earnings week, on top of last week's >$12M weekly calls and $15.6M April put sale",
-     "top_prints": [
-      "Desk A Subs · **~$3.3M** · 1500× Nov 6 (W) short puts open @$22, captures earnings week (2026-10-16)",
-      "Desk A Subs W2 · **>$12M** · 4000× Oct30 (W) calls (2026-10-07); **~$15.6M** · 2500× April short puts (2026-10-05)"
-     ],
-     "net_premium": {
-      "raw": "~$15.6M",
-      "usd": 15600000.0,
-      "source_print": "Desk A Subs W2 · **>$12M** · 4000× Oct30 (W) calls (2026-10-07); **~$15.6M** · 2500× April short puts (2026-10-05)"
-     },
-     "confidence": "Med"
-    },
-    "iv_catalyst": {
-     "status": "open",
-     "summary": "IV not on desk for this name.",
-     "note": "No invented IV — label OPEN until dossier/Trade Card carries it."
-    },
-    "oi_levels": {
-     "status": "not_on_desk",
-     "summary": "OI levels not on desk.",
-     "as_of": null,
-     "note": "Placeholder until an OI read is on desk.",
-     "source": null,
-     "monthly_opex": {
-      "status": "not_on_desk",
-      "label": "Monthly OpEx",
-      "expiry": null,
-      "walls": null,
-      "floors": null,
-      "pins": null,
-      "dealer_positioning": null,
-      "summary": "NOT ON DESK — no OI read for this horizon.",
-      "gamma": null,
-      "vanna": null,
-      "gamma_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "vanna_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "gamma_pos": [],
-      "gamma_neg": [],
-      "vanna_pos": [],
-      "vanna_neg": [],
-      "note": null
-     },
-     "all_expiry": {
-      "status": "not_on_desk",
-      "label": "All expiry",
-      "expiry": null,
-      "walls": null,
-      "floors": null,
-      "pins": null,
-      "dealer_positioning": null,
-      "summary": "NOT ON DESK — no OI read for this horizon.",
-      "gamma": null,
-      "vanna": null,
-      "gamma_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "vanna_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "gamma_pos": [],
-      "gamma_neg": [],
-      "vanna_pos": [],
-      "vanna_neg": [],
-      "note": null
-     }
-    },
-    "technical": {
-     "status": "real",
-     "tech_why": "Mixed: vs EMA8 $595.00 / EMA21 $590.83: below 8, below 21; vs 200-MA $392.68: well above (~+36%); weekly RSI ~67.",
-     "technicals_note": "vs EMA8 **$595.00** / EMA21 **$590.83**: **below 8, below 21** · vs 200-MA **$392.68**: **well above (~+36%)** · weekly RSI **~67** · earnings: **week of Nov 6** (per Desk A post)",
-     "levels": {
-      "spot": 562.23,
-      "ema8": 595.0034,
-      "ema21": 590.815,
-      "sma200": 392.6803,
-      "as_of": "2026-10-15",
-      "source": "daily historicals day + get_equity_quotes (Oct 9 close)"
-     },
-     "tech_score": 55
-    },
-    "fundamental": {
-     "status": "open",
-     "summary": "No fundamental profile on dossier — thesis is flow/team only."
-    },
-    "spotlight": null,
-    "thesis_one_liner": null
-   },
-   "thesis_one_liner": null,
-   "top_print": "Desk A Subs · **~$3.3M** · 1500× Nov 6 (W) short puts open @$22, captures earnings week (2026-10-16)",
-   "trade_lines": [
-    {
-     "kind": "put",
-     "label": "Put strike",
-     "value": 580,
-     "note": "Apr $580p sold"
-    },
-    {
-     "kind": "call",
-     "label": "Call strike",
-     "value": 640,
-     "note": "Oct30 (W) $640c"
-    }
-   ],
-   "vol_oi": {
-    "contract": "AMD Oct30'26 $640C",
-    "volume": 472,
-    "oi": 6621,
-    "as_of": "2026-10-09 (option quotes, Oct 9 session)"
-   }
+   ]
   },
   {
    "rank": 4,
@@ -5734,15 +5542,74 @@
    "tech": 45,
    "structure_bias": "mixed (put-sale + calls)",
    "put_sale_only": false,
-   "why": "Three sources line up: Desk A ~$8M Dec put sale (Scanner flag), freebie long-dated call buys, Desk B weekly calls into 10/28 earnings",
+   "why": "Three trades line up: a ~$8M December put sale Oct 12, long-dated call buys Oct 12, and weekly calls Oct 9 into 10/28 earnings",
+   "desk_analysis": "Three trades line up: a ~$8M December put sale Oct 12, long-dated call buys Oct 12, and weekly calls Oct 9 into 10/28 earnings",
    "confidence": "Med",
-   "spotlight": null,
-   "top_prints": [
-    "Desk A Subs · **~$8.0M** · 6000× December short puts open $13.60–13 (2026-10-12) — put-sale leg",
-    "Freebie · Sep'27 call BTO + Oct30W/Dec call buys + Nov bull risk reversal (2026-10-12, $ not stated); Desk B W2 **~$2.0M** · 3000× Oct30 (W) calls @$6.80 (2026-10-09)"
+   "chips": [
+    "MIXED",
+    "MED"
    ],
-   "technicals_note": "vs EMA8 **$345.46** / EMA21 **$343.75**: **below 8, below 21** · vs 200-MA **$339.02**: **kiss (~−1%)** · weekly RSI **~53** · earnings: **10/28** (per Desk B post)",
-   "tech_why": "Mixed: vs EMA8 $345.46 / EMA21 $343.75: below 8, below 21; vs 200-MA $339.02: kiss (~−1%); weekly RSI ~53.",
+   "net_premium": {
+    "raw": "~$8.0M",
+    "usd": 8000000,
+    "contracts": 6000,
+    "side": "collected"
+   },
+   "lead": {
+    "contract": "GOOG December puts · 6,000× sold to open",
+    "date": "2026-10-12"
+   },
+   "trades": [
+    {
+     "date": "2026-10-12",
+     "text": "**~$8.0M** · 6,000× December short puts open $13.60–13 (put-sale leg)"
+    },
+    {
+     "date": "2026-10-12",
+     "text": "Sep '27 call buy + Oct 30 (W) / December call buys + November bull risk reversal ($ not stated)"
+    },
+    {
+     "date": "2026-10-09",
+     "text": "**~$2.0M** · 3,000× Oct 30 (W) calls @ $6.80"
+    }
+   ],
+   "technicals": {
+    "grade": "Mixed",
+    "ema8": {
+     "value": 345.46,
+     "read": "Below"
+    },
+    "ema21": {
+     "value": 343.75,
+     "read": "Below"
+    },
+    "sma200": {
+     "value": 339.02,
+     "read": "Kiss (~−1%)"
+    },
+    "rsi_weekly": "~53"
+   },
+   "levels": {
+    "spot": 344.91,
+    "ema8": 345.4648,
+    "ema21": 343.5619,
+    "sma200": 339.0156,
+    "as_of": "2026-10-15",
+    "source": "Daily historicals"
+   },
+   "earnings": {
+    "past": [],
+    "next": {
+     "date": "2026-10-28",
+     "note": "Weekly calls bought into the print"
+    }
+   },
+   "thesis": null,
+   "trade_lines": [],
+   "vol_oi": null,
+   "iv": null,
+   "oi_levels": null,
+   "fundamental": null,
    "candles": [
     {
      "date": "2026-09-03",
@@ -5845,7 +5712,7 @@
     },
     {
      "date": "2026-09-17",
-     "o": 345.0,
+     "o": 345,
      "h": 345.96,
      "l": 340.5,
      "c": 343.68,
@@ -5900,7 +5767,7 @@
     },
     {
      "date": "2026-09-24",
-     "o": 333.0,
+     "o": 333,
      "h": 339.31,
      "l": 332.81,
      "c": 339.01,
@@ -6021,7 +5888,7 @@
     },
     {
      "date": "2026-10-09",
-     "o": 348.0,
+     "o": 348,
      "h": 351.06,
      "l": 346.88,
      "c": 347.86,
@@ -6119,7 +5986,7 @@
     {
      "date": "2026-04-15",
      "o": 330.56,
-     "h": 335.0,
+     "h": 335,
      "l": 328.66,
      "c": 334.47,
      "v": 15104096,
@@ -6183,7 +6050,7 @@
      "l": 335.06,
      "c": 337.75,
      "v": 13442135,
-     "ema8": 332.0,
+     "ema8": 332,
      "ema21": 320.06
     },
     {
@@ -6308,7 +6175,7 @@
     },
     {
      "date": "2026-05-12",
-     "o": 385.0,
+     "o": 385,
      "h": 386.44,
      "l": 379.72,
      "c": 383.82,
@@ -6361,7 +6228,7 @@
      "date": "2026-05-19",
      "o": 393.3,
      "h": 393.36,
-     "l": 383.0,
+     "l": 383,
      "c": 384.9,
      "v": 25559382,
      "ema8": 389.5,
@@ -6372,7 +6239,7 @@
      "date": "2026-05-20",
      "o": 385.04,
      "h": 390.7,
-     "l": 380.0,
+     "l": 380,
      "c": 384.9,
      "v": 16488132,
      "ema8": 388.48,
@@ -6403,7 +6270,7 @@
     },
     {
      "date": "2026-05-26",
-     "o": 381.0,
+     "o": 381,
      "h": 385.39,
      "l": 379.14,
      "c": 384.84,
@@ -6416,7 +6283,7 @@
      "date": "2026-05-27",
      "o": 382.76,
      "h": 389.73,
-     "l": 382.0,
+     "l": 382,
      "c": 384.83,
      "v": 16893148,
      "ema8": 385.29,
@@ -6426,7 +6293,7 @@
     {
      "date": "2026-05-28",
      "o": 383.86,
-     "h": 390.0,
+     "h": 390,
      "l": 381.25,
      "c": 386.12,
      "v": 20795414,
@@ -6460,7 +6327,7 @@
      "date": "2026-06-02",
      "o": 363.16,
      "h": 369.79,
-     "l": 355.0,
+     "l": 355,
      "c": 358.39,
      "v": 34648621,
      "ema8": 376.01,
@@ -6485,7 +6352,7 @@
      "l": 354.8,
      "c": 369.27,
      "v": 37746166,
-     "ema8": 371.0,
+     "ema8": 371,
      "ema21": 373.72,
      "sma200": 302.86
     },
@@ -6497,7 +6364,7 @@
      "c": 365.76,
      "v": 23411519,
      "ema8": 369.84,
-     "ema21": 373.0,
+     "ema21": 373,
      "sma200": 303.68
     },
     {
@@ -6591,7 +6458,7 @@
     {
      "date": "2026-06-18",
      "o": 363.89,
-     "h": 369.0,
+     "h": 369,
      "l": 356.61,
      "c": 367.46,
      "v": 29339118,
@@ -6812,7 +6679,7 @@
      "date": "2026-07-20",
      "o": 350.17,
      "h": 359.49,
-     "l": 350.0,
+     "l": 350,
      "c": 351.37,
      "v": 13203263,
      "ema8": 354.4,
@@ -6883,7 +6750,7 @@
      "v": 20986949,
      "ema8": 334.69,
      "ema21": 344.87,
-     "sma200": 324.0
+     "sma200": 324
     },
     {
      "date": "2026-07-29",
@@ -6942,7 +6809,7 @@
     },
     {
      "date": "2026-08-05",
-     "o": 380.0,
+     "o": 380,
      "h": 381.81,
      "l": 355.16,
      "c": 360.13,
@@ -6986,10 +6853,10 @@
     },
     {
      "date": "2026-08-11",
-     "o": 354.0,
-     "h": 355.0,
+     "o": 354,
+     "h": 355,
      "l": 342.57,
-     "c": 343.0,
+     "c": 343,
      "v": 18390185,
      "ema8": 352.34,
      "ema21": 350.87,
@@ -7068,7 +6935,7 @@
      "l": 336.17,
      "c": 338.2,
      "v": 14187720,
-     "ema8": 343.0,
+     "ema8": 343,
      "ema21": 346.31,
      "sma200": 331.78
     },
@@ -7272,7 +7139,7 @@
     },
     {
      "date": "2026-09-17",
-     "o": 345.0,
+     "o": 345,
      "h": 345.96,
      "l": 340.5,
      "c": 343.68,
@@ -7327,7 +7194,7 @@
     },
     {
      "date": "2026-09-24",
-     "o": 333.0,
+     "o": 333,
      "h": 339.31,
      "l": 332.81,
      "c": 339.01,
@@ -7448,7 +7315,7 @@
     },
     {
      "date": "2026-10-09",
-     "o": 348.0,
+     "o": 348,
      "h": 351.06,
      "l": 346.88,
      "c": 347.86,
@@ -7501,128 +7368,7 @@
      "ema21": 343.56,
      "sma200": 339.02
     }
-   ],
-   "levels": {
-    "spot": 344.91,
-    "ema8": 345.4648,
-    "ema21": 343.5619,
-    "sma200": 339.0156,
-    "as_of": "2026-10-15",
-    "source": "daily historicals day + get_equity_quotes (Oct 9 close)"
-   },
-   "chips": [
-    "MIXED",
-    "MED"
-   ],
-   "net_premium": {
-    "raw": "~$8.0M",
-    "usd": 8000000.0,
-    "source_print": "Desk A Subs · **~$8.0M** · 6000× December short puts open $13.60–13 (2026-10-12) — put-sale leg"
-   },
-   "desk_analysis": "Three sources line up: Desk A ~$8M Dec put sale (Scanner flag), freebie long-dated call buys, Desk B weekly calls into 10/28 earnings Mixed: vs EMA8 $345.46 / EMA21 $343.75: below 8, below 21; vs 200-MA $339.02: kiss (~−1%); weekly RSI ~53.",
-   "panels": {
-    "trade_summary": {
-     "status": "real",
-     "structure": "mixed (put-sale + calls)",
-     "why": "Three sources line up: Desk A ~$8M Dec put sale (Scanner flag), freebie long-dated call buys, Desk B weekly calls into 10/28 earnings",
-     "top_prints": [
-      "Desk A Subs · **~$8.0M** · 6000× December short puts open $13.60–13 (2026-10-12) — put-sale leg",
-      "Freebie · Sep'27 call BTO + Oct30W/Dec call buys + Nov bull risk reversal (2026-10-12, $ not stated); Desk B W2 **~$2.0M** · 3000× Oct30 (W) calls @$6.80 (2026-10-09)"
-     ],
-     "net_premium": {
-      "raw": "~$8.0M",
-      "usd": 8000000.0,
-      "source_print": "Desk A Subs · **~$8.0M** · 6000× December short puts open $13.60–13 (2026-10-12) — put-sale leg"
-     },
-     "confidence": "Med"
-    },
-    "iv_catalyst": {
-     "status": "open",
-     "summary": "IV not on desk for this name.",
-     "note": "No invented IV — label OPEN until dossier/Trade Card carries it."
-    },
-    "oi_levels": {
-     "status": "not_on_desk",
-     "summary": "OI levels not on desk.",
-     "as_of": null,
-     "note": "Placeholder until an OI read is on desk.",
-     "source": null,
-     "monthly_opex": {
-      "status": "not_on_desk",
-      "label": "Monthly OpEx",
-      "expiry": null,
-      "walls": null,
-      "floors": null,
-      "pins": null,
-      "dealer_positioning": null,
-      "summary": "NOT ON DESK — no OI read for this horizon.",
-      "gamma": null,
-      "vanna": null,
-      "gamma_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "vanna_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "gamma_pos": [],
-      "gamma_neg": [],
-      "vanna_pos": [],
-      "vanna_neg": [],
-      "note": null
-     },
-     "all_expiry": {
-      "status": "not_on_desk",
-      "label": "All expiry",
-      "expiry": null,
-      "walls": null,
-      "floors": null,
-      "pins": null,
-      "dealer_positioning": null,
-      "summary": "NOT ON DESK — no OI read for this horizon.",
-      "gamma": null,
-      "vanna": null,
-      "gamma_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "vanna_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "gamma_pos": [],
-      "gamma_neg": [],
-      "vanna_pos": [],
-      "vanna_neg": [],
-      "note": null
-     }
-    },
-    "technical": {
-     "status": "real",
-     "tech_why": "Mixed: vs EMA8 $345.46 / EMA21 $343.75: below 8, below 21; vs 200-MA $339.02: kiss (~−1%); weekly RSI ~53.",
-     "technicals_note": "vs EMA8 **$345.46** / EMA21 **$343.75**: **below 8, below 21** · vs 200-MA **$339.02**: **kiss (~−1%)** · weekly RSI **~53** · earnings: **10/28** (per Desk B post)",
-     "levels": {
-      "spot": 344.91,
-      "ema8": 345.4648,
-      "ema21": 343.5619,
-      "sma200": 339.0156,
-      "as_of": "2026-10-15",
-      "source": "daily historicals day + get_equity_quotes (Oct 9 close)"
-     },
-     "tech_score": 45
-    },
-    "fundamental": {
-     "status": "open",
-     "summary": "No fundamental profile on dossier — thesis is flow/team only."
-    },
-    "spotlight": null,
-    "thesis_one_liner": null
-   },
-   "thesis_one_liner": null,
-   "top_print": "Desk A Subs · **~$8.0M** · 6000× December short puts open $13.60–13 (2026-10-12) — put-sale leg",
-   "trade_lines": [],
-   "vol_oi": null
+   ]
   },
   {
    "rank": 5,
@@ -7632,15 +7378,73 @@
    "tech": 55,
    "structure_bias": "short puts",
    "put_sale_only": true,
-   "why": "Desk A's $13.3M January put sale into earnings, then Desk B calls it a decent spot to sell puts after the record quarter — put-sale only, not a long",
+   "why": "$13.3M January put sale Oct 14 into earnings, then a follow-up Oct 15 calling it a decent spot to sell puts after the record quarter — put-sale only, not a long",
+   "desk_analysis": "$13.3M January put sale Oct 14 into earnings, then a follow-up Oct 15 calling it a decent spot to sell puts after the record quarter — put-sale only, not a long",
    "confidence": "Med",
-   "spotlight": null,
-   "top_prints": [
-    "Desk A Subs · **~$13.3M** · 9900× January 2027 short puts open @$13.52 into earnings (2026-10-14); also 800× April short puts @21.85 same day",
-    "Desk B · \"decent spot to sell puts\" after record quarter, citing Desk A's print (2026-10-15)"
+   "chips": [
+    "PUTS",
+    "MED",
+    "PUT-SALE ONLY"
    ],
-   "technicals_note": "vs EMA8 **$443.97** / EMA21 **$447.21**: **below 8, below 21** · vs 200-MA **$394.48**: **above (~+4%)** · weekly RSI **~63** · earnings: **reported 10/15** (record quarter per Desk B)",
-   "tech_why": "Mixed: vs EMA8 $443.97 / EMA21 $447.21: below 8, below 21; vs 200-MA $394.48: above (~+4%); weekly RSI ~63.",
+   "net_premium": {
+    "raw": "~$13.3M",
+    "usd": 13300000,
+    "contracts": 9900,
+    "side": "collected"
+   },
+   "lead": {
+    "contract": "TSM January 2027 puts · 9,900× sold to open @ $13.52",
+    "date": "2026-10-14"
+   },
+   "trades": [
+    {
+     "date": "2026-10-15",
+     "text": "Follow-up: \"decent spot to sell puts\" after the record quarter"
+    },
+    {
+     "date": "2026-10-14",
+     "text": "**~$13.3M** · 9,900× January 2027 short puts open @ $13.52 into earnings; also 800× April short puts @ $21.85"
+    }
+   ],
+   "technicals": {
+    "grade": "Mixed",
+    "ema8": {
+     "value": 443.97,
+     "read": "Below"
+    },
+    "ema21": {
+     "value": 447.21,
+     "read": "Below"
+    },
+    "sma200": {
+     "value": 394.48,
+     "read": "Above (~+4%)"
+    },
+    "rsi_weekly": "~63"
+   },
+   "levels": {
+    "spot": 422.25,
+    "ema8": 443.9676,
+    "ema21": 447.1577,
+    "sma200": 394.4815,
+    "as_of": "2026-10-15",
+    "source": "Daily historicals"
+   },
+   "earnings": {
+    "past": [
+     {
+      "date": "2026-10-15",
+      "note": "Record quarter"
+     }
+    ],
+    "next": null
+   },
+   "thesis": null,
+   "trade_lines": [],
+   "vol_oi": null,
+   "iv": null,
+   "oi_levels": null,
+   "fundamental": null,
    "candles": [
     {
      "date": "2026-09-03",
@@ -7669,7 +7473,7 @@
      "o": 435.48,
      "h": 444.29,
      "l": 433.72,
-     "c": 439.0,
+     "c": 439,
      "v": 13088876,
      "ema8": 423.89,
      "ema21": 420.29,
@@ -7779,7 +7583,7 @@
      "o": 441.22,
      "h": 452.88,
      "l": 441.2,
-     "c": 452.0,
+     "c": 452,
      "v": 11255993,
      "ema8": 435.24,
      "ema21": 427.85,
@@ -7887,7 +7691,7 @@
     {
      "date": "2026-10-06",
      "o": 484.23,
-     "h": 486.0,
+     "h": 486,
      "l": 481.48,
      "c": 482.3,
      "v": 8346202,
@@ -7955,7 +7759,7 @@
      "o": 436.25,
      "h": 440.39,
      "l": 428.06,
-     "c": 430.0,
+     "c": 430,
      "v": 15167153,
      "ema8": 450.17,
      "ema21": 449.65,
@@ -7987,7 +7791,7 @@
     {
      "date": "2026-04-10",
      "o": 375.59,
-     "h": 378.0,
+     "h": 378,
      "l": 369.75,
      "c": 370.6,
      "v": 13168160,
@@ -8177,7 +7981,7 @@
     {
      "date": "2026-05-07",
      "o": 418.09,
-     "h": 420.0,
+     "h": 420,
      "l": 408.11,
      "c": 414.15,
      "v": 13403164,
@@ -8187,7 +7991,7 @@
     {
      "date": "2026-05-08",
      "o": 416.95,
-     "h": 417.0,
+     "h": 417,
      "l": 400.88,
      "c": 411.68,
      "v": 18531181,
@@ -8268,7 +8072,7 @@
     },
     {
      "date": "2026-05-20",
-     "o": 397.0,
+     "o": 397,
      "h": 403.88,
      "l": 395.95,
      "c": 401.62,
@@ -8543,7 +8347,7 @@
     },
     {
      "date": "2026-06-26",
-     "o": 425.0,
+     "o": 425,
      "h": 436.13,
      "l": 419.19,
      "c": 432.35,
@@ -8554,7 +8358,7 @@
     },
     {
      "date": "2026-06-29",
-     "o": 437.0,
+     "o": 437,
      "h": 456.1,
      "l": 431.09,
      "c": 455.1,
@@ -8566,8 +8370,8 @@
     {
      "date": "2026-06-30",
      "o": 455.61,
-     "h": 479.0,
-     "l": 453.0,
+     "h": 479,
+     "l": 453,
      "c": 477.57,
      "v": 15074276,
      "ema8": 449.85,
@@ -8620,7 +8424,7 @@
     },
     {
      "date": "2026-07-08",
-     "o": 429.0,
+     "o": 429,
      "h": 440.49,
      "l": 428.75,
      "c": 436.98,
@@ -8774,7 +8578,7 @@
     },
     {
      "date": "2026-07-28",
-     "o": 385.0,
+     "o": 385,
      "h": 395.36,
      "l": 381.3,
      "c": 392.31,
@@ -8829,7 +8633,7 @@
     },
     {
      "date": "2026-08-04",
-     "o": 418.0,
+     "o": 418,
      "h": 420.25,
      "l": 412.11,
      "c": 417.17,
@@ -8843,7 +8647,7 @@
      "o": 419.32,
      "h": 426.3,
      "l": 413.07,
-     "c": 414.0,
+     "c": 414,
      "v": 12790436,
      "ema8": 407.54,
      "ema21": 412.33,
@@ -8875,7 +8679,7 @@
      "date": "2026-08-10",
      "o": 420.34,
      "h": 425.88,
-     "l": 416.0,
+     "l": 416,
      "c": 418.47,
      "v": 11776122,
      "ema8": 413.56,
@@ -8939,7 +8743,7 @@
     },
     {
      "date": "2026-08-18",
-     "o": 417.0,
+     "o": 417,
      "h": 419.63,
      "l": 410.76,
      "c": 413.41,
@@ -8964,7 +8768,7 @@
      "o": 408.6,
      "h": 417.96,
      "l": 407.72,
-     "c": 416.0,
+     "c": 416,
      "v": 10447899,
      "ema8": 418.85,
      "ema21": 417.97,
@@ -9052,7 +8856,7 @@
      "o": 417.8,
      "h": 418.62,
      "l": 412.06,
-     "c": 414.0,
+     "c": 414,
      "v": 7928439,
      "ema8": 417.26,
      "ema21": 417.59,
@@ -9096,7 +8900,7 @@
      "o": 435.48,
      "h": 444.29,
      "l": 433.72,
-     "c": 439.0,
+     "c": 439,
      "v": 13088876,
      "ema8": 423.89,
      "ema21": 420.29,
@@ -9206,7 +9010,7 @@
      "o": 441.22,
      "h": 452.88,
      "l": 441.2,
-     "c": 452.0,
+     "c": 452,
      "v": 11255993,
      "ema8": 435.24,
      "ema21": 427.85,
@@ -9314,7 +9118,7 @@
     {
      "date": "2026-10-06",
      "o": 484.23,
-     "h": 486.0,
+     "h": 486,
      "l": 481.48,
      "c": 482.3,
      "v": 8346202,
@@ -9382,7 +9186,7 @@
      "o": 436.25,
      "h": 440.39,
      "l": 428.06,
-     "c": 430.0,
+     "c": 430,
      "v": 15167153,
      "ema8": 450.17,
      "ema21": 449.65,
@@ -9399,129 +9203,7 @@
      "ema21": 447.16,
      "sma200": 394.48
     }
-   ],
-   "levels": {
-    "spot": 422.25,
-    "ema8": 443.9676,
-    "ema21": 447.1577,
-    "sma200": 394.4815,
-    "as_of": "2026-10-15",
-    "source": "Daily historicals"
-   },
-   "chips": [
-    "PUTS",
-    "MED",
-    "PUT-SALE ONLY"
-   ],
-   "net_premium": {
-    "raw": "~$13.3M",
-    "usd": 13300000.0,
-    "source_print": "Desk A Subs · **~$13.3M** · 9900× January 2027 short puts open @$13.52 into earnings (2026-10-14); also 800× April short puts @21.85 same day"
-   },
-   "desk_analysis": "Desk A's $13.3M January put sale into earnings, then Desk B calls it a decent spot to sell puts after the record quarter — put-sale only, not a long Mixed: vs EMA8 $443.97 / EMA21 $447.21: below 8, below 21; vs 200-MA $394.48: above (~+4%); weekly RSI ~63.",
-   "panels": {
-    "trade_summary": {
-     "status": "real",
-     "structure": "short puts",
-     "why": "Desk A's $13.3M January put sale into earnings, then Desk B calls it a decent spot to sell puts after the record quarter — put-sale only, not a long",
-     "top_prints": [
-      "Desk A Subs · **~$13.3M** · 9900× January 2027 short puts open @$13.52 into earnings (2026-10-14); also 800× April short puts @21.85 same day",
-      "Desk B · \"decent spot to sell puts\" after record quarter, citing Desk A's print (2026-10-15)"
-     ],
-     "net_premium": {
-      "raw": "~$13.3M",
-      "usd": 13300000.0,
-      "source_print": "Desk A Subs · **~$13.3M** · 9900× January 2027 short puts open @$13.52 into earnings (2026-10-14); also 800× April short puts @21.85 same day"
-     },
-     "confidence": "Med"
-    },
-    "iv_catalyst": {
-     "status": "open",
-     "summary": "IV not on desk for this name.",
-     "note": "No invented IV — label OPEN until dossier/Trade Card carries it."
-    },
-    "oi_levels": {
-     "status": "not_on_desk",
-     "summary": "OI levels not on desk.",
-     "as_of": null,
-     "note": "Placeholder until an OI read is on desk.",
-     "source": null,
-     "monthly_opex": {
-      "status": "not_on_desk",
-      "label": "Monthly OpEx",
-      "expiry": null,
-      "walls": null,
-      "floors": null,
-      "pins": null,
-      "dealer_positioning": null,
-      "summary": "NOT ON DESK — no OI read for this horizon.",
-      "gamma": null,
-      "vanna": null,
-      "gamma_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "vanna_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "gamma_pos": [],
-      "gamma_neg": [],
-      "vanna_pos": [],
-      "vanna_neg": [],
-      "note": null
-     },
-     "all_expiry": {
-      "status": "not_on_desk",
-      "label": "All expiry",
-      "expiry": null,
-      "walls": null,
-      "floors": null,
-      "pins": null,
-      "dealer_positioning": null,
-      "summary": "NOT ON DESK — no OI read for this horizon.",
-      "gamma": null,
-      "vanna": null,
-      "gamma_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "vanna_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "gamma_pos": [],
-      "gamma_neg": [],
-      "vanna_pos": [],
-      "vanna_neg": [],
-      "note": null
-     }
-    },
-    "technical": {
-     "status": "real",
-     "tech_why": "Mixed: vs EMA8 $443.97 / EMA21 $447.21: below 8, below 21; vs 200-MA $394.48: above (~+4%); weekly RSI ~63.",
-     "technicals_note": "vs EMA8 **$443.97** / EMA21 **$447.21**: **below 8, below 21** · vs 200-MA **$394.48**: **above (~+4%)** · weekly RSI **~63** · earnings: **reported 10/15** (record quarter per Desk B)",
-     "levels": {
-      "spot": 422.25,
-      "ema8": 443.9676,
-      "ema21": 447.1577,
-      "sma200": 394.4815,
-      "as_of": "2026-10-15",
-      "source": "Daily historicals"
-     },
-     "tech_score": 55
-    },
-    "fundamental": {
-     "status": "open",
-     "summary": "No fundamental profile on dossier — thesis is flow/team only."
-    },
-    "spotlight": null,
-    "thesis_one_liner": null
-   },
-   "thesis_one_liner": null,
-   "top_print": "Desk A Subs · **~$13.3M** · 9900× January 2027 short puts open @$13.52 into earnings (2026-10-14); also 800× April short puts @21.85 same day",
-   "trade_lines": [],
-   "vol_oi": null
+   ]
   },
   {
    "rank": 6,
@@ -9531,20 +9213,97 @@
    "tech": 73,
    "structure_bias": "mixed (calls + put-sale)",
    "put_sale_only": false,
-   "why": "Last week's #1 holds on aged W2 flow because the tape is one of the few still above 21/200 into the 10/22 print",
+   "why": "Last week's #1 holds on Oct 6–7 flow because the tape is one of the few still above the 21 and 200 into the 10/22 print",
+   "desk_analysis": "Last week's #1 holds on Oct 6–7 flow because the tape is one of the few still above the 21 and 200 into the 10/22 print",
    "confidence": "Med",
-   "spotlight": null,
-   "top_prints": [
-    "Desk A Subs W2 · **~$1.6M** · 1500× Oct23 (W) calls into 10/22 earnings (2026-10-06)",
-    "Desk A Subs W2 · **~$1.9M** · 750× March far-OTM calls (2026-10-07); **~$4.2M** · 725× Jan'29 short puts (2026-10-07, put-sale leg)"
+   "chips": [
+    "MIXED",
+    "MED"
    ],
-   "technicals_note": "vs EMA8 **$521.42** / EMA21 **$515.64**: **kiss 8, above 21** · vs 200-MA **$497.60**: **above (~+5%)** · weekly RSI **~53** · earnings: **10/22** (per Desk A post)",
-   "tech_why": "Strong: vs EMA8 $521.42 / EMA21 $515.64: kiss 8, above 21; vs 200-MA $497.60: above (~+5%); weekly RSI ~53.",
+   "net_premium": {
+    "raw": "~$4.2M",
+    "usd": 4200000,
+    "contracts": 725,
+    "side": "collected"
+   },
+   "lead": {
+    "contract": "SPOT Jan '29 puts · 725× sold to open",
+    "date": "2026-10-07"
+   },
+   "trades": [
+    {
+     "date": "2026-10-07",
+     "text": "**~$4.2M** · 725× Jan '29 short puts (put-sale leg)"
+    },
+    {
+     "date": "2026-10-07",
+     "text": "**~$1.9M** · 750× March far-OTM calls"
+    },
+    {
+     "date": "2026-10-06",
+     "text": "**~$1.6M** · 1,500× Oct 23 (W) calls into 10/22 earnings"
+    }
+   ],
+   "technicals": {
+    "grade": "Strong",
+    "ema8": {
+     "value": 521.42,
+     "read": "Kiss"
+    },
+    "ema21": {
+     "value": 515.64,
+     "read": "Above"
+    },
+    "sma200": {
+     "value": 497.6,
+     "read": "Above (~+5%)"
+    },
+    "rsi_weekly": "~53"
+   },
+   "levels": {
+    "spot": 533.37,
+    "ema8": 521.4185,
+    "ema21": 516.0049,
+    "sma200": 497.6014,
+    "as_of": "2026-10-15",
+    "source": "Daily historicals"
+   },
+   "earnings": {
+    "past": [],
+    "next": {
+     "date": "2026-10-22",
+     "note": "Weekly calls bought into the print"
+    }
+   },
+   "thesis": null,
+   "trade_lines": [
+    {
+     "kind": "call",
+     "label": "Call strike",
+     "value": 535,
+     "note": "Oct23'26 (W) $535c bought"
+    },
+    {
+     "kind": "call",
+     "label": "Call strike",
+     "value": 630,
+     "note": "Mar19'27 $630c far OTM"
+    }
+   ],
+   "vol_oi": {
+    "contract": "SPOT Oct23'26 $535C",
+    "volume": 16,
+    "oi": 1515,
+    "as_of": "2026-10-09 (option quotes, Oct 9 session)"
+   },
+   "iv": null,
+   "oi_levels": null,
+   "fundamental": null,
    "candles": [
     {
      "date": "2026-09-03",
-     "o": 565.0,
-     "h": 576.0,
+     "o": 565,
+     "h": 576,
      "l": 558.05,
      "c": 560.11,
      "v": 1609549,
@@ -9579,7 +9338,7 @@
      "o": 526.69,
      "h": 533.8,
      "l": 521.58,
-     "c": 523.0,
+     "c": 523,
      "v": 1454610,
      "ema8": 537.98,
      "ema21": 530.07,
@@ -9710,7 +9469,7 @@
      "date": "2026-09-25",
      "o": 509.75,
      "h": 514.6,
-     "l": 506.0,
+     "l": 506,
      "c": 510.01,
      "v": 840640,
      "ema8": 516.59,
@@ -9721,7 +9480,7 @@
      "date": "2026-09-28",
      "o": 507.03,
      "h": 507.03,
-     "l": 497.0,
+     "l": 497,
      "c": 497.51,
      "v": 1256361,
      "ema8": 512.35,
@@ -9731,7 +9490,7 @@
     {
      "date": "2026-09-29",
      "o": 499.74,
-     "h": 501.0,
+     "h": 501,
      "l": 488.52,
      "c": 493.66,
      "v": 1513335,
@@ -9742,7 +9501,7 @@
     {
      "date": "2026-09-30",
      "o": 491.4,
-     "h": 497.0,
+     "h": 497,
      "l": 486.64,
      "c": 487.38,
      "v": 1317920,
@@ -9787,7 +9546,7 @@
      "date": "2026-10-06",
      "o": 481.01,
      "h": 492.07,
-     "l": 478.0,
+     "l": 478,
      "c": 488.13,
      "v": 1133540,
      "ema8": 491.2,
@@ -9818,7 +9577,7 @@
     },
     {
      "date": "2026-10-09",
-     "o": 530.0,
+     "o": 530,
      "h": 540.82,
      "l": 522.94,
      "c": 529.14,
@@ -9829,8 +9588,8 @@
     },
     {
      "date": "2026-10-12",
-     "o": 530.0,
-     "h": 535.0,
+     "o": 530,
+     "h": 535,
      "l": 525.2,
      "c": 528.8,
      "v": 1029008,
@@ -9856,7 +9615,7 @@
      "l": 513.26,
      "c": 523.96,
      "v": 1448109,
-     "ema8": 518.0,
+     "ema8": 518,
      "ema21": 514.27,
      "sma200": 497.84
     },
@@ -9868,7 +9627,7 @@
      "c": 533.37,
      "v": 1614325,
      "ema8": 521.42,
-     "ema21": 516.0,
+     "ema21": 516,
      "sma200": 497.6
     }
    ],
@@ -9917,10 +9676,10 @@
      "date": "2026-04-15",
      "o": 516.9,
      "h": 537.8,
-     "l": 514.0,
+     "l": 514,
      "c": 531.17,
      "v": 2068832,
-     "ema8": 501.0,
+     "ema8": 501,
      "ema21": 495.05
     },
     {
@@ -9955,7 +9714,7 @@
     },
     {
      "date": "2026-04-21",
-     "o": 540.0,
+     "o": 540,
      "h": 541.99,
      "l": 521.91,
      "c": 522.44,
@@ -9966,8 +9725,8 @@
     {
      "date": "2026-04-22",
      "o": 523.25,
-     "h": 527.0,
-     "l": 508.0,
+     "h": 527,
+     "l": 508,
      "c": 522.88,
      "v": 1497824,
      "ema8": 520.58,
@@ -9975,8 +9734,8 @@
     },
     {
      "date": "2026-04-23",
-     "o": 523.0,
-     "h": 523.0,
+     "o": 523,
+     "h": 523,
      "l": 502.77,
      "c": 515.94,
      "v": 1628649,
@@ -9985,10 +9744,10 @@
     },
     {
      "date": "2026-04-24",
-     "o": 513.0,
-     "h": 521.0,
+     "o": 513,
+     "h": 521,
      "l": 506.55,
-     "c": 518.0,
+     "c": 518,
      "v": 1566221,
      "ema8": 519.2,
      "ema21": 509.63
@@ -10005,7 +9764,7 @@
     },
     {
      "date": "2026-04-28",
-     "o": 445.0,
+     "o": 445,
      "h": 448.8,
      "l": 420.53,
      "c": 434.2,
@@ -10016,7 +9775,7 @@
     {
      "date": "2026-04-29",
      "o": 434.15,
-     "h": 451.0,
+     "h": 451,
      "l": 430.84,
      "c": 443.57,
      "v": 3583365,
@@ -10027,7 +9786,7 @@
      "date": "2026-04-30",
      "o": 436.69,
      "h": 448.59,
-     "l": 433.0,
+     "l": 433,
      "c": 446.55,
      "v": 2166063,
      "ema8": 476.11,
@@ -10055,7 +9814,7 @@
     },
     {
      "date": "2026-05-05",
-     "o": 438.0,
+     "o": 438,
      "h": 438.48,
      "l": 413.89,
      "c": 419.53,
@@ -10096,7 +9855,7 @@
     {
      "date": "2026-05-11",
      "o": 415.01,
-     "h": 428.0,
+     "h": 428,
      "l": 412.99,
      "c": 419.5,
      "v": 1965720,
@@ -10106,7 +9865,7 @@
     {
      "date": "2026-05-12",
      "o": 422.55,
-     "h": 441.0,
+     "h": 441,
      "l": 420.65,
      "c": 432.75,
      "v": 1645952,
@@ -10145,7 +9904,7 @@
     },
     {
      "date": "2026-05-18",
-     "o": 434.0,
+     "o": 434,
      "h": 454.28,
      "l": 431.99,
      "c": 445.01,
@@ -10190,7 +9949,7 @@
     {
      "date": "2026-05-22",
      "o": 505.3,
-     "h": 534.0,
+     "h": 534,
      "l": 505.3,
      "c": 519.86,
      "v": 5287298,
@@ -10201,7 +9960,7 @@
     {
      "date": "2026-05-26",
      "o": 519.86,
-     "h": 534.0,
+     "h": 534,
      "l": 519.58,
      "c": 529.71,
      "v": 2630137,
@@ -10222,9 +9981,9 @@
     },
     {
      "date": "2026-05-28",
-     "o": 512.0,
+     "o": 512,
      "h": 527.74,
-     "l": 512.0,
+     "l": 512,
      "c": 516.71,
      "v": 1884542,
      "ema8": 493.07,
@@ -10233,14 +9992,14 @@
     },
     {
      "date": "2026-05-29",
-     "o": 515.0,
+     "o": 515,
      "h": 519.67,
      "l": 495.4,
      "c": 497.68,
      "v": 3399679,
      "ema8": 494.1,
      "ema21": 475.72,
-     "sma200": 571.0
+     "sma200": 571
     },
     {
      "date": "2026-06-01",
@@ -10257,7 +10016,7 @@
      "date": "2026-06-02",
      "o": 502.28,
      "h": 506.71,
-     "l": 491.0,
+     "l": 491,
      "c": 501.5,
      "v": 1426834,
      "ema8": 498.1,
@@ -10322,7 +10081,7 @@
     {
      "date": "2026-06-10",
      "o": 490.86,
-     "h": 513.0,
+     "h": 513,
      "l": 487.2,
      "c": 503.1,
      "v": 2533386,
@@ -10335,7 +10094,7 @@
      "o": 500.45,
      "h": 500.45,
      "l": 483.5,
-     "c": 486.0,
+     "c": 486,
      "v": 1861545,
      "ema8": 495.65,
      "ema21": 487.82,
@@ -10346,7 +10105,7 @@
      "o": 484.08,
      "h": 489.1,
      "l": 470.92,
-     "c": 482.0,
+     "c": 482,
      "v": 1944143,
      "ema8": 492.62,
      "ema21": 487.29,
@@ -10356,7 +10115,7 @@
      "date": "2026-06-15",
      "o": 479.62,
      "h": 490.27,
-     "l": 475.0,
+     "l": 475,
      "c": 479.85,
      "v": 1775938,
      "ema8": 489.78,
@@ -10432,7 +10191,7 @@
     {
      "date": "2026-06-25",
      "o": 451.77,
-     "h": 454.0,
+     "h": 454,
      "l": 440.41,
      "c": 441.21,
      "v": 1452407,
@@ -10464,7 +10223,7 @@
     },
     {
      "date": "2026-06-30",
-     "o": 455.0,
+     "o": 455,
      "h": 466.5,
      "l": 452.21,
      "c": 459.13,
@@ -10486,7 +10245,7 @@
     },
     {
      "date": "2026-07-02",
-     "o": 472.0,
+     "o": 472,
      "h": 489.94,
      "l": 467.54,
      "c": 485.97,
@@ -10498,7 +10257,7 @@
     {
      "date": "2026-07-06",
      "o": 480.06,
-     "h": 486.0,
+     "h": 486,
      "l": 474.48,
      "c": 483.01,
      "v": 1451081,
@@ -10508,7 +10267,7 @@
     },
     {
      "date": "2026-07-07",
-     "o": 495.0,
+     "o": 495,
      "h": 495.76,
      "l": 486.05,
      "c": 493.95,
@@ -10525,12 +10284,12 @@
      "c": 485.22,
      "v": 1688126,
      "ema8": 478.39,
-     "ema21": 475.0,
+     "ema21": 475,
      "sma200": 541.77
     },
     {
      "date": "2026-07-09",
-     "o": 470.0,
+     "o": 470,
      "h": 486.28,
      "l": 462.03,
      "c": 485.88,
@@ -10541,7 +10300,7 @@
     },
     {
      "date": "2026-07-10",
-     "o": 486.0,
+     "o": 486,
      "h": 493.39,
      "l": 476.71,
      "c": 479.77,
@@ -10598,7 +10357,7 @@
      "date": "2026-07-17",
      "o": 461.16,
      "h": 479.43,
-     "l": 456.0,
+     "l": 456,
      "c": 478.14,
      "v": 1740968,
      "ema8": 479.73,
@@ -10618,7 +10377,7 @@
     },
     {
      "date": "2026-07-21",
-     "o": 490.0,
+     "o": 490,
      "h": 495.96,
      "l": 486.01,
      "c": 493.23,
@@ -10629,7 +10388,7 @@
     },
     {
      "date": "2026-07-22",
-     "o": 490.0,
+     "o": 490,
      "h": 493.21,
      "l": 474.16,
      "c": 474.16,
@@ -10651,7 +10410,7 @@
     },
     {
      "date": "2026-07-24",
-     "o": 475.0,
+     "o": 475,
      "h": 487.56,
      "l": 471.49,
      "c": 482.66,
@@ -10684,7 +10443,7 @@
     },
     {
      "date": "2026-07-29",
-     "o": 510.0,
+     "o": 510,
      "h": 528.09,
      "l": 507.77,
      "c": 524.01,
@@ -10707,7 +10466,7 @@
     {
      "date": "2026-07-31",
      "o": 507.91,
-     "h": 520.0,
+     "h": 520,
      "l": 499.24,
      "c": 499.94,
      "v": 2296643,
@@ -10730,7 +10489,7 @@
      "date": "2026-08-04",
      "o": 466.95,
      "h": 505.32,
-     "l": 462.0,
+     "l": 462,
      "c": 478.17,
      "v": 4857530,
      "ema8": 494.16,
@@ -10740,7 +10499,7 @@
     {
      "date": "2026-08-05",
      "o": 488.57,
-     "h": 508.0,
+     "h": 508,
      "l": 482.17,
      "c": 482.23,
      "v": 2639732,
@@ -10785,8 +10544,8 @@
      "date": "2026-08-11",
      "o": 510.34,
      "h": 515.7,
-     "l": 497.0,
-     "c": 501.0,
+     "l": 497,
+     "c": 501,
      "v": 1715097,
      "ema8": 494.96,
      "ema21": 490.91,
@@ -10849,7 +10608,7 @@
     },
     {
      "date": "2026-08-19",
-     "o": 522.0,
+     "o": 522,
      "h": 541.87,
      "l": 520.89,
      "c": 533.37,
@@ -10860,7 +10619,7 @@
     },
     {
      "date": "2026-08-20",
-     "o": 537.0,
+     "o": 537,
      "h": 544.89,
      "l": 530.1,
      "c": 533.13,
@@ -10895,7 +10654,7 @@
      "date": "2026-08-25",
      "o": 532.62,
      "h": 554.25,
-     "l": 532.0,
+     "l": 532,
      "c": 552.57,
      "v": 1281036,
      "ema8": 529.38,
@@ -10904,7 +10663,7 @@
     },
     {
      "date": "2026-08-26",
-     "o": 550.0,
+     "o": 550,
      "h": 554.97,
      "l": 543.2,
      "c": 550.03,
@@ -10928,7 +10687,7 @@
      "date": "2026-08-28",
      "o": 532.41,
      "h": 553.29,
-     "l": 530.0,
+     "l": 530,
      "c": 547.51,
      "v": 1386990,
      "ema8": 535.82,
@@ -10948,8 +10707,8 @@
     },
     {
      "date": "2026-09-01",
-     "o": 540.0,
-     "h": 553.0,
+     "o": 540,
+     "h": 553,
      "l": 538.28,
      "c": 544.15,
      "v": 1260368,
@@ -10970,8 +10729,8 @@
     },
     {
      "date": "2026-09-03",
-     "o": 565.0,
-     "h": 576.0,
+     "o": 565,
+     "h": 576,
      "l": 558.05,
      "c": 560.11,
      "v": 1609549,
@@ -11006,7 +10765,7 @@
      "o": 526.69,
      "h": 533.8,
      "l": 521.58,
-     "c": 523.0,
+     "c": 523,
      "v": 1454610,
      "ema8": 537.98,
      "ema21": 530.07,
@@ -11137,7 +10896,7 @@
      "date": "2026-09-25",
      "o": 509.75,
      "h": 514.6,
-     "l": 506.0,
+     "l": 506,
      "c": 510.01,
      "v": 840640,
      "ema8": 516.59,
@@ -11148,7 +10907,7 @@
      "date": "2026-09-28",
      "o": 507.03,
      "h": 507.03,
-     "l": 497.0,
+     "l": 497,
      "c": 497.51,
      "v": 1256361,
      "ema8": 512.35,
@@ -11158,7 +10917,7 @@
     {
      "date": "2026-09-29",
      "o": 499.74,
-     "h": 501.0,
+     "h": 501,
      "l": 488.52,
      "c": 493.66,
      "v": 1513335,
@@ -11169,7 +10928,7 @@
     {
      "date": "2026-09-30",
      "o": 491.4,
-     "h": 497.0,
+     "h": 497,
      "l": 486.64,
      "c": 487.38,
      "v": 1317920,
@@ -11214,7 +10973,7 @@
      "date": "2026-10-06",
      "o": 481.01,
      "h": 492.07,
-     "l": 478.0,
+     "l": 478,
      "c": 488.13,
      "v": 1133540,
      "ema8": 491.2,
@@ -11245,7 +11004,7 @@
     },
     {
      "date": "2026-10-09",
-     "o": 530.0,
+     "o": 530,
      "h": 540.82,
      "l": 522.94,
      "c": 529.14,
@@ -11256,8 +11015,8 @@
     },
     {
      "date": "2026-10-12",
-     "o": 530.0,
-     "h": 535.0,
+     "o": 530,
+     "h": 535,
      "l": 525.2,
      "c": 528.8,
      "v": 1029008,
@@ -11283,7 +11042,7 @@
      "l": 513.26,
      "c": 523.96,
      "v": 1448109,
-     "ema8": 518.0,
+     "ema8": 518,
      "ema21": 514.27,
      "sma200": 497.84
     },
@@ -11295,149 +11054,10 @@
      "c": 533.37,
      "v": 1614325,
      "ema8": 521.42,
-     "ema21": 516.0,
+     "ema21": 516,
      "sma200": 497.6
     }
-   ],
-   "levels": {
-    "spot": 533.37,
-    "ema8": 521.4185,
-    "ema21": 516.0049,
-    "sma200": 497.6014,
-    "as_of": "2026-10-15",
-    "source": "daily historicals day + get_equity_quotes (Oct 9 close)"
-   },
-   "chips": [
-    "MIXED",
-    "MED"
-   ],
-   "net_premium": {
-    "raw": "~$4.2M",
-    "usd": 4200000.0,
-    "source_print": "Desk A Subs W2 · **~$1.9M** · 750× March far-OTM calls (2026-10-07); **~$4.2M** · 725× Jan'29 short puts (2026-10-07, put-sale leg)"
-   },
-   "desk_analysis": "Last week's #1 holds on aged W2 flow because the tape is one of the few still above 21/200 into the 10/22 print Strong: vs EMA8 $521.42 / EMA21 $515.64: kiss 8, above 21; vs 200-MA $497.60: above (~+5%); weekly RSI ~53.",
-   "panels": {
-    "trade_summary": {
-     "status": "real",
-     "structure": "mixed (calls + put-sale)",
-     "why": "Last week's #1 holds on aged W2 flow because the tape is one of the few still above 21/200 into the 10/22 print",
-     "top_prints": [
-      "Desk A Subs W2 · **~$1.6M** · 1500× Oct23 (W) calls into 10/22 earnings (2026-10-06)",
-      "Desk A Subs W2 · **~$1.9M** · 750× March far-OTM calls (2026-10-07); **~$4.2M** · 725× Jan'29 short puts (2026-10-07, put-sale leg)"
-     ],
-     "net_premium": {
-      "raw": "~$4.2M",
-      "usd": 4200000.0,
-      "source_print": "Desk A Subs W2 · **~$1.9M** · 750× March far-OTM calls (2026-10-07); **~$4.2M** · 725× Jan'29 short puts (2026-10-07, put-sale leg)"
-     },
-     "confidence": "Med"
-    },
-    "iv_catalyst": {
-     "status": "open",
-     "summary": "IV not on desk for this name.",
-     "note": "No invented IV — label OPEN until dossier/Trade Card carries it."
-    },
-    "oi_levels": {
-     "status": "not_on_desk",
-     "summary": "OI levels not on desk.",
-     "as_of": null,
-     "note": "Placeholder until an OI read is on desk.",
-     "source": null,
-     "monthly_opex": {
-      "status": "not_on_desk",
-      "label": "Monthly OpEx",
-      "expiry": null,
-      "walls": null,
-      "floors": null,
-      "pins": null,
-      "dealer_positioning": null,
-      "summary": "NOT ON DESK — no OI read for this horizon.",
-      "gamma": null,
-      "vanna": null,
-      "gamma_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "vanna_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "gamma_pos": [],
-      "gamma_neg": [],
-      "vanna_pos": [],
-      "vanna_neg": [],
-      "note": null
-     },
-     "all_expiry": {
-      "status": "not_on_desk",
-      "label": "All expiry",
-      "expiry": null,
-      "walls": null,
-      "floors": null,
-      "pins": null,
-      "dealer_positioning": null,
-      "summary": "NOT ON DESK — no OI read for this horizon.",
-      "gamma": null,
-      "vanna": null,
-      "gamma_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "vanna_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "gamma_pos": [],
-      "gamma_neg": [],
-      "vanna_pos": [],
-      "vanna_neg": [],
-      "note": null
-     }
-    },
-    "technical": {
-     "status": "real",
-     "tech_why": "Strong: vs EMA8 $521.42 / EMA21 $515.64: kiss 8, above 21; vs 200-MA $497.60: above (~+5%); weekly RSI ~53.",
-     "technicals_note": "vs EMA8 **$521.42** / EMA21 **$515.64**: **kiss 8, above 21** · vs 200-MA **$497.60**: **above (~+5%)** · weekly RSI **~53** · earnings: **10/22** (per Desk A post)",
-     "levels": {
-      "spot": 533.37,
-      "ema8": 521.4185,
-      "ema21": 516.0049,
-      "sma200": 497.6014,
-      "as_of": "2026-10-15",
-      "source": "daily historicals day + get_equity_quotes (Oct 9 close)"
-     },
-     "tech_score": 73
-    },
-    "fundamental": {
-     "status": "open",
-     "summary": "No fundamental profile on dossier — thesis is flow/team only."
-    },
-    "spotlight": null,
-    "thesis_one_liner": null
-   },
-   "thesis_one_liner": null,
-   "top_print": "Desk A Subs W2 · **~$1.6M** · 1500× Oct23 (W) calls into 10/22 earnings (2026-10-06)",
-   "trade_lines": [
-    {
-     "kind": "call",
-     "label": "Call strike",
-     "value": 535,
-     "note": "Oct23'26 (W) $535c bought"
-    },
-    {
-     "kind": "call",
-     "label": "Call strike",
-     "value": 630,
-     "note": "Mar19'27 $630c far OTM"
-    }
-   ],
-   "vol_oi": {
-    "contract": "SPOT Oct23'26 $535C",
-    "volume": 16,
-    "oi": 1515,
-    "as_of": "2026-10-09 (option quotes, Oct 9 session)"
-   }
+   ]
   },
   {
    "rank": 7,
@@ -11447,15 +11067,322 @@
    "tech": 45,
    "structure_bias": "short puts",
    "put_sale_only": true,
-   "why": "Desk A+B both selling INTC puts this week (semi put-sale burst Oct 12, two Hub put sales today) — put-sale only, not a long",
+   "why": "Put sales on both ends of the week (semi put-sale burst Oct 12, two more put sales Oct 16) — put-sale only, not a long",
+   "desk_analysis": "Put sales on both ends of the week (semi put-sale burst Oct 12, two more put sales Oct 16) — put-sale only, not a long",
    "confidence": "Low",
-   "spotlight": null,
-   "top_prints": [
-    "Desk A Subs · **~$2.0M** · 2500× June short puts open @$7.95, part of a semi put-sale burst with QCOM/MRVL (2026-10-12)",
-    "Desk A trading hub · April short puts + Desk B Hub · Jan'29 short puts (2026-10-16, $ not stated)"
+   "chips": [
+    "PUTS",
+    "LOW",
+    "PUT-SALE ONLY"
    ],
-   "technicals_note": "vs EMA8 **$103.53** / EMA21 **$107.63**: **below 8, below 21** · vs 200-MA **$84.29**: **above (~+7%)** · weekly RSI **~54** · earnings: unknown",
-   "tech_why": "Mixed: vs EMA8 $103.53 / EMA21 $107.63: below 8, below 21; vs 200-MA $84.29: above (~+7%); weekly RSI ~54.",
+   "net_premium": {
+    "raw": "~$2.0M",
+    "usd": 2000000,
+    "contracts": 2500,
+    "side": "collected"
+   },
+   "lead": {
+    "contract": "INTC June puts · 2,500× sold to open @ $7.95",
+    "date": "2026-10-12"
+   },
+   "trades": [
+    {
+     "date": "2026-10-16",
+     "text": "April short puts + Jan '29 short puts ($ not stated)"
+    },
+    {
+     "date": "2026-10-12",
+     "text": "**~$2.0M** · 2,500× June short puts open @ $7.95, part of a semi put-sale burst with QCOM/MRVL"
+    }
+   ],
+   "technicals": {
+    "grade": "Mixed",
+    "ema8": {
+     "value": 103.53,
+     "read": "Below"
+    },
+    "ema21": {
+     "value": 107.63,
+     "read": "Below"
+    },
+    "sma200": {
+     "value": 84.29,
+     "read": "Above (~+7%)"
+    },
+    "rsi_weekly": "~54"
+   },
+   "levels": {
+    "spot": 95.37,
+    "ema8": 103.5324,
+    "ema21": 107.5692,
+    "sma200": 84.294,
+    "as_of": "2026-10-15",
+    "source": "Daily historicals"
+   },
+   "earnings": {
+    "past": [],
+    "next": null
+   },
+   "thesis": "Size Sep 2027 $180 far-OTM calls bought (2,900 @ ~$21.48, $6.2M) in a CPU theme with AMD/ARM; a December $110 put sale and $20M+ next-year put sales on Sep 28 — put flow is context, not a long sleeve.",
+   "trade_lines": [
+    {
+     "kind": "put",
+     "label": "Put strike",
+     "value": 110,
+     "note": "Dec 18 '26 $110p sold"
+    },
+    {
+     "kind": "call",
+     "label": "Call strike",
+     "value": 180,
+     "note": "Sep '27 $180c bought"
+    },
+    {
+     "kind": "target",
+     "label": "Target",
+     "value": 130,
+     "note": "$130 target / call wall"
+    }
+   ],
+   "vol_oi": {
+    "contract": "INTC Dec18'26 $110P",
+    "volume": 609,
+    "oi": 20264,
+    "as_of": "2026-10-09 (option quotes, Oct 9 session)"
+   },
+   "iv": {
+    "iv30": "72.8%",
+    "skew": "−5.4",
+    "as_of": "2026-09-24"
+   },
+   "oi_levels": {
+    "as_of": "2026-09-30 10:07 CT",
+    "monthly_opex": {
+     "label": "Monthly OpEx",
+     "expiry": "2026-10-16",
+     "walls": "120 (−$0.74M)",
+     "floors": "110 (+$5.03M)",
+     "pins": "115 (+$1.25M)",
+     "dealer_positioning": "Mixed near spot: large +γ at 110/125, −γ immediately above at 120 and far wall 160.",
+     "gamma_pos": [
+      {
+       "strike": 110,
+       "usd": 5028090.05,
+       "display": "$5.03M",
+       "sign": "+"
+      },
+      {
+       "strike": 125,
+       "usd": 2864893.04,
+       "display": "$2.86M",
+       "sign": "+"
+      },
+      {
+       "strike": 100,
+       "usd": 1816388.65,
+       "display": "$1.82M",
+       "sign": "+"
+      },
+      {
+       "strike": 115,
+       "usd": 1246134.91,
+       "display": "$1.25M",
+       "sign": "+"
+      },
+      {
+       "strike": 130,
+       "usd": 1201960.75,
+       "display": "$1.20M",
+       "sign": "+"
+      }
+     ],
+     "gamma_neg": [
+      {
+       "strike": 110,
+       "usd": 5028090.05,
+       "display": "$5.03M",
+       "sign": "-"
+      },
+      {
+       "strike": 160,
+       "usd": 850469.25,
+       "display": "$0.85M",
+       "sign": "-"
+      },
+      {
+       "strike": 120,
+       "usd": 740486.62,
+       "display": "$0.74M",
+       "sign": "-"
+      },
+      {
+       "strike": 104,
+       "usd": 498424.08,
+       "display": "$0.50M",
+       "sign": "-"
+      }
+     ],
+     "vanna_pos": [
+      {
+       "strike": 125,
+       "usd": 318975,
+       "display": "$0.32M",
+       "sign": "+"
+      },
+      {
+       "strike": 140,
+       "usd": 281528.01,
+       "display": "$0.28M",
+       "sign": "+"
+      },
+      {
+       "strike": 130,
+       "usd": 215379.28,
+       "display": "$0.22M",
+       "sign": "+"
+      }
+     ],
+     "vanna_neg": [
+      {
+       "strike": 110,
+       "usd": 657845.92,
+       "display": "$0.66M",
+       "sign": "-"
+      },
+      {
+       "strike": 100,
+       "usd": 524815.03,
+       "display": "$0.52M",
+       "sign": "-"
+      },
+      {
+       "strike": 160,
+       "usd": 376456.02,
+       "display": "$0.38M",
+       "sign": "-"
+      }
+     ]
+    },
+    "all_expiry": {
+     "label": "All expiry",
+     "expiry": "All expirations",
+     "walls": "120 (−$3.16M)",
+     "floors": "110 (+$7.86M)",
+     "pins": "119 (+$15.46M)",
+     "dealer_positioning": "+γ concentrated 110–119 (pin ~119); −γ dominates just above spot at 120.",
+     "gamma_pos": [
+      {
+       "strike": 119,
+       "usd": 15464746.9,
+       "display": "$15.46M",
+       "sign": "+"
+      },
+      {
+       "strike": 125,
+       "usd": 9688233.3,
+       "display": "$9.69M",
+       "sign": "+"
+      },
+      {
+       "strike": 121,
+       "usd": 9003330.49,
+       "display": "$9.00M",
+       "sign": "+"
+      },
+      {
+       "strike": 115,
+       "usd": 8147531.11,
+       "display": "$8.15M",
+       "sign": "+"
+      },
+      {
+       "strike": 110,
+       "usd": 7862731.71,
+       "display": "$7.86M",
+       "sign": "+"
+      }
+     ],
+     "gamma_neg": [
+      {
+       "strike": 120,
+       "usd": 3164620.51,
+       "display": "$3.16M",
+       "sign": "-"
+      },
+      {
+       "strike": 70,
+       "usd": 2810549.82,
+       "display": "$2.81M",
+       "sign": "-"
+      },
+      {
+       "strike": 80,
+       "usd": 1959577.15,
+       "display": "$1.96M",
+       "sign": "-"
+      },
+      {
+       "strike": 129,
+       "usd": 1739935.62,
+       "display": "$1.74M",
+       "sign": "-"
+      }
+     ],
+     "vanna_pos": [
+      {
+       "strike": 70,
+       "usd": 2133727.14,
+       "display": "$2.13M",
+       "sign": "+"
+      },
+      {
+       "strike": 150,
+       "usd": 1398735.83,
+       "display": "$1.40M",
+       "sign": "+"
+      },
+      {
+       "strike": 80,
+       "usd": 1269933.01,
+       "display": "$1.27M",
+       "sign": "+"
+      },
+      {
+       "strike": 140,
+       "usd": 1097917.72,
+       "display": "$1.10M",
+       "sign": "+"
+      }
+     ],
+     "vanna_neg": [
+      {
+       "strike": 100,
+       "usd": 906999.71,
+       "display": "$0.91M",
+       "sign": "-"
+      },
+      {
+       "strike": 110,
+       "usd": 886623.84,
+       "display": "$0.89M",
+       "sign": "-"
+      },
+      {
+       "strike": 115,
+       "usd": 462949.68,
+       "display": "$0.46M",
+       "sign": "-"
+      },
+      {
+       "strike": 160,
+       "usd": 457091.76,
+       "display": "$0.46M",
+       "sign": "-"
+      }
+     ]
+    }
+   },
+   "fundamental": null,
    "candles": [
     {
      "date": "2026-09-03",
@@ -11627,7 +11554,7 @@
      "o": 126.83,
      "h": 126.93,
      "l": 122.84,
-     "c": 123.0,
+     "c": 123,
      "v": 97728428,
      "ema8": 117.93,
      "ema21": 108.48,
@@ -11659,7 +11586,7 @@
      "date": "2026-09-30",
      "o": 116.22,
      "h": 120.55,
-     "l": 116.0,
+     "l": 116,
      "c": 120.23,
      "v": 94917156,
      "ema8": 117.84,
@@ -11671,7 +11598,7 @@
      "o": 118.73,
      "h": 122.15,
      "l": 117.35,
-     "c": 120.0,
+     "c": 120,
      "v": 103559806,
      "ema8": 118.32,
      "ema21": 111.57,
@@ -11679,8 +11606,8 @@
     },
     {
      "date": "2026-10-02",
-     "o": 124.0,
-     "h": 126.0,
+     "o": 124,
+     "h": 126,
      "l": 118.96,
      "c": 119.33,
      "v": 95401476,
@@ -11703,7 +11630,7 @@
      "date": "2026-10-06",
      "o": 117.06,
      "h": 118.2,
-     "l": 112.0,
+     "l": 112,
      "c": 112.5,
      "v": 101938794,
      "ema8": 116.8,
@@ -11728,7 +11655,7 @@
      "l": 105.24,
      "c": 107.08,
      "v": 120196745,
-     "ema8": 114.0,
+     "ema8": 114,
      "ema21": 112.16,
      "sma200": 82.69
     },
@@ -11736,7 +11663,7 @@
      "date": "2026-10-09",
      "o": 108.33,
      "h": 108.38,
-     "l": 104.0,
+     "l": 104,
      "c": 104.7,
      "v": 75017756,
      "ema8": 111.93,
@@ -11774,7 +11701,7 @@
      "v": 104592794,
      "ema8": 105.86,
      "ema21": 108.79,
-     "sma200": 84.0
+     "sma200": 84
     },
     {
      "date": "2026-10-15",
@@ -11906,7 +11833,7 @@
      "l": 79.62,
      "c": 82.54,
      "v": 281405214,
-     "ema8": 69.0,
+     "ema8": 69,
      "ema21": 61.52
     },
     {
@@ -12023,7 +11950,7 @@
      "date": "2026-05-12",
      "o": 124.36,
      "h": 127.79,
-     "l": 115.0,
+     "l": 115,
      "c": 120.61,
      "v": 172516514,
      "ema8": 113.08,
@@ -12032,7 +11959,7 @@
     {
      "date": "2026-05-13",
      "o": 124.1,
-     "h": 125.0,
+     "h": 125,
      "l": 116.41,
      "c": 120.29,
      "v": 115364423,
@@ -12129,7 +12056,7 @@
      "date": "2026-05-27",
      "o": 124.39,
      "h": 125.27,
-     "l": 117.0,
+     "l": 117,
      "c": 121.77,
      "v": 93323344,
      "ema8": 118.47,
@@ -12172,7 +12099,7 @@
     {
      "date": "2026-06-02",
      "o": 107.45,
-     "h": 109.0,
+     "h": 109,
      "l": 104.17,
      "c": 107.93,
      "v": 106336209,
@@ -12215,7 +12142,7 @@
     },
     {
      "date": "2026-06-08",
-     "o": 111.0,
+     "o": 111,
      "h": 112.54,
      "l": 106.66,
      "c": 110.27,
@@ -12227,7 +12154,7 @@
     {
      "date": "2026-06-09",
      "o": 112.99,
-     "h": 114.0,
+     "h": 114,
      "l": 99.46,
      "c": 107.92,
      "v": 149623108,
@@ -12243,7 +12170,7 @@
      "c": 107.04,
      "v": 122653462,
      "ema8": 109.15,
-     "ema21": 109.0,
+     "ema21": 109,
      "sma200": 52.54
     },
     {
@@ -12255,7 +12182,7 @@
      "v": 188430320,
      "ema8": 110.89,
      "ema21": 109.73,
-     "sma200": 53.0
+     "sma200": 53
     },
     {
      "date": "2026-06-12",
@@ -12283,7 +12210,7 @@
      "date": "2026-06-16",
      "o": 125.11,
      "h": 128.7,
-     "l": 116.0,
+     "l": 116,
      "c": 117.05,
      "v": 132962556,
      "ema8": 117.03,
@@ -12369,7 +12296,7 @@
     },
     {
      "date": "2026-06-29",
-     "o": 127.0,
+     "o": 127,
      "h": 132.05,
      "l": 118.5,
      "c": 131.72,
@@ -12391,7 +12318,7 @@
     },
     {
      "date": "2026-07-01",
-     "o": 135.0,
+     "o": 135,
      "h": 135.74,
      "l": 126.68,
      "c": 127.02,
@@ -12636,7 +12563,7 @@
      "o": 88.4,
      "h": 91.68,
      "l": 85.62,
-     "c": 91.0,
+     "c": 91,
      "v": 96633640,
      "ema8": 91.65,
      "ema21": 99.4,
@@ -12816,7 +12743,7 @@
      "v": 81853821,
      "ema8": 92.29,
      "ema21": 96.21,
-     "sma200": 72.0
+     "sma200": 72
     },
     {
      "date": "2026-08-26",
@@ -12853,7 +12780,7 @@
     },
     {
      "date": "2026-08-31",
-     "o": 90.0,
+     "o": 90,
      "h": 91.85,
      "l": 88.97,
      "c": 89.51,
@@ -13054,7 +12981,7 @@
      "o": 126.83,
      "h": 126.93,
      "l": 122.84,
-     "c": 123.0,
+     "c": 123,
      "v": 97728428,
      "ema8": 117.93,
      "ema21": 108.48,
@@ -13086,7 +13013,7 @@
      "date": "2026-09-30",
      "o": 116.22,
      "h": 120.55,
-     "l": 116.0,
+     "l": 116,
      "c": 120.23,
      "v": 94917156,
      "ema8": 117.84,
@@ -13098,7 +13025,7 @@
      "o": 118.73,
      "h": 122.15,
      "l": 117.35,
-     "c": 120.0,
+     "c": 120,
      "v": 103559806,
      "ema8": 118.32,
      "ema21": 111.57,
@@ -13106,8 +13033,8 @@
     },
     {
      "date": "2026-10-02",
-     "o": 124.0,
-     "h": 126.0,
+     "o": 124,
+     "h": 126,
      "l": 118.96,
      "c": 119.33,
      "v": 95401476,
@@ -13130,7 +13057,7 @@
      "date": "2026-10-06",
      "o": 117.06,
      "h": 118.2,
-     "l": 112.0,
+     "l": 112,
      "c": 112.5,
      "v": 101938794,
      "ema8": 116.8,
@@ -13155,7 +13082,7 @@
      "l": 105.24,
      "c": 107.08,
      "v": 120196745,
-     "ema8": 114.0,
+     "ema8": 114,
      "ema21": 112.16,
      "sma200": 82.69
     },
@@ -13163,7 +13090,7 @@
      "date": "2026-10-09",
      "o": 108.33,
      "h": 108.38,
-     "l": 104.0,
+     "l": 104,
      "c": 104.7,
      "v": 75017756,
      "ema8": 111.93,
@@ -13201,7 +13128,7 @@
      "v": 104592794,
      "ema8": 105.86,
      "ema21": 108.79,
-     "sma200": 84.0
+     "sma200": 84
     },
     {
      "date": "2026-10-15",
@@ -13214,556 +13141,7 @@
      "ema21": 107.57,
      "sma200": 84.29
     }
-   ],
-   "levels": {
-    "spot": 95.37,
-    "ema8": 103.5324,
-    "ema21": 107.5692,
-    "sma200": 84.294,
-    "as_of": "2026-10-15",
-    "source": "daily historicals day + get_equity_quotes (Oct 9 close)"
-   },
-   "chips": [
-    "PUTS",
-    "LOW",
-    "PUT-SALE ONLY"
-   ],
-   "net_premium": {
-    "raw": "~$2.0M",
-    "usd": 2000000.0,
-    "source_print": "Desk A Subs · **~$2.0M** · 2500× June short puts open @$7.95, part of a semi put-sale burst with QCOM/MRVL (2026-10-12)"
-   },
-   "desk_analysis": "Desk A+B both selling INTC puts this week (semi put-sale burst Oct 12, two Hub put sales today) — put-sale only, not a long Mixed: vs EMA8 $103.53 / EMA21 $107.63: below 8, below 21; vs 200-MA $84.29: above (~+7%); weekly RSI ~54.",
-   "panels": {
-    "trade_summary": {
-     "status": "real",
-     "structure": "short puts",
-     "why": "Desk A+B both selling INTC puts this week (semi put-sale burst Oct 12, two Hub put sales today) — put-sale only, not a long",
-     "top_prints": [
-      "Desk A Subs · **~$2.0M** · 2500× June short puts open @$7.95, part of a semi put-sale burst with QCOM/MRVL (2026-10-12)",
-      "Desk A trading hub · April short puts + Desk B Hub · Jan'29 short puts (2026-10-16, $ not stated)"
-     ],
-     "net_premium": {
-      "raw": "~$2.0M",
-      "usd": 2000000.0,
-      "source_print": "Desk A Subs · **~$2.0M** · 2500× June short puts open @$7.95, part of a semi put-sale burst with QCOM/MRVL (2026-10-12)"
-     },
-     "confidence": "Low"
-    },
-    "iv_catalyst": {
-     "status": "from_dossier",
-     "summary": "IV30 72.8%; skew −5.4",
-     "iv30": "72.8%",
-     "skew": "−5.4",
-     "as_of": "2026-09-24",
-     "note": "Snapshot from dossier Trade Card mention"
-    },
-    "oi_levels": {
-     "status": "from_oi",
-     "summary": "Monthly OpEx + All-expiry OI reads on desk.",
-     "as_of": "2026-09-30 10:07 CT",
-     "note": "Structured OI scorecard export.",
-     "source": "OI scorecard export",
-     "monthly_opex": {
-      "status": "from_oi",
-      "label": "Monthly OpEx",
-      "expiry": "2026-10-16",
-      "walls": "120 (−$0.74M)",
-      "floors": "110 (+$5.03M)",
-      "pins": "115 (+$1.25M)",
-      "dealer_positioning": "Mixed near spot: large +γ at 110/125, −γ immediately above at 120 and far wall 160.",
-      "summary": "Monthly OpEx gamma/vanna on desk.",
-      "gamma": "+110 $5.03M; +125 $2.86M; +100 $1.82M; +115 $1.25M; +130 $1.20M | −110 $5.03M; −160 $0.85M; −120 $0.74M; −104 $0.50M",
-      "vanna": "+125 $0.32M; +140 $0.28M; +130 $0.22M | −110 $0.66M; −100 $0.52M; −160 $0.38M",
-      "gamma_levels": {
-       "pos": [
-        {
-         "strike": 110.0,
-         "usd": 5028090.05,
-         "display": "$5.03M",
-         "sign": "+"
-        },
-        {
-         "strike": 125.0,
-         "usd": 2864893.04,
-         "display": "$2.86M",
-         "sign": "+"
-        },
-        {
-         "strike": 100.0,
-         "usd": 1816388.65,
-         "display": "$1.82M",
-         "sign": "+"
-        },
-        {
-         "strike": 115.0,
-         "usd": 1246134.91,
-         "display": "$1.25M",
-         "sign": "+"
-        },
-        {
-         "strike": 130.0,
-         "usd": 1201960.75,
-         "display": "$1.20M",
-         "sign": "+"
-        }
-       ],
-       "neg": [
-        {
-         "strike": 110.0,
-         "usd": 5028090.05,
-         "display": "$5.03M",
-         "sign": "-"
-        },
-        {
-         "strike": 160.0,
-         "usd": 850469.25,
-         "display": "$0.85M",
-         "sign": "-"
-        },
-        {
-         "strike": 120.0,
-         "usd": 740486.62,
-         "display": "$0.74M",
-         "sign": "-"
-        },
-        {
-         "strike": 104.0,
-         "usd": 498424.08,
-         "display": "$0.50M",
-         "sign": "-"
-        }
-       ]
-      },
-      "vanna_levels": {
-       "pos": [
-        {
-         "strike": 125.0,
-         "usd": 318975.0,
-         "display": "$0.32M",
-         "sign": "+"
-        },
-        {
-         "strike": 140.0,
-         "usd": 281528.01,
-         "display": "$0.28M",
-         "sign": "+"
-        },
-        {
-         "strike": 130.0,
-         "usd": 215379.28,
-         "display": "$0.22M",
-         "sign": "+"
-        }
-       ],
-       "neg": [
-        {
-         "strike": 110.0,
-         "usd": 657845.92,
-         "display": "$0.66M",
-         "sign": "-"
-        },
-        {
-         "strike": 100.0,
-         "usd": 524815.03,
-         "display": "$0.52M",
-         "sign": "-"
-        },
-        {
-         "strike": 160.0,
-         "usd": 376456.02,
-         "display": "$0.38M",
-         "sign": "-"
-        }
-       ]
-      },
-      "gamma_pos": [
-       {
-        "strike": 110.0,
-        "usd": 5028090.05,
-        "display": "$5.03M",
-        "sign": "+"
-       },
-       {
-        "strike": 125.0,
-        "usd": 2864893.04,
-        "display": "$2.86M",
-        "sign": "+"
-       },
-       {
-        "strike": 100.0,
-        "usd": 1816388.65,
-        "display": "$1.82M",
-        "sign": "+"
-       },
-       {
-        "strike": 115.0,
-        "usd": 1246134.91,
-        "display": "$1.25M",
-        "sign": "+"
-       },
-       {
-        "strike": 130.0,
-        "usd": 1201960.75,
-        "display": "$1.20M",
-        "sign": "+"
-       }
-      ],
-      "gamma_neg": [
-       {
-        "strike": 110.0,
-        "usd": 5028090.05,
-        "display": "$5.03M",
-        "sign": "-"
-       },
-       {
-        "strike": 160.0,
-        "usd": 850469.25,
-        "display": "$0.85M",
-        "sign": "-"
-       },
-       {
-        "strike": 120.0,
-        "usd": 740486.62,
-        "display": "$0.74M",
-        "sign": "-"
-       },
-       {
-        "strike": 104.0,
-        "usd": 498424.08,
-        "display": "$0.50M",
-        "sign": "-"
-       }
-      ],
-      "vanna_pos": [
-       {
-        "strike": 125.0,
-        "usd": 318975.0,
-        "display": "$0.32M",
-        "sign": "+"
-       },
-       {
-        "strike": 140.0,
-        "usd": 281528.01,
-        "display": "$0.28M",
-        "sign": "+"
-       },
-       {
-        "strike": 130.0,
-        "usd": 215379.28,
-        "display": "$0.22M",
-        "sign": "+"
-       }
-      ],
-      "vanna_neg": [
-       {
-        "strike": 110.0,
-        "usd": 657845.92,
-        "display": "$0.66M",
-        "sign": "-"
-       },
-       {
-        "strike": 100.0,
-        "usd": 524815.03,
-        "display": "$0.52M",
-        "sign": "-"
-       },
-       {
-        "strike": 160.0,
-        "usd": 376456.02,
-        "display": "$0.38M",
-        "sign": "-"
-       }
-      ],
-      "note": "monthly 110 appears in both +γ and −γ lists (capture quirk); walls/floors inferred preferring levels above/below spot; spot drifted 118.55–118.81 during previews"
-     },
-     "all_expiry": {
-      "status": "from_oi",
-      "label": "All expiry",
-      "expiry": "All expirations",
-      "walls": "120 (−$3.16M)",
-      "floors": "110 (+$7.86M)",
-      "pins": "119 (+$15.46M)",
-      "dealer_positioning": "+γ concentrated 110–119 (pin ~119); −γ dominates just above spot at 120.",
-      "summary": "All expiry gamma/vanna on desk.",
-      "gamma": "+119 $15.46M; +125 $9.69M; +121 $9.00M; +115 $8.15M; +110 $7.86M | −120 $3.16M; −70 $2.81M; −80 $1.96M; −129 $1.74M",
-      "vanna": "+70 $2.13M; +150 $1.40M; +80 $1.27M; +140 $1.10M | −100 $0.91M; −110 $0.89M; −115 $0.46M; −160 $0.46M",
-      "gamma_levels": {
-       "pos": [
-        {
-         "strike": 119.0,
-         "usd": 15464746.9,
-         "display": "$15.46M",
-         "sign": "+"
-        },
-        {
-         "strike": 125.0,
-         "usd": 9688233.3,
-         "display": "$9.69M",
-         "sign": "+"
-        },
-        {
-         "strike": 121.0,
-         "usd": 9003330.49,
-         "display": "$9.00M",
-         "sign": "+"
-        },
-        {
-         "strike": 115.0,
-         "usd": 8147531.11,
-         "display": "$8.15M",
-         "sign": "+"
-        },
-        {
-         "strike": 110.0,
-         "usd": 7862731.71,
-         "display": "$7.86M",
-         "sign": "+"
-        }
-       ],
-       "neg": [
-        {
-         "strike": 120.0,
-         "usd": 3164620.51,
-         "display": "$3.16M",
-         "sign": "-"
-        },
-        {
-         "strike": 70.0,
-         "usd": 2810549.82,
-         "display": "$2.81M",
-         "sign": "-"
-        },
-        {
-         "strike": 80.0,
-         "usd": 1959577.15,
-         "display": "$1.96M",
-         "sign": "-"
-        },
-        {
-         "strike": 129.0,
-         "usd": 1739935.62,
-         "display": "$1.74M",
-         "sign": "-"
-        }
-       ]
-      },
-      "vanna_levels": {
-       "pos": [
-        {
-         "strike": 70.0,
-         "usd": 2133727.14,
-         "display": "$2.13M",
-         "sign": "+"
-        },
-        {
-         "strike": 150.0,
-         "usd": 1398735.83,
-         "display": "$1.40M",
-         "sign": "+"
-        },
-        {
-         "strike": 80.0,
-         "usd": 1269933.01,
-         "display": "$1.27M",
-         "sign": "+"
-        },
-        {
-         "strike": 140.0,
-         "usd": 1097917.72,
-         "display": "$1.10M",
-         "sign": "+"
-        }
-       ],
-       "neg": [
-        {
-         "strike": 100.0,
-         "usd": 906999.71,
-         "display": "$0.91M",
-         "sign": "-"
-        },
-        {
-         "strike": 110.0,
-         "usd": 886623.84,
-         "display": "$0.89M",
-         "sign": "-"
-        },
-        {
-         "strike": 115.0,
-         "usd": 462949.68,
-         "display": "$0.46M",
-         "sign": "-"
-        },
-        {
-         "strike": 160.0,
-         "usd": 457091.76,
-         "display": "$0.46M",
-         "sign": "-"
-        }
-       ]
-      },
-      "gamma_pos": [
-       {
-        "strike": 119.0,
-        "usd": 15464746.9,
-        "display": "$15.46M",
-        "sign": "+"
-       },
-       {
-        "strike": 125.0,
-        "usd": 9688233.3,
-        "display": "$9.69M",
-        "sign": "+"
-       },
-       {
-        "strike": 121.0,
-        "usd": 9003330.49,
-        "display": "$9.00M",
-        "sign": "+"
-       },
-       {
-        "strike": 115.0,
-        "usd": 8147531.11,
-        "display": "$8.15M",
-        "sign": "+"
-       },
-       {
-        "strike": 110.0,
-        "usd": 7862731.71,
-        "display": "$7.86M",
-        "sign": "+"
-       }
-      ],
-      "gamma_neg": [
-       {
-        "strike": 120.0,
-        "usd": 3164620.51,
-        "display": "$3.16M",
-        "sign": "-"
-       },
-       {
-        "strike": 70.0,
-        "usd": 2810549.82,
-        "display": "$2.81M",
-        "sign": "-"
-       },
-       {
-        "strike": 80.0,
-        "usd": 1959577.15,
-        "display": "$1.96M",
-        "sign": "-"
-       },
-       {
-        "strike": 129.0,
-        "usd": 1739935.62,
-        "display": "$1.74M",
-        "sign": "-"
-       }
-      ],
-      "vanna_pos": [
-       {
-        "strike": 70.0,
-        "usd": 2133727.14,
-        "display": "$2.13M",
-        "sign": "+"
-       },
-       {
-        "strike": 150.0,
-        "usd": 1398735.83,
-        "display": "$1.40M",
-        "sign": "+"
-       },
-       {
-        "strike": 80.0,
-        "usd": 1269933.01,
-        "display": "$1.27M",
-        "sign": "+"
-       },
-       {
-        "strike": 140.0,
-        "usd": 1097917.72,
-        "display": "$1.10M",
-        "sign": "+"
-       }
-      ],
-      "vanna_neg": [
-       {
-        "strike": 100.0,
-        "usd": 906999.71,
-        "display": "$0.91M",
-        "sign": "-"
-       },
-       {
-        "strike": 110.0,
-        "usd": 886623.84,
-        "display": "$0.89M",
-        "sign": "-"
-       },
-       {
-        "strike": 115.0,
-        "usd": 462949.68,
-        "display": "$0.46M",
-        "sign": "-"
-       },
-       {
-        "strike": 160.0,
-        "usd": 457091.76,
-        "display": "$0.46M",
-        "sign": "-"
-       }
-      ],
-      "note": "monthly 110 appears in both +γ and −γ lists (capture quirk); walls/floors inferred preferring levels above/below spot; spot drifted 118.55–118.81 during previews"
-     }
-    },
-    "technical": {
-     "status": "real",
-     "tech_why": "Mixed: vs EMA8 $103.53 / EMA21 $107.63: below 8, below 21; vs 200-MA $84.29: above (~+7%); weekly RSI ~54.",
-     "technicals_note": "vs EMA8 **$103.53** / EMA21 **$107.63**: **below 8, below 21** · vs 200-MA **$84.29**: **above (~+7%)** · weekly RSI **~54** · earnings: unknown",
-     "levels": {
-      "spot": 95.37,
-      "ema8": 103.5324,
-      "ema21": 107.5692,
-      "sma200": 84.294,
-      "as_of": "2026-10-15",
-      "source": "daily historicals day + get_equity_quotes (Oct 9 close)"
-     },
-     "tech_score": 45
-    },
-    "fundamental": {
-     "status": "open",
-     "summary": "No fundamental profile on dossier — thesis is flow/team only."
-    },
-    "spotlight": null,
-    "thesis_one_liner": "Desk B flags size Sep 2027 $180 far-OTM calls bought (2900 @~$21.48, $6.2M) in a CPU theme with AMD/ARM; Desk A trade card put-sale (Dec18 $110p) + Desk B Sep 28 $20M+ next-year put sales (incomplete) — put flow is context, not a long sleeve."
-   },
-   "thesis_one_liner": "Desk B flags size Sep 2027 $180 far-OTM calls bought (2900 @~$21.48, $6.2M) in a CPU theme with AMD/ARM; Desk A trade card put-sale (Dec18 $110p) + Desk B Sep 28 $20M+ next-year put sales (incomplete) — put flow is context, not a long sleeve.",
-   "top_print": "Desk A Subs · **~$2.0M** · 2500× June short puts open @$7.95, part of a semi put-sale burst with QCOM/MRVL (2026-10-12)",
-   "trade_lines": [
-    {
-     "kind": "put",
-     "label": "Put strike",
-     "value": 110,
-     "note": "Dec18'26 $110p sold (Trade Card)"
-    },
-    {
-     "kind": "call",
-     "label": "Call strike",
-     "value": 180,
-     "note": "Sep'27 $180c (Desk B)"
-    },
-    {
-     "kind": "target",
-     "label": "Target",
-     "value": 130,
-     "note": "Desk A $130 tgt / Call Wall"
-    }
-   ],
-   "vol_oi": {
-    "contract": "INTC Dec18'26 $110P",
-    "volume": 609,
-    "oi": 20264,
-    "as_of": "2026-10-09 (option quotes, Oct 9 session)"
-   }
+   ]
   },
   {
    "rank": 8,
@@ -13773,15 +13151,67 @@
    "tech": 75,
    "structure_bias": "mixed (put-sale + calls)",
    "put_sale_only": false,
-   "why": "Desk A long-dated put sale this week plus Desk B's W2 breakout post (Dec call roll, Nov call add); strong +31% over the 200-MA",
+   "why": "Long-dated put sale Oct 13 (~$2.5M Jan '28 puts) plus the Oct 5 call roll and add on the breakout; strong +31% over the 200-MA",
+   "desk_analysis": "Long-dated put sale Oct 13 (~$2.5M Jan '28 puts) plus the Oct 5 call roll and add on the breakout; strong +31% over the 200-MA",
    "confidence": "Med",
-   "spotlight": null,
-   "top_prints": [
-    "Desk A Subs · **~$2.5M** · 1000× Jan'28 short puts open @$24.80 (2026-10-13)",
-    "Desk B W2 · breakout post: Dec call roll, Nov call add, Nov short puts (2026-10-05, $ not stated)"
+   "chips": [
+    "MIXED",
+    "MED"
    ],
-   "technicals_note": "vs EMA8 **$170.64** / EMA21 **$159.35**: **below 8 (just), above 21** · vs 200-MA **$129.67**: **well above (~+31%)** · weekly RSI **~65** · earnings: unknown",
-   "tech_why": "Strong: vs EMA8 $170.64 / EMA21 $159.35: below 8 (just), above 21; vs 200-MA $129.67: well above (~+31%); weekly RSI ~65.",
+   "net_premium": {
+    "raw": "~$2.5M",
+    "usd": 2500000,
+    "contracts": 1000,
+    "side": "collected"
+   },
+   "lead": {
+    "contract": "SHOP Jan '28 puts · 1,000× sold to open @ $24.80",
+    "date": "2026-10-13"
+   },
+   "trades": [
+    {
+     "date": "2026-10-13",
+     "text": "**~$2.5M** · 1,000× Jan '28 short puts open @ $24.80"
+    },
+    {
+     "date": "2026-10-05",
+     "text": "Breakout: December call roll, November call add, November short puts ($ not stated)"
+    }
+   ],
+   "technicals": {
+    "grade": "Strong",
+    "ema8": {
+     "value": 170.64,
+     "read": "Below (just)"
+    },
+    "ema21": {
+     "value": 159.35,
+     "read": "Above"
+    },
+    "sma200": {
+     "value": 129.67,
+     "read": "Well above (~+31%)"
+    },
+    "rsi_weekly": "~65"
+   },
+   "levels": {
+    "spot": 178.14,
+    "ema8": 170.6418,
+    "ema21": 159.2581,
+    "sma200": 129.6662,
+    "as_of": "2026-10-15",
+    "source": "Daily historicals"
+   },
+   "earnings": {
+    "past": [],
+    "next": null
+   },
+   "thesis": null,
+   "trade_lines": [],
+   "vol_oi": null,
+   "iv": null,
+   "oi_levels": null,
+   "fundamental": null,
    "candles": [
     {
      "date": "2026-09-03",
@@ -13818,7 +13248,7 @@
     },
     {
      "date": "2026-09-09",
-     "o": 138.0,
+     "o": 138,
      "h": 138.22,
      "l": 125.99,
      "c": 126.79,
@@ -14119,7 +13549,7 @@
      "date": "2026-04-09",
      "o": 120.31,
      "h": 120.61,
-     "l": 112.0,
+     "l": 112,
      "c": 112.38,
      "v": 10547590,
      "ema8": 116.9,
@@ -14217,7 +13647,7 @@
     },
     {
      "date": "2026-04-23",
-     "o": 130.0,
+     "o": 130,
      "h": 130.3,
      "l": 121.73,
      "c": 124.23,
@@ -14369,7 +13799,7 @@
      "date": "2026-05-14",
      "o": 95.4,
      "h": 97.96,
-     "l": 94.0,
+     "l": 94,
      "c": 97.42,
      "v": 16595404,
      "ema8": 104.4,
@@ -14379,7 +13809,7 @@
      "date": "2026-05-15",
      "o": 97.5,
      "h": 101.45,
-     "l": 96.0,
+     "l": 96,
      "c": 100.28,
      "v": 15858556,
      "ema8": 103.49,
@@ -14434,7 +13864,7 @@
      "o": 105.81,
      "h": 107.85,
      "l": 102.98,
-     "c": 103.0,
+     "c": 103,
      "v": 10563550,
      "ema8": 103.47,
      "ema21": 108.46,
@@ -14459,7 +13889,7 @@
      "c": 106.6,
      "v": 8343826,
      "ema8": 104.41,
-     "ema21": 108.0,
+     "ema21": 108,
      "sma200": 139.94
     },
     {
@@ -14552,7 +13982,7 @@
     },
     {
      "date": "2026-06-09",
-     "o": 111.0,
+     "o": 111,
      "h": 116.96,
      "l": 107.19,
      "c": 110.42,
@@ -14642,7 +14072,7 @@
      "date": "2026-06-22",
      "o": 106.75,
      "h": 111.58,
-     "l": 106.0,
+     "l": 106,
      "c": 107.98,
      "v": 8596224,
      "ema8": 109.76,
@@ -14706,9 +14136,9 @@
     },
     {
      "date": "2026-06-30",
-     "o": 113.0,
-     "h": 116.0,
-     "l": 112.0,
+     "o": 113,
+     "h": 116,
+     "l": 112,
      "c": 114.18,
      "v": 6608876,
      "ema8": 112.89,
@@ -14807,7 +14237,7 @@
      "date": "2026-07-14",
      "o": 121.63,
      "h": 126.11,
-     "l": 120.0,
+     "l": 120,
      "c": 125.68,
      "v": 4817272,
      "ema8": 122.1,
@@ -14885,7 +14315,7 @@
      "o": 117.44,
      "h": 117.91,
      "l": 111.06,
-     "c": 112.0,
+     "c": 112,
      "v": 10553718,
      "ema8": 119.97,
      "ema21": 119.31,
@@ -14981,7 +14411,7 @@
     },
     {
      "date": "2026-08-05",
-     "o": 150.0,
+     "o": 150,
      "h": 153.88,
      "l": 142.52,
      "c": 144.24,
@@ -15026,7 +14456,7 @@
     {
      "date": "2026-08-11",
      "o": 153.85,
-     "h": 155.0,
+     "h": 155,
      "l": 151.56,
      "c": 152.61,
      "v": 8276245,
@@ -15245,7 +14675,7 @@
     },
     {
      "date": "2026-09-09",
-     "o": 138.0,
+     "o": 138,
      "h": 138.22,
      "l": 125.99,
      "c": 126.79,
@@ -15540,151 +14970,7 @@
      "ema21": 159.26,
      "sma200": 129.67
     }
-   ],
-   "levels": {
-    "spot": 178.14,
-    "ema8": 170.6418,
-    "ema21": 159.2581,
-    "sma200": 129.6662,
-    "as_of": "2026-10-15",
-    "source": "Daily historicals"
-   },
-   "chips": [
-    "MIXED",
-    "MED"
-   ],
-   "net_premium": {
-    "raw": "~$2.5M",
-    "usd": 2500000.0,
-    "source_print": "Desk A Subs · **~$2.5M** · 1000× Jan'28 short puts open @$24.80 (2026-10-13)"
-   },
-   "desk_analysis": "Desk A long-dated put sale this week plus Desk B's W2 breakout post (Dec call roll, Nov call add); strong +31% over the 200-MA Strong: vs EMA8 $170.64 / EMA21 $159.35: below 8 (just), above 21; vs 200-MA $129.67: well above (~+31%); weekly RSI ~65.",
-   "panels": {
-    "trade_summary": {
-     "status": "real",
-     "structure": "mixed (put-sale + calls)",
-     "why": "Desk A long-dated put sale this week plus Desk B's W2 breakout post (Dec call roll, Nov call add); strong +31% over the 200-MA",
-     "top_prints": [
-      "Desk A Subs · **~$2.5M** · 1000× Jan'28 short puts open @$24.80 (2026-10-13)",
-      "Desk B W2 · breakout post: Dec call roll, Nov call add, Nov short puts (2026-10-05, $ not stated)"
-     ],
-     "net_premium": {
-      "raw": "~$2.5M",
-      "usd": 2500000.0,
-      "source_print": "Desk A Subs · **~$2.5M** · 1000× Jan'28 short puts open @$24.80 (2026-10-13)"
-     },
-     "confidence": "Med"
-    },
-    "iv_catalyst": {
-     "status": "open",
-     "summary": "IV not on desk for this name.",
-     "note": "No invented IV — label OPEN until dossier/Trade Card carries it."
-    },
-    "oi_levels": {
-     "status": "not_on_desk",
-     "summary": "OI levels not on desk.",
-     "as_of": null,
-     "note": "Placeholder until an OI read is on desk.",
-     "source": null,
-     "monthly_opex": {
-      "status": "not_on_desk",
-      "label": "Monthly OpEx",
-      "expiry": null,
-      "walls": null,
-      "floors": null,
-      "pins": null,
-      "dealer_positioning": null,
-      "summary": "NOT ON DESK — no OI read for this horizon.",
-      "gamma": null,
-      "vanna": null,
-      "gamma_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "vanna_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "gamma_pos": [],
-      "gamma_neg": [],
-      "vanna_pos": [],
-      "vanna_neg": [],
-      "note": null
-     },
-     "all_expiry": {
-      "status": "not_on_desk",
-      "label": "All expiry",
-      "expiry": null,
-      "walls": null,
-      "floors": null,
-      "pins": null,
-      "dealer_positioning": null,
-      "summary": "NOT ON DESK — no OI read for this horizon.",
-      "gamma": null,
-      "vanna": null,
-      "gamma_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "vanna_levels": {
-       "pos": [],
-       "neg": []
-      },
-      "gamma_pos": [],
-      "gamma_neg": [],
-      "vanna_pos": [],
-      "vanna_neg": [],
-      "note": null
-     }
-    },
-    "technical": {
-     "status": "real",
-     "tech_why": "Strong: vs EMA8 $170.64 / EMA21 $159.35: below 8 (just), above 21; vs 200-MA $129.67: well above (~+31%); weekly RSI ~65.",
-     "technicals_note": "vs EMA8 **$170.64** / EMA21 **$159.35**: **below 8 (just), above 21** · vs 200-MA **$129.67**: **well above (~+31%)** · weekly RSI **~65** · earnings: unknown",
-     "levels": {
-      "spot": 178.14,
-      "ema8": 170.6418,
-      "ema21": 159.2581,
-      "sma200": 129.6662,
-      "as_of": "2026-10-15",
-      "source": "Daily historicals"
-     },
-     "tech_score": 75
-    },
-    "fundamental": {
-     "status": "open",
-     "summary": "No fundamental profile on dossier — thesis is flow/team only."
-    },
-    "spotlight": null,
-    "thesis_one_liner": null
-   },
-   "thesis_one_liner": null,
-   "top_print": "Desk A Subs · **~$2.5M** · 1000× Jan'28 short puts open @$24.80 (2026-10-13)",
-   "trade_lines": [],
-   "vol_oi": null
-  }
- ],
- "spotlight_watch": [
-  {
-   "date": "2026-10-14",
-   "ticker": "FCX",
-   "title": "Upside Calls Cheap in Metals Leader for AI Buildout",
-   "structure": "long calls (stock stop $63 / target $80)",
-   "ticket": "filled"
-  },
-  {
-   "date": "2026-10-05",
-   "ticker": "HOOD",
-   "title": "Long Calls in Top Financial Growth Story",
-   "structure": "long calls",
-   "ticket": "OPEN"
-  },
-  {
-   "date": "2026-09-29",
-   "ticker": "V",
-   "title": "Call spreads / payments quarter",
-   "structure": "call spreads",
-   "ticket": "OPEN"
+   ]
   }
  ],
  "data_gaps": []

@@ -42,13 +42,6 @@ function isoLabel(iso) {
   return /^\d{4}-\d{2}-\d{2}$/.test(iso ?? "") ? `${shortDate(iso)}, ${iso.slice(0, 4)}` : iso ?? "";
 }
 
-function ticketClass(t) {
-  const v = (t || "").toLowerCase();
-  if (v === "open") return "open";
-  if (v === "filled") return "filled";
-  return "";
-}
-
 function chipClass(c) {
   const raw = String(c || "").toUpperCase();
   if (raw.includes("PUT-SALE")) return "put-sale";
@@ -57,6 +50,25 @@ function chipClass(c) {
 
 function renderChips(chips) {
   return (chips || []).map((c) => `<span class="sb-chip is-${esc(chipClass(c))}">${esc(c)}</span>`).join("");
+}
+
+const STAR = `<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M10 1.6 L12.6 7 L18.5 7.7 L14.1 11.7 L15.3 17.6 L10 14.6 L4.7 17.6 L5.9 11.7 L1.5 7.7 L7.4 7 Z" fill="#f5c451" stroke="#c99212" stroke-width="1.1" stroke-linejoin="round" /></svg>`;
+
+/** Yellow filled star for a name that has an Active Spotlight. */
+export function spotlightStar(ticker, active) {
+  if (!active.has(ticker)) return "";
+  return `<span class="sb-star" title="Active Spotlight" role="img" aria-label="Active Spotlight">${STAR}</span>`;
+}
+
+/** Tickers in the Active row of spotlights.json. */
+export function activeSpotlights(seed) {
+  const active = (seed?.sections || []).find((section) => section.id === "active");
+  return new Set((active?.plays || []).map((play) => play.ticker));
+}
+
+/** Unique trade dates for a name, newest first. */
+export function tradeDates(name) {
+  return [...new Set((name.trades || []).map((trade) => trade.date))].sort((a, b) => b.localeCompare(a));
 }
 
 /** Scorecard trade lines on the shared levels chart: call strikes amber, put strikes red, targets blue. */
@@ -121,13 +133,22 @@ function renderSpark(candles) {
   return `<span class="spark" title="Last ${n} sessions · EMA8 in amber"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">${sticks}${ema}</svg></span>`;
 }
 
-function boardRow(name) {
+function renderStamps(name) {
+  const dates = tradeDates(name);
+  if (!dates.length) return "";
+  return `<span class="sb-times">${dates
+    .map((date) => `<time datetime="${esc(date)}">${esc(shortDate(date))}</time>`)
+    .join("")}</span>`;
+}
+
+function boardRow(name, active) {
   const comp = Math.max(0, Math.min(100, Number(name.composite) || 0));
+  const star = active.has(name.ticker) ? ", Active Spotlight" : "";
   return `<li><button type="button" class="sb-row" data-ticker="${esc(name.ticker)}" aria-haspopup="dialog"
-      aria-label="${esc(name.ticker)}, rank ${esc(name.rank)}, composite ${esc(name.composite)}, flow ${esc(name.flow)}, tech ${esc(name.tech)}. Open trade card">
+      aria-label="${esc(name.ticker)}${star}, rank ${esc(name.rank)}, composite ${esc(name.composite)}, flow ${esc(name.flow)}, tech ${esc(name.tech)}. Open trade card">
     <span class="sb-rank">#${esc(name.rank)}</span>
-    <span class="sb-id"><strong class="sb-ticker">${esc(name.ticker)}</strong><span class="sb-struct">${esc(name.structure_bias || "—")}</span></span>
-    <span class="sb-mid"><span class="sb-chips">${renderChips(name.chips)}</span><span class="sb-why">${md(name.why || "—")}</span></span>
+    <span class="sb-id"><span class="sb-name"><strong class="sb-ticker">${esc(name.ticker)}</strong>${spotlightStar(name.ticker, active)}</span><span class="sb-struct">${esc(name.structure_bias || "—")}</span></span>
+    <span class="sb-mid"><span class="sb-chips">${renderChips(name.chips)}${renderStamps(name)}</span><span class="sb-why">${md(name.why || "—")}</span></span>
     <span class="sb-scores">
       <span class="sb-comp-line"><strong class="sb-comp">${esc(name.composite)}</strong><span class="sb-ft">F <b>${esc(name.flow)}</b> · T <b>${esc(name.tech)}</b></span></span>
       <span class="sb-bar" aria-hidden="true"><i style="width:${comp}%"></i></span>
@@ -137,89 +158,8 @@ function boardRow(name) {
   </button></li>`;
 }
 
-function watchCard(w, linked) {
-  const tc = ticketClass(w.ticket);
-  const inner = `<span class="spot-top">
-      <strong class="spot-ticker">${esc(w.ticker)}</strong>
-      ${tc ? `<span class="sb-ticket is-${tc}">${esc(w.ticket)}</span>` : ""}
-    </span>
-    <span class="spot-title">${esc(w.title || "")}</span>
-    <span class="spot-meta"><span class="spot-chip sb-struct-chip">${esc(w.structure || "")}</span></span>
-    <span class="spot-foot">
-      <time datetime="${esc(w.date || "")}">Posted ${esc(isoLabel(w.date))}</time>
-      ${linked ? `<span class="sb-watch-open">Open Spotlight card <span class="fr-arrow" aria-hidden="true">→</span></span>` : ""}
-    </span>`;
-  return linked
-    ? `<li><a class="spot-card sb-watch-card" href="../spotlights/#${esc(w.ticker)}">${inner}</a></li>`
-    : `<li><div class="spot-card sb-watch-card is-static">${inner}</div></li>`;
-}
-
-function statusPill(status) {
-  const s = (status || "open").toLowerCase();
-  const labels = { real: "REAL", from_dossier: "DOSSIER", from_oi: "OI READ", not_on_desk: "NOT ON DESK" };
-  return `<span class="fi-pill is-${esc(s)}">${esc(labels[s] || "OPEN")}</span>`;
-}
-
-function panelStatus(panel) {
-  if (!panel || typeof panel !== "object") return "open";
-  return panel.status || "open";
-}
-
-export function parseLevelsFallback(str) {
-  const out = { pos: [], neg: [] };
-  if (!str) return out;
-  const norm = String(str).replace(/[−–]/g, "-");
-  let left = norm;
-  let right = "";
-  if (norm.includes("|")) {
-    const parts = norm.split("|");
-    left = parts[0];
-    right = parts.slice(1).join("|");
-  } else {
-    const m = /;\s*(?=-\s*\d)/.exec(norm);
-    if (m) {
-      left = norm.slice(0, m.index);
-      right = norm.slice(m.index + 1);
-    }
-  }
-  const re = /([+\-]?\s*\d+(?:\.\d+)?)\s*\$\s*-?\s*([\d,.]+)\s*([KkMmBb])?/g;
-  function side(chunk, defaultSign) {
-    const items = [];
-    let m;
-    const cleaned = String(chunk || "").replace(/^[+:\s-]+/, "");
-    while ((m = re.exec(cleaned))) {
-      let raw = m[1].replace(/\s+/g, "");
-      let sign = defaultSign;
-      if (raw.startsWith("+")) {
-        sign = "+";
-        raw = raw.slice(1);
-      } else if (raw.startsWith("-")) {
-        sign = "-";
-        raw = raw.slice(1);
-      }
-      const strike = Number(raw);
-      if (Number.isNaN(strike)) continue;
-      const suf = (m[3] || "").toUpperCase();
-      const mult = suf === "B" ? 1e9 : suf === "M" ? 1e6 : suf === "K" ? 1e3 : 1;
-      const amount = Math.abs(Number(String(m[2]).replace(/,/g, ""))) * mult;
-      if (!(amount > 0)) continue;
-      items.push({ strike, usd: amount, display: fmtUsd(amount) || `$${amount}`, sign });
-    }
-    re.lastIndex = 0;
-    return items;
-  }
-  out.pos = side(left, "+");
-  out.neg = side(right, "-");
-  return out;
-}
-
-function levelList(s, kind) {
-  const direct = s[kind];
-  if (Array.isArray(direct) && direct.length) return direct;
-  const group = kind.startsWith("gamma") ? s.gamma_levels || {} : s.vanna_levels || {};
-  const side = kind.endsWith("_pos") ? "pos" : "neg";
-  if (Array.isArray(group[side]) && group[side].length) return group[side];
-  return parseLevelsFallback(kind.startsWith("gamma") ? s.gamma : s.vanna)[side] || [];
+function emptyState(text) {
+  return `<p class="fi-empty">${esc(text)}</p>`;
 }
 
 function renderStrikeBars(items, tone) {
@@ -240,276 +180,223 @@ function renderStrikeBars(items, tone) {
     .join("")}</div>`;
 }
 
-function strikeFromCoord(raw) {
-  if (raw == null || raw === "") return null;
-  const t = String(raw).trim();
-  if (/^open$/i.test(t)) return null;
-  const m = t.match(/-?\d+(?:\.\d+)?/);
-  return m ? m[0] : null;
-}
-
-function topStrike(items) {
-  if (!items || !items.length) return null;
-  let best = items[0];
-  for (const it of items) {
-    if ((Number(it.usd) || 0) > (Number(best.usd) || 0)) best = it;
-  }
-  if (best.strike == null || best.strike === "") return null;
-  const n = Number(best.strike);
-  return Number.isFinite(n) ? String(n) : String(best.strike);
-}
-
-function decodeHorizonFoot(s, shortLabel, gPos, gNeg) {
-  const support = strikeFromCoord(s.floors) || topStrike(gPos);
-  const resist = strikeFromCoord(s.walls) || topStrike(gNeg);
-  const pin = strikeFromCoord(s.pins);
-  const bits = [support ? `Support at ${support}` : "Support OPEN", resist ? `resistance at ${resist}` : "resistance OPEN"];
-  if (pin) bits.push(`pin at ${pin}`);
-  const key = "Put floor = support · Call wall = resistance · Pin = magnet";
-  return `<div class="oi-levels-foot"><div class="oi-decode">${esc(`${shortLabel}: ${bits.join(", ")}`)}</div><div class="oi-decode-key">${esc(key)}</div></div>`;
-}
-
 function coordChip(label, value) {
-  if (value) {
-    return `<div class="oi-chip"><span class="oi-chip-k">${esc(label)}</span><span class="oi-chip-v">${esc(value)}</span></div>`;
-  }
-  return `<div class="oi-chip is-open"><span class="oi-chip-k">${esc(label)}</span><span class="oi-chip-v">OPEN</span></div>`;
+  return `<div class="oi-chip${value ? "" : " is-open"}"><span class="oi-chip-k">${esc(label)}</span><span class="oi-chip-v">${esc(value || "—")}</span></div>`;
 }
 
-function renderOiHorizon(sub, fallbackLabel) {
-  const s = sub || {};
-  const st = panelStatus(s);
-  const label = s.label || fallbackLabel;
-  let body;
-  if (st === "not_on_desk" || st === "open") {
-    const tag = st === "not_on_desk" ? "NOT ON DESK" : "OPEN";
-    const reason =
-      String(s.summary || "")
-        .replace(/^(OPEN|NOT ON DESK)\s*[—\-]\s*/i, "")
-        .trim() || (st === "open" ? "No Monthly OpEx / Third Friday breakout in singles." : "No OI read for this horizon.");
-    body = `<div class="oi-open-banner"><span class="oi-open-tag">${tag}</span><span class="oi-open-reason">${esc(reason)}</span></div>`;
-  } else {
-    const gPos = levelList(s, "gamma_pos");
-    const gNeg = levelList(s, "gamma_neg");
-    body = `
-      ${s.expiry ? `<div class="oi-expiry">${esc(s.expiry)}</div>` : ""}
-      <div class="oi-chips">
-        ${coordChip("Call wall", s.walls)}
-        ${coordChip("Put floor", s.floors)}
-        ${coordChip("Pin", s.pins)}
-      </div>
-      ${s.dealer_positioning ? `<div class="oi-dealer"><span class="oi-chip-k">Dealer</span> ${esc(s.dealer_positioning)}</div>` : ""}
-      <div class="oi-greek-grid">
-        <div class="oi-greek"><div class="oi-greek-title is-pos">+ Gamma</div>${renderStrikeBars(gPos, "pos")}</div>
-        <div class="oi-greek"><div class="oi-greek-title is-neg">− Gamma</div>${renderStrikeBars(gNeg, "neg")}</div>
-        <div class="oi-greek"><div class="oi-greek-title is-pos">+ Vanna</div>${renderStrikeBars(levelList(s, "vanna_pos"), "pos")}</div>
-        <div class="oi-greek"><div class="oi-greek-title is-neg">− Vanna</div>${renderStrikeBars(levelList(s, "vanna_neg"), "neg")}</div>
-      </div>
-      ${decodeHorizonFoot(s, /all/i.test(label) ? "All expiry" : "OpEx", gPos, gNeg)}`;
-  }
+function renderOiHorizon(h) {
+  const expiry = /^\d{4}-\d{2}-\d{2}$/.test(h.expiry || "") ? `Expiry ${isoLabel(h.expiry)}` : h.expiry;
   return `<div class="oi-card">
-    <div class="oi-card-title"><span>${esc(label)}</span>${statusPill(st)}</div>
-    <div class="oi-card-body">${body}</div>
+    <div class="oi-card-title"><span>${esc(h.label)}</span>${expiry ? `<span class="oi-expiry">${esc(expiry)}</span>` : ""}</div>
+    <div class="oi-card-body">
+      <div class="oi-chips">
+        ${coordChip("Call wall", h.walls)}
+        ${coordChip("Put floor", h.floors)}
+        ${coordChip("Pin", h.pins)}
+      </div>
+      ${h.dealer_positioning ? `<p class="oi-dealer"><span class="oi-chip-k">Dealer</span> ${esc(h.dealer_positioning)}</p>` : ""}
+      <div class="oi-greek-grid">
+        <div class="oi-greek"><div class="oi-greek-title is-pos">+ Gamma</div>${renderStrikeBars(h.gamma_pos, "pos")}</div>
+        <div class="oi-greek"><div class="oi-greek-title is-neg">− Gamma</div>${renderStrikeBars(h.gamma_neg, "neg")}</div>
+        <div class="oi-greek"><div class="oi-greek-title is-pos">+ Vanna</div>${renderStrikeBars(h.vanna_pos, "pos")}</div>
+        <div class="oi-greek"><div class="oi-greek-title is-neg">− Vanna</div>${renderStrikeBars(h.vanna_neg, "neg")}</div>
+      </div>
+    </div>
   </div>`;
 }
 
-function renderFlowIntel(name) {
-  const p = name.panels || {};
-  const trade = p.trade_summary || {};
-  const iv = p.iv_catalyst || {};
-  const oi = p.oi_levels || {};
-  const tech = p.technical || {};
-  const fund = p.fundamental || {};
-  const thesis = p.thesis_one_liner || name.thesis_one_liner;
-  const spot = p.spotlight || name.spotlight;
+function stampLabel(raw) {
+  const m = /^(\d{4}-\d{2}-\d{2})(?:\s+(.+))?$/.exec(raw || "");
+  if (!m) return raw || "";
+  return `${isoLabel(m[1])}${m[2] ? ` · ${m[2]}` : ""}`;
+}
 
-  const prints = (trade.top_prints || []).map((x) => `<li>${md(x)}</li>`).join("");
+function fiSection(title, body, aside = "") {
+  return `<section class="fi-card">
+    <h4 class="fi-card-title"><span>${esc(title)}</span>${aside ? `<span class="fi-aside">${aside}</span>` : ""}</h4>
+    <div class="fi-body">${body}</div>
+  </section>`;
+}
 
-  const ivBody =
-    panelStatus(iv) === "open"
-      ? `<p><strong>OPEN</strong> — ${esc(iv.summary || "IV not on desk.")}</p>
-         <p class="fi-note">${esc(iv.note || "")}</p>`
-      : `<p>${esc(iv.summary || "")}</p>
-         ${iv.as_of ? `<p class="fi-note">as of ${esc(iv.as_of)} · ${esc(iv.note || "")}</p>` : `<p class="fi-note">${esc(iv.note || "")}</p>`}`;
+function techLine(label, value, read, tone = "") {
+  return `<div class="fi-line${tone ? ` is-${tone}` : ""}"><dt>${esc(label)}</dt><dd><b>${esc(value)}</b>${read ? `<span>${esc(read)}</span>` : ""}</dd></div>`;
+}
 
-  let oiBody;
-  const mo = oi.monthly_opex;
-  const ae = oi.all_expiry;
-  if ((panelStatus(oi) === "not_on_desk" || panelStatus(oi) === "open") && !mo && !ae) {
-    oiBody = `<div class="oi-open-banner"><span class="oi-open-tag">NOT ON DESK</span><span class="oi-open-reason">${esc(oi.summary || "OI levels not on desk.")}</span></div>`;
-  } else {
-    oiBody = `
-      <div class="oi-meta">${oi.as_of ? `as of ${esc(oi.as_of)}` : ""}${oi.as_of && oi.source ? " · " : ""}${oi.source ? esc(oi.source) : ""}</div>
-      <div class="oi-cards">
-        ${renderOiHorizon(mo, "Monthly OpEx")}
-        ${renderOiHorizon(ae, "All expiry")}
-      </div>`;
-  }
+function readTone(read) {
+  const r = String(read || "").toLowerCase();
+  if (r.startsWith("above") || r.startsWith("well above")) return "up";
+  if (r.startsWith("below")) return "down";
+  return "";
+}
 
-  const lv = tech.levels || name.levels || {};
-  const techBody = `
-    <p>${md(tech.tech_why || name.tech_why || "—")}</p>
-    <p class="fi-note">Tech score ${esc(tech.tech_score ?? name.tech)}/100 ·
-      spot ${fmtPx(lv.spot)} · EMA8 ${fmtPx(lv.ema8)} · EMA21 ${fmtPx(lv.ema21)} · 200-MA ${lv.sma200 != null ? fmtPx(lv.sma200) : "OPEN"}</p>
-    ${tech.technicals_note ? `<p class="fi-note">${md(tech.technicals_note)}</p>` : ""}`;
+/** Earnings boxes: the three most recent reports, oldest first, then the next one. Blank boxes stay blank. */
+export function earningsBoxes(earnings = {}) {
+  const past = [...(earnings.past || [])].sort((a, b) => String(a.date).localeCompare(String(b.date))).slice(-3);
+  const slots = [null, null, null];
+  past.forEach((report, index) => {
+    slots[3 - past.length + index] = report;
+  });
+  return [
+    ...slots.map((report, index) => ({ kind: "past", label: `Past ER ${index + 1}`, report })),
+    { kind: "next", label: "Upcoming ER", report: earnings.next || null },
+  ];
+}
 
-  const fundBody = `${panelStatus(fund) === "open" ? `<p><strong>OPEN</strong> — ${esc(fund.summary || "No fundamental profile.")}</p>` : `<p>${esc(fund.summary || "")}</p>`}
-    ${thesis ? `<p><em>Thesis:</em> ${esc(thesis)}</p>` : ""}`;
+function erBox({ kind, label, report }) {
+  const when = report ? (report.date ? isoLabel(report.date) : report.label || "") : "";
+  return `<div class="fi-er${report ? "" : " is-empty"}${kind === "next" ? " is-next" : ""}">
+    <span class="fi-er-k">${esc(label)}</span>
+    <strong class="fi-er-v">${esc(when || "None")}</strong>
+    ${report?.note ? `<span class="fi-er-note">${esc(report.note)}</span>` : ""}
+  </div>`;
+}
 
-  let spotBody;
-  if (!spot) {
-    spotBody = `<p class="fi-note">No Spotlight card on this name.</p>`;
-  } else {
-    const tc = ticketClass(spot.ticket);
-    spotBody = `<div class="fi-spot">
-      <div class="fi-spot-title">${esc(spot.title || spot.ticker || "Spotlight")}</div>
-      <div class="fi-spot-meta">
-        <span>${esc(spot.date || "")}</span>
-        <span>${esc(spot.structure || "")}</span>
-        ${tc ? `<span class="sb-ticket is-${tc}">${esc(spot.ticket)}</span>` : ""}
-      </div>
+function renderFlowIntel(name, active) {
+  const trades = (name.trades || [])
+    .map((trade) => `<li><time datetime="${esc(trade.date)}">${esc(shortDate(trade.date))}</time><span>${md(trade.text)}</span></li>`)
+    .join("");
+  const prem = name.net_premium;
+  const tradeBody = `<p>${md(name.why || "—")}</p>
+    ${trades ? `<ul class="fi-trades">${trades}</ul>` : ""}
+    ${prem ? `<p class="fi-note">Largest print ${esc(fmtUsd(prem.usd) || prem.raw)} · ${esc(prem.side || "")}</p>` : ""}`;
+
+  const iv = name.iv;
+  const next = name.earnings?.next;
+  const ivBody = `<dl class="fi-lines">
+      ${iv ? techLine("IV30", iv.iv30, `as of ${isoLabel(iv.as_of)}`) : ""}
+      ${iv?.skew ? techLine("Skew", iv.skew, "") : ""}
+    </dl>
+    ${iv ? "" : emptyState("No live IV pull yet.")}
+    <div class="fi-sub">
+      <span class="fi-sub-k">Open catalyst</span>
+      ${next ? `<p><strong>Earnings ${esc(next.date ? isoLabel(next.date) : next.label)}</strong>${next.note ? ` · ${esc(next.note)}` : ""}</p>` : emptyState("No catalyst on file.")}
     </div>`;
-  }
 
-  return `
-    <h3 class="fi-title">Flow Intelligence</h3>
-    <details class="fi-acc" open>
-      <summary>Trade / Flow Summary ${statusPill(panelStatus(trade))}</summary>
-      <div class="fi-body">
-        <p><strong>${esc(name.ticker)}</strong> · ${esc(trade.structure || name.structure_bias || "—")} · conf ${esc(trade.confidence || "OPEN")}</p>
-        <p>${md(trade.why || name.why || "—")}</p>
-        ${trade.net_premium ? `<p>Net premium (from prints): <strong>${esc(fmtUsd(trade.net_premium.usd) || trade.net_premium.raw)}</strong></p>` : `<p class="fi-note">Net premium: OPEN (no $ print parsed)</p>`}
-        ${prints ? `<ul>${prints}</ul>` : ""}
-      </div>
-    </details>
-    <details class="fi-acc">
-      <summary>IV &amp; catalyst ${statusPill(panelStatus(iv))}</summary>
-      <div class="fi-body">${ivBody}</div>
-    </details>
-    <details class="fi-acc" open>
-      <summary>OI / Dealer levels ${statusPill(panelStatus(oi))}</summary>
-      <div class="fi-body">${oiBody}</div>
-    </details>
-    <details class="fi-acc" open>
-      <summary>Technical Analysis ${statusPill(panelStatus(tech))}</summary>
-      <div class="fi-body">${techBody}</div>
-    </details>
-    <details class="fi-acc">
-      <summary>Fundamental / thesis ${statusPill(panelStatus(fund))}</summary>
-      <div class="fi-body">${fundBody}</div>
-    </details>
-    <details class="fi-acc">
-      <summary>Spotlight ${spot ? statusPill("real") : statusPill("open")}</summary>
-      <div class="fi-body">${spotBody}</div>
-    </details>`;
+  const oi = name.oi_levels;
+  const oiBody = oi
+    ? `${oi.as_of ? `<p class="fi-note is-top">As of ${esc(stampLabel(oi.as_of))}</p>` : ""}
+       <div class="oi-cards">${renderOiHorizon(oi.monthly_opex)}${renderOiHorizon(oi.all_expiry)}</div>`
+    : emptyState("No live OI pull yet. Walls, floors, pins, and dealer gamma show here once a read lands.");
+
+  const t = name.technicals || {};
+  const lv = name.levels || {};
+  const techBody = `<dl class="fi-lines">
+      ${techLine("Spot", fmtPx(lv.spot), lv.as_of ? `${shortDate(lv.as_of)} close` : "")}
+      ${t.ema8 ? techLine("EMA8", fmtPx(t.ema8.value), t.ema8.read, readTone(t.ema8.read)) : ""}
+      ${t.ema21 ? techLine("EMA21", fmtPx(t.ema21.value), t.ema21.read, readTone(t.ema21.read)) : ""}
+      ${t.sma200 ? techLine("200-MA", fmtPx(t.sma200.value), t.sma200.read, readTone(t.sma200.read)) : ""}
+      ${t.rsi_weekly ? techLine("Weekly RSI", t.rsi_weekly, "") : ""}
+      ${techLine("Tech score", `${name.tech}/100`, t.grade || "")}
+    </dl>`;
+
+  const fundBody = `${name.thesis ? `<p><span class="fi-sub-k">Thesis</span> ${esc(name.thesis)}</p>` : ""}
+    ${name.fundamental ? `<p>${esc(name.fundamental)}</p>` : ""}
+    ${!name.thesis && !name.fundamental ? emptyState("No fundamental profile yet.") : ""}
+    <div class="fi-ers">${earningsBoxes(name.earnings).map(erBox).join("")}</div>`;
+
+  const spotBody = active.has(name.ticker)
+    ? `<a class="fi-spot-link" href="../spotlights/#${esc(name.ticker)}">${spotlightStar(name.ticker, active)}Active Spotlight · open the card <span aria-hidden="true">→</span></a>`
+    : `<p class="fi-none">None</p>`;
+
+  return [
+    fiSection("Trade summary", tradeBody, `${(name.trades || []).length} trades`),
+    fiSection("IV & catalyst", ivBody),
+    fiSection("OI & dealer levels", oiBody),
+    fiSection("Technical analysis", techBody),
+    fiSection("Fundamental / thesis", fundBody),
+    fiSection("Spotlight", spotBody),
+  ].join("");
 }
 
 function volOi(name) {
-  const top = name.top_print || (name.top_prints || [])[0] || "";
-  const oi = (name.panels || {}).oi_levels || {};
-  if (name.vol_oi) {
-    return {
-      value: `${Number(name.vol_oi.volume).toLocaleString("en-US")} / ${Number(name.vol_oi.oi).toLocaleString("en-US")}`,
-      hint: `${name.vol_oi.contract} · Oct 9 quote`,
-    };
-  }
-  if (oi.vol_oi) return { value: oi.vol_oi, hint: "from dossier/print" };
-  const m = String(top).match(/vol\s*[~≈]?\s*([\d,]+)\s*\/\s*OI\s*([\d,]+)/i);
-  return m ? { value: `${m[1]}/${m[2]}`, hint: "from dossier/print" } : { value: null, hint: "no specific contract in print" };
+  if (!name.vol_oi) return { value: null, hint: "No contract on file" };
+  return {
+    value: `${Number(name.vol_oi.volume).toLocaleString("en-US")} / ${Number(name.vol_oi.oi).toLocaleString("en-US")}`,
+    hint: `${name.vol_oi.contract} · ${shortDate(name.vol_oi.as_of.slice(0, 10))}`,
+  };
 }
 
-function isHighConf(name) {
-  return (name.chips || []).includes("HIGH") || (name.confidence || "").toLowerCase().startsWith("high");
+function metric(label, value, sub, tone = "") {
+  return `<div class="sb-metric${tone ? ` is-${tone}` : ""}"><dt>${esc(label)}</dt><dd>${value}</dd>${sub ? `<dd class="sb-metric-sub">${esc(sub)}</dd>` : ""}</div>`;
 }
 
-function premiumLabel(name) {
-  const prem = name.net_premium;
-  return prem ? fmtUsd(prem.usd) || prem.raw : "OPEN";
+function score(value) {
+  return `${esc(value)}<span class="sb-of">/100</span>`;
 }
 
-function cardRow(label, value, sub, extra = "") {
-  return `<div class="cc-oi-row${extra ? ` ${extra}` : ""}"><dt>${esc(label)}</dt><dd>${value}${sub ? `<span class="sb-row-sub">${sub}</span>` : ""}</dd></div>`;
-}
-
-function renderTradeCard(name) {
-  const levels = name.levels || {};
-  const prem = name.net_premium;
-  const premLabel = premiumLabel(name);
-  const vo = volOi(name);
-  const asOf = levels.as_of ? ` · as of ${esc(isoLabel(levels.as_of))} close` : "";
-  const structure = `${name.structure_bias || "—"}${name.put_sale_only ? " · put-sale only · not a long" : ""}`;
-  const score = (label, value, tone, hint) =>
-    `<div class="sb-score is-${tone}"><dt>${label}</dt><dd>${esc(value)}<span>/100</span></dd>${hint ? `<dd class="sb-score-hint">${hint}</dd>` : ""}</div>`;
-
-  return `
-    <p class="cc-meta">
-      <span class="cc-alert sb-alert">Options Flow · Flow alert</span>
-      <span>Spot ${fmtPx(levels.spot)}${asOf}</span>
-    </p>
-    <h3 class="cc-title" id="bc-title">${esc(name.ticker)} · ${esc(structure)}</h3>
-    <dl class="sb-scoreboard">
-      ${score("Composite", name.composite, "comp", "0.65F / 0.35T")}
-      ${score("Flow", name.flow, "flow")}
-      ${score("Tech", name.tech, "tech")}
-    </dl>
-    <div class="cc-block">
-      <h4 class="cc-label">Desk analysis</h4>
-      <div class="cc-flow"><p>${md(name.desk_analysis || "—")}</p></div>
-    </div>
-    <div class="cc-block">
-      <h4 class="cc-label">Trade card</h4>
-      <dl class="cc-oi sb-facts">
-        ${cardRow("Top print $", esc(premLabel), prem ? "net premium (from prints)" : "premium OPEN", prem ? "is-flow" : "is-open")}
-        ${cardRow("Structure", esc(structure))}
-        ${cardRow("Confidence", esc(name.confidence || "OPEN"))}
-        ${cardRow("Vol / OI", vo.value ? esc(vo.value) : "n/a", esc(vo.hint), vo.value ? "" : "is-open")}
-        ${cardRow("Spot / EMA8", `${fmtPx(levels.spot)} / ${fmtPx(levels.ema8)}`, `EMA21 ${fmtPx(levels.ema21)} · 200 ${levels.sma200 != null ? fmtPx(levels.sma200) : "OPEN"}`)}
-        ${cardRow("Strategy bias", esc((name.chips || [])[0] || name.structure_bias || "—"))}
-        ${cardRow("Condition", name.put_sale_only ? "Put-sale only" : "Board filter")}
-        ${cardRow("Rank", `#${esc(name.rank)} · ${isHighConf(name) ? "High conf" : esc(name.confidence || "OPEN")}`)}
-      </dl>
-    </div>
-    ${name.top_print ? `<div class="cc-block"><h4 class="cc-label">Top print</h4><p class="sb-print">${md(name.top_print)}</p></div>` : ""}`;
-}
-
-function tile(label, value, sub, accent) {
-  return `<div class="tl-tile${accent ? ` is-${accent}` : ""}"><dt>${esc(label)}</dt><dd>${esc(value)}</dd>${sub ? `<dd class="tl-sub">${esc(sub)}</dd>` : ""}</div>`;
+function conditionLabel(name) {
+  if (name.put_sale_only) return "Put-sale only";
+  const s = String(name.structure_bias || "").toLowerCase();
+  if (s.startsWith("mixed")) return "Mixed flow";
+  if (s.startsWith("calls")) return "Call-led";
+  return "Board filter";
 }
 
 function swatch(kind, label, title) {
   return `<span class="tl-key"${title ? ` title="${esc(title)}"` : ""}><i class="tl-sw is-${kind}"></i>${esc(label)}</span>`;
 }
 
-function fillRight(dialog, name) {
-  const levels = name.levels || {};
-  const chart = boardLevels(name);
+/** Fills the trade card in the order it reads: ticker and contract, analysis, metrics, chart, strategy row. */
+function renderTradeCard(dialog, name, board, active) {
+  const lv = name.levels || {};
+  const t = name.technicals || {};
+  const prem = name.net_premium;
   const vo = volOi(name);
-  $("#bc-contract", dialog).textContent = name.vol_oi?.contract || name.structure_bias || "";
+  const dates = tradeDates(name);
+  const total = (board.names || []).length;
+
+  $("#bc-ticker", dialog).textContent = name.ticker;
+  $("#bc-star", dialog).innerHTML = spotlightStar(name.ticker, active);
+  $("#bc-spot", dialog).textContent = lv.spot != null ? fmtPx(lv.spot) : "";
+  $("#bc-rank", dialog).textContent = `Rank #${name.rank} of ${total}`;
+  $("#bc-chips", dialog).innerHTML = renderChips(name.chips);
+  $("#bc-contract", dialog).textContent = name.lead?.contract || name.structure_bias || "";
+  const stamp = $("#bc-stamp", dialog);
+  stamp.dateTime = name.lead?.date || "";
+  stamp.textContent = name.lead?.date ? `Lead print ${isoLabel(name.lead.date)}` : "";
+  $("#bc-pills", dialog).innerHTML = [
+    `<span class="sb-pill is-struct">${esc(name.structure_bias || "—")}</span>`,
+    `<span class="sb-pill">${esc(`${(name.trades || []).length} trades`)}</span>`,
+  ].join("");
+  $("#bc-premium", dialog).textContent = prem ? fmtUsd(prem.usd) || prem.raw : "—";
+  $("#bc-premium-sub", dialog).textContent = prem
+    ? [prem.side, prem.contracts ? `${prem.contracts.toLocaleString("en-US")} contracts` : ""].filter(Boolean).join(" · ")
+    : "Not stated in the prints";
+  $("#bc-analysis", dialog).innerHTML = md(name.desk_analysis || name.why || "—");
+
   $("#bc-tiles", dialog).innerHTML = [
-    tile("Spot", fmtPx(levels.spot), levels.as_of ? `${shortDate(levels.as_of)} close` : "Spot OPEN"),
-    tile("Net premium", premiumLabel(name), name.net_premium ? "From prints" : "Not in a print"),
-    tile("Composite", `${name.composite}/100`, `F${name.flow} / T${name.tech}`, "be"),
-    tile("Vol / OI", vo.value || "n/a", vo.value ? (name.vol_oi ? "Oct 9 quote" : "From dossier/print") : "No contract in print"),
+    metric("Composite", score(name.composite), `F ${name.flow} / T ${name.tech}`, "comp"),
+    metric("Flow", score(name.flow), "Flow score", "flow"),
+    metric("Tech", score(name.tech), t.grade ? `${t.grade} tape` : "Tech score", "tech"),
+    metric("Vol / OI", vo.value ? esc(vo.value) : "—", vo.hint, vo.value ? "" : "empty"),
+  ].join("");
+  $("#bc-tiles-2", dialog).innerHTML = [
+    metric("Spot", esc(fmtPx(lv.spot)), lv.as_of ? `${shortDate(lv.as_of)} close` : ""),
+    metric("Trades", esc(String((name.trades || []).length)), dates.length ? `${shortDate(dates[dates.length - 1])} – ${shortDate(dates[0])}` : ""),
+    metric("Confidence", esc(name.confidence || "—"), ""),
+    metric("Weekly RSI", esc(t.rsi_weekly || "—"), ""),
+    metric("Upcoming ER", esc(name.earnings?.next ? (name.earnings.next.date ? shortDate(name.earnings.next.date) : name.earnings.next.label) : "None"), "", name.earnings?.next ? "" : "empty"),
   ].join("");
 
-  const head = [`${name.ticker} — ~6-month price · daily`, ...chart.lines.map((line) => line.label)];
-  $("#bc-head", dialog).textContent = head.join(" · ");
-  const lines = name.trade_lines || [];
+  const chart = boardLevels(name);
+  $("#bc-head", dialog).textContent = [`${name.ticker} — 6-month price`, ...chart.lines.map((line) => line.label)].join(" · ");
   $("#bc-legend", dialog).innerHTML =
     swatch("price", "Close") +
-    (lines.length
-      ? boardLines(name).map((line) => swatch(SWATCH[line.kind], line.label, line.note)).join("")
-      : `<span class="tl-key sb-dim">No strike levels in flow</span>`);
+    (chart.lines.length
+      ? chart.lines.map((line) => swatch(SWATCH[line.kind], line.label, line.note)).join("")
+      : `<span class="tl-key sb-dim">No strike levels in the flow</span>`);
   const n = chart.window.length;
   $("#bc-range", dialog).textContent = n ? `${shortDate(chart.window[0].t, true)} → ${shortDate(chart.spotDate, true)} · ${n}d` : "";
-  $("#bc-note", dialog).textContent = n
-    ? `Daily closes as of ${isoLabel(levels.as_of || chart.spotDate)} from the weekly snapshot. Lines are the strikes and targets named in the flow.`
-    : "";
-  $("#flow-intel", dialog).innerHTML = renderFlowIntel(name);
+
+  $("#bc-foot", dialog).innerHTML = [
+    metric("Strategy", esc(name.structure_bias || "—"), ""),
+    metric("Condition", esc(conditionLabel(name)), ""),
+    metric("Rank", esc(`#${name.rank} of ${total}`), ""),
+  ].join("");
   return chart;
 }
 
-function setupCard(dialog, board) {
+function setupCard(dialog, board, active) {
   const chartHost = $("#bc-chart", dialog);
   const byTicker = new Map((board.names || []).map((name) => [name.ticker, name]));
   let trigger = null;
@@ -524,23 +411,18 @@ function setupCard(dialog, board) {
     const name = byTicker.get(ticker);
     if (!name) return;
     trigger = from ?? null;
-    const levels = name.levels || {};
-    $("#bc-ticker", dialog).textContent = name.ticker;
-    $("#bc-rank", dialog).textContent = `#${name.rank}`;
-    $("#bc-chips", dialog).innerHTML = renderChips(name.chips);
-    $("#bc-spot", dialog).textContent =
-      levels.spot != null ? `Spot ${fmtPx(levels.spot)}${levels.as_of ? ` · ${shortDate(levels.as_of)}` : ""}` : "Spot OPEN";
-    $("#trade-card", dialog).innerHTML = renderTradeCard(name);
-    const chart = fillRight(dialog, name);
+    clearChart();
+    const chart = renderTradeCard(dialog, name, board, active);
+    $("#fi-count", dialog).textContent = `${name.ticker} · ${(name.trades || []).length} trades`;
+    $("#flow-intel", dialog).innerHTML = renderFlowIntel(name, active);
     if (!dialog.open) dialog.showModal();
     $(".cc-left", dialog).scrollTop = 0;
-    $(".cc-right", dialog).scrollTop = 0;
+    $(".sb-intel", dialog).scrollTop = 0;
     $(".cc-body", dialog).scrollTop = 0;
     $("#bc-close", dialog).focus();
     history.replaceState(null, "", `#${name.ticker}`);
-    clearChart();
     if (chart.window.length) unmount = drawLevelsChart(chartHost, name.ticker, chart);
-    else chartHost.innerHTML = `<p class="cc-chart-loading">No daily bars on board</p>`;
+    else chartHost.innerHTML = `<p class="cc-chart-loading">No daily bars on the board</p>`;
   };
 
   $("#bc-close", dialog).addEventListener("click", () => dialog.close());
@@ -562,7 +444,7 @@ function splitWeek(text) {
   return { main, rest: rest.join(" — ") };
 }
 
-function renderBoard(board, spotlightTickers) {
+function renderBoard(board, active) {
   const live = board.live === true || (board.label || "").toUpperCase() === "LIVE";
   $("#sb-badge").outerHTML = live
     ? `<span class="badge is-live" id="sb-badge"><i aria-hidden="true"></i>Live</span>`
@@ -573,23 +455,18 @@ function renderBoard(board, spotlightTickers) {
   $("#week-of").textContent = week.main;
   $("#iso-week").textContent = [board.iso_week, week.rest].filter(Boolean).join(" · ");
   $("#last-updated").textContent = board.last_updated || board.generated || "—";
-  $("#last-updated-et").textContent = [board.last_updated_et, `weekly snapshot · loaded ${new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`]
-    .filter(Boolean)
-    .join(" · ");
+  $("#last-updated-et").textContent = [board.last_updated_et, "weekly snapshot"].filter(Boolean).join(" · ");
   const blend = board.composite_blend || {};
-  $("#blend-note").textContent = blend.note || `LOCKED v1: ${blend.flow ?? 0.65} flow / ${blend.tech ?? 0.35} tech`;
+  $("#blend-note").textContent = blend.note || `${blend.flow ?? 0.65} flow / ${blend.tech ?? 0.35} tech`;
   $("#lookback").textContent = board.flow_lookback ? `Flow lookback · ${board.flow_lookback}` : "";
   $("#sb-asof").textContent = [board.iso_week, `${names.length} ranked names`, board.last_updated ? `updated ${board.last_updated}` : ""]
     .filter(Boolean)
     .join(" · ");
 
   $("#board-count").textContent = names.length ? `${names.length} names · composite / flow / tech` : "";
-  $("#sb-list").innerHTML = names.length ? names.map(boardRow).join("") : `<li class="sb-empty">No names on the board this week.</li>`;
-
-  const watch = board.spotlight_watch || [];
-  $("#sb-watch-section").hidden = !watch.length;
-  $("#watch-count").textContent = watch.length ? `${watch.length} in lookback` : "";
-  $("#sb-watch").innerHTML = watch.map((w) => watchCard(w, spotlightTickers.has(w.ticker))).join("");
+  $("#sb-list").innerHTML = names.length
+    ? names.map((name) => boardRow(name, active)).join("")
+    : `<li class="sb-empty">No names on the board this week.</li>`;
 
   const gaps = board.data_gaps || [];
   const gapsEl = $("#gaps");
@@ -604,12 +481,11 @@ async function loadJson(path) {
 }
 
 async function main() {
-  let spotlightTickers = new Set();
+  let active = new Set();
   try {
-    const spotlights = await loadJson("spotlights.json");
-    spotlightTickers = new Set(spotlights.sections.flatMap((section) => section.plays).map((play) => play.ticker));
+    active = activeSpotlights(await loadJson("spotlights.json"));
   } catch {
-    spotlightTickers = new Set();
+    active = new Set();
   }
 
   let board;
@@ -621,8 +497,8 @@ async function main() {
     return;
   }
 
-  renderBoard(board, spotlightTickers);
-  const card = setupCard($("#board-card"), board);
+  renderBoard(board, active);
+  const card = setupCard($("#board-card"), board, active);
   const list = $("#sb-list");
   list.addEventListener("click", (event) => {
     const row = event.target.closest(".sb-row");
