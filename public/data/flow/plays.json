@@ -1,0 +1,204 @@
+{
+  "asOf": "2026-10-27",
+  "asOfLabel": "Tue Oct 27, 2026 session close",
+  "window": "Last 3 weeks · Oct 13 – Oct 27, 2026",
+  "plays": [
+    {
+      "id": 43869,
+      "ticker": "JCI",
+      "exchange": "NYSE",
+      "name": "Johnson Controls",
+      "date": "2026-10-27",
+      "alertedAtCt": "2026-10-27 05:15 PM CT",
+      "title": "Calls Bought in Thermal Technology Leader With Record Backlog on Data Center Demand",
+      "confidence": "$$$",
+      "refPrice": 155.9,
+      "flow": [
+        "Johnson Controls (JCI) on 10/26 with a buyer of 2000 December $160 calls at $3.54 in adjustments for around $700K, open interest now 3,500. The same session saw 1600 December $130 short puts open.",
+        "JCI also has 700 September 2027 $170 calls bought on 9/16 holding in open interest, and saw 300 September 2027 $145 short puts open on 10/9 and 225 September 2027 $190 calls bought on 10/13.",
+        "JCI shares are +30% YTD and have held above the 200 day moving average for more than a year, and after reclaiming the 50 day on Monday shares are back near the $160 October high, resistance for a breakout."
+      ],
+      "oi": [
+        { "contract": "Dec $160 calls", "detail": "3,500 OI · 2,000 bought 10/26" },
+        { "contract": "Sep 2027 $170 calls", "detail": "700 holding · bought 9/16" }
+      ],
+      "recommendation": "JCI is a core way to own data center thermal demand with a record backlog behind it, and like following the December $160 calls into a breakout over the October high.",
+      "lead": { "type": "call", "action": "bought", "qty": 2000, "strike": 160, "expiry": "December", "price": 3.54 },
+      "quote": { "date": "2026-10-27", "last": 155.88, "prev": 147.5 }
+    },
+    {
+      "id": 43833,
+      "ticker": "CRWD",
+      "exchange": "NASDAQ",
+      "name": "CrowdStrike",
+      "date": "2026-10-25",
+      "alertedAtCt": "2026-10-25 12:23 PM CT",
+      "title": "Long Calls Accumulate in Cyber Leader as Shares Reclaim the 50 Day",
+      "confidence": "$$$",
+      "refPrice": 257.6,
+      "flow": [
+        "CrowdStrike (CRWD) on 10/20 with a late opening buy of 3000 January 2028 $255 calls for $17M that is holding in open interest.",
+        "Put sellers followed on 10/23 with 325 December 2027 $180 and 350 January 2028 $170 short puts opening, while 1880 September 2027 $360 calls bought 9/21 and 350 December 2028 $225 short puts sit in open interest.",
+        "CRWD shares are +119.8% YTD and reclaimed the 50 day moving average on 10/21 after a pullback to the 10/20 low, with the 10/6 high at $286.99 the next upside target."
+      ],
+      "oi": [
+        { "contract": "Jan 2028 $255 calls", "detail": "3,000 holding · $17M" },
+        { "contract": "Sep 2027 $360 calls", "detail": "1,880 · bought 9/21" },
+        { "contract": "Dec 2028 $225 short puts", "detail": "350 in OI" }
+      ],
+      "recommendation": "CRWD is a core AI security name to own and the size long dated call buying favors adding on dips toward the 50 day into the 12/1 report.",
+      "lead": { "type": "call", "action": "bought", "qty": 3000, "strike": 255, "expiry": "January 2028", "price": null },
+      "quote": { "date": "2026-10-27", "last": 268.02, "prev": 261.83 }
+    },
+    {
+      "id": 43836,
+      "ticker": "DDOG",
+      "exchange": "NASDAQ",
+      "name": "Datadog",
+      "date": "2026-10-25",
+      "alertedAtCt": "2026-10-25 09:45 AM CT",
+      "title": "Bulls Stick with Best in Class AI Infrastructure Services Leader",
+      "confidence": "$$$",
+      "refPrice": null,
+      "flow": [
+        "Datadog (DDOG) last week with opening sales of December $230 puts 800X and December $220 puts 600X and follows a 9/3 opening sale of 500 June 2028 $310 straddles which has a strong bullish bias.",
+        "DDOG also has long January 2028 $260 calls in open interest valued near $15M and 2000 December $130 calls worth $34M.",
+        "DDOG is forming a cup and handle pattern pulling back recently but holding AVWAP off September low as support. A move through $300 would measure to a $390 upside target and Fibonacci extension targets sit at $315, $328.5 and $350."
+      ],
+      "oi": [
+        { "contract": "Jan 2028 $260 calls", "detail": "Long · valued near $15M" },
+        { "contract": "Dec $130 calls", "detail": "2,000 · worth $34M" }
+      ],
+      "recommendation": "DDOG has long been a favorite though valuation is tricky at these levels which supports the favored play being selling puts as a willing buyer on weakness.",
+      "lead": { "type": "call", "action": "long", "qty": null, "strike": 260, "expiry": "January 2028", "price": null },
+      "quote": { "date": "2026-10-26", "last": 280.24, "prev": 269.65 }
+    },
+    {
+      "id": 43802,
+      "ticker": "CORT",
+      "exchange": "NASDAQ",
+      "name": "Corcept Therapeutics",
+      "date": "2026-10-22",
+      "alertedAtCt": "2026-10-22 04:59 PM CT",
+      "title": "Bull Spread Positions for Upside in Impressive Biotech Growth Story into Catalyst",
+      "confidence": "$$$",
+      "refPrice": 108.5,
+      "flow": [
+        "Corcept Therapeutics (CORT) with a rare large trade on 10/20 as 2560 January $120/$160 wide call spreads bought to open for around $2.8M debit.",
+        "CORT still has 4200 January $140/$95 short strangles in open interest from a 9/29 trade and a 5/27 trade bought 1000 January $80 calls and sits on a $4M position up 450%.",
+        "CORT shares are on a massive run since the March 2026 low and have now formed a large flag stalling just under the 1.618 extension level at $129 with $170 the next upside target."
+      ],
+      "oi": [
+        { "contract": "Jan $140/$95 short strangles", "detail": "4,200 OI · 9/29" },
+        { "contract": "Jan $80 calls", "detail": "1,000 · ~$4M position · 5/27" }
+      ],
+      "recommendation": "CORT has a high-impact catalyst nearing but remains one of the most impressive mid-cap biotech growth names. I caught the bottom in shares earlier this year but wish I held the position. I like the set-up here for a move to $160.",
+      "lead": { "type": "call", "action": "bought", "qty": 1000, "strike": 80, "expiry": "January", "price": null },
+      "quote": { "date": "2026-10-27", "last": 87.59, "prev": 87.125 }
+    },
+    {
+      "id": 43783,
+      "ticker": "QCOM",
+      "exchange": "NASDAQ",
+      "name": "Qualcomm",
+      "date": "2026-10-21",
+      "alertedAtCt": "2026-10-21 08:36 PM CT",
+      "title": "Bulls Confident in Large Cap Semi Undergoing Major Portfolio Shifts",
+      "confidence": "$$$",
+      "refPrice": 177.3,
+      "flow": [
+        "Qualcomm (QCOM) will report on 11-3 and shares forming a two-week basing pattern on a breakout retest and key AVWAP level have seen plenty of bullish options positioning."
+      ],
+      "oi": [],
+      "recommendation": "QCOM has a clear $169 level to trade against providing a real nice risk-reward here and put sales seem more popular that call buys.",
+      "lead": { "type": "call", "action": "bought", "qty": 3500, "strike": 250, "expiry": "February", "price": null },
+      "quote": { "date": "2026-10-26", "last": 179.6, "prev": 175.91 }
+    },
+    {
+      "id": 43786,
+      "ticker": "MMM",
+      "exchange": "NYSE",
+      "name": "3M",
+      "date": "2026-10-21",
+      "alertedAtCt": "2026-10-21 06:58 PM CT",
+      "title": "Call Buyer Lines Up in Industrial Conglomerate Gaining AI Data Center Traction",
+      "confidence": "$$$",
+      "refPrice": 174.7,
+      "flow": [
+        "3M (MMM) on 10/20 saw a buyer of 1000 December $175 calls at $4.80 on earnings day, now 2,591 in open interest.",
+        "The 400 January 2028 $170 calls bought on 9/28 hold 466 in open interest, and the 425 June 2027 $140 puts sold to open on 10/8 hold 753.",
+        "Shares are +9.1% YTD and reclaimed the 200 day on 10/12, then closed back above the 50 day on 10/20 with the 8/13 high at $184.69 the next upside target."
+      ],
+      "oi": [
+        { "contract": "Dec $175 calls", "detail": "2,591 OI · 1,000 bought 10/20" },
+        { "contract": "Jan 2028 $170 calls", "detail": "466 OI · bought 9/28" },
+        { "contract": "Jun 2027 $140 short puts", "detail": "753 OI · sold 10/8" }
+      ],
+      "recommendation": "MMM's turnaround now includes a growing AI data center business with Amazon on board, and with shares back above the 50 and 200 day it looks attractive on dips toward the 50 day.",
+      "lead": { "type": "call", "action": "bought", "qty": 1000, "strike": 175, "expiry": "December", "price": 4.8 },
+      "quote": { "date": "2026-10-26", "last": 172.79, "prev": 173.46 }
+    },
+    {
+      "id": 43739,
+      "ticker": "COIN",
+      "exchange": "NASDAQ",
+      "name": "Coinbase",
+      "date": "2026-10-19",
+      "alertedAtCt": "2026-10-19 06:02 PM CT",
+      "title": "Call Buyers and Put Sellers Position in Crypto Leader Ahead of Earnings",
+      "confidence": "$$$",
+      "refPrice": 168.5,
+      "flow": [
+        "Coinbase (COIN) on 10/19 with an opening sale of 300 September 2027 $150 puts at $26.50 as shares pulled back for a second session. That follows 1500 November $175 short puts opened late in the day on 10/12 at $12.60.",
+        "COIN also has 9325 December $185 calls bought at $23 on 10/5 still holding in open interest.",
+        "Shares closed above all four of their key moving averages on 10/15 and slipped back below them the next session. COIN is -25.5% YTD and 55% below its 52 week high, with the July low at $139 as key support and the September high near $208 as resistance."
+      ],
+      "oi": [
+        { "contract": "Dec $185 calls", "detail": "9,325 holding · bought 10/5 at $23" }
+      ],
+      "recommendation": "COIN is a high beta way to play a crypto rebound and with December call buyers and put sellers active into the 10/29 report, the flows look attractive here.",
+      "lead": { "type": "put", "action": "sold", "qty": 300, "strike": 150, "expiry": "September 2027", "price": 26.5 },
+      "quote": { "date": "2026-10-26", "last": 159.6, "prev": 164.45 }
+    },
+    {
+      "id": 43665,
+      "ticker": "ALAB",
+      "exchange": "NASDAQ",
+      "name": "Astera Labs",
+      "date": "2026-10-14",
+      "alertedAtCt": "2026-10-14 08:23 PM CT",
+      "title": "Put Sales Accumulate in Hyper Growth Connectivity Winner",
+      "confidence": "$$$",
+      "refPrice": 300.0,
+      "flow": [
+        "Astera Labs (ALAB) on 10/14 with a large opening sale of 600 September 2027 $220 puts at $36.20 and has seen a string of size long-dated put sales into weakness.",
+        "ALAB September $200 short puts opened 600X on 10/13 while 500 of the $320 calls bought, March $230 short puts 4000X, March $220 short puts 350X, January $250 short puts 850X, March $280 short puts 500X, January $260 puts 400X and January 2028 $300 short puts have all opened in the last two weeks.",
+        "ALAB on the weekly is in a longer-term rising channel pattern and the past six-months a bull pennant forming. On more weakness, monthly lower value and rising 200MA support at $248.5 should hold."
+      ],
+      "oi": [],
+      "recommendation": "ALAB valuation will make for a bumpy ride but reminds me of SNOW years ago, dips will find buyers which is why put sales attractive when RSI gets oversold.",
+      "lead": { "type": "put", "action": "sold", "qty": 600, "strike": 220, "expiry": "September 2027", "price": 36.2 },
+      "quote": { "date": "2026-10-26", "last": 259.51, "prev": 257.16 }
+    },
+    {
+      "id": 43649,
+      "ticker": "CSCO",
+      "exchange": "NASDAQ",
+      "name": "Cisco",
+      "date": "2026-10-13",
+      "alertedAtCt": "2026-10-13 06:34 PM CT",
+      "title": "Bulls Put on Size Positions in Full AI Stack Provider",
+      "confidence": "$$$",
+      "refPrice": 115.15,
+      "flow": [
+        "Cisco (CSCO) on 10/12 with a buyer of 1950 December 2028 $140 calls for $3.8M and also with 1000 March $110 short puts opening.",
+        "These bull trades follow size buys in September $135 calls for $2.7M, June $170 way OTM calls 2500X and 2000 December $110 calls, accumulation of bull positioning with 11-12 the next earnings date.",
+        "CSCO shares are +50% YTD and recently pulled back to $105 support from $130 post-earnings highs but recently showing relative strength with $121 and $127.5 key overhead levels. The weekly is forming a large bull pennant that measures to $170 above $125."
+      ],
+      "oi": [],
+      "recommendation": "CSCO looks positioned for more upside in 2027 as the AI story plays out and a safer way to play the theme with re-rate potential.",
+      "lead": { "type": "call", "action": "bought", "qty": 1950, "strike": 140, "expiry": "December 2028", "price": null },
+      "quote": { "date": "2026-10-26", "last": 110.24, "prev": 106.5 }
+    }
+  ]
+}

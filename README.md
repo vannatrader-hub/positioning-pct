@@ -11,7 +11,9 @@ Public sources are bank labels only: JPM, Morgan Stanley, BoA, GS, and a desk co
 - Home. Three destinations. Each tile opens its own page.
 - Positioning. Eleven Select Sector cards, a soft-to-crowded map, and a soft-vol gauge.
 - SPX Levels. Placeholder for this phase.
-- Options Flow. Placeholder for this phase.
+- Options Flow. A $$$ watchlist of the last three weeks, newest alert first, with alert date and time (CT) on every row. Each row opens a calling card: condensed flow, flow in open interest, and a Recommendation on the left; a trade-levels chart on the right (about six months of daily closes, the lead option strike, and break-even when the premium is known).
+
+Options Flow data lives in `public/data/flow/`: `plays.json` is the seed, and `bars/<TICKER>.json` holds committed daily bars (`t,o,h,l,c,v`). The chart is drawn as SVG from those closes, so the page needs no chart service.
 
 Each sector card shows the percentile, a timeframe, a status, and a Soft to Crowded bar. Green is the soft end. Dark is crowded. The triangle marks that week’s print.
 
