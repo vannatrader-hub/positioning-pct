@@ -78,7 +78,7 @@ function row(play, isLatest) {
   button.setAttribute("aria-haspopup", "dialog");
   button.setAttribute(
     "aria-label",
-    `${play.ticker}, ${play.name}. ${alertLabel(play.alertedAtCt)}. ${play.title}. Open calling card`,
+    `${play.ticker}, ${play.name}${play.industry ? `, ${play.industry.broad}, ${play.industry.focus}` : ""}. ${alertLabel(play.alertedAtCt)}. ${play.title}. Open calling card`,
   );
 
   const ident = el("span", "fr-id");
@@ -86,6 +86,10 @@ function row(play, isLatest) {
   top.append(el("strong", "fr-ticker", play.ticker));
   if (isLatest) top.append(el("span", "badge is-live fr-new", "Latest"));
   ident.append(top, el("span", "fr-name", play.name));
+
+  const industry = el("span", "fr-ind");
+  industry.append(el("strong", "fr-ind-broad", play.industry?.broad ?? "—"));
+  if (play.industry?.focus) industry.append(el("span", "fr-ind-focus", play.industry.focus));
 
   const flow = el("span", "fr-flow");
   flow.append(el("span", "conf", play.confidence), el("span", "fr-title", play.title));
@@ -105,7 +109,7 @@ function row(play, isLatest) {
   const arrow = el("span", "fr-arrow", "→");
   arrow.setAttribute("aria-hidden", "true");
 
-  button.append(ident, flow, date, px, arrow);
+  button.append(ident, industry, flow, date, px, arrow);
   item.append(button);
   return item;
 }
@@ -270,7 +274,7 @@ function setupCard(dialog, plays) {
   const fill = (play) => {
     dialog.querySelector("#cc-ticker").textContent = play.ticker;
     dialog.querySelector("#cc-conf").textContent = play.confidence;
-    dialog.querySelector("#cc-name").textContent = play.name;
+    dialog.querySelector("#cc-name").textContent = play.industry ? `${play.name} · ${play.industry.broad} · ${play.industry.focus}` : play.name;
     dialog.querySelector("#cc-title").textContent = play.title;
 
     dialog.querySelector("#cc-alert").textContent = alertLabel(play.alertedAtCt, true);
@@ -347,7 +351,7 @@ async function main() {
     if (!response.ok) throw new Error(`plays ${response.status}`);
     seed = await response.json();
   } catch {
-    asOf.textContent = "The watchlist could not load.";
+    asOf.textContent = "The Shopping List could not load.";
     return;
   }
 
