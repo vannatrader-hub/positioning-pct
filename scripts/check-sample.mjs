@@ -424,6 +424,21 @@ board.names.forEach((name, index) => {
 });
 assert(/^Advisory only/.test(board.advisory), "scorecard keeps the advisory-only footer");
 for (const item of board.spotlight_watch) assert(item.ticker && item.title && item.structure, `spotlight watch ${item.ticker}`);
+const boardPage = readFileSync(join(root, "options-flow/scorecard/index.html"), "utf8");
+assert(boardPage.includes('href="/src/styles.css"') && boardPage.includes('class="topbar"') && boardPage.includes('class="site-footer"'), "scorecard sits in the Positioning % shell");
+assert(boardPage.includes('class="subnav"') && boardPage.includes('class="is-current" href="./" aria-current="page">Weekly scorecard'), "scorecard is the current Options Flow subpage");
+for (const id of ["sb-meta", "week-of", "blend-note", "lookback", "sb-list", "sb-watch", "advisory", "gaps", "board-card", "trade-card", "bc-chart", "bc-tiles", "flow-intel"]) {
+  assert(boardPage.includes(`id="${id}"`), `scorecard page keeps #${id}`);
+}
+const boardScript = readFileSync(join(root, "src/scorecard.js"), "utf8");
+for (const piece of ["renderSpark", "renderChips", "renderFlowIntel", "renderOiHorizon", "renderTradeCard", "watchCard", "drawLevelsChart", "data_gaps", "flow_lookback"]) {
+  assert(boardScript.includes(piece), `scorecard keeps ${piece}`);
+}
+for (const file of ["options-flow/index.html", "options-flow/scorecard/index.html", "src/scorecard.js", "src/options-flow-hub.js"]) {
+  const text = readFileSync(join(root, file), "utf8");
+  assert(!/netlify|desk-flow-board/i.test(text), `${file} points off-site`);
+  assert(!/http-equiv="refresh"|location\.(href|assign)\s*=|location\.replace\((?!`dollar\/)/.test(text), `${file} redirects away`);
+}
 
 const banned = [
   "sentiment ai",

@@ -1,18 +1,13 @@
-import "@fontsource/ibm-plex-mono/latin-400.css";
-import "@fontsource/ibm-plex-mono/latin-500.css";
-import "@fontsource/ibm-plex-mono/latin-600.css";
-import "@fontsource/ibm-plex-mono/latin-700.css";
-import "@fontsource-variable/ibm-plex-sans/wght.css";
+import { drawLevelsChart, shortDate, usd } from "./flow-chart.js";
 
-const $ = (sel) => document.querySelector(sel);
-const base = import.meta.env ? import.meta.env.BASE_URL : "/";
+const $ = (sel, root = document) => root.querySelector(sel);
 
-let boardData = null;
-let spotlightTickers = new Set();
-let selectedTicker = null;
-let trigger = null;
+function dataUrl(path) {
+  const base = import.meta.env ? import.meta.env.BASE_URL : "/";
+  return `${base}data/flow/${path}`;
+}
 
-function esc(s) {
+export function esc(s) {
   return String(s ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -20,7 +15,7 @@ function esc(s) {
     .replace(/"/g, "&quot;");
 }
 
-function md(s) {
+export function md(s) {
   return esc(String(s ?? ""))
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/(^|[\s(])\*([^*\s][^*]*?)\*(?=[\s).,;:]|$)/g, "$1<em>$2</em>")
@@ -28,7 +23,7 @@ function md(s) {
     .replace(/\s*(→|->)\s*/g, " → ");
 }
 
-function fmtUsd(n) {
+export function fmtUsd(n) {
   if (n == null || Number.isNaN(Number(n))) return null;
   const v = Number(n);
   const abs = Math.abs(v);
@@ -43,6 +38,10 @@ function fmtPx(n, digits = 2) {
   return `$${Number(n).toFixed(digits)}`;
 }
 
+function isoLabel(iso) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(iso ?? "") ? `${shortDate(iso)}, ${iso.slice(0, 4)}` : iso ?? "";
+}
+
 function ticketClass(t) {
   const v = (t || "").toLowerCase();
   if (v === "open") return "open";
@@ -51,196 +50,114 @@ function ticketClass(t) {
 }
 
 function chipClass(c) {
-  const raw = String(c || "");
-  if (raw.toUpperCase().includes("PUT-SALE")) return "PUT-SALE";
-  return raw.replace(/\s+/g, "-").toUpperCase();
+  const raw = String(c || "").toUpperCase();
+  if (raw.includes("PUT-SALE")) return "put-sale";
+  return raw.replace(/\s+/g, "-").toLowerCase();
 }
 
 function renderChips(chips) {
-  return (chips || [])
-    .map((c) => `<span class="chip ${esc(chipClass(c))}" data-chip="${esc(c)}">${esc(c)}</span>`)
-    .join("");
+  return (chips || []).map((c) => `<span class="sb-chip is-${esc(chipClass(c))}">${esc(c)}</span>`).join("");
 }
 
-function guideColor(kind) {
-  if (kind === "put") return "#ff6b6b";
-  if (kind === "target") return "#5b9cff";
-  if (kind === "longput") return "#c084fc";
-  return "#f5a623";
+/** Scorecard trade lines on the shared levels chart: call strikes amber, put strikes red, targets blue. */
+const LINE_KIND = { call: "strike", put: "stop", target: "target", longput: "short" };
+const SWATCH = { strike: "strike", stop: "stop", target: "target", short: "short" };
+
+export function boardLines(name) {
+  return (name.trade_lines || [])
+    .filter((line) => typeof line.value === "number")
+    .map((line) => ({ kind: LINE_KIND[line.kind] ?? "strike", value: line.value, label: `${line.label} ${usd(line.value)}`, note: line.note }))
+    .sort((a, b) => b.value - a.value);
+}
+
+/** Everything the shared trade-levels chart draws for one board name. */
+export function boardLevels(name) {
+  const window = (name.chart || name.candles || []).map((bar) => ({ t: bar.date, c: Number(bar.c) }));
+  const last = window[window.length - 1];
+  return {
+    window,
+    lines: boardLines(name),
+    expiry: null,
+    expiryInView: false,
+    markers: [],
+    spot: last?.c ?? null,
+    spotDate: last?.t ?? null,
+  };
 }
 
 function renderSpark(candles) {
   if (!candles || !candles.length) {
-    return `<div class="spark empty-spark" title="No daily bars">—</div>`;
+    return `<span class="spark is-empty" title="No daily bars">—</span>`;
   }
   const W = 120;
   const H = 40;
-  const padT = 3;
-  const padB = 3;
-  const padL = 2;
-  const padR = 2;
+  const pad = 3;
   const n = candles.length;
-  let lo = Math.min(...candles.map((b) => Number(b.l)));
+  const lo = Math.min(...candles.map((b) => Number(b.l)));
   let hi = Math.max(...candles.map((b) => Number(b.h)));
   if (!(hi > lo)) hi = lo + 1;
-  const plotH = H - padT - padB;
-  const slot = (W - padL - padR) / n;
+  const plotH = H - pad * 2;
+  const slot = (W - 4) / n;
   const bodyW = Math.max(1.2, Math.min(3.5, slot * 0.55));
-  const yOf = (v) => padT + ((hi - v) / (hi - lo)) * plotH;
+  const yOf = (v) => pad + ((hi - v) / (hi - lo)) * plotH;
   const sticks = candles
     .map((b, i) => {
-      const x = padL + slot * i + slot / 2;
-      const up = Number(b.c) >= Number(b.o);
+      const x = 2 + slot * i + slot / 2;
+      const cls = Number(b.c) >= Number(b.o) ? "up" : "dn";
       const yO = yOf(Number(b.o));
       const yC = yOf(Number(b.c));
       const top = Math.min(yO, yC);
       const bh = Math.max(1, Math.max(yO, yC) - top);
-      const cls = up ? "up" : "dn";
       return (
         `<line class="wick ${cls}" x1="${x.toFixed(2)}" y1="${yOf(Number(b.h)).toFixed(2)}" x2="${x.toFixed(2)}" y2="${yOf(Number(b.l)).toFixed(2)}" />` +
         `<rect class="body ${cls}" x="${(x - bodyW / 2).toFixed(2)}" y="${top.toFixed(2)}" width="${bodyW.toFixed(2)}" height="${bh.toFixed(2)}" />`
       );
     })
     .join("");
-  const pts = [];
-  candles.forEach((b, i) => {
-    if (b.ema8 == null) return;
-    pts.push(`${(padL + slot * i + slot / 2).toFixed(2)},${yOf(Number(b.ema8)).toFixed(2)}`);
-  });
-  const emaPath = pts.length >= 2 ? `<polyline class="ema8" points="${pts.join(" ")}" />` : "";
-  return `<div class="spark"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">${sticks}${emaPath}</svg></div>`;
+  const pts = candles
+    .map((b, i) => (b.ema8 == null ? null : `${(2 + slot * i + slot / 2).toFixed(2)},${yOf(Number(b.ema8)).toFixed(2)}`))
+    .filter(Boolean);
+  const ema = pts.length >= 2 ? `<polyline class="ema8" points="${pts.join(" ")}" />` : "";
+  return `<span class="spark" title="Last ${n} sessions · EMA8 in amber"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">${sticks}${ema}</svg></span>`;
 }
 
-function renderBoardRow(name) {
-  return `<button type="button" class="board-row" data-ticker="${esc(name.ticker)}" aria-haspopup="dialog" aria-label="Open ${esc(name.ticker)} detail, rank ${esc(name.rank)}, composite ${esc(name.composite)}">
-    <span class="board-rank">#${esc(name.rank)}</span>
-    <span class="board-ticker">${esc(name.ticker)}</span>
-    <div class="board-mid">
-      <div class="board-chips">${renderChips(name.chips)}</div>
-      <div class="board-why">${md(name.why || "—")}</div>
-    </div>
-    <div class="board-scores">
-      <div><span class="comp">${esc(name.composite)}</span></div>
-      <div>F <strong>${esc(name.flow)}</strong></div>
-      <div>T <strong>${esc(name.tech)}</strong></div>
-    </div>
-    <div class="board-spark">${renderSpark(name.candles)}</div>
-  </button>`;
+function boardRow(name) {
+  const comp = Math.max(0, Math.min(100, Number(name.composite) || 0));
+  return `<li><button type="button" class="sb-row" data-ticker="${esc(name.ticker)}" aria-haspopup="dialog"
+      aria-label="${esc(name.ticker)}, rank ${esc(name.rank)}, composite ${esc(name.composite)}, flow ${esc(name.flow)}, tech ${esc(name.tech)}. Open trade card">
+    <span class="sb-rank">#${esc(name.rank)}</span>
+    <span class="sb-id"><strong class="sb-ticker">${esc(name.ticker)}</strong><span class="sb-struct">${esc(name.structure_bias || "—")}</span></span>
+    <span class="sb-mid"><span class="sb-chips">${renderChips(name.chips)}</span><span class="sb-why">${md(name.why || "—")}</span></span>
+    <span class="sb-scores">
+      <span class="sb-comp-line"><strong class="sb-comp">${esc(name.composite)}</strong><span class="sb-ft">F <b>${esc(name.flow)}</b> · T <b>${esc(name.tech)}</b></span></span>
+      <span class="sb-bar" aria-hidden="true"><i style="width:${comp}%"></i></span>
+    </span>
+    <span class="sb-spark">${renderSpark(name.candles)}</span>
+    <span class="fr-arrow" aria-hidden="true">→</span>
+  </button></li>`;
 }
 
-function renderWatch(items) {
-  if (!items || !items.length) return "";
-  const cards = items
-    .map((w) => {
-      const tc = ticketClass(w.ticket);
-      const linked = spotlightTickers.has(w.ticker);
-      const inner = `<div class="wt">${esc(w.ticker)}</div>
-        <div class="wd">${esc(w.date || "")}</div>
-        <div class="wtitle">${esc(w.title || "")}</div>
-        <div class="wstruct">${esc(w.structure || "")}</div>
-        ${tc ? `<span class="ticket-pill ${tc}">${esc(w.ticket)}</span>` : ""}
-        ${linked ? `<span class="wopen">Open Spotlight card →</span>` : ""}`;
-      return linked
-        ? `<a class="watch-card is-link" href="../spotlights/#${esc(w.ticker)}">${inner}</a>`
-        : `<div class="watch-card">${inner}</div>`;
-    })
-    .join("");
-  return `<h2 class="section-title">Spotlight watch (lookback)</h2>
-    <div class="watch-strip">${cards}</div>`;
+function watchCard(w, linked) {
+  const tc = ticketClass(w.ticket);
+  const inner = `<span class="spot-top">
+      <strong class="spot-ticker">${esc(w.ticker)}</strong>
+      ${tc ? `<span class="sb-ticket is-${tc}">${esc(w.ticket)}</span>` : ""}
+    </span>
+    <span class="spot-title">${esc(w.title || "")}</span>
+    <span class="spot-meta"><span class="spot-chip sb-struct-chip">${esc(w.structure || "")}</span></span>
+    <span class="spot-foot">
+      <time datetime="${esc(w.date || "")}">Posted ${esc(isoLabel(w.date))}</time>
+      ${linked ? `<span class="sb-watch-open">Open Spotlight card <span class="fr-arrow" aria-hidden="true">→</span></span>` : ""}
+    </span>`;
+  return linked
+    ? `<li><a class="spot-card sb-watch-card" href="../spotlights/#${esc(w.ticker)}">${inner}</a></li>`
+    : `<li><div class="spot-card sb-watch-card is-static">${inner}</div></li>`;
 }
 
 function statusPill(status) {
   const s = (status || "open").toLowerCase();
   const labels = { real: "REAL", from_dossier: "DOSSIER", from_oi: "OI READ", not_on_desk: "NOT ON DESK" };
-  return `<span class="status-pill ${esc(s)}">${esc(labels[s] || "OPEN")}</span>`;
-}
-
-function buildDetailChart(name) {
-  const bars = name.chart || name.candles || [];
-  const levels = name.levels || {};
-  if (!bars.length) {
-    return `<div class="chart-wrap"><div class="chart-empty">No daily bars on board</div></div>`;
-  }
-  const W = 640;
-  const H = 220;
-  const padL = 48;
-  const padR = 64;
-  const padT = 12;
-  const padB = 24;
-  const closes = bars.map((b) => Number(b.c));
-  const guides = [
-    { val: levels.spot, color: "#3dd68c", dash: "", label: "Spot" },
-    ...(name.trade_lines || []).map((t) => ({
-      val: t.value,
-      color: guideColor(t.kind),
-      dash: t.kind === "target" ? "2 3" : "5 4",
-      label: t.label,
-      note: t.note,
-    })),
-  ].filter((g) => g.val != null && !Number.isNaN(Number(g.val)));
-
-  let lo = Math.min(...bars.map((b) => Number(b.l)));
-  let hi = Math.max(...bars.map((b) => Number(b.h)));
-  for (const g of guides) {
-    lo = Math.min(lo, Number(g.val));
-    hi = Math.max(hi, Number(g.val));
-  }
-  const pad = (hi - lo) * 0.06 || 1;
-  lo -= pad;
-  hi += pad;
-  const plotW = W - padL - padR;
-  const plotH = H - padT - padB;
-  const n = bars.length;
-  const xOf = (i) => padL + (n === 1 ? plotW / 2 : (i / (n - 1)) * plotW);
-  const yOf = (v) => padT + ((hi - v) / (hi - lo)) * plotH;
-
-  const linePts = closes.map((c, i) => `${xOf(i).toFixed(2)},${yOf(c).toFixed(2)}`).join(" ");
-  const areaPts = `${xOf(0).toFixed(2)},${(padT + plotH).toFixed(2)} ${linePts} ${xOf(n - 1).toFixed(2)},${(padT + plotH).toFixed(2)}`;
-
-  const guideLines = guides
-    .map((g) => {
-      const y = yOf(Number(g.val));
-      return `
-        <line x1="${padL}" y1="${y.toFixed(2)}" x2="${(W - padR).toFixed(2)}" y2="${y.toFixed(2)}"
-          stroke="${g.color}" stroke-width="1.25" stroke-dasharray="${g.dash}" opacity="0.85" />
-        <text x="${(W - padR + 4).toFixed(2)}" y="${(y + 3).toFixed(2)}" fill="${g.color}"
-          font-size="9" font-family="IBM Plex Mono, monospace">${esc(g.label)} ${fmtPx(g.val)}${g.note ? `<title>${esc(g.note)}</title>` : ""}</text>`;
-    })
-    .join("");
-
-  const yTicks = [lo, (lo + hi) / 2, hi]
-    .map((v) => {
-      const y = yOf(v);
-      return `<text x="${padL - 6}" y="${(y + 3).toFixed(2)}" text-anchor="end" fill="#5a6d8a" font-size="9" font-family="IBM Plex Mono, monospace">${Number(v).toFixed(1)}</text>
-        <line x1="${padL}" y1="${y.toFixed(2)}" x2="${(W - padR).toFixed(2)}" y2="${y.toFixed(2)}" stroke="#1a2740" stroke-width="1" />`;
-    })
-    .join("");
-
-  const first = bars[0].date || "";
-  const last = bars[bars.length - 1].date || "";
-  const tradeLines = name.trade_lines || [];
-  const legend = `
-    <span class="lg-spot">Spot</span>
-    ${tradeLines.map((t) => `<span style="color:${guideColor(t.kind)}" title="${esc(t.note || "")}">${esc(t.label)} ${fmtPx(t.value)}</span>`).join(" ")}
-    ${tradeLines.length ? "" : `<span style="color:var(--dim)">no strike levels in flow</span>`}
-  `;
-
-  return `<div class="chart-wrap">
-    <div class="chart-head">
-      <h3>~6-month price · daily</h3>
-      <div class="chart-legend">${legend}</div>
-    </div>
-    <svg class="chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${esc(name.ticker)} 6-month price chart">
-      ${yTicks}
-      <polygon points="${areaPts}" fill="rgba(61,214,140,0.08)" />
-      <polyline fill="none" stroke="#3dd68c" stroke-width="1.75" points="${linePts}" />
-      ${guideLines}
-    </svg>
-    <div class="chart-foot">
-      <span>${esc(first)} → ${esc(last)} · ${n}d</span>
-      <span>as of ${esc(levels.as_of || last)} · daily closes</span>
-    </div>
-  </div>`;
+  return `<span class="fi-pill is-${esc(s)}">${esc(labels[s] || "OPEN")}</span>`;
 }
 
 function panelStatus(panel) {
@@ -248,7 +165,7 @@ function panelStatus(panel) {
   return panel.status || "open";
 }
 
-function parseLevelsFallback(str) {
+export function parseLevelsFallback(str) {
   const out = { pos: [], neg: [] };
   if (!str) return out;
   const norm = String(str).replace(/[−–]/g, "-");
@@ -284,9 +201,9 @@ function parseLevelsFallback(str) {
       if (Number.isNaN(strike)) continue;
       const suf = (m[3] || "").toUpperCase();
       const mult = suf === "B" ? 1e9 : suf === "M" ? 1e6 : suf === "K" ? 1e3 : 1;
-      const usd = Math.abs(Number(String(m[2]).replace(/,/g, ""))) * mult;
-      if (!(usd > 0)) continue;
-      items.push({ strike, usd, display: fmtUsd(usd) || `$${usd}`, sign });
+      const amount = Math.abs(Number(String(m[2]).replace(/,/g, ""))) * mult;
+      if (!(amount > 0)) continue;
+      items.push({ strike, usd: amount, display: fmtUsd(amount) || `$${amount}`, sign });
     }
     re.lastIndex = 0;
     return items;
@@ -314,7 +231,7 @@ function renderStrikeBars(items, tone) {
       const pct = Math.max(6, Math.round((Number(it.usd) / max) * 100));
       const strike = Number(it.strike);
       const label = Number.isInteger(strike) ? strike.toFixed(0) : String(strike);
-      return `<div class="oi-bar-row ${tone}">
+      return `<div class="oi-bar-row is-${tone}">
         <span class="oi-strike">${esc(label)}</span>
         <span class="oi-bar-track"><span class="oi-bar-fill" style="width:${pct}%"></span></span>
         <span class="oi-bar-val">${esc(it.display || fmtUsd(it.usd) || "")}</span>
@@ -356,7 +273,7 @@ function coordChip(label, value) {
   if (value) {
     return `<div class="oi-chip"><span class="oi-chip-k">${esc(label)}</span><span class="oi-chip-v">${esc(value)}</span></div>`;
   }
-  return `<div class="oi-chip oi-chip-open"><span class="oi-chip-k">${esc(label)}</span><span class="oi-chip-v">OPEN</span></div>`;
+  return `<div class="oi-chip is-open"><span class="oi-chip-k">${esc(label)}</span><span class="oi-chip-v">OPEN</span></div>`;
 }
 
 function renderOiHorizon(sub, fallbackLabel) {
@@ -383,10 +300,10 @@ function renderOiHorizon(sub, fallbackLabel) {
       </div>
       ${s.dealer_positioning ? `<div class="oi-dealer"><span class="oi-chip-k">Dealer</span> ${esc(s.dealer_positioning)}</div>` : ""}
       <div class="oi-greek-grid">
-        <div class="oi-greek"><div class="oi-greek-title pos">+ Gamma</div>${renderStrikeBars(gPos, "pos")}</div>
-        <div class="oi-greek"><div class="oi-greek-title neg">− Gamma</div>${renderStrikeBars(gNeg, "neg")}</div>
-        <div class="oi-greek"><div class="oi-greek-title pos">+ Vanna</div>${renderStrikeBars(levelList(s, "vanna_pos"), "pos")}</div>
-        <div class="oi-greek"><div class="oi-greek-title neg">− Vanna</div>${renderStrikeBars(levelList(s, "vanna_neg"), "neg")}</div>
+        <div class="oi-greek"><div class="oi-greek-title is-pos">+ Gamma</div>${renderStrikeBars(gPos, "pos")}</div>
+        <div class="oi-greek"><div class="oi-greek-title is-neg">− Gamma</div>${renderStrikeBars(gNeg, "neg")}</div>
+        <div class="oi-greek"><div class="oi-greek-title is-pos">+ Vanna</div>${renderStrikeBars(levelList(s, "vanna_pos"), "pos")}</div>
+        <div class="oi-greek"><div class="oi-greek-title is-neg">− Vanna</div>${renderStrikeBars(levelList(s, "vanna_neg"), "neg")}</div>
       </div>
       ${decodeHorizonFoot(s, /all/i.test(label) ? "All expiry" : "OpEx", gPos, gNeg)}`;
   }
@@ -411,9 +328,9 @@ function renderFlowIntel(name) {
   const ivBody =
     panelStatus(iv) === "open"
       ? `<p><strong>OPEN</strong> — ${esc(iv.summary || "IV not on desk.")}</p>
-         <p class="note">${esc(iv.note || "")}</p>`
+         <p class="fi-note">${esc(iv.note || "")}</p>`
       : `<p>${esc(iv.summary || "")}</p>
-         ${iv.as_of ? `<p class="note">as of ${esc(iv.as_of)} · ${esc(iv.note || "")}</p>` : `<p class="note">${esc(iv.note || "")}</p>`}`;
+         ${iv.as_of ? `<p class="fi-note">as of ${esc(iv.as_of)} · ${esc(iv.note || "")}</p>` : `<p class="fi-note">${esc(iv.note || "")}</p>`}`;
 
   let oiBody;
   const mo = oi.monthly_opex;
@@ -432,218 +349,268 @@ function renderFlowIntel(name) {
   const lv = tech.levels || name.levels || {};
   const techBody = `
     <p>${md(tech.tech_why || name.tech_why || "—")}</p>
-    <p class="note">Tech score ${esc(tech.tech_score ?? name.tech)}/100 ·
+    <p class="fi-note">Tech score ${esc(tech.tech_score ?? name.tech)}/100 ·
       spot ${fmtPx(lv.spot)} · EMA8 ${fmtPx(lv.ema8)} · EMA21 ${fmtPx(lv.ema21)} · 200-MA ${lv.sma200 != null ? fmtPx(lv.sma200) : "OPEN"}</p>
-    ${tech.technicals_note ? `<p class="note">${md(tech.technicals_note)}</p>` : ""}`;
+    ${tech.technicals_note ? `<p class="fi-note">${md(tech.technicals_note)}</p>` : ""}`;
 
-  const fundBody =
-    panelStatus(fund) === "open"
-      ? `<p><strong>OPEN</strong> — ${esc(fund.summary || "No fundamental profile.")}</p>
-         ${thesis ? `<p><em>Thesis:</em> ${esc(thesis)}</p>` : ""}`
-      : `<p>${esc(fund.summary || "")}</p>
-         ${thesis ? `<p><em>Thesis:</em> ${esc(thesis)}</p>` : ""}`;
+  const fundBody = `${panelStatus(fund) === "open" ? `<p><strong>OPEN</strong> — ${esc(fund.summary || "No fundamental profile.")}</p>` : `<p>${esc(fund.summary || "")}</p>`}
+    ${thesis ? `<p><em>Thesis:</em> ${esc(thesis)}</p>` : ""}`;
 
   let spotBody;
   if (!spot) {
-    spotBody = `<p class="note">No Spotlight card on this name — —</p>`;
+    spotBody = `<p class="fi-note">No Spotlight card on this name.</p>`;
   } else {
     const tc = ticketClass(spot.ticket);
-    spotBody = `<div class="spotlight-strip">
-      <div class="sp-title">${esc(spot.title || spot.ticker || "Spotlight")}</div>
-      <div class="sp-meta">
+    spotBody = `<div class="fi-spot">
+      <div class="fi-spot-title">${esc(spot.title || spot.ticker || "Spotlight")}</div>
+      <div class="fi-spot-meta">
         <span>${esc(spot.date || "")}</span>
         <span>${esc(spot.structure || "")}</span>
-        ${tc ? `<span class="ticket-pill ${tc}">${esc(spot.ticket)}</span>` : ""}
+        ${tc ? `<span class="sb-ticket is-${tc}">${esc(spot.ticket)}</span>` : ""}
       </div>
     </div>`;
   }
 
   return `
-    <div class="fi-title">Flow Intelligence</div>
-    <details class="accordion" open>
+    <h3 class="fi-title">Flow Intelligence</h3>
+    <details class="fi-acc" open>
       <summary>Trade / Flow Summary ${statusPill(panelStatus(trade))}</summary>
-      <div class="body">
+      <div class="fi-body">
         <p><strong>${esc(name.ticker)}</strong> · ${esc(trade.structure || name.structure_bias || "—")} · conf ${esc(trade.confidence || "OPEN")}</p>
         <p>${md(trade.why || name.why || "—")}</p>
-        ${trade.net_premium ? `<p>Net premium (from prints): <strong>${esc(fmtUsd(trade.net_premium.usd) || trade.net_premium.raw)}</strong></p>` : `<p class="note">Net premium: OPEN (no $ print parsed)</p>`}
+        ${trade.net_premium ? `<p>Net premium (from prints): <strong>${esc(fmtUsd(trade.net_premium.usd) || trade.net_premium.raw)}</strong></p>` : `<p class="fi-note">Net premium: OPEN (no $ print parsed)</p>`}
         ${prints ? `<ul>${prints}</ul>` : ""}
       </div>
     </details>
-    <details class="accordion">
+    <details class="fi-acc">
       <summary>IV &amp; catalyst ${statusPill(panelStatus(iv))}</summary>
-      <div class="body">${ivBody}</div>
+      <div class="fi-body">${ivBody}</div>
     </details>
-    <details class="accordion" open>
+    <details class="fi-acc" open>
       <summary>OI / Dealer levels ${statusPill(panelStatus(oi))}</summary>
-      <div class="body">${oiBody}</div>
+      <div class="fi-body">${oiBody}</div>
     </details>
-    <details class="accordion" open>
+    <details class="fi-acc" open>
       <summary>Technical Analysis ${statusPill(panelStatus(tech))}</summary>
-      <div class="body">${techBody}</div>
+      <div class="fi-body">${techBody}</div>
     </details>
-    <details class="accordion">
+    <details class="fi-acc">
       <summary>Fundamental / thesis ${statusPill(panelStatus(fund))}</summary>
-      <div class="body">${fundBody}</div>
+      <div class="fi-body">${fundBody}</div>
     </details>
-    <details class="accordion">
+    <details class="fi-acc">
       <summary>Spotlight ${spot ? statusPill("real") : statusPill("open")}</summary>
-      <div class="body">${spotBody}</div>
+      <div class="fi-body">${spotBody}</div>
     </details>`;
 }
 
-function renderTradeCard(name) {
+function volOi(name) {
+  const top = name.top_print || (name.top_prints || [])[0] || "";
+  const oi = (name.panels || {}).oi_levels || {};
+  if (name.vol_oi) {
+    return {
+      value: `${Number(name.vol_oi.volume).toLocaleString("en-US")} / ${Number(name.vol_oi.oi).toLocaleString("en-US")}`,
+      hint: `${name.vol_oi.contract} · Oct 9 quote`,
+    };
+  }
+  if (oi.vol_oi) return { value: oi.vol_oi, hint: "from dossier/print" };
+  const m = String(top).match(/vol\s*[~≈]?\s*([\d,]+)\s*\/\s*OI\s*([\d,]+)/i);
+  return m ? { value: `${m[1]}/${m[2]}`, hint: "from dossier/print" } : { value: null, hint: "no specific contract in print" };
+}
+
+function isHighConf(name) {
+  return (name.chips || []).includes("HIGH") || (name.confidence || "").toLowerCase().startsWith("high");
+}
+
+function premiumLabel(name) {
+  const prem = name.net_premium;
+  return prem ? fmtUsd(prem.usd) || prem.raw : "OPEN";
+}
+
+function cardRow(label, value, sub, extra = "") {
+  return `<div class="cc-oi-row${extra ? ` ${extra}` : ""}"><dt>${esc(label)}</dt><dd>${value}${sub ? `<span class="sb-row-sub">${sub}</span>` : ""}</dd></div>`;
+}
+
+function renderTradeCard(name, advisory) {
   const levels = name.levels || {};
   const prem = name.net_premium;
-  const premLabel = prem ? fmtUsd(prem.usd) || prem.raw : "OPEN";
-  const top = name.top_print || (name.top_prints || [])[0] || "";
-  const volOi = (() => {
-    const oi = (name.panels || {}).oi_levels || {};
-    if (name.vol_oi) return `${Number(name.vol_oi.volume).toLocaleString()} / ${Number(name.vol_oi.oi).toLocaleString()}`;
-    if (oi.vol_oi) return oi.vol_oi;
-    const m = String(top).match(/vol\s*[~≈]?\s*([\d,]+)\s*\/\s*OI\s*([\d,]+)/i);
-    return m ? `${m[1]}/${m[2]}` : null;
-  })();
-  const dim = `<span style="color:var(--dim);font-size:11px">/100</span>`;
-  const highConf = (name.chips || []).includes("HIGH") || (name.confidence || "").toLowerCase().startsWith("high");
+  const premLabel = premiumLabel(name);
+  const vo = volOi(name);
+  const asOf = levels.as_of ? ` · as of ${esc(isoLabel(levels.as_of))} close` : "";
+  const structure = `${name.structure_bias || "—"}${name.put_sale_only ? " · put-sale only · not a long" : ""}`;
+  const score = (label, value, tone, hint) =>
+    `<div class="sb-score is-${tone}"><dt>${label}</dt><dd>${esc(value)}<span>/100</span></dd>${hint ? `<dd class="sb-score-hint">${hint}</dd>` : ""}</div>`;
 
   return `
-    <div class="tc-header">
-      <div class="tc-brand"><strong>OPTIONS FLOW</strong> · Flow Alert</div>
-      <div class="tc-chips">${renderChips(name.chips)}</div>
+    <p class="cc-meta">
+      <span class="cc-alert sb-alert">Options Flow · Flow alert</span>
+      <span>Spot ${fmtPx(levels.spot)}${asOf}</span>
+    </p>
+    <h3 class="cc-title" id="bc-title">${esc(name.ticker)} · ${esc(structure)}</h3>
+    <dl class="sb-scoreboard">
+      ${score("Composite", name.composite, "comp", "0.65F / 0.35T")}
+      ${score("Flow", name.flow, "flow")}
+      ${score("Tech", name.tech, "tech")}
+    </dl>
+    <div class="cc-block">
+      <h4 class="cc-label">Desk analysis</h4>
+      <div class="cc-flow"><p>${md(name.desk_analysis || "—")}</p></div>
     </div>
-    <div class="tc-main">
-      <div>
-        <div class="tc-ticker-line">
-          <span class="tc-ticker" id="detail-ticker">${esc(name.ticker)}</span>
-          <span class="tc-spot">${fmtPx(levels.spot)}</span>${levels.as_of ? `<span class="tc-asof" style="font-size:10px;color:var(--dim);margin-left:6px">as of ${esc(levels.as_of)} close</span>` : ""}
-        </div>
-        <div class="tc-structure">${esc(name.structure_bias || "—")}${name.put_sale_only ? " · put-sale only · not a long" : ""}</div>
-      </div>
-      <div class="tc-premium">
-        <div class="val">${esc(premLabel)}</div>
-        <div class="sub">${prem ? "net premium (from prints)" : "premium OPEN"}</div>
-        <div class="comp">Composite ${esc(name.composite)} · F${esc(name.flow)} / T${esc(name.tech)}</div>
-      </div>
+    <div class="cc-block">
+      <h4 class="cc-label">Trade card</h4>
+      <dl class="cc-oi sb-facts">
+        ${cardRow("Top print $", esc(premLabel), prem ? "net premium (from prints)" : "premium OPEN", prem ? "is-flow" : "is-open")}
+        ${cardRow("Structure", esc(structure))}
+        ${cardRow("Confidence", esc(name.confidence || "OPEN"))}
+        ${cardRow("Vol / OI", vo.value ? esc(vo.value) : "n/a", esc(vo.hint), vo.value ? "" : "is-open")}
+        ${cardRow("Spot / EMA8", `${fmtPx(levels.spot)} / ${fmtPx(levels.ema8)}`, `EMA21 ${fmtPx(levels.ema21)} · 200 ${levels.sma200 != null ? fmtPx(levels.sma200) : "OPEN"}`)}
+        ${cardRow("Strategy bias", esc((name.chips || [])[0] || name.structure_bias || "—"))}
+        ${cardRow("Condition", name.put_sale_only ? "Put-sale only" : "Board filter")}
+        ${cardRow("Rank", `#${esc(name.rank)} · ${isHighConf(name) ? "High conf" : esc(name.confidence || "OPEN")}`)}
+      </dl>
     </div>
-    <div class="analysis-block">
-      <h3>DESK ANALYSIS</h3>
-      <p>${md(name.desk_analysis || "—")}</p>
-    </div>
-    <div class="metric-grid">
-      <div class="metric-tile"><div class="lab">Flow</div><div class="val flow">${esc(name.flow)}${dim}</div></div>
-      <div class="metric-tile"><div class="lab">Tech</div><div class="val tech">${esc(name.tech)}${dim}</div></div>
-      <div class="metric-tile">
-        <div class="lab">Composite</div>
-        <div class="val comp">${esc(name.composite)}${dim}</div>
-        <div class="hint">0.65F / 0.35T</div>
-      </div>
-      <div class="metric-tile"><div class="lab">Top print $</div><div class="val ${prem ? "flow" : "open"}">${esc(premLabel)}</div></div>
-      <div class="metric-tile"><div class="lab">Structure</div><div class="val" style="font-size:12px">${esc(name.structure_bias || "—")}</div></div>
-      <div class="metric-tile"><div class="lab">Confidence</div><div class="val">${esc(name.confidence || "OPEN")}</div></div>
-      <div class="metric-tile">
-        <div class="lab">Vol / OI</div>
-        <div class="val ${volOi ? "" : "open"}">${volOi ? esc(volOi) : "n/a"}</div>
-        <div class="hint">${name.vol_oi ? `${esc(name.vol_oi.contract)} · Oct 9 quote` : volOi ? "from dossier/print" : "no specific contract in print"}</div>
-      </div>
-      <div class="metric-tile">
-        <div class="lab">Spot / EMA8</div>
-        <div class="val" style="font-size:12px">${fmtPx(levels.spot)} / ${fmtPx(levels.ema8)}</div>
-        <div class="hint">EMA21 ${fmtPx(levels.ema21)} · 200 ${levels.sma200 != null ? fmtPx(levels.sma200) : "OPEN"}</div>
-      </div>
-    </div>
-    ${buildDetailChart(name)}
-    <div class="tc-footer">
-      <div class="tc-foot-box"><div class="lab">Strategy bias</div><div class="val">${esc((name.chips || [])[0] || name.structure_bias || "—")}</div></div>
-      <div class="tc-foot-box"><div class="lab">Condition</div><div class="val">${name.put_sale_only ? "Put-sale only" : "Board filter"}</div></div>
-      <div class="tc-foot-box"><div class="lab">Rank</div><div class="val">#${esc(name.rank)} · ${highConf ? "High conf" : esc(name.confidence || "OPEN")}</div></div>
+    ${name.top_print ? `<div class="cc-block"><h4 class="cc-label">Top print</h4><p class="sb-print">${md(name.top_print)}</p></div>` : ""}
+    <div class="cc-rec">
+      <h4 class="cc-label">Advisory</h4>
+      <p>${esc(advisory)}</p>
     </div>`;
 }
 
-function openDetail(ticker, from) {
-  if (!boardData) return;
-  const name = (boardData.names || []).find((n) => n.ticker === ticker);
-  if (!name) return;
-  selectedTicker = ticker;
-  trigger = from ?? document.querySelector(`.board-row[data-ticker="${ticker}"]`);
+function tile(label, value, sub, accent) {
+  return `<div class="tl-tile${accent ? ` is-${accent}` : ""}"><dt>${esc(label)}</dt><dd>${esc(value)}</dd>${sub ? `<dd class="tl-sub">${esc(sub)}</dd>` : ""}</div>`;
+}
+
+function swatch(kind, label, title) {
+  return `<span class="tl-key"${title ? ` title="${esc(title)}"` : ""}><i class="tl-sw is-${kind}"></i>${esc(label)}</span>`;
+}
+
+function fillRight(dialog, name) {
   const levels = name.levels || {};
-  $("#detail-spot-pill").textContent =
-    levels.spot != null ? `Spot: ${fmtPx(levels.spot)}${levels.as_of ? ` · as of ${levels.as_of}` : ""}` : "Spot: OPEN";
-  $("#trade-card").innerHTML = renderTradeCard(name);
-  $("#flow-intel").innerHTML = renderFlowIntel(name);
-  $("#detail-overlay").hidden = false;
-  $(".detail-shell").scrollTop = 0;
-  document.body.style.overflow = "hidden";
-  $("#detail-close").focus();
-  history.replaceState(null, "", `#${ticker}`);
+  const chart = boardLevels(name);
+  const vo = volOi(name);
+  $("#bc-contract", dialog).textContent = name.vol_oi?.contract || name.structure_bias || "";
+  $("#bc-tiles", dialog).innerHTML = [
+    tile("Spot", fmtPx(levels.spot), levels.as_of ? `${shortDate(levels.as_of)} close` : "Spot OPEN"),
+    tile("Net premium", premiumLabel(name), name.net_premium ? "From prints" : "Not in a print"),
+    tile("Composite", `${name.composite}/100`, `F${name.flow} / T${name.tech}`, "be"),
+    tile("Vol / OI", vo.value || "n/a", vo.value ? (name.vol_oi ? "Oct 9 quote" : "From dossier/print") : "No contract in print"),
+  ].join("");
+
+  const head = [`${name.ticker} — ~6-month price · daily`, ...chart.lines.map((line) => line.label)];
+  $("#bc-head", dialog).textContent = head.join(" · ");
+  const lines = name.trade_lines || [];
+  $("#bc-legend", dialog).innerHTML =
+    swatch("price", "Close") +
+    (lines.length
+      ? boardLines(name).map((line) => swatch(SWATCH[line.kind], line.label, line.note)).join("")
+      : `<span class="tl-key sb-dim">No strike levels in flow</span>`);
+  const n = chart.window.length;
+  $("#bc-range", dialog).textContent = n ? `${shortDate(chart.window[0].t, true)} → ${shortDate(chart.spotDate, true)} · ${n}d` : "";
+  $("#bc-note", dialog).textContent = n
+    ? `Daily closes as of ${isoLabel(levels.as_of || chart.spotDate)} from the weekly snapshot, not a stream. Lines are the strikes and targets named in the flow.`
+    : "";
+  $("#flow-intel", dialog).innerHTML = renderFlowIntel(name);
+  return chart;
 }
 
-function closeDetail() {
-  if ($("#detail-overlay").hidden) return;
-  selectedTicker = null;
-  $("#detail-overlay").hidden = true;
-  document.body.style.overflow = "";
-  history.replaceState(null, "", window.location.pathname + window.location.search);
-  trigger?.focus();
-  trigger = null;
+function setupCard(dialog, board) {
+  const chartHost = $("#bc-chart", dialog);
+  const byTicker = new Map((board.names || []).map((name) => [name.ticker, name]));
+  const advisory = board.advisory || "Advisory only — not an order ticket.";
+  let trigger = null;
+  let unmount = null;
+
+  const clearChart = () => {
+    unmount?.();
+    unmount = null;
+  };
+
+  const open = (ticker, from) => {
+    const name = byTicker.get(ticker);
+    if (!name) return;
+    trigger = from ?? null;
+    const levels = name.levels || {};
+    $("#bc-ticker", dialog).textContent = name.ticker;
+    $("#bc-rank", dialog).textContent = `#${name.rank}`;
+    $("#bc-chips", dialog).innerHTML = renderChips(name.chips);
+    $("#bc-spot", dialog).textContent =
+      levels.spot != null ? `Spot ${fmtPx(levels.spot)}${levels.as_of ? ` · ${shortDate(levels.as_of)}` : ""}` : "Spot OPEN";
+    $("#trade-card", dialog).innerHTML = renderTradeCard(name, advisory);
+    const chart = fillRight(dialog, name);
+    if (!dialog.open) dialog.showModal();
+    $(".cc-left", dialog).scrollTop = 0;
+    $(".cc-right", dialog).scrollTop = 0;
+    $(".cc-body", dialog).scrollTop = 0;
+    $("#bc-close", dialog).focus();
+    history.replaceState(null, "", `#${name.ticker}`);
+    clearChart();
+    if (chart.window.length) unmount = drawLevelsChart(chartHost, name.ticker, chart);
+    else chartHost.innerHTML = `<p class="cc-chart-loading">No daily bars on board</p>`;
+  };
+
+  $("#bc-close", dialog).addEventListener("click", () => dialog.close());
+  dialog.addEventListener("click", (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+  dialog.addEventListener("close", () => {
+    clearChart();
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+    trigger?.focus();
+    trigger = null;
+  });
+
+  return { open, byTicker };
 }
 
-function renderBoard(data) {
-  boardData = data;
-  const live = data.live === true || (data.label || "").toUpperCase() === "LIVE";
-  const blend = data.composite_blend || {};
-  const blendNote = blend.note || `LOCKED v1: ${blend.flow ?? 0.65} flow / ${blend.tech ?? 0.35} tech`;
+function splitWeek(text) {
+  const [main, ...rest] = String(text || "—").split(" — ");
+  return { main, rest: rest.join(" — ") };
+}
 
-  $("#brand-badges").innerHTML = live
-    ? `<span class="badge live">LIVE</span>`
-    : `<span class="badge dry">${esc(data.label || "SNAPSHOT")}</span>`;
-  $("#week-of").textContent = data.week_of || "—";
-  $("#iso-week").textContent = data.iso_week || "";
-  $("#last-updated").textContent = data.last_updated || data.generated || "—";
-  $("#last-updated-et").textContent = data.last_updated_et || "";
-  $("#blend-note").innerHTML = `Composite blend · <em>${esc(blendNote)}</em>`;
-  $("#lookback").textContent = data.flow_lookback || "";
+function renderBoard(board, spotlightTickers) {
+  const live = board.live === true || (board.label || "").toUpperCase() === "LIVE";
+  $("#sb-badge").outerHTML = live
+    ? `<span class="badge is-live" id="sb-badge"><i aria-hidden="true"></i>Live</span>`
+    : `<span class="badge" id="sb-badge">${esc(board.label === "SNAPSHOT" || !board.label ? "Weekly snapshot" : board.label)}</span>`;
 
-  const names = (data.names || []).slice().sort((a, b) => (a.rank || 99) - (b.rank || 99));
-  $("#tab-count").textContent = names.length ? String(names.length) : "";
-  const grid = $("#grid");
-  grid.innerHTML = names.length ? names.map(renderBoardRow).join("") : `<div class="empty">No names on the board this week.</div>`;
+  const names = (board.names || []).slice().sort((a, b) => (a.rank || 99) - (b.rank || 99));
+  const week = splitWeek(board.week_of);
+  $("#week-of").textContent = week.main;
+  $("#iso-week").textContent = [board.iso_week, week.rest].filter(Boolean).join(" · ");
+  $("#last-updated").textContent = board.last_updated || board.generated || "—";
+  $("#last-updated-et").textContent = [board.last_updated_et, `weekly snapshot · loaded ${new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`]
+    .filter(Boolean)
+    .join(" · ");
+  const blend = board.composite_blend || {};
+  $("#blend-note").textContent = blend.note || `LOCKED v1: ${blend.flow ?? 0.65} flow / ${blend.tech ?? 0.35} tech`;
+  $("#lookback").textContent = board.flow_lookback ? `Flow lookback · ${board.flow_lookback}` : "";
+  $("#sb-asof").textContent = [board.iso_week, `${names.length} ranked names`, board.last_updated ? `updated ${board.last_updated}` : ""]
+    .filter(Boolean)
+    .join(" · ");
 
-  $("#watch-section").innerHTML = renderWatch(data.spotlight_watch);
-  $("#advisory").textContent = data.advisory || "Advisory only — not an order ticket.";
+  $("#board-count").textContent = names.length ? `${names.length} names · composite / flow / tech` : "";
+  $("#sb-list").innerHTML = names.length ? names.map(boardRow).join("") : `<li class="sb-empty">No names on the board this week.</li>`;
 
-  const gaps = data.data_gaps || [];
+  const watch = board.spotlight_watch || [];
+  $("#sb-watch-section").hidden = !watch.length;
+  $("#watch-count").textContent = watch.length ? `${watch.length} in lookback` : "";
+  $("#sb-watch").innerHTML = watch.map((w) => watchCard(w, spotlightTickers.has(w.ticker))).join("");
+
+  $("#advisory").textContent = board.advisory || "Advisory only — not an order ticket.";
+  const gaps = board.data_gaps || [];
   const gapsEl = $("#gaps");
-  gapsEl.style.display = gaps.length ? "" : "none";
-  gapsEl.querySelector("ul").innerHTML = gaps.map((g) => `<li>${esc(g)}</li>`).join("");
-
-  if (selectedTicker && !$("#detail-overlay").hidden) openDetail(selectedTicker);
-}
-
-function openFromHash() {
-  const ticker = decodeURIComponent(window.location.hash.slice(1)).toUpperCase();
-  if (ticker && boardData?.names?.some((n) => n.ticker === ticker)) openDetail(ticker);
+  gapsEl.hidden = !gaps.length;
+  $("ul", gapsEl).innerHTML = gaps.map((g) => `<li>${esc(g)}</li>`).join("");
 }
 
 async function loadJson(path) {
-  const res = await fetch(`${base}data/flow/${path}`, { cache: "no-cache" });
+  const res = await fetch(dataUrl(path), { cache: "no-cache" });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
 
 async function main() {
-  $("#grid").addEventListener("click", (event) => {
-    const row = event.target.closest(".board-row");
-    if (row) openDetail(row.dataset.ticker, row);
-  });
-  $("#detail-close").addEventListener("click", closeDetail);
-  $("#detail-overlay").addEventListener("click", (e) => {
-    if (e.target === $("#detail-overlay")) closeDetail();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeDetail();
-  });
-  window.addEventListener("hashchange", openFromHash);
-
+  let spotlightTickers = new Set();
   try {
     const spotlights = await loadJson("spotlights.json");
     spotlightTickers = new Set(spotlights.sections.flatMap((section) => section.plays).map((play) => play.ticker));
@@ -651,15 +618,28 @@ async function main() {
     spotlightTickers = new Set();
   }
 
+  let board;
   try {
-    const data = await loadJson("scorecard.json");
-    $("#poll-status").textContent = `weekly snapshot · loaded ${new Date().toLocaleTimeString()}`;
-    renderBoard(data);
-    openFromHash();
-  } catch (err) {
-    $("#poll-status").textContent = `load error: ${err.message}`;
-    $("#grid").innerHTML = `<div class="empty">The scorecard could not load.</div>`;
+    board = await loadJson("scorecard.json");
+  } catch {
+    $("#sb-asof").textContent = "The scorecard could not load.";
+    $("#sb-list").innerHTML = `<li class="sb-empty">The scorecard could not load.</li>`;
+    return;
   }
+
+  renderBoard(board, spotlightTickers);
+  const card = setupCard($("#board-card"), board);
+  const list = $("#sb-list");
+  list.addEventListener("click", (event) => {
+    const row = event.target.closest(".sb-row");
+    if (row) card.open(row.dataset.ticker, row);
+  });
+  const openFromHash = () => {
+    const ticker = decodeURIComponent(window.location.hash.slice(1)).toUpperCase();
+    if (card.byTicker.has(ticker)) card.open(ticker, $(`.sb-row[data-ticker="${ticker}"]`, list));
+  };
+  window.addEventListener("hashchange", openFromHash);
+  openFromHash();
 }
 
-main();
+if (typeof document !== "undefined") main();
