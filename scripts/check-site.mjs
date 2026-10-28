@@ -691,7 +691,8 @@ assert(deskPages.every((file) => !readFileSync(join(root, file), "utf8").include
 assert(/<h1>Vault/.test(vaultPage), "Vault hero");
 assert((vaultPage.match(/class="tile vault-tile"/g) ?? []).length === 3, "Vault shows three preview tiles");
 assert(!/<a\s[^>]*class="tile vault-tile/.test(vaultPage), "Vault preview tiles do not link anywhere");
-assert(!/<form|<input|<button|type="password"|checkout|sign up|log ?in\b/i.test(vaultPage), "Vault has no login, form, or checkout");
+assert(!/type="password"|checkout/i.test(vaultPage), "Vault has no password field or checkout");
+
 
 const monetization = /\b(free|paid|premium|subscri\w*|paywall\w*|upgrad\w*|trials?|pric(e|es|ed|ing)|members?hips?|unlock\w*)\b/i;
 const chromeCopy = [
@@ -716,6 +717,29 @@ for (const [where, text] of chromeCopy) {
 const hubScript = readFileSync(join(root, "src/options-flow-hub.js"), "utf8").match(/(["'`])(?:(?!\1)[^\\]|\\.)*\1/g) ?? [];
 const hubHit = hubScript.find((text) => monetization.test(text));
 assert(!hubHit, `src/options-flow-hub.js UI copy says ${hubHit}`);
+
+/* Vault wall: signed-out visitors get a sign-in card; Vault content only renders from an inert template. */
+const vaultMain = vaultPage.match(/<main id="content">([\s\S]*?)<\/main>/)?.[1] ?? "";
+const vaultTemplate = vaultMain.match(/<template id="vault-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
+const vaultOutside = vaultMain.replace(/<template id="vault-content">[\s\S]*?<\/template>/, "");
+assert(vaultPage.includes('src="/src/vault-gate.js"'), "Vault page runs vault-gate.js");
+assert(/<section class="vault-wall" id="vault-wall" data-state="checking"/.test(vaultOutside), "Vault wall renders by default, before the gate decides");
+assert(/<h1 id="vault-wall-title">Sign in to open Vault<\/h1>/.test(vaultOutside), "Vault wall reads Sign in to open Vault");
+assert(/<input id="wall-email"[^>]*type="email"/.test(vaultOutside), "Vault wall asks for an email");
+assert(/<h1>Vault/.test(vaultTemplate) && (vaultTemplate.match(/class="tile vault-tile"/g) ?? []).length === 3, "Vault hero and tiles live in the template");
+assert(!/vault-hero|vault-tile|vault-desk/.test(vaultOutside), "no Vault content renders outside the template");
+const gateSource = readFileSync(join(root, "src/vault-gate.js"), "utf8");
+assert(gateSource.includes("import.meta.env.VITE_CLERK_PUBLISHABLE_KEY"), "Vault gate reads VITE_CLERK_PUBLISHABLE_KEY");
+assert(gateSource.includes('import("@clerk/clerk-js")'), "Vault gate loads Clerk only on demand");
+const gateHit = (gateSource.match(/(["'`])(?:(?!\1)[^\\]|\\.)*\1/g) ?? []).find((text) => monetization.test(text));
+assert(!gateHit, `src/vault-gate.js UI copy says ${gateHit}`);
+const envExample = readFileSync(join(root, ".env.example"), "utf8");
+assert(/^VITE_CLERK_PUBLISHABLE_KEY=$/m.test(envExample), ".env.example documents an empty VITE_CLERK_PUBLISHABLE_KEY");
+const ignored = readFileSync(join(root, ".gitignore"), "utf8");
+assert(/^\.env$/m.test(ignored) && /^\.env\.\*$/m.test(ignored), ".gitignore keeps local env files out of git");
+for (const file of [".env.example", "README.md", "src/vault-gate.js", "vault/index.html", ".github/workflows/pages.yml"]) {
+  assert(!/\b(pk|sk)_(test|live)_[A-Za-z0-9]{8,}/.test(readFileSync(join(root, file), "utf8")), `${file} carries a Clerk key`);
+}
 
 const scrubbed = /\bsample\b|\beducation\b|not advice|illustrative|textbook|curriculum|\blessons?\b|\bdesk [ab]\b|get_equity_|spotlight watch/i;
 for (const file of [...publicPages, "README.md", "public/data/flow/scorecard.json", "public/data/flow/plays.json", "public/data/flow/spotlights.json"]) {

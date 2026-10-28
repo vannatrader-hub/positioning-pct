@@ -11,6 +11,7 @@
     <meta name="theme-color" content="#0a0c10" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
     <link rel="stylesheet" href="/src/styles.css" />
+    <script type="module" src="/src/vault-gate.js"></script>
   </head>
   <body class="is-vault">
     <a class="skip" href="#content">Skip to content</a>
@@ -34,117 +35,147 @@
 
     <div class="wrap">
       <main id="content">
-        <section class="vault-hero">
-          <div>
-            <span class="pill vault-pill">
-              <svg class="surface-dial" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.75" /><circle cx="6" cy="6" r="1.5" /></svg>
-              Opening later
-            </span>
-            <h1>Vault<span class="mark">.</span></h1>
-            <p class="lede">
-              A private desk surface for deeper reads and the tools behind them. It opens later, by invitation.
-            </p>
-            <p class="vault-note">No sign-in and no forms. The Desk keeps reading in public while the Vault is built.</p>
+        <section class="vault-wall" id="vault-wall" data-state="checking" aria-labelledby="vault-wall-title">
+          <div class="wall-card">
+            <svg class="wall-dial" viewBox="0 0 48 48" aria-hidden="true">
+              <circle class="vd-ring" cx="24" cy="24" r="22" />
+              <circle class="vd-knob" cx="24" cy="24" r="14" />
+              <path class="vd-pointer" d="M24 12.5 V17" />
+              <circle class="vd-core" cx="24" cy="24" r="2.5" />
+            </svg>
+            <h1 id="vault-wall-title">Sign in to open Vault</h1>
+            <p class="wall-lede" id="wall-lede">Enter your email and we will send you a sign-in link.</p>
+            <form class="wall-form" id="wall-form" novalidate>
+              <label class="wall-label" for="wall-email">Email</label>
+              <div class="wall-row">
+                <input id="wall-email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" required />
+                <button class="wall-submit" id="wall-submit" type="submit">Email me a link</button>
+              </div>
+            </form>
+            <p class="wall-status" id="wall-status" role="status" aria-live="polite"></p>
+            <button class="wall-reset" id="wall-reset" type="button" hidden>Use a different email</button>
+            <a class="wall-back" href="../"><span aria-hidden="true">←</span> Back to the Desk</a>
           </div>
-          <svg class="vault-dial" viewBox="0 0 240 240" aria-hidden="true">
-            <circle class="vd-ring" cx="120" cy="120" r="112" />
-            <circle class="vd-ticks" cx="120" cy="120" r="96" />
-            <path class="vd-arc" d="M120 24 A96 96 0 0 1 203.14 72" />
-            <circle class="vd-ring" cx="120" cy="120" r="72" />
-            <circle class="vd-knob" cx="120" cy="120" r="40" />
-            <path class="vd-pointer" d="M120 86 V100" />
-            <circle class="vd-core" cx="120" cy="120" r="5" />
-          </svg>
         </section>
 
-        <section class="vault-section" aria-labelledby="vault-preview-title">
-          <div class="section-head">
-            <div class="section-title-row">
-              <h2 id="vault-preview-title">Inside the Vault</h2>
-              <span class="section-count">Three tools in the works</span>
+        <div class="vault-account" id="vault-account" hidden>
+          <span id="vault-account-email"></span>
+          <button type="button" id="vault-signout">Sign out</button>
+        </div>
+
+        <template id="vault-content">
+          <section class="vault-hero">
+            <div>
+              <span class="pill vault-pill">
+                <svg class="surface-dial" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.75" /><circle cx="6" cy="6" r="1.5" /></svg>
+                Opening later
+              </span>
+              <h1>Vault<span class="mark">.</span></h1>
+              <p class="lede">
+                A private desk surface for deeper reads and the tools behind them. It opens later, by invitation.
+              </p>
+              <p class="vault-note">The Desk keeps reading in public while the Vault is built.</p>
             </div>
-            <p class="hint">A look at what the private desk will carry. None of these open yet.</p>
-          </div>
+            <svg class="vault-dial" viewBox="0 0 240 240" aria-hidden="true">
+              <circle class="vd-ring" cx="120" cy="120" r="112" />
+              <circle class="vd-ticks" cx="120" cy="120" r="96" />
+              <path class="vd-arc" d="M120 24 A96 96 0 0 1 203.14 72" />
+              <circle class="vd-ring" cx="120" cy="120" r="72" />
+              <circle class="vd-knob" cx="120" cy="120" r="40" />
+              <path class="vd-pointer" d="M120 86 V100" />
+              <circle class="vd-core" cx="120" cy="120" r="5" />
+            </svg>
+          </section>
 
-          <div class="tile-grid vault-grid">
-            <article class="tile vault-tile">
-              <div class="tile-kicker">
-                <span class="tile-num">01</span>
-                <span class="badge is-soon">Soon</span>
+          <section class="vault-section" aria-labelledby="vault-preview-title">
+            <div class="section-head">
+              <div class="section-title-row">
+                <h2 id="vault-preview-title">Inside the Vault</h2>
+                <span class="section-count">Three tools in the works</span>
               </div>
-              <span class="tile-icon" aria-hidden="true">
-                <svg viewBox="0 0 28 28" fill="none" stroke-linecap="round">
-                  <path d="M4 7 H24" stroke="#f5c451" stroke-width="2" />
-                  <path d="M4 14 H24" stroke="#8b919c" stroke-width="2" stroke-dasharray="2 3" />
-                  <path d="M4 21 H24" stroke="#e5e7eb" stroke-width="2" />
-                  <circle cx="18" cy="14" r="2.6" fill="#e0322b" />
-                </svg>
-              </span>
-              <h2>Live pulls</h2>
-              <p>Dealer walls and index levels pulled live on request, instead of waiting for the weekly snapshot.</p>
-              <ul class="hub-facts">
-                <li>Dealer walls · reference levels</li>
-                <li>On request, time-stamped</li>
-              </ul>
-              <span class="vault-soon">Not open yet</span>
-            </article>
+              <p class="hint">A look at what the private desk will carry. None of these open yet.</p>
+            </div>
 
-            <article class="tile vault-tile">
-              <div class="tile-kicker">
-                <span class="tile-num">02</span>
-                <span class="badge is-soon">Soon</span>
-              </div>
-              <span class="tile-icon" aria-hidden="true">
-                <svg viewBox="0 0 28 28" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M8 19 V12.5 a6 6 0 0 1 12 0 V19 l2 2.5 H6 Z" stroke="#e5e7eb" stroke-width="2" />
-                  <path d="M12 24.5 h4" stroke="#8b919c" stroke-width="2" />
-                  <circle cx="20.5" cy="7" r="3" fill="#f5c451" />
-                </svg>
-              </span>
-              <h2>Private alerts &amp; watchlists</h2>
-              <p>Your own names on a quiet watchlist, with alerts when flow or positioning moves on them. Kept to you, never posted to the Desk.</p>
-              <ul class="hub-facts">
-                <li>Your names · your thresholds</li>
-                <li>Flow and positioning triggers</li>
-              </ul>
-              <span class="vault-soon">Not open yet</span>
-            </article>
+            <div class="tile-grid vault-grid">
+              <article class="tile vault-tile">
+                <div class="tile-kicker">
+                  <span class="tile-num">01</span>
+                  <span class="badge is-soon">Soon</span>
+                </div>
+                <span class="tile-icon" aria-hidden="true">
+                  <svg viewBox="0 0 28 28" fill="none" stroke-linecap="round">
+                    <path d="M4 7 H24" stroke="#f5c451" stroke-width="2" />
+                    <path d="M4 14 H24" stroke="#8b919c" stroke-width="2" stroke-dasharray="2 3" />
+                    <path d="M4 21 H24" stroke="#e5e7eb" stroke-width="2" />
+                    <circle cx="18" cy="14" r="2.6" fill="#e0322b" />
+                  </svg>
+                </span>
+                <h2>Live pulls</h2>
+                <p>Dealer walls and index levels pulled live on request, instead of waiting for the weekly snapshot.</p>
+                <ul class="hub-facts">
+                  <li>Dealer walls · reference levels</li>
+                  <li>On request, time-stamped</li>
+                </ul>
+                <span class="vault-soon">Not open yet</span>
+              </article>
 
-            <article class="tile vault-tile">
-              <div class="tile-kicker">
-                <span class="tile-num">03</span>
-                <span class="badge is-soon">Soon</span>
-              </div>
-              <span class="tile-icon" aria-hidden="true">
-                <svg viewBox="0 0 28 28" fill="none" stroke-linecap="round">
-                  <rect x="4" y="16" width="5" height="8" rx="1.5" fill="#464b54" />
-                  <rect x="11.5" y="11" width="5" height="13" rx="1.5" fill="#8b919c" />
-                  <rect x="19" y="5" width="5" height="19" rx="1.5" fill="#f5c451" />
-                </svg>
-              </span>
-              <h2>Account-aware sizing notes</h2>
-              <p>Notes that read a Desk idea against your own account size and risk lines, so a read turns into a sized plan.</p>
-              <ul class="hub-facts">
-                <li>Account size · risk per idea</li>
-                <li>Written as notes, not orders</li>
-              </ul>
-              <span class="vault-soon">Not open yet</span>
-            </article>
-          </div>
-        </section>
+              <article class="tile vault-tile">
+                <div class="tile-kicker">
+                  <span class="tile-num">02</span>
+                  <span class="badge is-soon">Soon</span>
+                </div>
+                <span class="tile-icon" aria-hidden="true">
+                  <svg viewBox="0 0 28 28" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 19 V12.5 a6 6 0 0 1 12 0 V19 l2 2.5 H6 Z" stroke="#e5e7eb" stroke-width="2" />
+                    <path d="M12 24.5 h4" stroke="#8b919c" stroke-width="2" />
+                    <circle cx="20.5" cy="7" r="3" fill="#f5c451" />
+                  </svg>
+                </span>
+                <h2>Private alerts &amp; watchlists</h2>
+                <p>Your own names on a quiet watchlist, with alerts when flow or positioning moves on them. Kept to you, never posted to the Desk.</p>
+                <ul class="hub-facts">
+                  <li>Your names · your thresholds</li>
+                  <li>Flow and positioning triggers</li>
+                </ul>
+                <span class="vault-soon">Not open yet</span>
+              </article>
 
-        <section class="vault-desk" aria-labelledby="vault-desk-title">
-          <div>
-            <h2 id="vault-desk-title">Everything live sits on the Desk</h2>
-            <p class="hint">Positioning, Options Flow, and SPX Levels stay where they are, open as always.</p>
-          </div>
-          <nav class="vault-desk-links" aria-label="Desk pages">
-            <a class="is-primary" href="../"><span aria-hidden="true">←</span> Desk home</a>
-            <a href="../positioning/">Positioning</a>
-            <a href="../options-flow/">Options Flow</a>
-            <a href="../spx-levels/">SPX Levels</a>
-          </nav>
-        </section>
+              <article class="tile vault-tile">
+                <div class="tile-kicker">
+                  <span class="tile-num">03</span>
+                  <span class="badge is-soon">Soon</span>
+                </div>
+                <span class="tile-icon" aria-hidden="true">
+                  <svg viewBox="0 0 28 28" fill="none" stroke-linecap="round">
+                    <rect x="4" y="16" width="5" height="8" rx="1.5" fill="#464b54" />
+                    <rect x="11.5" y="11" width="5" height="13" rx="1.5" fill="#8b919c" />
+                    <rect x="19" y="5" width="5" height="19" rx="1.5" fill="#f5c451" />
+                  </svg>
+                </span>
+                <h2>Account-aware sizing notes</h2>
+                <p>Notes that read a Desk idea against your own account size and risk lines, so a read turns into a sized plan.</p>
+                <ul class="hub-facts">
+                  <li>Account size · risk per idea</li>
+                  <li>Written as notes, not orders</li>
+                </ul>
+                <span class="vault-soon">Not open yet</span>
+              </article>
+            </div>
+          </section>
+
+          <section class="vault-desk" aria-labelledby="vault-desk-title">
+            <div>
+              <h2 id="vault-desk-title">Everything live sits on the Desk</h2>
+              <p class="hint">Positioning, Options Flow, and SPX Levels stay where they are, open as always.</p>
+            </div>
+            <nav class="vault-desk-links" aria-label="Desk pages">
+              <a class="is-primary" href="../"><span aria-hidden="true">←</span> Desk home</a>
+              <a href="../positioning/">Positioning</a>
+              <a href="../options-flow/">Options Flow</a>
+              <a href="../spx-levels/">SPX Levels</a>
+            </nav>
+          </section>
+        </template>
       </main>
 
       <footer class="site-footer">
