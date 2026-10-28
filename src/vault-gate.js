@@ -157,6 +157,12 @@ async function startClerk(publishableKey) {
 
   if (new URLSearchParams(location.search).has("__clerk_status")) await finishLinkHere(clerk);
 
+  signOut.addEventListener("click", async () => {
+    signOut.disabled = true;
+    await clerk.signOut();
+    location.replace(vaultUrl());
+  });
+
   clerk.addListener(({ user }) => {
     if (user) openVault(user.primaryEmailAddress?.emailAddress);
     else if (opened) location.replace(vaultUrl());
@@ -214,12 +220,6 @@ async function startClerk(publishableKey) {
     pending?.cancelEmailLinkFlow();
     pending = null;
     backToForm();
-  });
-
-  signOut.addEventListener("click", async () => {
-    signOut.disabled = true;
-    await clerk.signOut();
-    location.replace(vaultUrl());
   });
 
   if (wall.dataset.state === "checking") setState("ready");
