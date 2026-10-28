@@ -6,7 +6,7 @@ import { CANON, WEEKS, buildReading, ordinal } from "../src/readings.js";
 import { CURRICULUM, creditSpreadMath, leapMath, price } from "../src/study.js";
 import { breakeven, chartLevels, resolveExpiry } from "../src/flow-chart.js";
 import { SIDES, alertLabel, sortPlays } from "../src/options-flow.js";
-import { SECTION_ORDER, STATUS, allPlays, ladderLevels, sortCards } from "../src/spotlights.js";
+import { SECTION_ORDER, STATUS, allPlays, levelKind, outcomeLabel, sortCards, spotlightLevels, spotlightLines } from "../src/spotlights.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
@@ -305,10 +305,13 @@ assert(alertLabel("2026-10-27 05:15 PM CT") === "Alerted Oct 27, 5:15 PM CT", "a
 const jciBars = JSON.parse(readFileSync(join(root, "public/data/flow/bars/JCI.json"), "utf8")).bars;
 assert(chartLevels(flowBy.JCI, jciBars).expiryInView, "JCI Dec expiry is marked on the chart");
 assert(!chartLevels(flowBy.CRWD, JSON.parse(readFileSync(join(root, "public/data/flow/bars/CRWD.json"), "utf8")).bars).expiryInView, "CRWD 2028 expiry stays off the axis");
-const chartSource = readFileSync(join(root, "src/flow-chart.js"), "utf8").toLowerCase();
-for (const phrase of ["tradingview", "candlestick", "max gain", "dip buyer"]) {
-  assert(!chartSource.includes(phrase), `trade-levels chart should not include "${phrase}"`);
+for (const file of ["src/flow-chart.js", "src/spotlights.js"]) {
+  const chartSource = readFileSync(join(root, file), "utf8").toLowerCase();
+  for (const phrase of ["tradingview", "candlestick", "max gain", "dip buyer"]) {
+    assert(!chartSource.includes(phrase), `${file} trade-levels chart should not include "${phrase}"`);
+  }
 }
+assert(readFileSync(join(root, "src/spotlights.js"), "utf8").includes("drawLevelsChart"), "Spotlight cards share the $$$ line chart");
 
 const hub = readFileSync(join(root, "options-flow/index.html"), "utf8");
 const hubLinks = [...hub.matchAll(/<a class="tile hub-tile[^"]*" href="([^"]+)"/g)].map((match) => match[1]);
@@ -335,7 +338,7 @@ assert(
   "only the Active row opens by default",
 );
 const spotRows = Object.fromEntries(spot.sections.map((section) => [section.id, section.plays.map((play) => play.ticker)]));
-assert(JSON.stringify(spotRows) === JSON.stringify({ active: ["GLD", "FCX"], open: ["HOOD", "FSLY"], closed: ["V"] }), `Spotlight rows ${JSON.stringify(spotRows)}`);
+assert(JSON.stringify(spotRows) === JSON.stringify({ active: ["GLD", "FCX"], open: ["HOOD"], closed: ["V", "FSLY"] }), `Spotlight rows ${JSON.stringify(spotRows)}`);
 const { start: activeStart, end: activeEnd } = spot.activeWindow;
 assert(activeStart.startsWith("2026-10-") && activeEnd.startsWith("2026-10-") && activeEnd === spot.asOf, "Active window sits inside October 2026");
 for (const section of spot.sections) {
@@ -350,13 +353,27 @@ for (const section of spot.sections) {
     if (play.status === "open") assert(play.published < activeStart, `${where} belongs in Active`);
     if (play.status === "closed") {
       assert(play.closedAt > play.published && play.closeNote && play.result, `${where} needs a close date, note, and result`);
-      assert(/^https:\/\/x\.com\//.test(play.closeEvidenceUrl), `${where} close evidence ${play.closeEvidenceUrl}`);
+      assert(["banked", "expired"].includes(play.outcome), `${where} outcome ${play.outcome}`);
+      if (play.outcome === "banked") assert(/^https:\/\/x\.com\//.test(play.closeEvidenceUrl), `${where} close evidence ${play.closeEvidenceUrl}`);
     }
-    const lines = ladderLevels(play);
-    assert(lines.length === play.levels.length, `${where} has a level with an unknown label`);
-    const by = Object.fromEntries(lines.map((line) => [line.kind, line.value]));
-    assert(by.stop === play.stop && by.target === play.target && by.be === play.breakeven && by.spot === play.spotAtPost, `${where} ladder matches stop/target/B/E/spot`);
+    assert(play.levels.every((level) => levelKind(level.label)), `${where} has a level with an unknown label`);
+    const by = Object.fromEntries(play.levels.map((level) => [levelKind(level.label), level.price]));
+    assert(by.stop === play.stop && by.target === play.target && by.be === play.breakeven && by.spot === play.spotAtPost, `${where} levels match stop/target/B/E/spot`);
     assert(play.side === "puts" ? play.target < play.stop : play.target > play.stop, `${where} target sits past the stop`);
+
+    const bars = JSON.parse(readFileSync(join(root, `public/data/flow/bars/${play.ticker}.json`), "utf8")).bars;
+    assert(bars.length >= 250, `${where} needs at least a year of bars`);
+    assert(bars.every((bar, index) => index === 0 || bar.t > bars[index - 1].t), `${where} bars ascend`);
+    assert(bars.every((bar) => bar.l <= Math.min(bar.o, bar.c) && bar.h >= Math.max(bar.o, bar.c)), `${where} OHLC`);
+    assert(bars[bars.length - 1].t === spot.asOf, `${where} bars run to ${spot.asOf}`);
+    const chart = spotlightLevels(play, bars);
+    assert(chart.window.length >= 110 && chart.window.length <= 135, `${where} six-month window ${chart.window.length}`);
+    const kinds = Object.fromEntries(chart.lines.map((line) => [line.kind, line.value]));
+    assert(kinds.stop === play.stop && kinds.target === play.target && kinds.breakeven === play.breakeven, `${where} chart draws stop/target/B/E`);
+    assert(!chart.lines.some((line) => /^spot/i.test(line.label)), `${where} spot at post is a marker, not a level line`);
+    assert(chart.expiryInView, `${where} expiry ${chart.expiry} is marked on the chart`);
+    assert(chart.posted && Math.abs(chart.posted.c - play.spotAtPost) / play.spotAtPost < 0.01, `${where} close at post ${chart.posted?.c} vs ticket ${play.spotAtPost}`);
+    if (play.closedAt) assert(chart.markers.some((marker) => marker.t === chart.closeBar.t), `${where} close is marked on the chart`);
   }
 }
 const spotBy = Object.fromEntries(allPlays(spot).map((play) => [play.ticker, play]));
@@ -371,10 +388,17 @@ for (const [ticker, want] of Object.entries(spotWant)) {
   const got = Object.fromEntries(Object.keys(want).map((key) => [key, spotBy[ticker]?.[key]]));
   assert(JSON.stringify(got) === JSON.stringify(want), `spotlight ${ticker} ticket ${JSON.stringify(got)}`);
 }
-assert(spotBy.V.closedAt === "2026-10-12" && spotBy.V.result === "+107%", "V closed Oct 12 at +107%");
-assert(JSON.stringify(ladderLevels(spotBy.FCX).map((line) => line.value)) === "[80,78.25,75,69.2,63]", "FCX ladder runs target $80 down to stop $63");
+assert(spotBy.V.closedAt === "2026-10-12" && outcomeLabel(spotBy.V) === "Banked +107%", "V banked +107% on Oct 12");
+const fsly = spotBy.FSLY;
+const fslyChart = spotlightLevels(fsly, JSON.parse(readFileSync(join(root, "public/data/flow/bars/FSLY.json"), "utf8")).bars);
+assert(fsly.outcome === "expired" && outcomeLabel(fsly) === "Expired worthless", "FSLY expired worthless");
+assert(fslyChart.expiry === "2026-10-16" && fsly.closedAt === fslyChart.expiry, `FSLY closes at the ${fslyChart.expiry} October OpEx`);
+assert(/OpEx expired/.test(fsly.closeNote) && /worthless/.test(fsly.closeNote), `FSLY close note ${fsly.closeNote}`);
+assert(fslyChart.closeBar.c < 25, `FSLY closed ${fslyChart.closeBar.c} at expiry, under the $25 strike`);
+assert(JSON.stringify(spotlightLines(spotBy.FCX).map((line) => line.value)) === "[80,78.25,75,63]", "FCX chart lines run target $80 down to stop $63");
+assert(JSON.stringify(spotlightLines(spotBy.V).map((line) => line.kind)) === '["target","breakeven","strike","stop"]', "V draws short/target, B/E, long strike, stop");
 const spotPage = readFileSync(join(root, "options-flow/spotlights/index.html"), "utf8");
-for (const id of ["spot-rows", "spot-card", "sc-rec", "sc-close-note", "sl-tiles", "sl-ladder"]) {
+for (const id of ["spot-rows", "spot-card", "sc-rec", "sc-close-note", "sl-tiles", "sl-chart", "sl-legend"]) {
   assert(spotPage.includes(`id="${id}"`), `Spotlight page keeps #${id}`);
 }
 assert(spotPage.includes("Recommendation") && spotPage.includes("Trade levels"), "Spotlight card labels");

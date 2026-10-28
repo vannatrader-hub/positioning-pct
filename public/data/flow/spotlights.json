@@ -74,7 +74,7 @@
     {
       "id": "open",
       "title": "Open",
-      "hint": "Still open, posted before the Active window. Stays here until a close note lands.",
+      "hint": "Still open, posted before the Active window. A trade moves to Closed on a close note or when its options expire.",
       "defaultOpen": false,
       "plays": [
         {
@@ -105,42 +105,13 @@
             { "label": "B/E Nov OpEx", "price": 131 },
             { "label": "Target", "price": 140 }
           ]
-        },
-        {
-          "ticker": "FSLY",
-          "name": "Fastly",
-          "title": "Event-Driven Opportunity Emerges in Edge Compute Name Poised to Move",
-          "published": "2026-09-20",
-          "status": "open",
-          "side": "calls",
-          "structure": "Long October $25 calls",
-          "entry": "Oct $25 calls @ $1.80 or better",
-          "debit": 1.8,
-          "spotAtPost": 23.8,
-          "stop": 21.5,
-          "target": 30,
-          "breakeven": 26.8,
-          "expiryNote": "October OpEx",
-          "timeframe": "1 month",
-          "idea": [
-            "An event-driven set-up in an edge-compute name into its Investor Day: a flag sitting under key volume and value levels.",
-            "A break of the highs leaves room toward $30. October expiry has passed; the Spotlight stays Open until a close note lands."
-          ],
-          "recommendation": "Long FSLY October $25 calls at $1.80 or better into Investor Day. Flag under key vol/value; break of highs leaves room toward $30. October expiry may already be past — keep in Open until a close/bank note lands.",
-          "levels": [
-            { "label": "Stop", "price": 21.5 },
-            { "label": "Spot at post", "price": 23.8 },
-            { "label": "Strike", "price": 25 },
-            { "label": "B/E Oct OpEx", "price": 26.8 },
-            { "label": "Target", "price": 30 }
-          ]
         }
       ]
     },
     {
       "id": "closed",
       "title": "Closed",
-      "hint": "Banked or stopped. Close notes come from live chat or X when posted.",
+      "hint": "Banked, stopped, or expired. Close notes come from live chat or X when posted; expiry closes a trade on its own.",
       "defaultOpen": false,
       "plays": [
         {
@@ -161,6 +132,7 @@
           "expiryNote": "December OpEx",
           "timeframe": "3 months",
           "result": "+107%",
+          "outcome": "banked",
           "closeNote": "Banked +107% (public member note on X, 2026-10-12).",
           "closeQuote": "Members: Can bank Visa $V call play +107%",
           "closeEvidenceUrl": "https://x.com/i/status/2109638837697905053",
@@ -175,6 +147,39 @@
             { "label": "Long strike", "price": 380 },
             { "label": "B/E Dec OpEx", "price": 387.5 },
             { "label": "Short / target", "price": 410 }
+          ]
+        },
+        {
+          "ticker": "FSLY",
+          "name": "Fastly",
+          "title": "Event-Driven Opportunity Emerges in Edge Compute Name Poised to Move",
+          "published": "2026-09-20",
+          "closedAt": "2026-10-16",
+          "status": "closed",
+          "side": "calls",
+          "structure": "Long October $25 calls",
+          "entry": "Oct $25 calls @ $1.80 or better",
+          "debit": 1.8,
+          "spotAtPost": 23.8,
+          "stop": 21.5,
+          "target": 30,
+          "breakeven": 26.8,
+          "expiryNote": "October OpEx",
+          "timeframe": "1 month",
+          "result": "−100%",
+          "outcome": "expired",
+          "closeNote": "October OpEx expired · calls finished worthless (no bank note posted).",
+          "idea": [
+            "An event-driven set-up in an edge-compute name into its Investor Day: a flag sitting under key volume and value levels.",
+            "A break of the highs left room toward $30. October OpEx (Oct 16) passed with the calls finishing worthless, which closes the trade at $0."
+          ],
+          "recommendation": "Was long FSLY October $25 calls at $1.80 or better into Investor Day. Flag under key vol/value; a break of highs left room toward $30. October OpEx expired with the calls worthless; no bank note was posted.",
+          "levels": [
+            { "label": "Stop", "price": 21.5 },
+            { "label": "Spot at post", "price": 23.8 },
+            { "label": "Strike", "price": 25 },
+            { "label": "B/E Oct OpEx", "price": 26.8 },
+            { "label": "Target", "price": 30 }
           ]
         }
       ]

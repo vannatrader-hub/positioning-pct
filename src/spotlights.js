@@ -1,19 +1,12 @@
-import { niceTicks, shortDate, usd } from "./flow-chart.js";
+import { drawLevelsChart, resolveExpiry, shortDate, sixMonths, usd } from "./flow-chart.js";
 
-const NS = "http://www.w3.org/2000/svg";
+const DAY = 86400000;
+const EXPIRY_REACH_DAYS = 80;
 
 function dateLabel(iso, withYear = true) {
   const label = shortDate(iso);
   return withYear ? `${label}, ${iso.slice(0, 4)}` : label;
 }
-
-const LEVELS = {
-  target: { label: "Target", color: "#4ade80", dash: "none" },
-  be: { label: "Break-even", color: "#60a5fa", dash: "6 4" },
-  strike: { label: "Strike", color: "#f59e0b", dash: "6 5" },
-  spot: { label: "Spot at post", color: "#e5e7eb", dash: "2 4" },
-  stop: { label: "Stop", color: "#f87171", dash: "6 5" },
-};
 
 export const STATUS = { active: "Active", open: "Open", closed: "Closed" };
 export const SECTION_ORDER = ["active", "open", "closed"];
@@ -28,13 +21,6 @@ function el(tag, className, text) {
   if (className) node.className = className;
   if (text !== undefined) node.textContent = text;
   return node;
-}
-
-function svgNode(tag, attrs = {}, text) {
-  const item = document.createElementNS(NS, tag);
-  for (const [key, value] of Object.entries(attrs)) item.setAttribute(key, String(value));
-  if (text !== undefined) item.textContent = text;
-  return item;
 }
 
 function pct(from, to) {
@@ -61,12 +47,70 @@ export function levelKind(label) {
   return null;
 }
 
-/** Only the levels a Spotlight names, highest first. A Spotlight without levels draws nothing. */
-export function ladderLevels(play) {
+const CHART_KIND = { stop: "stop", target: "target", be: "breakeven", strike: "strike" };
+
+/** Horizontal chart lines from the levels a ticket names, highest first. Spot at post is marked on the price path instead. */
+export function spotlightLines(play) {
   return (play.levels ?? [])
-    .map((level) => ({ kind: levelKind(level.label), value: level.price, label: `${level.label} ${usd(level.price)}` }))
+    .map((level) => ({ kind: CHART_KIND[levelKind(level.label)], value: level.price, label: `${level.label} ${usd(level.price)}` }))
     .filter((line) => line.kind && typeof line.value === "number")
     .sort((a, b) => b.value - a.value);
+}
+
+function days(isoDate) {
+  return Date.parse(`${isoDate}T00:00:00Z`) / DAY;
+}
+
+function barOnOrBefore(bars, isoDate) {
+  let found = null;
+  for (const bar of bars) {
+    if (bar.t > isoDate) break;
+    found = bar;
+  }
+  return found;
+}
+
+/** "January OpEx" on a ticket posted Oct 20, 2026 → the Jan 15, 2027 monthly. */
+export function spotlightExpiry(play) {
+  return resolveExpiry((play.expiryNote ?? "").split(" ")[0], play.published);
+}
+
+/** Everything the shared trade-levels chart draws for one Spotlight ticket. */
+export function spotlightLevels(play, bars) {
+  const window = sixMonths(bars);
+  const last = window[window.length - 1];
+  const expiry = spotlightExpiry(play);
+  const expiryInView = Boolean(expiry) && expiry >= window[0].t && days(expiry) - days(last.t) <= EXPIRY_REACH_DAYS;
+  const posted = barOnOrBefore(bars, play.published);
+  const closeBar = play.closedAt ? barOnOrBefore(bars, play.closedAt) : null;
+  const markers = [];
+  if (posted && posted.t >= window[0].t) {
+    markers.push({ t: posted.t, value: posted.c, label: `Posted ${shortDate(play.published)}`, side: closeBar ? "left" : "right" });
+  }
+  if (closeBar && closeBar.t >= window[0].t) {
+    const expired = play.outcome === "expired";
+    markers.push({
+      t: closeBar.t,
+      value: closeBar.c,
+      label: expired ? `Expired ${shortDate(play.closedAt)}` : `Closed ${shortDate(play.closedAt)} ${play.result ?? ""}`.trim(),
+      line: !(expiryInView && closeBar.t === expiry),
+    });
+  }
+  return { window, lines: spotlightLines(play), expiry, expiryInView, spot: last.c, spotDate: last.t, markers, posted, closeBar };
+}
+
+const OUTCOME = {
+  banked: { chip: "Banked", badge: "Closed", row: "", tone: "banked" },
+  expired: { chip: "Expired worthless", badge: "Expired", row: "expired", tone: "expired" },
+};
+
+function outcome(play) {
+  return OUTCOME[play.outcome] ?? OUTCOME.banked;
+}
+
+/** "Banked +107%" or "Expired worthless" — the card's one-line close result. */
+export function outcomeLabel(play) {
+  return play.outcome === "expired" ? outcome(play).chip : `${outcome(play).chip} ${play.result ?? ""}`.trim();
 }
 
 function statusPill(play) {
@@ -79,7 +123,7 @@ function cardItem(play) {
   button.type = "button";
   button.dataset.ticker = play.ticker;
   button.setAttribute("aria-haspopup", "dialog");
-  button.setAttribute("aria-label", `${play.ticker}, ${play.name}. ${play.title}. ${STATUS[play.status]}${play.result ? ` ${play.result}` : ""}. Open Spotlight card`);
+  button.setAttribute("aria-label", `${play.ticker}, ${play.name}. ${play.title}. ${STATUS[play.status]}${play.closedAt ? `, ${outcomeLabel(play)}` : ""}. Open Spotlight card`);
 
   const top = el("span", "spot-top");
   top.append(el("strong", "spot-ticker", play.ticker), statusPill(play));
@@ -87,7 +131,7 @@ function cardItem(play) {
   const title = el("span", "spot-title", play.title);
   const meta = el("span", "spot-meta");
   meta.append(el("span", `spot-chip is-${play.side}`, play.entry));
-  if (play.result) meta.append(el("span", "spot-chip is-banked", `Banked ${play.result}`));
+  if (play.closedAt) meta.append(el("span", `spot-chip is-${outcome(play).tone}`, outcomeLabel(play)));
   const levels = el("span", "spot-levels");
   levels.append(
     ...[
@@ -123,9 +167,16 @@ function sectionBadge(section) {
     badge.append(dot, "Live");
     return badge;
   }
-  const banked = section.plays.filter((play) => play.result);
-  if (section.id === "closed" && banked.length) {
-    return el("span", "badge is-banked", banked.map((play) => `${play.ticker} ${play.result}`).join(" · "));
+  const closed = sortCards(section.plays).filter((play) => play.closedAt);
+  if (section.id === "closed" && closed.length) {
+    const badges = el("span", "spot-sum-badges");
+    badges.append(
+      ...closed.map((play) => {
+        const text = play.outcome === "expired" ? `${play.ticker} ${outcome(play).row}` : `${play.ticker} ${play.result ?? "closed"}`;
+        return el("span", `badge is-${outcome(play).tone}`, text);
+      }),
+    );
+    return badges;
   }
   return el("span", "badge", section.title);
 }
@@ -162,134 +213,69 @@ function tile(label, value, sub, accent) {
   return box;
 }
 
-function swatch(kind) {
+function swatch(kind, label) {
   const item = el("span", "tl-key");
-  const sw = el("i", "tl-sw");
-  sw.style.borderTopColor = LEVELS[kind].color;
-  sw.style.borderTopStyle = LEVELS[kind].dash === "none" ? "solid" : "dashed";
-  item.append(sw, LEVELS[kind].label);
+  item.append(el("i", `tl-sw is-${kind}`), label);
   return item;
 }
 
-/** Draws the level ladder into `host`, sized to the host. Returns an unmount function. */
-function mountLadder(host, play) {
-  const lines = ladderLevels(play);
-  const svg = svgNode("svg", { class: "tl-svg", role: "img" });
-  svg.setAttribute("aria-label", `${play.ticker} trade levels. ${lines.map((line) => line.label).join(". ")}.`);
-  host.replaceChildren(svg);
+const LEGEND = { strike: "Strike", short: "Short", breakeven: "B/E", stop: "Stop", target: "Target" };
 
-  const draw = () => {
-    const width = Math.round(host.clientWidth);
-    const height = Math.round(host.clientHeight);
-    if (!width || !height) return;
-    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-    svg.setAttribute("width", width);
-    svg.setAttribute("height", height);
-    svg.replaceChildren();
+const barsCache = new Map();
 
-    const pad = { top: 22, right: 18, bottom: 18, left: 56 };
-    const values = lines.map((line) => line.value);
-    let lo = Math.min(...values);
-    let hi = Math.max(...values);
-    const margin = (hi - lo) * 0.14 || hi * 0.05 || 1;
-    lo -= margin;
-    hi += margin;
-    const right = width - pad.right;
-    const y = (value) => pad.top + (1 - (value - lo) / (hi - lo)) * (height - pad.top - pad.bottom);
-
-    for (const tick of niceTicks(lo, hi, Math.max(3, Math.round(height / 70)))) {
-      const ty = y(tick);
-      svg.append(
-        svgNode("line", { x1: pad.left, x2: right, y1: ty, y2: ty, stroke: "rgba(255, 255, 255, 0.055)" }),
-        svgNode("text", { x: pad.left - 8, y: ty + 3.5, "text-anchor": "end", fill: "#6b7280", class: "tl-axis" }, `$${tick % 1 ? tick.toFixed(1) : tick}`),
-      );
-    }
-
-    if (typeof play.stop === "number" && typeof play.target === "number") {
-      const top = y(Math.max(play.stop, play.target));
-      const bottom = y(Math.min(play.stop, play.target));
-      const up = play.target > play.stop;
-      const gradient = svgNode("linearGradient", { id: "spot-band", x1: 0, x2: 0, y1: up ? 1 : 0, y2: up ? 0 : 1 });
-      gradient.append(
-        svgNode("stop", { offset: "0%", "stop-color": "#f87171", "stop-opacity": 0.16 }),
-        svgNode("stop", { offset: "100%", "stop-color": "#4ade80", "stop-opacity": 0.16 }),
-      );
-      const defs = svgNode("defs");
-      defs.append(gradient);
-      svg.append(defs, svgNode("rect", { x: pad.left, y: top, width: right - pad.left, height: bottom - top, fill: "url(#spot-band)", rx: 6 }));
-    }
-
-    // Lines closer than a label's height alternate sides so their tags never overprint.
-    let lastY = -Infinity;
-    let side = "right";
-    for (const line of lines) {
-      const { color, dash } = LEVELS[line.kind];
-      const ly = y(line.value);
-      side = ly - lastY < 16 ? (side === "right" ? "left" : "right") : "right";
-      lastY = ly;
-      const tag = side === "right"
-        ? { x: right - 4, "text-anchor": "end" }
-        : { x: pad.left + 6, "text-anchor": "start" };
-      svg.append(
-        svgNode("line", { x1: pad.left, x2: right, y1: ly, y2: ly, stroke: color, "stroke-width": 1.6, "stroke-dasharray": dash }),
-        svgNode("text", { ...tag, y: ly - 7, fill: color, class: "tl-tag" }, line.label),
-      );
-    }
-  };
-
-  const observer = new ResizeObserver(draw);
-  observer.observe(host);
-  draw();
-  return () => {
-    observer.disconnect();
-    host.replaceChildren();
-  };
+function loadBars(ticker) {
+  if (!barsCache.has(ticker)) {
+    const request = fetch(dataUrl(`bars/${ticker}.json`), { cache: "no-cache" })
+      .then((response) => {
+        if (!response.ok) throw new Error(`bars ${response.status}`);
+        return response.json();
+      })
+      .then((file) => file.bars);
+    request.catch(() => barsCache.delete(ticker));
+    barsCache.set(ticker, request);
+  }
+  return barsCache.get(ticker);
 }
 
-function fillLevels(dialog, play) {
-  const lines = ladderLevels(play);
+function fillChart(dialog, play, levels) {
+  const has = (value) => typeof value === "number";
   const tiles = dialog.querySelector("#sl-tiles");
-  const ladder = dialog.querySelector("#sl-ladder");
   const legend = dialog.querySelector("#sl-legend");
   const move = dialog.querySelector("#sl-move");
-  const note = dialog.querySelector("#sl-note");
-  const contract = play.result ? `${play.entry} · Closed ${play.result}` : play.entry;
+  const contract = play.closedAt ? `${play.entry} · ${outcomeLabel(play)}` : play.entry;
   dialog.querySelector("#sl-contract").textContent = `${play.ticker} · ${contract}`;
-  move.replaceChildren();
-  legend.replaceChildren();
 
-  if (!lines.length) {
-    tiles.classList.add("is-spot-only");
-    tiles.replaceChildren(tile("Status", STATUS[play.status], `Posted ${dateLabel(play.published, false)}`));
-    dialog.querySelector("#sl-head").textContent = `${play.ticker} — trade levels`;
-    ladder.replaceChildren(el("p", "cc-chart-loading", "This Spotlight names no stop, strike, or target."));
-    note.textContent = "Nothing is drawn because the Spotlight carries no trade levels. Levels are never filled in from elsewhere.";
-    return null;
-  }
-
-  const has = (value) => typeof value === "number";
-  tiles.classList.remove("is-spot-only");
   tiles.replaceChildren(
     tile("Entry", has(play.debit) ? usd(play.debit) : "—", play.entry.includes("or better") ? "Debit, or better" : "Debit"),
-    tile("Stop", has(play.stop) ? usd(play.stop) : "—", has(play.stop) ? "Stock level" : "Not on the card"),
-    tile("Target", has(play.target) ? usd(play.target) : "—", has(play.target) ? "Stock level" : "Not on the card", has(play.target) ? "be" : ""),
-    tile("B/E", has(play.breakeven) ? usd(play.breakeven) : "—", play.expiryNote ? `At ${play.expiryNote}` : "Not on the card"),
+    tile("Stop", has(play.stop) ? usd(play.stop) : "—", has(play.stop) ? "Stock level" : "Not on the ticket"),
+    tile("Target", has(play.target) ? usd(play.target) : "—", has(play.target) ? "Stock level" : "Not on the ticket"),
+    tile("B/E", has(play.breakeven) ? usd(play.breakeven) : "—", play.expiryNote ? `At ${play.expiryNote}` : "Not on the ticket", has(play.breakeven) ? "be" : ""),
   );
-  dialog.querySelector("#sl-head").textContent = [`${play.ticker} — trade levels`, ...lines.map((line) => line.label)].join(" · ");
-  const kinds = [...new Set(lines.map((line) => line.kind))];
-  legend.append(...Object.keys(LEVELS).filter((kind) => kinds.includes(kind)).map(swatch));
-  if (has(play.spotAtPost) && has(play.target) && has(play.stop)) {
-    move.append(
-      "Spot to target ",
-      el("strong", "", pct(play.spotAtPost, play.target)),
-      " · to stop ",
-      el("strong", "is-down", pct(play.spotAtPost, play.stop)),
-    );
+
+  const named = [has(play.stop) && `Stop ${usd(play.stop)}`, has(play.target) && `Target ${usd(play.target)}`, has(play.breakeven) && `B/E ${usd(play.breakeven)}`];
+  dialog.querySelector("#sl-head").textContent = [`${play.ticker} — 6-month price`, ...named.filter(Boolean)].join(" · ");
+
+  const kinds = new Set(levels.lines.map((line) => line.kind));
+  legend.replaceChildren(swatch("price", "Close"), ...Object.keys(LEGEND).filter((kind) => kinds.has(kind)).map((kind) => swatch(kind, LEGEND[kind])));
+  if (levels.expiryInView) legend.append(swatch("expiry", "Expiry"));
+  if (levels.markers.length) legend.append(swatch("posted", play.closedAt ? "Posted / closed" : "Posted"));
+
+  move.replaceChildren();
+  if (play.closedAt && levels.closeBar) {
+    const expired = play.outcome === "expired";
+    move.append(`${expired ? "Expiry close" : "Close"} ${shortDate(levels.closeBar.t)}: `, el("strong", expired ? "is-down" : "", usd(levels.closeBar.c)));
+    const strike = levels.lines.find((line) => line.kind === "strike");
+    if (expired && strike) move.append(` vs ${usd(strike.value)} strike`);
+  } else if (has(play.stop) && has(play.target)) {
+    const pastStop = play.side === "puts" ? levels.spot > play.stop : levels.spot < play.stop;
+    move.append(`Last ${usd(levels.spot)}: `);
+    if (pastStop) move.append(el("strong", "is-down", `${play.side === "puts" ? "Above" : "Below"} stop ${usd(play.stop)}`));
+    else move.append("to target ", el("strong", "", pct(levels.spot, play.target)), " · to stop ", el("strong", "is-down", pct(levels.spot, play.stop)));
   }
-  note.textContent = play.closedAt
-    ? `Closed ${dateLabel(play.closedAt)}. Stock levels as named on the Spotlight; spot is the stock price when it posted.`
-    : "Stock levels as named on the Spotlight; spot is the stock price when it posted. No price history is drawn here.";
-  return mountLadder(ladder, play);
+
+  const expiryNote = levels.expiry ? ` Expiry read as the ${shortDate(levels.expiry, true)} monthly.` : "";
+  dialog.querySelector("#sl-note").textContent =
+    `Daily closes from a committed snapshot through ${dateLabel(levels.spotDate)}, not a stream. Levels come from the Spotlight ticket.${expiryNote}`;
 }
 
 function headBadge(play) {
@@ -300,7 +286,10 @@ function headBadge(play) {
     badge.append(dot, "Live");
     return badge;
   }
-  if (play.status === "closed") return el("span", "badge is-banked", play.result ? `Closed ${play.result}` : "Closed");
+  if (play.status === "closed") {
+    const { badge, tone } = outcome(play);
+    return el("span", `badge is-${tone}`, play.outcome === "expired" ? badge : `${badge} ${play.result ?? ""}`.trim());
+  }
   return el("span", "badge", "Open");
 }
 
@@ -308,9 +297,10 @@ function closeBlock(play) {
   const block = el("div", "cc-block spot-close");
   block.append(el("h4", "cc-label", "Close note"));
   const line = el("p", "spot-close-line");
-  line.append(el("strong", "", play.result ? `Banked ${play.result}` : "Closed"), ` · ${dateLabel(play.closedAt)}`);
+  line.append(el("strong", `is-${outcome(play).tone}`, outcomeLabel(play)), ` · ${dateLabel(play.closedAt)}`);
   block.append(line);
   if (play.closeQuote) block.append(el("blockquote", "spot-close-quote", `“${play.closeQuote}”`));
+  else if (play.closeNote) block.append(el("p", "spot-close-text", play.closeNote));
   if (play.closeEvidenceUrl) {
     const link = el("a", "spot-close-link", "Public close note on X ↗");
     link.href = play.closeEvidenceUrl;
@@ -322,12 +312,37 @@ function closeBlock(play) {
 }
 
 function setupCard(dialog, plays) {
+  const chartHost = dialog.querySelector("#sl-chart");
   let trigger = null;
   let unmount = null;
+  let mountId = 0;
+
+  const clearChart = () => {
+    mountId += 1;
+    unmount?.();
+    unmount = null;
+  };
+
+  const showChart = async (play) => {
+    clearChart();
+    const id = mountId;
+    for (const selector of ["#sl-tiles", "#sl-legend", "#sl-move", "#sl-head", "#sl-note"]) dialog.querySelector(selector).replaceChildren();
+    dialog.querySelector("#sl-contract").textContent = `${play.ticker} · ${play.entry}`;
+    chartHost.replaceChildren(el("p", "cc-chart-loading", "Loading daily closes…"));
+    try {
+      const bars = await loadBars(play.ticker);
+      if (id !== mountId) return;
+      const levels = spotlightLevels(play, bars);
+      fillChart(dialog, play, levels);
+      unmount = drawLevelsChart(chartHost, play.ticker, levels);
+    } catch {
+      if (id !== mountId) return;
+      chartHost.replaceChildren(el("p", "cc-chart-loading", "The price chart could not load."));
+    }
+  };
 
   const open = (play, from) => {
     trigger = from ?? null;
-    unmount?.();
     dialog.querySelector("#sc-ticker").textContent = play.ticker;
     dialog.querySelector("#sc-badge").replaceChildren(headBadge(play));
     dialog.querySelector("#sc-name").textContent = play.name;
@@ -360,7 +375,7 @@ function setupCard(dialog, plays) {
     dialog.querySelector(".cc-left").scrollTop = 0;
     dialog.querySelector("#sc-close").focus();
     history.replaceState(null, "", `#${play.ticker}`);
-    unmount = fillLevels(dialog, play);
+    showChart(play);
   };
 
   dialog.querySelector("#sc-close").addEventListener("click", () => dialog.close());
@@ -368,8 +383,7 @@ function setupCard(dialog, plays) {
     if (event.target === dialog) dialog.close();
   });
   dialog.addEventListener("close", () => {
-    unmount?.();
-    unmount = null;
+    clearChart();
     history.replaceState(null, "", window.location.pathname + window.location.search);
     trigger?.focus();
     trigger = null;
