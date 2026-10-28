@@ -11,9 +11,12 @@ Public sources are bank labels only: JPM, Morgan Stanley, BoA, GS, and a desk co
 - Home. Three destinations. Each tile opens its own page.
 - Positioning. Eleven Select Sector cards, a soft-to-crowded map, and a soft-vol gauge.
 - SPX Levels. Placeholder for this phase.
-- Options Flow. A $$$ watchlist of the last three weeks, newest alert first, with alert date and time (CT) on every row. Each row opens a calling card: condensed flow, Customer purchased (the most recent customer trade named in the alert, hidden when there is none), flow in open interest, and a Recommendation on the left; a trade-levels chart on the right (about six months of daily closes, the lead option strike, and break-even when the premium is known).
+- Options Flow (`/options-flow/`). A hub with three calling cards, each opening its own page:
+  - $$$ watchlist (`/options-flow/dollar/`). The last three weeks, newest alert first, with alert date and time (CT) on every row. Each row opens a calling card: condensed flow, Customer purchased (the most recent customer trade named in the alert, hidden when there is none), flow in open interest, and a Recommendation on the left; a trade-levels chart on the right (about six months of daily closes, the lead option strike, and break-even when the premium is known). Old `/options-flow/#TICKER` links forward here.
+  - Spotlight trades (`/options-flow/spotlights/`). A labeled sample of trade cards: the idea, the structure, a Recommendation, and a level ladder drawn only from the levels the card names.
+  - Weekly scorecard (`/options-flow/scorecard/`). The dark flow board: names ranked by composite (0.65 flow / 0.35 tech), each row opening a trade card with flow intelligence panels and a six-month price chart, plus the Spotlight watch strip. Advisory only.
 
-Options Flow data lives in `public/data/flow/`: `plays.json` is the seed, and `bars/<TICKER>.json` holds committed daily bars (`t,o,h,l,c,v`). The chart is drawn as SVG from those closes, so the page needs no chart service.
+Options Flow data lives in `public/data/flow/`: `plays.json` is the watchlist seed, `bars/<TICKER>.json` holds committed daily bars (`t,o,h,l,c,v`), `spotlights.json` is the Spotlight sample, and `scorecard.json` is the weekly board snapshot. Charts are drawn as SVG from committed data, so no page needs a chart service.
 
 Each sector card shows the percentile, a timeframe, a status, and a Soft to Crowded bar. Green is the soft end. Dark is crowded. The triangle marks that week’s print.
 
@@ -44,4 +47,4 @@ If the site is not public yet, a repo admin opens **Settings → Pages → Build
 
 ## Fonts
 
-Bodoni Moda (SIL Open Font License) and Inter (SIL Open Font License). License texts are in `src/fonts/`.
+Bodoni Moda (SIL Open Font License) and Inter (SIL Open Font License). License texts are in `src/fonts/`. The weekly scorecard also uses IBM Plex Sans and IBM Plex Mono (SIL Open Font License), bundled from the `@fontsource` packages at build time.

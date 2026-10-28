@@ -6,6 +6,7 @@ import { CANON, WEEKS, buildReading, ordinal } from "../src/readings.js";
 import { CURRICULUM, creditSpreadMath, leapMath, price } from "../src/study.js";
 import { breakeven, chartLevels, resolveExpiry } from "../src/flow-chart.js";
 import { SIDES, alertLabel, sortPlays } from "../src/options-flow.js";
+import { STATUS, ladderLevels, sortCards } from "../src/spotlights.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
@@ -308,6 +309,54 @@ const chartSource = readFileSync(join(root, "src/flow-chart.js"), "utf8").toLowe
 for (const phrase of ["tradingview", "candlestick", "max gain", "dip buyer"]) {
   assert(!chartSource.includes(phrase), `trade-levels chart should not include "${phrase}"`);
 }
+
+const hub = readFileSync(join(root, "options-flow/index.html"), "utf8");
+const hubLinks = [...hub.matchAll(/<a class="tile hub-tile[^"]*" href="([^"]+)"/g)].map((match) => match[1]);
+assert(JSON.stringify(hubLinks) === JSON.stringify(["dollar/", "spotlights/", "scorecard/"]), `hub calling cards ${hubLinks}`);
+assert(!hub.includes('id="flow-list"'), "hub shows calling cards, not the $$$ table");
+const dollarPage = readFileSync(join(root, "options-flow/dollar/index.html"), "utf8");
+for (const id of ["flow-list", "calling-card", "cc-buy-block", "cc-oi-block", "cc-rec", "tl-tiles", "cc-chart"]) {
+  assert(dollarPage.includes(`id="${id}"`), `$$$ watchlist page keeps #${id}`);
+}
+assert(dollarPage.includes('src="/src/options-flow.js"'), "$$$ watchlist page runs options-flow.js");
+const viteConfig = readFileSync(join(root, "vite.config.js"), "utf8");
+for (const page of ["options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html"]) {
+  assert(viteConfig.includes(`"${page}"`), `vite builds ${page}`);
+  const html = readFileSync(join(root, page), "utf8");
+  assert(/class="lockup" href="(\.\.\/)+"/.test(html), `${page} lockup links home`);
+  if (page !== "options-flow/index.html") assert(html.includes('href="../"'), `${page} links back to the Options Flow hub`);
+}
+
+const spot = JSON.parse(readFileSync(join(root, "public/data/flow/spotlights.json"), "utf8"));
+assert(spot.sample === true, "Spotlight cards are labeled sample");
+assert(spot.cards.length >= 2 && spot.cards.length <= 4, `Spotlight sample has ${spot.cards.length} cards`);
+assert(JSON.stringify(sortCards(spot.cards)) === JSON.stringify(spot.cards), "spotlights.json is stored newest card first");
+for (const card of spot.cards) {
+  const where = `spotlight ${card.ticker}`;
+  assert(card.status in STATUS, `${where} status ${card.status}`);
+  assert(card.title && card.structure && card.recommendation && card.idea?.length, `${where} needs title, structure, idea, recommendation`);
+  const lines = ladderLevels(card);
+  if (card.levels === null) assert(lines.length === 0, `${where} draws no levels without levels`);
+  const by = Object.fromEntries(lines.map((line) => [line.kind, line.value]));
+  if (by.stop !== undefined && by.target !== undefined) {
+    assert(card.bias === "puts" ? by.target < by.stop : by.target > by.stop, `${where} target sits past the stop`);
+  }
+}
+assert(JSON.stringify(ladderLevels(spot.cards.find((card) => card.ticker === "FCX")).map((line) => line.value)) === "[80,63]", "FCX ladder is target $80 over stop $63");
+
+const board = JSON.parse(readFileSync(join(root, "public/data/flow/scorecard.json"), "utf8"));
+assert(board.names.length >= 5, `scorecard ranks ${board.names.length} names`);
+board.names.forEach((name, index) => {
+  const where = `scorecard ${name.ticker}`;
+  assert(name.rank === index + 1, `${where} rank ${name.rank}`);
+  assert(Math.abs(name.composite - (0.65 * name.flow + 0.35 * name.tech)) <= 0.5 + 1e-9, `${where} composite ${name.composite} vs 0.65F/0.35T`);
+  if (index) assert(name.composite <= board.names[index - 1].composite, `${where} ranked by composite`);
+  assert(name.chart.length >= 100 && name.chart.every((bar, i) => i === 0 || bar.date > name.chart[i - 1].date), `${where} six-month chart`);
+  assert(name.candles.length >= 10, `${where} spark candles`);
+  assert(name.panels && name.desk_analysis, `${where} trade card panels`);
+});
+assert(/^Advisory only/.test(board.advisory), "scorecard keeps the advisory-only footer");
+for (const item of board.spotlight_watch) assert(item.ticker && item.title && item.structure, `spotlight watch ${item.ticker}`);
 
 const banned = [
   "sentiment ai",
