@@ -6,7 +6,7 @@
     <title>Positioning · Positioning %.</title>
     <meta
       name="description"
-      content="Positioning: sector Soft ↔ Crowded bars, credit, options and Soft Vol, and the full ten-category desk. Each card opens the Soft ↔ Crowded desk at its section."
+      content="Positioning: sector Soft ↔ Crowded bars, credit, options and Soft Vol, and the full ten-category desk, plus six interactive positioning charts."
     />
     <meta name="theme-color" content="#f4f5f7" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
@@ -37,7 +37,8 @@
           <h1>Positioning</h1>
           <p class="lede">
             Four ways into the Soft ↔ Crowded desk. Each card opens the desk at its section: the sector bars, credit,
-            options and Soft Vol, or the full desk with all ten categories.
+            options and Soft Vol, or the full desk with all ten categories. Below them, six headline reads redrawn as
+            interactive charts.
           </p>
         </section>
 
@@ -151,6 +152,63 @@
             <span class="open">Open full desk <span class="arrow" aria-hidden="true">→</span></span>
           </a>
         </div>
+
+        <section class="hub-charts" aria-labelledby="charts-title">
+          <div class="section-head">
+            <div class="section-title-row">
+              <h2 id="charts-title">Charts</h2>
+              <a class="section-link" href="charts/">Open all six →</a>
+            </div>
+            <p class="hint">
+              Six headline reads redrawn as interactive Soft ↔ Crowded charts. Each card opens its chart; every chart
+              shares one history slider and links back to its desk section.
+            </p>
+          </div>
+          <div class="chart-tiles">
+            <a class="tile chart-tile" href="charts/#soft-vol">
+              <div class="tile-kicker"><span class="tile-num">01</span><span class="house h-desk">Desk</span></div>
+              <h3>Soft Vol ↔ Stretched VIX</h3>
+              <div class="chart-tile-plot" data-preview="soft-vol" aria-hidden="true"></div>
+              <p class="chart-tile-fact" data-hub="chart-soft-vol">Residual gauge, in vol points</p>
+              <span class="open">Open chart <span class="arrow" aria-hidden="true">→</span></span>
+            </a>
+            <a class="tile chart-tile" href="charts/#sectors">
+              <div class="tile-kicker"><span class="tile-num">02</span><span class="house h-jpm">JPM</span></div>
+              <h3>Sector Soft ↔ Crowded</h3>
+              <div class="chart-tile-plot" data-preview="sectors" aria-hidden="true"></div>
+              <p class="chart-tile-fact" data-hub="chart-sectors">XLF to XLC on one scale</p>
+              <span class="open">Open chart <span class="arrow" aria-hidden="true">→</span></span>
+            </a>
+            <a class="tile chart-tile" href="charts/#broad-equity">
+              <div class="tile-kicker"><span class="tile-num">03</span><span class="house h-jpm">JPM</span></div>
+              <h3>Broad equity positioning</h3>
+              <div class="chart-tile-plot" data-preview="broad-equity" aria-hidden="true"></div>
+              <p class="chart-tile-fact" data-hub="chart-broad-equity">Composite percentile by week</p>
+              <span class="open">Open chart <span class="arrow" aria-hidden="true">→</span></span>
+            </a>
+            <a class="tile chart-tile" href="charts/#credit-stress">
+              <div class="tile-kicker"><span class="tile-num">04</span><span class="house h-desk">Desk</span></div>
+              <h3>Credit stress</h3>
+              <div class="chart-tile-plot" data-preview="credit-stress" aria-hidden="true"></div>
+              <p class="chart-tile-fact" data-hub="chart-credit-stress">CDX and BBB−AAA</p>
+              <span class="open">Open chart <span class="arrow" aria-hidden="true">→</span></span>
+            </a>
+            <a class="tile chart-tile" href="charts/#fund-managers">
+              <div class="tile-kicker"><span class="tile-num">05</span><span class="house h-boa">BoA</span></div>
+              <h3>Fund manager survey · crowded trades</h3>
+              <div class="chart-tile-plot" data-preview="fund-managers" aria-hidden="true"></div>
+              <p class="chart-tile-fact" data-hub="chart-fund-managers">Most crowded trade and cash</p>
+              <span class="open">Open chart <span class="arrow" aria-hidden="true">→</span></span>
+            </a>
+            <a class="tile chart-tile" href="charts/#risk-appetite">
+              <div class="tile-kicker"><span class="tile-num">06</span><span class="house h-gs">GS</span></div>
+              <h3>GS risk appetite</h3>
+              <div class="chart-tile-plot" data-preview="risk-appetite" aria-hidden="true"></div>
+              <p class="chart-tile-fact" data-hub="chart-risk-appetite">Positioning, risky vs safe, short-term composite</p>
+              <span class="open">Open chart <span class="arrow" aria-hidden="true">→</span></span>
+            </a>
+          </div>
+        </section>
       </main>
 
       <footer class="site-footer">
