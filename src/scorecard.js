@@ -262,11 +262,16 @@ function renderFlowIntel(name, active) {
 
   const iv = name.iv;
   const next = name.earnings?.next;
+  const ivAsOf = iv?.as_of ? `as of ${stampLabel(iv.as_of)}` : "";
+  const move = /^(.+?)\s+(to .+)$/.exec(iv?.expected_move || "");
   const ivBody = `<dl class="fi-lines">
-      ${iv ? techLine("IV30", iv.iv30, `as of ${isoLabel(iv.as_of)}`) : ""}
+      ${iv?.iv30 ? techLine("IV30", iv.iv30, ivAsOf) : ""}
+      ${!iv?.iv30 && iv?.atm_iv ? techLine("ATM IV", iv.atm_iv, [iv.atm_contract, ivAsOf].filter(Boolean).join(" · ")) : ""}
+      ${iv?.expected_move ? techLine("Expected move", move ? move[1] : iv.expected_move, move ? move[2] : "") : ""}
       ${iv?.skew ? techLine("Skew", iv.skew, "") : ""}
+      ${iv?.prior?.iv30 ? techLine("Prior IV30", iv.prior.iv30, [iv.prior.skew ? `skew ${iv.prior.skew}` : "", iv.prior.as_of ? `as of ${stampLabel(iv.prior.as_of)}` : ""].filter(Boolean).join(" · ")) : ""}
     </dl>
-    ${iv ? "" : emptyState("No live IV pull yet.")}
+    ${iv?.iv30 || iv?.atm_iv ? "" : emptyState("No live IV pull yet.")}
     <div class="fi-sub">
       <span class="fi-sub-k">Open catalyst</span>
       ${next ? `<p><strong>Earnings ${esc(next.date ? isoLabel(next.date) : next.label)}</strong>${next.note ? ` · ${esc(next.note)}` : ""}</p>` : emptyState("No catalyst on file.")}
