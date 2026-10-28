@@ -2629,6 +2629,12 @@ body:has(.cc[open]) { overflow: hidden; }
 
 .hub-tile.is-board::before { background: linear-gradient(90deg, #ffd166, #3dd68c 45%, #5b9cff); }
 
+.hub-tile.is-scale::before { background: linear-gradient(90deg, var(--soft), var(--mid) 50%, var(--crowded)); }
+
+.hub-grid.is-four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.hub-grid.is-four .hub-tile { min-height: 340px; }
+
 .hub-icon .conf { padding: 3px 7px; font-size: 10.5px; }
 
 .tile-icon.is-dark {
@@ -2970,9 +2976,10 @@ body:has(.cc[open]) { overflow: hidden; }
   .study-cards { grid-template-columns: minmax(0, 1fr); }
   .ov-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tile-grid,
+  .hub-grid.is-four,
   .study-grid,
   .gauge-copy { grid-template-columns: 1fr; }
-  .tile { min-height: 0; }
+  .tile, .hub-grid.is-four .hub-tile { min-height: 0; }
   .spot-grid { grid-template-columns: 1fr; }
   .spot-sum {
     grid-template-columns: minmax(0, 1fr) 28px;
