@@ -646,7 +646,7 @@ async function main() {
 
   try {
     const spotlights = await loadJson("spotlights.json");
-    spotlightTickers = new Set(spotlights.cards.map((card) => card.ticker));
+    spotlightTickers = new Set(spotlights.sections.flatMap((section) => section.plays).map((play) => play.ticker));
   } catch {
     spotlightTickers = new Set();
   }

@@ -20,7 +20,11 @@ load("plays.json")
   .catch(() => {});
 
 load("spotlights.json")
-  .then((seed) => fact("spotlights", `${seed.cards.length} sample cards · ${seed.window}`))
+  .then((seed) => {
+    const plays = seed.sections.flatMap((section) => section.plays);
+    const counts = seed.sections.map((section) => `${section.plays.length} ${section.title.toLowerCase()}`);
+    fact("spotlights", `${plays.length} Spotlights · ${counts.join(" · ")}`);
+  })
   .catch(() => {});
 
 load("scorecard.json")

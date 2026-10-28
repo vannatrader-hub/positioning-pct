@@ -6,7 +6,7 @@
     <title>Spotlight trades · Options Flow · Positioning %.</title>
     <meta
       name="description"
-      content="Spotlight trades: sample trade cards with the idea, the structure, a recommendation, and the trade levels. Education only, not advice."
+      content="Spotlight trades: Active, Open, and Closed trade tickets with the idea, the structure, a Recommendation, and the trade levels. Education only, not advice."
     />
     <meta name="theme-color" content="#f4f5f7" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
@@ -33,27 +33,27 @@
           <a href="../scorecard/">Weekly scorecard</a>
         </nav>
         <section class="page-head">
-          <span class="pill">Spotlight trades <span class="badge is-sample">Sample</span></span>
+          <span class="pill">Spotlight trades <span class="badge is-live"><i aria-hidden="true"></i>Live</span></span>
           <h1>Spotlight trades</h1>
           <p class="lede">
-            Trade cards built around one idea each. Open a card for the idea, the structure, a Recommendation, and the
-            trade levels the card names. Phase 1 shows a small sample set for education.
+            Trade tickets built around one idea each, in three rows: Active, Open, and Closed. Open a card for the idea,
+            the structure, a Recommendation, and the trade levels it names. Education and advisory only.
           </p>
-          <p class="sample-line pill" id="spot-asof">Loading sample cards…</p>
+          <p class="sample-line pill" id="spot-asof">Loading Spotlight trades…</p>
         </section>
 
         <section class="desk-section" aria-labelledby="spot-title">
           <div class="section-head">
             <div class="section-title-row">
-              <h2 id="spot-title">Spotlight cards</h2>
+              <h2 id="spot-title">Spotlight trades</h2>
               <span class="section-count" id="spot-count"></span>
             </div>
             <p class="hint">
-              Newest card first. Trade levels are drawn only when the card names them — no stop or target is filled in
-              for a card that does not carry one.
+              Active is open by default; tap Open or Closed to expand. Newest first in each row. Trade levels are drawn
+              only from the levels a Spotlight names — nothing is filled in from elsewhere.
             </p>
           </div>
-          <ul class="spot-grid" id="spot-list" aria-labelledby="spot-title"></ul>
+          <div class="spot-rows" id="spot-rows" aria-labelledby="spot-title"></div>
         </section>
       </main>
 
@@ -62,7 +62,7 @@
           <header class="cc-head">
             <div class="cc-ident">
               <h2 class="cc-ticker" id="sc-ticker"></h2>
-              <span class="badge is-sample">Sample</span>
+              <span id="sc-badge"></span>
               <span class="cc-name" id="sc-name"></span>
             </div>
             <button class="cc-close" type="button" id="sc-close" aria-label="Close Spotlight card">
@@ -86,6 +86,7 @@
                 <h4 class="cc-label">Structure</h4>
                 <dl class="cc-oi" id="sc-structure"></dl>
               </div>
+              <div id="sc-close-note"></div>
               <div class="cc-rec">
                 <h4 class="cc-label">Recommendation</h4>
                 <p id="sc-rec"></p>
@@ -108,14 +109,14 @@
               <p class="cc-chart-note" id="sl-note"></p>
             </section>
           </div>
-          <p class="cc-foot">Sample card · education only · not advice. Not a live list and not an order ticket.</p>
+          <p class="cc-foot">Spotlight ticket · education and advisory only · not advice. Not an order ticket; size is not on the card.</p>
         </div>
       </dialog>
 
       <footer class="site-footer">
         <div>
           <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
-          <p class="foot-note">Phase 1 public reading. Spotlight cards on this page are a labeled sample, not a live source.</p>
+          <p class="foot-note">Spotlight trades are live tickets shown for education. Advisory only: not advice and not an order ticket.</p>
           <p class="foot-edu">Education only · not advice.</p>
         </div>
         <nav class="foot-links" aria-label="Footer">
@@ -126,7 +127,7 @@
         </nav>
       </footer>
     </div>
-    <noscript>Spotlight cards need JavaScript to draw. Education only, not advice.</noscript>
+    <noscript>Spotlight trades need JavaScript to draw. Education only, not advice.</noscript>
     <script type="module" src="/src/spotlights.js"></script>
   </body>
 </html>

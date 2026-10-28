@@ -1,56 +1,183 @@
 {
-  "sample": true,
-  "asOf": "2026-10-14",
-  "window": "Sep 7 – Oct 14, 2026",
-  "note": "Sample Spotlight trade cards for education. Not a live list, not advice.",
-  "cards": [
+  "live": true,
+  "asOf": "2026-10-27",
+  "asOfStamp": "2026-10-27T20:10:00-05:00",
+  "activeWindow": { "start": "2026-10-06", "end": "2026-10-27" },
+  "note": "Spotlight trade tickets for education. Advisory only, not advice and not an order ticket.",
+  "sourceNote": "Member Spotlight PDFs pulled 2026-10-27; V close from public X bank note 2026-10-12.",
+  "sections": [
     {
-      "ticker": "FCX",
-      "name": "Freeport-McMoRan",
-      "date": "2026-10-14",
-      "title": "Upside Calls Cheap in Metals Leader for AI Buildout",
-      "structure": "Long calls",
-      "bias": "calls",
-      "status": "filled",
-      "idea": [
-        "A copper leader framed as an AI-buildout supplier: grid, data-center wiring, and power all pull on the metal.",
-        "The card prefers upside calls while implied volatility is described as cheap, and puts the exit on the stock, not on the option price."
-      ],
-      "recommendation": "Sample read: long calls, managed on the stock. Respect the $63 stock stop; the $80 stock target is the planned exit. Size is not on the card.",
-      "levels": {
-        "stop": 63,
-        "target": 80
-      }
+      "id": "active",
+      "title": "Active",
+      "hint": "Open Spotlights from October's current three-week window (Oct 6 – Oct 27) — still working.",
+      "defaultOpen": true,
+      "plays": [
+        {
+          "ticker": "GLD",
+          "name": "Gold Trust",
+          "title": "Precious Metals Divergence Set-Up Emerges a Second Time",
+          "published": "2026-10-20",
+          "status": "active",
+          "side": "calls",
+          "structure": "Long January $400 calls",
+          "entry": "Jan $400 calls @ $8 or better",
+          "debit": 8.0,
+          "spotAtPost": 377.5,
+          "stop": 367,
+          "target": 400,
+          "breakeven": 408,
+          "expiryNote": "January OpEx",
+          "timeframe": "3 months",
+          "idea": [
+            "A second precious-metals divergence set-up: a falling wedge with RSI divergence, sitting just under resistance.",
+            "A push back through $393 opens a run toward $400. The Spotlight uses January calls struck at that $400 target, about three months out."
+          ],
+          "recommendation": "Long GLD January $400 calls at $8 or better. Falling-wedge / RSI divergence setup under resistance, with a shot back through $393 toward $400.",
+          "levels": [
+            { "label": "Stop", "price": 367 },
+            { "label": "Spot at post", "price": 377.5 },
+            { "label": "Target", "price": 400 },
+            { "label": "B/E Jan OpEx", "price": 408 }
+          ]
+        },
+        {
+          "ticker": "FCX",
+          "name": "Freeport-McMoRan",
+          "title": "Upside Calls Cheap in Metals Leader for AI Buildout",
+          "published": "2026-10-14",
+          "status": "active",
+          "side": "calls",
+          "structure": "Long December $75 calls",
+          "entry": "Dec $75 calls @ $3.25 or better",
+          "debit": 3.25,
+          "spotAtPost": 69.2,
+          "stop": 63,
+          "target": 80,
+          "breakeven": 78.25,
+          "expiryNote": "December OpEx",
+          "timeframe": "2 months",
+          "idea": [
+            "A copper and metals leader framed as an AI-buildout supplier, with upside calls priced cheaply.",
+            "The stock pulled back into its anchored VWAP and 21-week EMA, retesting a range breakout. Exits are set on the stock: a $63 stop and an $80 target."
+          ],
+          "recommendation": "Long FCX December $75 calls at $3.25 or better. Pullback into AVWAP / 21-week EMA / range breakout retest; stock stop $63, stock target $80.",
+          "levels": [
+            { "label": "Stop", "price": 63 },
+            { "label": "Spot at post", "price": 69.2 },
+            { "label": "Strike", "price": 75 },
+            { "label": "B/E Dec OpEx", "price": 78.25 },
+            { "label": "Target", "price": 80 }
+          ]
+        }
+      ]
     },
     {
-      "ticker": "V",
-      "name": "Visa",
-      "date": "2026-09-29",
-      "title": "Call Spreads into the Payments Quarter",
-      "structure": "Call spreads",
-      "bias": "calls",
-      "status": "open",
-      "idea": [
-        "Payments volume into the quarter, with the card choosing call spreads to lower the cost of upside exposure.",
-        "A spread caps the gain at the short strike in exchange for a smaller debit."
-      ],
-      "recommendation": "Sample read: call spreads into the print. The card names no strikes, stop, or target, so no trade levels are drawn.",
-      "levels": null
+      "id": "open",
+      "title": "Open",
+      "hint": "Still open, posted before the Active window. Stays here until a close note lands.",
+      "defaultOpen": false,
+      "plays": [
+        {
+          "ticker": "HOOD",
+          "name": "Brokerage platform",
+          "title": "Long Calls in Top Financial Growth Story",
+          "published": "2026-10-05",
+          "status": "open",
+          "side": "calls",
+          "structure": "Long November $125 calls",
+          "entry": "Nov $125 calls @ $6",
+          "debit": 6.0,
+          "spotAtPost": 114.1,
+          "stop": 105,
+          "target": 140,
+          "breakeven": 131,
+          "expiryNote": "November OpEx",
+          "timeframe": "2 months",
+          "idea": [
+            "A top financial growth story: a multi-week consolidation inside a strong uptrend.",
+            "November calls ride a break higher out of the range. Exits are set on the stock: a $105 stop and a $140 target."
+          ],
+          "recommendation": "Long HOOD November $125 calls at $6. Multi-week consolidation in a strong trend; stock stop $105, stock target $140.",
+          "levels": [
+            { "label": "Stop", "price": 105 },
+            { "label": "Spot at post", "price": 114.1 },
+            { "label": "Strike", "price": 125 },
+            { "label": "B/E Nov OpEx", "price": 131 },
+            { "label": "Target", "price": 140 }
+          ]
+        },
+        {
+          "ticker": "FSLY",
+          "name": "Fastly",
+          "title": "Event-Driven Opportunity Emerges in Edge Compute Name Poised to Move",
+          "published": "2026-09-20",
+          "status": "open",
+          "side": "calls",
+          "structure": "Long October $25 calls",
+          "entry": "Oct $25 calls @ $1.80 or better",
+          "debit": 1.8,
+          "spotAtPost": 23.8,
+          "stop": 21.5,
+          "target": 30,
+          "breakeven": 26.8,
+          "expiryNote": "October OpEx",
+          "timeframe": "1 month",
+          "idea": [
+            "An event-driven set-up in an edge-compute name into its Investor Day: a flag sitting under key volume and value levels.",
+            "A break of the highs leaves room toward $30. October expiry has passed; the Spotlight stays Open until a close note lands."
+          ],
+          "recommendation": "Long FSLY October $25 calls at $1.80 or better into Investor Day. Flag under key vol/value; break of highs leaves room toward $30. October expiry may already be past — keep in Open until a close/bank note lands.",
+          "levels": [
+            { "label": "Stop", "price": 21.5 },
+            { "label": "Spot at post", "price": 23.8 },
+            { "label": "Strike", "price": 25 },
+            { "label": "B/E Oct OpEx", "price": 26.8 },
+            { "label": "Target", "price": 30 }
+          ]
+        }
+      ]
     },
     {
-      "ticker": "NU",
-      "name": "Nu Holdings",
-      "date": "2026-09-07",
-      "title": "Long Calls in Brazilian Financial Growth Leader",
-      "structure": "Long calls",
-      "bias": "calls",
-      "status": "open",
-      "idea": [
-        "A Latin American digital bank growing customers and deposits faster than the incumbents it competes with.",
-        "The card frames long calls as the way to hold the growth story with a defined cost."
-      ],
-      "recommendation": "Sample read: long calls with defined risk. The card names no stock stop or target, so no trade levels are drawn.",
-      "levels": null
+      "id": "closed",
+      "title": "Closed",
+      "hint": "Banked or stopped. Close notes come from live chat or X when posted.",
+      "defaultOpen": false,
+      "plays": [
+        {
+          "ticker": "V",
+          "name": "Visa",
+          "title": "Call Spreads in Financial Heavyweight Positioned for Strong Payments Quarter",
+          "published": "2026-09-29",
+          "closedAt": "2026-10-12",
+          "status": "closed",
+          "side": "calls",
+          "structure": "Long December $380/$410 call spreads",
+          "entry": "Dec $380/$410 call spreads @ $7.50",
+          "debit": 7.5,
+          "spotAtPost": 366.5,
+          "stop": 349,
+          "target": 410,
+          "breakeven": 387.5,
+          "expiryNote": "December OpEx",
+          "timeframe": "3 months",
+          "result": "+107%",
+          "closeNote": "Banked +107% (public member note on X, 2026-10-12).",
+          "closeQuote": "Members: Can bank Visa $V call play +107%",
+          "closeEvidenceUrl": "https://x.com/i/status/2109638837697905053",
+          "idea": [
+            "A financial heavyweight into a strong payments quarter: an orderly pullback forming a falling wedge.",
+            "Above $371 the chart pointed to new highs. Call spreads cut the debit in exchange for capping the gain at the $410 short strike."
+          ],
+          "recommendation": "Was long V December $380/$410 call spreads at $7.50. Orderly pullback / falling wedge; above $371 pointed to new highs. Closed after the bank note.",
+          "levels": [
+            { "label": "Stop", "price": 349 },
+            { "label": "Spot at post", "price": 366.5 },
+            { "label": "Long strike", "price": 380 },
+            { "label": "B/E Dec OpEx", "price": 387.5 },
+            { "label": "Short / target", "price": 410 }
+          ]
+        }
+      ]
     }
   ]
 }

@@ -13,10 +13,10 @@ Public sources are bank labels only: JPM, Morgan Stanley, BoA, GS, and a desk co
 - SPX Levels. Placeholder for this phase.
 - Options Flow (`/options-flow/`). A hub with three calling cards, each opening its own page:
   - $$$ watchlist (`/options-flow/dollar/`). The last three weeks, newest alert first, with alert date and time (CT) on every row. Each row opens a calling card: condensed flow, Customer purchased (the most recent customer trade named in the alert, hidden when there is none), flow in open interest, and a Recommendation on the left; a trade-levels chart on the right (about six months of daily closes, the lead option strike, and break-even when the premium is known). Old `/options-flow/#TICKER` links forward here.
-  - Spotlight trades (`/options-flow/spotlights/`). A labeled sample of trade cards: the idea, the structure, a Recommendation, and a level ladder drawn only from the levels the card names.
+  - Spotlight trades (`/options-flow/spotlights/`). Live Spotlight tickets in three dropdown rows: Active (open, inside the current October window, expanded by default), Open (still open, posted earlier), and Closed (with the close result and a link to the public close note). Each card opens the idea, the structure, a Recommendation, and a trade-levels ladder (stop, spot at post, strike, break-even, target) drawn only from the levels the ticket names.
   - Weekly scorecard (`/options-flow/scorecard/`). The dark flow board: names ranked by composite (0.65 flow / 0.35 tech), each row opening a trade card with flow intelligence panels and a six-month price chart, plus the Spotlight watch strip. Advisory only.
 
-Options Flow data lives in `public/data/flow/`: `plays.json` is the watchlist seed, `bars/<TICKER>.json` holds committed daily bars (`t,o,h,l,c,v`), `spotlights.json` is the Spotlight sample, and `scorecard.json` is the weekly board snapshot. Charts are drawn as SVG from committed data, so no page needs a chart service.
+Options Flow data lives in `public/data/flow/`: `plays.json` is the watchlist seed, `bars/<TICKER>.json` holds committed daily bars (`t,o,h,l,c,v`), `spotlights.json` holds the Spotlight tickets by row (`active`, `open`, `closed`), and `scorecard.json` is the weekly board snapshot. Charts are drawn as SVG from committed data, so no page needs a chart service.
 
 Each sector card shows the percentile, a timeframe, a status, and a Soft to Crowded bar. Green is the soft end. Dark is crowded. The triangle marks that week’s print.
 
