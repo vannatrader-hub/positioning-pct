@@ -5,7 +5,7 @@ import { HOUSES, INDICATORS, SECTIONS, readIndicator } from "../src/desk.js";
 import { CANON, WEEKS, buildReading, ordinal } from "../src/readings.js";
 import { CURRICULUM, creditSpreadMath, leapMath, price } from "../src/study.js";
 import { breakeven, chartLevels, resolveExpiry } from "../src/flow-chart.js";
-import { alertLabel, sortPlays } from "../src/options-flow.js";
+import { SIDES, alertLabel, sortPlays } from "../src/options-flow.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
@@ -261,11 +261,15 @@ for (const play of flow.plays) {
   for (const line of rows ?? []) {
     assert(line.contract && line.detail, `${play.ticker} customerPurchased row needs contract and detail`);
     assert(/\d{1,2}\/\d{1,2}$|last week$/.test(line.detail), `${play.ticker} customerPurchased "${line.detail}" names when it traded`);
+    const kind = /\bputs?\b/.test(line.contract) ? "puts" : "calls";
+    const act = /\b(sold|short)\b/.test(line.detail) ? "sold" : "bought";
+    assert(line.side === `${kind}_${act}`, `${play.ticker} ${line.contract} side ${line.side} should be ${kind}_${act}`);
+    assert(line.side in SIDES, `${play.ticker} unknown side ${line.side}`);
   }
 }
 assert(
   JSON.stringify(flowBy.JCI.customerPurchased) ===
-    JSON.stringify([{ contract: "Dec $160 calls", detail: "2,000 bought @ $3.54 · 10/26" }]),
+    JSON.stringify([{ contract: "Dec $160 calls", detail: "2,000 bought @ $3.54 · 10/26", side: "calls_bought" }]),
   "JCI customer purchased is the 10/26 Dec $160 call buy only",
 );
 assert(flowBy.QCOM.customerPurchased.length === 0, "QCOM flow names no recent customer trade");
