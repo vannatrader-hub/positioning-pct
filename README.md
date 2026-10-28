@@ -6,6 +6,15 @@ Figures are weekly snapshots committed with the site (`src/series.js` and `publi
 
 Public sources are bank labels only: JPM, Morgan Stanley, BoA, GS, and a desk composite. The choice stays in this browser.
 
+## Surfaces
+
+Two surfaces, switched from the `Desk | Vault` control in every topbar:
+
+- Desk. Everything live today: home, the Positioning hub and its desk, Options Flow and its subpages, SPX Levels. URLs stay where they are; Desk is the surface name, not a path.
+- Vault (`/vault/`). The Phase 2 surface stub: a hero, three `Soon` preview tiles that do not link, and a panel pointing back to the Desk pages. It has its own darker theme scoped under `body.is-vault`. No sign-in, forms, or checkout.
+
+Surface chrome (home, hubs, Vault, 404, and every topbar and footer) never carries monetization words or `$` outside the `$$$` flow mark; `npm run check` enforces this along with the switcher on every page.
+
 ## Pages
 
 Site nav, in order: Positioning | Options Flow | SPX Levels.

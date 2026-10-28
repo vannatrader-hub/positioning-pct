@@ -130,23 +130,73 @@ button, select { font: inherit; color: inherit; }
 
 .topbar .lockup { font-size: 26px; }
 
-.phase {
-  display: inline-flex;
+.topbar-start {
+  display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink-2);
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  min-width: 0;
 }
 
-.phase i,
+/* Surface switcher: Desk | Vault. Reads as a toggle, not as page nav. */
+.surface {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(15, 20, 30, 0.055);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.surface a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 13px 6px 11px;
+  border-radius: 999px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition: color 140ms ease, background 140ms ease;
+}
+
+.surface a:hover { color: var(--ink); }
+
+.surface a.is-current {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(15, 20, 30, 0.08), 0 0 0 1px var(--line);
+}
+
+.surface-dot,
 .live-dot {
+  flex: none;
   width: 7px;
   height: 7px;
   border-radius: 50%;
+  background: var(--faint);
+}
+
+.surface a.is-current .surface-dot,
+.pill .surface-dot,
+.live-dot {
   background: var(--red);
   box-shadow: 0 0 0 3px rgba(224, 50, 43, 0.14);
 }
+
+.surface-dial {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+.surface-dial circle + circle { fill: currentColor; stroke: none; }
 
 .nav {
   display: flex;
@@ -2961,6 +3011,200 @@ body:has(.cc[open]) { overflow: hidden; }
 
 .spot-cc { height: min(720px, calc(100dvh - 32px)); }
 
+/* Vault: same family, a darker and more private room. Scoped so the Desk stays light. */
+.is-vault {
+  --canvas: #0a0c10;
+  --surface: #12161d;
+  --ink: #f3f4f6;
+  --ink-2: #d4d8de;
+  --muted: #9aa1ad;
+  --faint: #6b7280;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.15);
+  --gold: #f5c451;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px rgba(0, 0, 0, 0.28);
+  color-scheme: dark;
+  background:
+    radial-gradient(1000px 520px at 10% -14%, rgba(245, 196, 81, 0.08), transparent 62%),
+    radial-gradient(900px 460px at 94% -10%, rgba(96, 132, 255, 0.08), transparent 60%),
+    var(--canvas);
+  background-repeat: no-repeat;
+}
+
+.is-vault ::selection { background: rgba(245, 196, 81, 0.28); }
+.is-vault .topbar { background: rgba(10, 12, 16, 0.72); }
+.is-vault .surface { background: rgba(255, 255, 255, 0.04); }
+
+.is-vault .surface a.is-current {
+  background: #1c222c;
+  box-shadow: inset 0 0 0 1px rgba(245, 196, 81, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.is-vault .surface a.is-current .surface-dial { color: var(--gold); }
+
+.is-vault .nav {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: none;
+}
+
+.is-vault .nav a { color: var(--muted); }
+.is-vault .nav a:hover { color: var(--ink); background: rgba(255, 255, 255, 0.06); }
+
+.nav-tag {
+  padding: 0 6px 0 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+  white-space: nowrap;
+}
+
+.is-vault .pill { background: rgba(255, 255, 255, 0.04); }
+.is-vault .tile-icon { background: #0e1218; }
+.is-vault .badge { background: rgba(255, 255, 255, 0.05); }
+
+.is-vault .badge.is-soon {
+  background: rgba(245, 196, 81, 0.1);
+  border-color: rgba(245, 196, 81, 0.28);
+  color: var(--gold);
+}
+
+.vault-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 40px;
+  align-items: center;
+  padding: 72px 0 48px;
+}
+
+.vault-pill { color: var(--gold); }
+
+.vault-hero h1 {
+  margin: 22px 0 16px;
+  font-size: clamp(56px, 9vw, 104px);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+}
+
+.vault-hero h1 .mark { color: var(--gold); }
+
+.vault-note {
+  margin: 18px 0 0;
+  font-size: 13.5px;
+  color: var(--faint);
+}
+
+.vault-dial {
+  width: 240px;
+  height: 240px;
+  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.45));
+}
+
+.vd-ring { fill: none; stroke: var(--line-strong); }
+
+.vd-ticks {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 8;
+  stroke-dasharray: 1.5 8.553;
+}
+
+.vd-arc { fill: none; stroke: var(--gold); stroke-width: 2; stroke-linecap: round; }
+.vd-knob { fill: #161b23; stroke: var(--line-strong); }
+.vd-pointer { stroke: var(--gold); stroke-width: 3; stroke-linecap: round; }
+.vd-core { fill: var(--red); }
+
+.vault-grid { margin-top: 4px; }
+
+.vault-tile {
+  overflow: hidden;
+  cursor: default;
+}
+
+.vault-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(245, 196, 81, 0.7), rgba(96, 132, 255, 0.35) 55%, transparent);
+  opacity: 0.55;
+}
+
+.vault-tile:hover {
+  transform: none;
+  box-shadow: var(--shadow);
+  border-color: var(--line);
+}
+
+.vault-soon {
+  margin-top: auto;
+  padding-top: 26px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--faint);
+}
+
+.vault-soon::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+}
+
+.vault-desk {
+  margin-top: 56px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px 28px;
+  align-items: center;
+  padding: 24px 26px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent), var(--surface);
+}
+
+.vault-desk h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.vault-desk-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.vault-desk-links a {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.vault-desk-links a:hover { background: rgba(255, 255, 255, 0.07); color: var(--ink); }
+
+.vault-desk-links a.is-primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #0b0d12;
+}
+
+.vault-desk-links a.is-primary:hover { background: #fff; }
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .cc[open] { animation: none; }
@@ -2980,6 +3224,9 @@ body:has(.cc[open]) { overflow: hidden; }
   .study-grid,
   .gauge-copy { grid-template-columns: 1fr; }
   .tile, .hub-grid.is-four .hub-tile { min-height: 0; }
+  .vault-hero { grid-template-columns: 1fr; }
+  .vault-dial { display: none; }
+  .vault-desk { grid-template-columns: 1fr; }
   .spot-grid { grid-template-columns: 1fr; }
   .spot-sum {
     grid-template-columns: minmax(0, 1fr) 28px;
@@ -3030,7 +3277,8 @@ body:has(.cc[open]) { overflow: hidden; }
 
 @media (max-width: 640px) {
   .wrap { width: min(1120px, calc(100% - 32px)); }
-  .hero { padding: 40px 0 28px; }
+  .hero,
+  .vault-hero { padding: 40px 0 28px; }
   .tagline { font-size: 17px; }
   .bucket-grid { grid-template-columns: 1fr; }
   .icard-grid { grid-template-columns: 1fr; }
@@ -3040,4 +3288,5 @@ body:has(.cc[open]) { overflow: hidden; }
   .desk-section { scroll-margin-top: 150px; }
   .site-footer { grid-template-columns: 1fr; }
   .topbar .lockup { font-size: 22px; }
+  .nav-tag { display: none; }
 }
