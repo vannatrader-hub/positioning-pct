@@ -3214,10 +3214,13 @@ body:has(.cc[open]) { overflow: hidden; }
 }
 
 .wall-dial {
-  width: 48px;
-  height: 48px;
+  width: 60px;
+  height: 60px;
   margin: 0 auto 18px;
 }
+
+.wall-dial .vd-ring { stroke: rgba(255, 255, 255, 0.3); stroke-width: 1.5; }
+.wall-dial .vd-knob { fill: #1c222c; stroke: rgba(255, 255, 255, 0.24); stroke-width: 1.5; }
 
 .wall-card h1 {
   margin: 0 0 10px;
