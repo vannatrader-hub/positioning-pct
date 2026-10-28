@@ -692,6 +692,11 @@ assert(/<h1>Vault/.test(vaultPage), "Vault hero");
 assert((vaultPage.match(/class="tile vault-tile"/g) ?? []).length === 3, "Vault shows three preview tiles");
 assert(!/<a\s[^>]*class="tile vault-tile/.test(vaultPage), "Vault preview tiles do not link anywhere");
 assert(!/type="password"|checkout/i.test(vaultPage), "Vault has no password field or checkout");
+const vaultTopbar = vaultPage.match(/<header class="topbar">[\s\S]*?<\/header>/)?.[0] ?? "";
+assert(!/on the desk|nav-tag/i.test(vaultTopbar), "Vault topbar drops the On the Desk label");
+const vaultFooter = vaultPage.match(/<footer class="site-footer">[\s\S]*?<\/footer>/)?.[0] ?? "";
+assert(vaultFooter.includes('<p class="foot-note">Vault · by invitation.</p>'), "Vault footer reads Vault · by invitation.");
+assert(!/opening later/i.test(vaultTopbar + vaultFooter), "Vault chrome no longer says opening later");
 
 
 const monetization = /\b(free|paid|premium|subscri\w*|paywall\w*|upgrad\w*|trials?|pric(e|es|ed|ing)|members?hips?|unlock\w*)\b/i;
