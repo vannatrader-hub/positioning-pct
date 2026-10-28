@@ -6,7 +6,7 @@
     <title>Options Flow · Positioning %.</title>
     <meta
       name="description"
-      content="A $$$ options flow watchlist. Each name opens a calling card with the flow, the open interest that stayed, and a daily chart. Education only, not advice."
+      content="Options Flow: a $$$ watchlist, Spotlight trades, and a weekly flow scorecard. Each card opens its own page. Education only, not advice."
     />
     <meta name="theme-color" content="#f4f5f7" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
@@ -27,97 +27,82 @@
     <div class="wrap">
       <main id="content">
         <section class="page-head">
-          <span class="pill">$$$ watchlist</span>
+          <span class="pill">Options Flow</span>
           <h1>Options Flow</h1>
           <p class="lede">
-            Names where large opening options trades lined up on one side. Open a name for its calling card:
-            the flow, the open interest that stayed, a recommendation, and the trade levels on a price chart.
+            Three ways into the flow. Each card opens its own page: the $$$ watchlist with its calling cards,
+            Spotlight trades with a recommendation and trade levels, and the weekly scorecard board.
           </p>
-          <p class="sample-line pill" id="flow-asof">Loading watchlist…</p>
         </section>
 
-        <section class="desk-section flow-list-section" aria-labelledby="watchlist-title">
-          <div class="section-head">
-            <div class="section-title-row">
-              <h2 id="watchlist-title">$$$ watchlist</h2>
-              <span class="section-count" id="flow-count"></span>
+        <div class="tile-grid hub-grid">
+          <a class="tile hub-tile" href="dollar/">
+            <div class="tile-kicker">
+              <span class="tile-num">01</span>
+              <span class="badge is-live"><i aria-hidden="true"></i>Live</span>
             </div>
-            <p class="hint">
-              <span class="conf" aria-hidden="true">$$$</span> marks the highest-confidence flow. Last three weeks,
-              newest alert first. Alert times are Central (CT). Last close is from a committed daily snapshot.
+            <span class="tile-icon hub-icon" aria-hidden="true"><span class="conf">$$$</span></span>
+            <h2>$$$ watchlist</h2>
+            <p>
+              The highest-confidence flow of the last three weeks, newest alert first. Each name opens a calling card:
+              Customer purchased, flow in open interest, a Recommendation, and trade levels on a six-month chart.
             </p>
-          </div>
-          <div class="flow-head" aria-hidden="true">
-            <span>Name</span>
-            <span>Flow</span>
-            <span>Alerted (CT)</span>
-            <span>Last close</span>
-          </div>
-          <ul class="flow-list" id="flow-list" aria-labelledby="watchlist-title"></ul>
-        </section>
-      </main>
+            <ul class="hub-facts">
+              <li data-hub="dollar">Name · Flow · Alerted (CT) · Last close</li>
+              <li>Committed daily snapshot</li>
+            </ul>
+            <span class="open">Open watchlist <span class="arrow" aria-hidden="true">→</span></span>
+          </a>
 
-      <dialog class="cc" id="calling-card" aria-labelledby="cc-ticker" aria-describedby="cc-title">
-        <div class="cc-frame">
-          <header class="cc-head">
-            <div class="cc-ident">
-              <h2 class="cc-ticker" id="cc-ticker"></h2>
-              <span class="conf" id="cc-conf"></span>
-              <span class="cc-name" id="cc-name"></span>
+          <a class="tile hub-tile" href="spotlights/">
+            <div class="tile-kicker">
+              <span class="tile-num">02</span>
+              <span class="badge is-sample">Sample</span>
             </div>
-            <button class="cc-close" type="button" id="cc-close" aria-label="Close calling card">
-              <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
-                <path d="M5 5 L15 15 M15 5 L5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            <span class="tile-icon" aria-hidden="true">
+              <svg viewBox="0 0 28 28" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="14" cy="14" r="9.5" stroke="#464b54" stroke-width="2" />
+                <circle cx="14" cy="14" r="4" fill="#f5c451" stroke="#0b0d12" stroke-width="1.5" />
+                <path d="M14 1.5 V5 M14 23 V26.5 M1.5 14 H5 M23 14 H26.5" stroke="#8b919c" stroke-width="2" />
               </svg>
-            </button>
-          </header>
-          <div class="cc-body">
-            <section class="cc-left" aria-label="Flow">
-              <p class="cc-meta">
-                <time class="cc-alert" id="cc-alert"></time>
-                <span id="cc-meta"></span>
-              </p>
-              <h3 class="cc-title" id="cc-title"></h3>
-              <div class="cc-block">
-                <h4 class="cc-label">Flow</h4>
-                <div class="cc-flow" id="cc-flow"></div>
-              </div>
-              <div class="cc-block cc-buy" id="cc-buy-block">
-                <div class="cc-buy-head">
-                  <h4 class="cc-label">Customer purchased</h4>
-                  <span class="cc-side" id="cc-buy-side"></span>
-                </div>
-                <dl class="cc-oi" id="cc-buy"></dl>
-              </div>
-              <div class="cc-block" id="cc-oi-block">
-                <h4 class="cc-label">Flow in open interest</h4>
-                <dl class="cc-oi" id="cc-oi"></dl>
-              </div>
-              <div class="cc-rec">
-                <h4 class="cc-label">Recommendation</h4>
-                <p id="cc-rec"></p>
-              </div>
-            </section>
-            <section class="cc-right" aria-labelledby="tl-kicker">
-              <div class="tl-top">
-                <span class="tl-kicker" id="tl-kicker">Trade levels</span>
-                <span class="tl-contract" id="tl-contract"></span>
-              </div>
-              <dl class="tl-tiles" id="tl-tiles"></dl>
-              <div class="tl-panel">
-                <p class="tl-chart-head" id="tl-chart-head"></p>
-                <div class="cc-chart" id="cc-chart"></div>
-                <div class="tl-foot">
-                  <span class="tl-legend" id="tl-legend"></span>
-                  <span class="tl-move" id="tl-move"></span>
-                </div>
-              </div>
-              <p class="cc-chart-note" id="cc-chart-note"></p>
-            </section>
-          </div>
-          <p class="cc-foot">Education only · not advice. Flow notes are a dated snapshot, not a live feed.</p>
+            </span>
+            <h2>Spotlight trades</h2>
+            <p>
+              Spotlight-style trade cards: the idea, the structure, a Recommendation, and the trade levels — stop,
+              strike, and target — on one ladder. Phase 1 shows a small sample set for education.
+            </p>
+            <ul class="hub-facts">
+              <li data-hub="spotlights">Sample cards</li>
+              <li>Open or filled, by card</li>
+            </ul>
+            <span class="open">Open Spotlight trades <span class="arrow" aria-hidden="true">→</span></span>
+          </a>
+
+          <a class="tile hub-tile is-board" href="scorecard/">
+            <div class="tile-kicker">
+              <span class="tile-num">03</span>
+              <span class="badge is-live"><i aria-hidden="true"></i>Live</span>
+            </div>
+            <span class="tile-icon is-dark" aria-hidden="true">
+              <svg viewBox="0 0 28 28" fill="none" stroke-linecap="round">
+                <rect x="3" y="5" width="22" height="4" rx="1.5" fill="#ffd166" />
+                <rect x="3" y="12" width="17" height="4" rx="1.5" fill="#3dd68c" />
+                <rect x="3" y="19" width="12" height="4" rx="1.5" fill="#5b9cff" />
+              </svg>
+            </span>
+            <h2>Weekly scorecard</h2>
+            <p>
+              The dark flow board: names ranked by a composite of flow and technicals, each row opening a trade card
+              with flow intelligence panels and a six-month price chart. Spotlight watch underneath.
+            </p>
+            <ul class="hub-facts">
+              <li data-hub="scorecard">Ranked names · composite / flow / tech</li>
+              <li>Weekly snapshot</li>
+            </ul>
+            <span class="open">Open scorecard <span class="arrow" aria-hidden="true">→</span></span>
+          </a>
         </div>
-      </dialog>
+      </main>
 
       <footer class="site-footer">
         <div>
@@ -133,7 +118,6 @@
         </nav>
       </footer>
     </div>
-    <noscript>This watchlist needs JavaScript to draw. Education only, not advice.</noscript>
-    <script type="module" src="/src/options-flow.js"></script>
+    <script type="module" src="/src/options-flow-hub.js"></script>
   </body>
 </html>
