@@ -2718,7 +2718,165 @@ body:has(.cc[open]) { overflow: hidden; }
 }
 
 .spot-status.is-open { background: rgba(74, 108, 247, 0.08); color: #2c3f9e; border-color: rgba(74, 108, 247, 0.2); }
-.spot-status.is-filled { background: #effaf3; color: #1f7a45; border-color: rgba(34, 197, 94, 0.24); }
+.spot-status.is-active { background: #fdf2f1; color: #b4231d; border-color: rgba(224, 50, 43, 0.2); }
+.spot-status.is-closed { background: #f1f3f6; color: var(--ink-2); border-color: var(--line-strong); }
+
+.spot-chip.is-banked { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+.spot-levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.spot-lv b { font-weight: 700; color: var(--ink-2); }
+
+.badge.is-banked {
+  background: #effaf3;
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #1f7a45;
+}
+
+.spot-rows {
+  display: grid;
+  gap: 14px;
+}
+
+.spot-row {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.spot-row[open] { border-color: var(--line-strong); }
+
+.spot-sum {
+  list-style: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 28px;
+  grid-template-areas:
+    "head tickers chev"
+    "hint tickers chev";
+  align-items: center;
+  gap: 4px 16px;
+  padding: 18px 20px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.spot-sum::-webkit-details-marker { display: none; }
+.spot-sum:hover { background: rgba(15, 20, 30, 0.02); }
+
+.spot-sum:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -4px;
+  border-radius: var(--radius);
+}
+
+.spot-sum-head {
+  grid-area: head;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+
+.spot-sum-title {
+  font-size: 19px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.spot-sum-count {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.spot-sum-hint {
+  grid-area: hint;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.spot-sum-tickers {
+  grid-area: tickers;
+  font-size: 14px;
+  font-weight: 750;
+  letter-spacing: 0.01em;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.spot-chev {
+  grid-area: chev;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  position: relative;
+  transition: transform 160ms ease, background 160ms ease;
+}
+
+.spot-chev::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 1.8px solid var(--ink-2);
+  border-bottom: 1.8px solid var(--ink-2);
+  transform: translate(-50%, -70%) rotate(45deg);
+}
+
+.spot-row[open] .spot-chev { transform: rotate(180deg); background: #f1f3f6; }
+
+.spot-row-body {
+  padding: 4px 20px 20px;
+  border-top: 1px solid var(--line);
+  background: #fafbfc;
+}
+
+.spot-row-body .spot-grid { padding-top: 16px; }
+
+.spot-row.is-active .spot-sum { box-shadow: inset 3px 0 0 var(--red); }
+.spot-row.is-closed .spot-card { background: #fcfcfd; }
+
+.spot-close-line {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.spot-close-line strong { color: #1f7a45; font-weight: 750; }
+
+.spot-close-quote {
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  border-left: 3px solid rgba(34, 197, 94, 0.4);
+  background: #f6fbf8;
+  border-radius: 0 10px 10px 0;
+  font-size: 13.5px;
+  color: var(--ink-2);
+}
+
+.spot-close-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.tl-move strong.is-down { color: #f87171; }
 
 .spot-empty {
   grid-column: 1 / -1;
@@ -2734,7 +2892,7 @@ body:has(.cc[open]) { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .cc[open] { animation: none; }
-  .tile, .card, .chip, .open .arrow, .spot-card { transition: none; }
+  .tile, .card, .chip, .open .arrow, .spot-card, .spot-chev { transition: none; }
   .tile:hover, .spot-card:hover { transform: none; }
 }
 
@@ -2750,6 +2908,15 @@ body:has(.cc[open]) { overflow: hidden; }
   .gauge-copy { grid-template-columns: 1fr; }
   .tile { min-height: 0; }
   .spot-grid { grid-template-columns: 1fr; }
+  .spot-sum {
+    grid-template-columns: minmax(0, 1fr) 28px;
+    grid-template-areas:
+      "head chev"
+      "hint chev"
+      "tickers chev";
+    padding: 16px;
+  }
+  .spot-row-body { padding: 4px 12px 14px; }
   .controls { grid-template-columns: 1fr; }
   .control + .control { border-left: 0; border-top: 1px solid var(--line); }
   .card.is-hero .card-body { grid-template-columns: 1fr; }

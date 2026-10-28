@@ -6,7 +6,7 @@ import { CANON, WEEKS, buildReading, ordinal } from "../src/readings.js";
 import { CURRICULUM, creditSpreadMath, leapMath, price } from "../src/study.js";
 import { breakeven, chartLevels, resolveExpiry } from "../src/flow-chart.js";
 import { SIDES, alertLabel, sortPlays } from "../src/options-flow.js";
-import { STATUS, ladderLevels, sortCards } from "../src/spotlights.js";
+import { SECTION_ORDER, STATUS, allPlays, ladderLevels, sortCards } from "../src/spotlights.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
@@ -328,21 +328,57 @@ for (const page of ["options-flow/index.html", "options-flow/dollar/index.html",
 }
 
 const spot = JSON.parse(readFileSync(join(root, "public/data/flow/spotlights.json"), "utf8"));
-assert(spot.sample === true, "Spotlight cards are labeled sample");
-assert(spot.cards.length >= 2 && spot.cards.length <= 4, `Spotlight sample has ${spot.cards.length} cards`);
-assert(JSON.stringify(sortCards(spot.cards)) === JSON.stringify(spot.cards), "spotlights.json is stored newest card first");
-for (const card of spot.cards) {
-  const where = `spotlight ${card.ticker}`;
-  assert(card.status in STATUS, `${where} status ${card.status}`);
-  assert(card.title && card.structure && card.recommendation && card.idea?.length, `${where} needs title, structure, idea, recommendation`);
-  const lines = ladderLevels(card);
-  if (card.levels === null) assert(lines.length === 0, `${where} draws no levels without levels`);
-  const by = Object.fromEntries(lines.map((line) => [line.kind, line.value]));
-  if (by.stop !== undefined && by.target !== undefined) {
-    assert(card.bias === "puts" ? by.target < by.stop : by.target > by.stop, `${where} target sits past the stop`);
+assert(spot.live === true && !("sample" in spot), "Spotlight trades are live tickets");
+assert(JSON.stringify(spot.sections.map((section) => section.id)) === JSON.stringify(SECTION_ORDER), "Spotlight rows are Active, Open, Closed");
+assert(
+  JSON.stringify(spot.sections.map((section) => Boolean(section.defaultOpen))) === "[true,false,false]",
+  "only the Active row opens by default",
+);
+const spotRows = Object.fromEntries(spot.sections.map((section) => [section.id, section.plays.map((play) => play.ticker)]));
+assert(JSON.stringify(spotRows) === JSON.stringify({ active: ["GLD", "FCX"], open: ["HOOD", "FSLY"], closed: ["V"] }), `Spotlight rows ${JSON.stringify(spotRows)}`);
+const { start: activeStart, end: activeEnd } = spot.activeWindow;
+assert(activeStart.startsWith("2026-10-") && activeEnd.startsWith("2026-10-") && activeEnd === spot.asOf, "Active window sits inside October 2026");
+for (const section of spot.sections) {
+  assert(JSON.stringify(sortCards(section.plays)) === JSON.stringify(section.plays), `${section.id} row is stored newest first`);
+  for (const play of section.plays) {
+    const where = `spotlight ${play.ticker}`;
+    assert(play.status === section.id, `${where} status ${play.status} sits in the ${section.id} row`);
+    assert(play.status in STATUS, `${where} status ${play.status}`);
+    assert(play.title && play.structure && play.entry && play.recommendation && play.idea?.length, `${where} needs title, structure, entry, idea, recommendation`);
+    assert(!("url" in play), `${where} carries a member source link`);
+    if (play.status === "active") assert(play.published >= activeStart && play.published <= activeEnd, `${where} outside the Active window`);
+    if (play.status === "open") assert(play.published < activeStart, `${where} belongs in Active`);
+    if (play.status === "closed") {
+      assert(play.closedAt > play.published && play.closeNote && play.result, `${where} needs a close date, note, and result`);
+      assert(/^https:\/\/x\.com\//.test(play.closeEvidenceUrl), `${where} close evidence ${play.closeEvidenceUrl}`);
+    }
+    const lines = ladderLevels(play);
+    assert(lines.length === play.levels.length, `${where} has a level with an unknown label`);
+    const by = Object.fromEntries(lines.map((line) => [line.kind, line.value]));
+    assert(by.stop === play.stop && by.target === play.target && by.be === play.breakeven && by.spot === play.spotAtPost, `${where} ladder matches stop/target/B/E/spot`);
+    assert(play.side === "puts" ? play.target < play.stop : play.target > play.stop, `${where} target sits past the stop`);
   }
 }
-assert(JSON.stringify(ladderLevels(spot.cards.find((card) => card.ticker === "FCX")).map((line) => line.value)) === "[80,63]", "FCX ladder is target $80 over stop $63");
+const spotBy = Object.fromEntries(allPlays(spot).map((play) => [play.ticker, play]));
+const spotWant = {
+  GLD: { debit: 8, stop: 367, target: 400, breakeven: 408, spotAtPost: 377.5, published: "2026-10-20" },
+  FCX: { debit: 3.25, stop: 63, target: 80, breakeven: 78.25, spotAtPost: 69.2, published: "2026-10-14" },
+  HOOD: { debit: 6, stop: 105, target: 140, breakeven: 131, spotAtPost: 114.1, published: "2026-10-05" },
+  FSLY: { debit: 1.8, stop: 21.5, target: 30, breakeven: 26.8, spotAtPost: 23.8, published: "2026-09-20" },
+  V: { debit: 7.5, stop: 349, target: 410, breakeven: 387.5, spotAtPost: 366.5, published: "2026-09-29" },
+};
+for (const [ticker, want] of Object.entries(spotWant)) {
+  const got = Object.fromEntries(Object.keys(want).map((key) => [key, spotBy[ticker]?.[key]]));
+  assert(JSON.stringify(got) === JSON.stringify(want), `spotlight ${ticker} ticket ${JSON.stringify(got)}`);
+}
+assert(spotBy.V.closedAt === "2026-10-12" && spotBy.V.result === "+107%", "V closed Oct 12 at +107%");
+assert(JSON.stringify(ladderLevels(spotBy.FCX).map((line) => line.value)) === "[80,78.25,75,69.2,63]", "FCX ladder runs target $80 down to stop $63");
+const spotPage = readFileSync(join(root, "options-flow/spotlights/index.html"), "utf8");
+for (const id of ["spot-rows", "spot-card", "sc-rec", "sc-close-note", "sl-tiles", "sl-ladder"]) {
+  assert(spotPage.includes(`id="${id}"`), `Spotlight page keeps #${id}`);
+}
+assert(spotPage.includes("Recommendation") && spotPage.includes("Trade levels"), "Spotlight card labels");
+assert(!/is-sample/.test(spotPage) && !/is-sample/.test(hub.split('href="spotlights/"')[1].split("</a>")[0]), "Spotlight page and hub card are not labeled Sample");
 
 const board = JSON.parse(readFileSync(join(root, "public/data/flow/scorecard.json"), "utf8"));
 assert(board.names.length >= 5, `scorecard ranks ${board.names.length} names`);
