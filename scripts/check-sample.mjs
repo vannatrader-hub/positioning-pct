@@ -221,7 +221,7 @@ for (const [ticker, want] of Object.entries(studyWant)) {
 }
 
 const flow = JSON.parse(readFileSync(join(root, "public/data/flow/plays.json"), "utf8"));
-const flowTickers = ["JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN", "ALAB", "CSCO"];
+const flowTickers = ["CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN", "ALAB", "CSCO"];
 assert(
   JSON.stringify(sortPlays(flow.plays).map((play) => play.ticker)) === JSON.stringify(flowTickers),
   `flow watchlist newest alert first: ${sortPlays(flow.plays).map((play) => play.ticker)}`,
@@ -230,7 +230,7 @@ assert(
   JSON.stringify(flow.plays.map((play) => play.ticker)) === JSON.stringify(flowTickers),
   "plays.json is stored newest alert first",
 );
-const windowStart = new Date(Date.UTC(2026, 9, 27) - 21 * 86400000).toISOString().slice(0, 10);
+const windowStart = new Date(Date.parse(`${flow.asOf}T00:00:00Z`) - 21 * 86400000).toISOString().slice(0, 10);
 for (const play of flow.plays) {
   const where = `flow ${play.ticker}`;
   assert(play.confidence === "$$$", `${where} confidence`);
@@ -300,10 +300,19 @@ assert(
 for (const ticker of ["COIN", "ALAB"]) {
   assert(flowBy[ticker].customerPurchased.every((line) => line.detail.includes("sold")), `${ticker} short puts read as sold`);
 }
-const beWant = { JCI: 163.54, MMM: 179.8, COIN: 123.5, ALAB: 183.8, CORT: 130.94, CRWD: null, DDOG: null, CSCO: null, QCOM: null };
+const beWant = { CASY: 671.2, JCI: 163.54, MMM: 179.8, COIN: 123.5, ALAB: 183.8, CORT: 130.94, CRWD: null, DDOG: null, CSCO: null, QCOM: null };
 for (const [ticker, want] of Object.entries(beWant)) {
   assert(breakeven(flowBy[ticker].lead) === want, `${ticker} break-even ${breakeven(flowBy[ticker].lead)} !== ${want}`);
 }
+assert(
+  JSON.stringify(flowBy.CASY.lead) === JSON.stringify({ type: "put", action: "sold", qty: 275, strike: 890, expiry: "December 2027", price: 218.8 }),
+  `CASY lead is the Dec 2027 $890 put sale ${JSON.stringify(flowBy.CASY.lead)}`,
+);
+assert(flowBy.CASY.customerPurchased[0]?.contract === "Dec 2027 $890 puts", "CASY Customer purchased is the Dec 2027 $890 puts");
+const casyLevels = chartLevels(flowBy.CASY, JSON.parse(readFileSync(join(root, "public/data/flow/bars/CASY.json"), "utf8")).bars);
+assert(JSON.stringify(casyLevels.lines.map((line) => line.value)) === "[890,671.2]", `CASY chart draws the $890 strike and break-even ${casyLevels.lines.map((line) => line.value)}`);
+assert(casyLevels.expiry === "2027-12-17", `CASY December 2027 expiry ${casyLevels.expiry}`);
+assert(!flowBy.UPS, "UPS is a $$ alert and stays off the $$$ watchlist");
 assert(resolveExpiry("December", "2026-10-27") === "2026-12-18", "December resolves to Dec 18, 2026");
 assert(resolveExpiry("January", "2026-10-22") === "2027-01-15", "January resolves to Jan 15, 2027");
 assert(resolveExpiry("January 2028", "2026-10-25") === "2028-01-21", "January 2028 resolves to Jan 21, 2028");
@@ -345,9 +354,11 @@ assert(
   "only the Active row opens by default",
 );
 const spotRows = Object.fromEntries(spot.sections.map((section) => [section.id, section.plays.map((play) => play.ticker)]));
-assert(JSON.stringify(spotRows) === JSON.stringify({ active: ["GLD", "FCX"], open: ["HOOD"], closed: ["V", "FSLY"] }), `Spotlight rows ${JSON.stringify(spotRows)}`);
+assert(JSON.stringify(spotRows) === JSON.stringify({ active: ["XYZ", "GLD", "FCX"], open: ["HOOD"], closed: ["V", "FSLY"] }), `Spotlight rows ${JSON.stringify(spotRows)}`);
 const { start: activeStart, end: activeEnd } = spot.activeWindow;
 assert(activeStart.startsWith("2026-10-") && activeEnd.startsWith("2026-10-") && activeEnd === spot.asOf, "Active window sits inside October 2026");
+const barsLag = (Date.parse(`${spot.asOf}T00:00:00Z`) - Date.parse(`${spot.barsThrough}T00:00:00Z`)) / 86400000;
+assert(barsLag >= 0 && barsLag <= 3, `Spotlight bars through ${spot.barsThrough} should be the last session on or before ${spot.asOf}`);
 for (const section of spot.sections) {
   assert(JSON.stringify(sortCards(section.plays)) === JSON.stringify(section.plays), `${section.id} row is stored newest first`);
   for (const play of section.plays) {
@@ -372,7 +383,7 @@ for (const section of spot.sections) {
     assert(bars.length >= 250, `${where} needs at least a year of bars`);
     assert(bars.every((bar, index) => index === 0 || bar.t > bars[index - 1].t), `${where} bars ascend`);
     assert(bars.every((bar) => bar.l <= Math.min(bar.o, bar.c) && bar.h >= Math.max(bar.o, bar.c)), `${where} OHLC`);
-    assert(bars[bars.length - 1].t === spot.asOf, `${where} bars run to ${spot.asOf}`);
+    assert(bars[bars.length - 1].t === spot.barsThrough, `${where} bars run to ${spot.barsThrough}`);
     const chart = spotlightLevels(play, bars);
     assert(chart.window.length >= 110 && chart.window.length <= 135, `${where} six-month window ${chart.window.length}`);
     const kinds = Object.fromEntries(chart.lines.map((line) => [line.kind, line.value]));
@@ -385,6 +396,7 @@ for (const section of spot.sections) {
 }
 const spotBy = Object.fromEntries(allPlays(spot).map((play) => [play.ticker, play]));
 const spotWant = {
+  XYZ: { debit: 3.5, stop: 70, target: 90, breakeven: 78.5, spotAtPost: 75, published: "2026-10-27" },
   GLD: { debit: 8, stop: 367, target: 400, breakeven: 408, spotAtPost: 377.5, published: "2026-10-20" },
   FCX: { debit: 3.25, stop: 63, target: 80, breakeven: 78.25, spotAtPost: 69.2, published: "2026-10-14" },
   HOOD: { debit: 6, stop: 105, target: 140, breakeven: 131, spotAtPost: 114.1, published: "2026-10-05" },
@@ -403,6 +415,7 @@ assert(fslyChart.expiry === "2026-10-16" && fsly.closedAt === fslyChart.expiry, 
 assert(/OpEx expired/.test(fsly.closeNote) && /worthless/.test(fsly.closeNote), `FSLY close note ${fsly.closeNote}`);
 assert(fslyChart.closeBar.c < 25, `FSLY closed ${fslyChart.closeBar.c} at expiry, under the $25 strike`);
 assert(JSON.stringify(spotlightLines(spotBy.FCX).map((line) => line.value)) === "[80,78.25,75,63]", "FCX chart lines run target $80 down to stop $63");
+assert(JSON.stringify(spotlightLines(spotBy.XYZ).map((line) => line.value)) === "[90,85,78.5,75,70]", "XYZ chart lines run target $90, short $85, B/E, long $75, stop $70");
 assert(JSON.stringify(spotlightLines(spotBy.V).map((line) => line.kind)) === '["target","breakeven","strike","stop"]', "V draws short/target, B/E, long strike, stop");
 const spotPage = readFileSync(join(root, "options-flow/spotlights/index.html"), "utf8");
 for (const id of ["spot-rows", "spot-card", "sc-rec", "sc-close-note", "sl-tiles", "sl-chart", "sl-legend"]) {

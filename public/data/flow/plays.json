@@ -1,8 +1,35 @@
 {
-  "asOf": "2026-10-27",
-  "asOfLabel": "Tue Oct 27, 2026 session close",
-  "window": "Last 3 weeks · Oct 13 – Oct 27, 2026",
+  "asOf": "2026-10-28",
+  "asOfLabel": "Wed Oct 28, 2026 pre-market · quotes Tue Oct 27 close",
+  "window": "Last 3 weeks · Oct 13 – Oct 28, 2026",
   "plays": [
+    {
+      "id": 43866,
+      "ticker": "CASY",
+      "exchange": "NASDAQ",
+      "name": "Casey's General Stores",
+      "date": "2026-10-27",
+      "alertedAtCt": "2026-10-27 08:10 PM CT",
+      "title": "Large Put Sale Confident in High Quality Fuel/Food Business",
+      "confidence": "$$$",
+      "refPrice": 695.0,
+      "flow": [
+        "Casey's General Stores (CASY) rarely sees size flow, and on 10/27 saw 275 December 2027 $890 puts sold to open at $218.80, about $6M in premium.",
+        "CASY also has short February $520 and $500 puts in open interest from earlier sales that now carry strong mark-to-market gains.",
+        "The convenience-store operator has a strong moat with traffic-driven food growth, disciplined store expansion, and the CEFCO acquisition adding scale."
+      ],
+      "customerPurchased": [
+        { "contract": "Dec 2027 $890 puts", "detail": "275 sold to open @ $218.80 · 10/27", "side": "puts_sold" }
+      ],
+      "oi": [
+        { "contract": "Dec 2027 $890 short puts", "detail": "275 opened 10/27 · ~$6M" },
+        { "contract": "Feb $520 short puts", "detail": "In OI · strong gains" },
+        { "contract": "Feb $500 short puts", "detail": "In OI · strong gains" }
+      ],
+      "recommendation": "CASY is a forever-own type name, and the deep in-the-money put sale favors selling puts on dips or buying strength on the moat thesis.",
+      "lead": { "type": "put", "action": "sold", "qty": 275, "strike": 890, "expiry": "December 2027", "price": 218.8 },
+      "quote": { "date": "2026-10-27", "last": 697.54, "prev": 703.93 }
+    },
     {
       "id": 43869,
       "ticker": "JCI",
