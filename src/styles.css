@@ -3870,11 +3870,11 @@ body:has(.cc[open]) { overflow: hidden; }
 /* Three soft pulses per turn, one each in red, green, and blue. */
 @keyframes nt-pulse {
   0%, 100% { box-shadow: var(--shadow), 0 0 8px rgba(255, 45, 85, 0.16); }
-  16.7% { box-shadow: var(--shadow), 0 0 22px rgba(255, 45, 85, 0.36); }
+  16.7% { box-shadow: var(--shadow), 0 0 26px rgba(255, 45, 85, 0.44); }
   33.3% { box-shadow: var(--shadow), 0 0 8px rgba(48, 209, 88, 0.16); }
-  50% { box-shadow: var(--shadow), 0 0 22px rgba(48, 209, 88, 0.36); }
+  50% { box-shadow: var(--shadow), 0 0 26px rgba(48, 209, 88, 0.44); }
   66.7% { box-shadow: var(--shadow), 0 0 8px rgba(10, 132, 255, 0.18); }
-  83.3% { box-shadow: var(--shadow), 0 0 22px rgba(10, 132, 255, 0.38); }
+  83.3% { box-shadow: var(--shadow), 0 0 26px rgba(10, 132, 255, 0.46); }
 }
 
 @keyframes nt-blink {

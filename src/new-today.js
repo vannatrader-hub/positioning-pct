@@ -116,14 +116,13 @@ function render(state, items) {
   body.replaceChildren();
   if (!todays.length) {
     body.append(el("p", "nt-empty is-all", isToday ? "Nothing new this desk day yet." : "Nothing new that desk day."));
+    return;
   }
 
   if (state.view === "all") {
-    if (todays.length) {
-      const section = el("section", "desk-section nt-section");
-      section.append(list(todays, { showSection: true }));
-      body.append(section);
-    }
+    const section = el("section", "desk-section nt-section");
+    section.append(list(todays, { showSection: true }));
+    body.append(section);
     return;
   }
 
