@@ -175,6 +175,17 @@ function fillLevels(dialog, play, levels) {
     `Daily closes from a committed snapshot through ${dateLabel(levels.spotDate)}, not a stream.${expiryNote}`;
 }
 
+function fillRows(dialog, listId, blockId, lines = []) {
+  const list = dialog.querySelector(listId);
+  list.replaceChildren();
+  for (const line of lines) {
+    const pair = el("div", "cc-oi-row");
+    pair.append(el("dt", "", line.contract), el("dd", "", line.detail));
+    list.append(pair);
+  }
+  dialog.querySelector(blockId).hidden = !lines.length;
+}
+
 function setupCard(dialog, plays) {
   const chartHost = dialog.querySelector("#cc-chart");
   let trigger = null;
@@ -217,14 +228,8 @@ function setupCard(dialog, plays) {
 
     dialog.querySelector("#cc-flow").replaceChildren(...play.flow.slice(0, 3).map((text) => el("p", "", text)));
 
-    const oi = dialog.querySelector("#cc-oi");
-    oi.replaceChildren();
-    for (const line of play.oi ?? []) {
-      const pair = el("div", "cc-oi-row");
-      pair.append(el("dt", "", line.contract), el("dd", "", line.detail));
-      oi.append(pair);
-    }
-    dialog.querySelector("#cc-oi-block").hidden = !(play.oi ?? []).length;
+    fillRows(dialog, "#cc-buy", "#cc-buy-block", play.customerPurchased);
+    fillRows(dialog, "#cc-oi", "#cc-oi-block", play.oi);
     dialog.querySelector("#cc-rec").textContent = play.recommendation;
 
     for (const id of ["#tl-contract", "#tl-chart-head", "#tl-move", "#cc-chart-note"]) {
