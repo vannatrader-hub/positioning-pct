@@ -3,10 +3,11 @@ import { dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { HOUSES, INDICATORS, SECTIONS, readIndicator } from "../src/desk.js";
 import { CANON, WEEKS, buildReading, ordinal } from "../src/readings.js";
-import { CURRICULUM, creditSpreadMath, leapMath, price } from "../src/study.js";
+import { STRUCTURES, creditSpreadMath, leapMath, price } from "../src/study.js";
 import { breakeven, chartLevels, resolveExpiry } from "../src/flow-chart.js";
 import { SIDES, alertLabel, sortPlays } from "../src/options-flow.js";
 import { SECTION_ORDER, STATUS, allPlays, levelKind, outcomeLabel, sortCards, spotlightLevels, spotlightLines } from "../src/spotlights.js";
+import { activeSpotlights, earningsBoxes, spotlightStar, tradeDates } from "../src/scorecard.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
@@ -49,7 +50,7 @@ for (let week = 0; week < WEEKS.length; week += 1) {
   }
   for (const source of ["ms", "gs", "boa", "desk"]) {
     const xlre = buildReading(source, week, 4).sectors.XLRE;
-    assert(xlre.available && xlre.points !== 81, `${source} XLRE week ${week} should be a sample read, not 81`);
+    assert(xlre.available && xlre.points !== 81, `${source} XLRE week ${week} should be a read, not 81`);
   }
 }
 
@@ -116,7 +117,7 @@ for (const [label, display] of Object.entries(crossWant)) {
   const asset = cross.assets.find((item) => item.label === label);
   assert(asset?.display === display, `cross-asset ${label} ${asset?.display} !== ${display}`);
 }
-assert(cross.basis === "Sample · ref chart 06-Oct-26 (JPM)", `cross-asset basis ${cross.basis}`);
+assert(cross.basis === "Ref chart 06-Oct-26 (JPM)", `cross-asset basis ${cross.basis}`);
 const broad = readIndicator(INDICATORS.find((indicator) => indicator.id === "jpm-broad"), 7);
 assert(broad.value === "0.66" && broad.basis === cross.basis, `JPM broad equity ${broad.value} ${broad.basis}`);
 
@@ -151,7 +152,7 @@ const sides = [
   ...marks.crowdedTickers.map((ticker) => [ticker, "crowded"]),
 ];
 for (const [ticker, side] of sides) {
-  const plan = CURRICULUM[side];
+  const plan = STRUCTURES[side];
   const underlying = marks.underlyings[ticker];
   assert(underlying && typeof underlying.spot === "number", `${ticker} needs a spot price`);
   assert(underlying.spotBid <= underlying.spotAsk, `${ticker} spot bid/ask`);
@@ -207,8 +208,8 @@ const studyWant = {
 for (const [ticker, want] of Object.entries(studyWant)) {
   const side = marks.crowdedTickers.includes(ticker) ? "crowded" : "soft";
   const structures = marks.chains[ticker].structures;
-  const math = creditSpreadMath(structures[CURRICULUM[side].spread]);
-  const leap = leapMath(structures[CURRICULUM[side].leap]);
+  const math = creditSpreadMath(structures[STRUCTURES[side].spread]);
+  const leap = leapMath(structures[STRUCTURES[side].leap]);
   const got = {
     credit: price(math.credit),
     maxLoss: price(math.maxLoss),
@@ -224,7 +225,7 @@ const flow = JSON.parse(readFileSync(join(root, "public/data/flow/plays.json"), 
 const flowTickers = ["CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN", "ALAB", "CSCO"];
 assert(
   JSON.stringify(sortPlays(flow.plays).map((play) => play.ticker)) === JSON.stringify(flowTickers),
-  `flow watchlist newest alert first: ${sortPlays(flow.plays).map((play) => play.ticker)}`,
+  `Shopping List newest alert first: ${sortPlays(flow.plays).map((play) => play.ticker)}`,
 );
 assert(
   JSON.stringify(flow.plays.map((play) => play.ticker)) === JSON.stringify(flowTickers),
@@ -234,6 +235,7 @@ const windowStart = new Date(Date.parse(`${flow.asOf}T00:00:00Z`) - 21 * 8640000
 for (const play of flow.plays) {
   const where = `flow ${play.ticker}`;
   assert(play.confidence === "$$$", `${where} confidence`);
+  assert(play.industry?.broad && play.industry?.focus, `${where} industry broad / focus`);
   assert(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2} (AM|PM) CT$/.test(play.alertedAtCt), `${where} alert stamp ${play.alertedAtCt}`);
   assert(play.alertedAtCt.startsWith(play.date), `${where} alert date matches date`);
   assert(play.date >= windowStart && play.date <= flow.asOf, `${where} outside the 3-week window`);
@@ -433,17 +435,29 @@ board.names.forEach((name, index) => {
   if (index) assert(name.composite <= board.names[index - 1].composite, `${where} ranked by composite`);
   assert(name.chart.length >= 100 && name.chart.every((bar, i) => i === 0 || bar.date > name.chart[i - 1].date), `${where} six-month chart`);
   assert(name.candles.length >= 10, `${where} spark candles`);
-  assert(name.panels && name.desk_analysis, `${where} trade card panels`);
+  assert(name.desk_analysis && name.lead?.contract && name.net_premium, `${where} trade card header`);
+  assert(name.trades?.length && name.trades.every((trade) => /^\d{4}-\d{2}-\d{2}$/.test(trade.date) && trade.text), `${where} trades carry dates`);
+  assert(JSON.stringify(tradeDates(name)) === JSON.stringify([...tradeDates(name)].sort().reverse()), `${where} trade dates newest first`);
+  assert(name.technicals?.ema8 && name.technicals?.ema21 && name.technicals?.sma200, `${where} technical lines`);
+  const boxes = earningsBoxes(name.earnings);
+  assert(boxes.length === 4 && boxes.filter((box) => box.kind === "past").length === 3 && boxes[3].kind === "next", `${where} 3 past + 1 upcoming ER boxes`);
+  for (const key of ["iv", "oi_levels", "fundamental"]) assert(key in name, `${where} carries ${key} (null when there is no live pull)`);
+  for (const key of ["panels", "spotlight_watch", "top_prints", "technicals_note", "tech_why"]) assert(!(key in name), `${where} still carries ${key}`);
+  assert(!/desk [ab]\b/i.test(JSON.stringify(name)), `${where} still names Desk A/B`);
 });
-for (const item of board.spotlight_watch) assert(item.ticker && item.title && item.structure, `spotlight watch ${item.ticker}`);
+assert(!("spotlight_watch" in board), "scorecard has no Spotlight watch list");
+const activeSet = activeSpotlights(spot);
+assert(JSON.stringify([...activeSet]) === '["XYZ","GLD","FCX"]', `Active Spotlights ${[...activeSet]}`);
+assert(spotlightStar("XYZ", activeSet).includes("sb-star") && spotlightStar("AAPL", activeSet) === "", "star only marks Active Spotlights");
 const boardPage = readFileSync(join(root, "options-flow/scorecard/index.html"), "utf8");
 assert(boardPage.includes('href="/src/styles.css"') && boardPage.includes('class="topbar"') && boardPage.includes('class="site-footer"'), "scorecard sits in the Positioning % shell");
 assert(boardPage.includes('class="subnav"') && boardPage.includes('class="is-current" href="./" aria-current="page">Weekly scorecard'), "scorecard is the current Options Flow subpage");
-for (const id of ["sb-meta", "week-of", "blend-note", "lookback", "sb-list", "sb-watch", "gaps", "board-card", "trade-card", "bc-chart", "bc-tiles", "flow-intel"]) {
+assert(!boardPage.includes('id="sb-watch"'), "Spotlight watch section is gone");
+for (const id of ["sb-meta", "week-of", "blend-note", "lookback", "sb-list", "gaps", "board-card", "trade-card", "bc-ticker", "bc-contract", "bc-stamp", "bc-analysis", "bc-chart", "bc-tiles", "flow-intel"]) {
   assert(boardPage.includes(`id="${id}"`), `scorecard page keeps #${id}`);
 }
 const boardScript = readFileSync(join(root, "src/scorecard.js"), "utf8");
-for (const piece of ["renderSpark", "renderChips", "renderFlowIntel", "renderOiHorizon", "renderTradeCard", "watchCard", "drawLevelsChart", "data_gaps", "flow_lookback"]) {
+for (const piece of ["renderSpark", "renderChips", "renderFlowIntel", "renderOiHorizon", "renderTradeCard", "spotlightStar", "drawLevelsChart", "data_gaps", "flow_lookback"]) {
   assert(boardScript.includes(piece), `scorecard keeps ${piece}`);
 }
 for (const file of ["options-flow/index.html", "options-flow/scorecard/index.html", "src/scorecard.js", "src/options-flow-hub.js"]) {
@@ -490,6 +504,34 @@ walk(root);
 const css = readFileSync(join(root, "src/styles.css"), "utf8");
 assert(!css.includes("sparkline"), "stylesheet should not define a sparkline treatment");
 const page = readFileSync(join(root, "src/positioning.js"), "utf8");
+for (const level of ["extreme soft", "soft", "mid", "crowded"]) assert(page.includes(`level: "${level}"`), `sector bucket column ${level}`);
+for (const source of ["jpm", "ms", "gs", "boa", "desk"]) {
+  const sectors = buildReading(source, 7, 4).sectors;
+  for (const ticker of CANON) {
+    const sector = sectors[ticker];
+    if (sector.available) assert(["extreme soft", "soft", "mid", "crowded"].includes(sector.level), `${source} ${ticker} level ${sector.level} has a bucket`);
+  }
+}
+
+const nav = /<nav class="nav" aria-label="Pages">[\s\S]*?<\/nav>/;
+const publicPages = ["index.html", "positioning/index.html", "spx-levels/index.html", "options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html"];
+for (const file of publicPages) {
+  const html = readFileSync(join(root, file), "utf8");
+  const order = [...(html.match(nav)?.[0] ?? "").matchAll(/>(Positioning|Options Flow|SPX Levels)</g)].map((m) => m[1]);
+  assert(JSON.stringify(order) === '["Positioning","Options Flow","SPX Levels"]', `${file} nav order ${order}`);
+}
+
+const scrubbed = /\bsample\b|\beducation\b|not advice|illustrative|textbook|curriculum|\blessons?\b|\bdesk [ab]\b|get_equity_|spotlight watch/i;
+for (const file of [...publicPages, "README.md", "public/data/flow/scorecard.json", "public/data/flow/plays.json", "public/data/flow/spotlights.json"]) {
+  const hit = readFileSync(join(root, file), "utf8").match(scrubbed);
+  assert(!hit, `${file} still says "${hit?.[0]}"`);
+}
+for (const name of readdirSync(join(root, "src"))) {
+  if (extname(name) !== ".js") continue;
+  const strings = readFileSync(join(root, "src", name), "utf8").match(/(["'`])(?:(?!\1)[^\\]|\\.)*\1/g) ?? [];
+  const hit = strings.find((text) => scrubbed.test(text));
+  assert(!hit, `src/${name} UI copy still says ${hit}`);
+}
 assert(page.includes("Soft") && page.includes("Crowded"), "cards render Soft and Crowded labels");
 assert(!page.includes("linear-gradient(90deg, #3"), "no blue-green card fill");
 
@@ -497,4 +539,4 @@ if (failed) {
   console.error(`${failed} check(s) failed`);
   process.exit(1);
 }
-console.log("sample readings ok");
+console.log("site checks ok");

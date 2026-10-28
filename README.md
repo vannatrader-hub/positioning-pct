@@ -2,23 +2,25 @@
 
 Phase 1 public reading of where sector positioning sits: soft, crowded, or somewhere between.
 
-Education only. Not advice. Nothing on the site names a size, and nothing on the site is a prompt to act. Figures are weekly snapshots in a sample file, not a live source.
+Figures are weekly snapshots committed with the site (`src/series.js` and `public/data/`), not a live feed.
 
 Public sources are bank labels only: JPM, Morgan Stanley, BoA, GS, and a desk composite. The choice stays in this browser.
 
 ## Pages
 
+Site nav, in order: Positioning | Options Flow | SPX Levels.
+
 - Home. Three destinations. Each tile opens its own page.
-- Positioning. Eleven Select Sector cards, a soft-to-crowded map, and a soft-vol gauge.
-- SPX Levels. Placeholder for this phase.
+- Positioning. Eleven Select Sector cards grouped into four columns on the Soft ↔ Crowded scale (Extreme soft, Soft, Mid, Crowded), a soft-to-crowded map, a soft-vol gauge, and a Study desk that only tabs sectors meeting its criteria (JPM under 0.25 or 0.75 and up).
 - Options Flow (`/options-flow/`). A hub with three calling cards, each opening its own page:
-  - $$$ watchlist (`/options-flow/dollar/`). The last three weeks, newest alert first, with alert date and time (CT) on every row. Each row opens a calling card: condensed flow, Customer purchased (the most recent customer trade named in the alert, hidden when there is none), flow in open interest, and a Recommendation on the left; a trade-levels chart on the right (about six months of daily closes, the lead option strike, and break-even when the premium is known). Old `/options-flow/#TICKER` links forward here.
-  - Spotlight trades (`/options-flow/spotlights/`). Live Spotlight tickets in three dropdown rows: Active (open, inside the current October window, expanded by default), Open (still open, posted earlier), and Closed (banked with a link to the public close note, or expired worthless at OpEx). Each card opens the idea, the structure, and a Recommendation on the left; on the right, the same six-month line chart as the $$$ calling cards, with the ticket's stop, strike, break-even, and target drawn across the price path, the expiry rule, and markers where the ticket posted and closed.
-  - Weekly scorecard (`/options-flow/scorecard/`). The weekly flow board in the same Options Flow page as Spotlights: week meta and the composite blend up top, then names ranked by composite (0.65 flow / 0.35 tech) with their chips, why, flow and tech scores, and a 30-session candle strip. Each row opens a trade card: desk analysis, scores, and trade-card facts on the left; on the dark right side, the same six-month line chart as the other cards with the flow's strikes and targets, then the Flow Intelligence panels (trade / flow summary, IV and catalyst, OI and dealer levels, technicals, fundamentals, Spotlight). Spotlight watch sits under the board.
+  - $$$ Shopping List (`/options-flow/dollar/`). The last three weeks, newest alert first, with each name's industry (broad sector, focus underneath) and alert date and time (CT) on every row. Each row opens a calling card: condensed flow, Customer purchased (the most recent customer trade named in the alert, hidden when there is none), flow in open interest, and a Recommendation on the left; a trade-levels chart on the right (about six months of daily closes, the lead option strike, and break-even when the premium is known). Old `/options-flow/#TICKER` links forward here.
+  - Spotlight trades (`/options-flow/spotlights/`). Live Spotlight tickets in three dropdown rows: Active (open, inside the current October window, expanded by default), Open (still open, posted earlier), and Closed (banked with a link to the public close note, or expired worthless at OpEx). Each card opens the idea, the structure, and a Recommendation on the left; on the right, the same six-month line chart as the $$$ calling cards, with the ticket's stop, strike, break-even, and target drawn across the price path, the expiry rule, and markers where the ticket posted and closed. An empty row reads "None".
+  - Weekly scorecard (`/options-flow/scorecard/`). Week meta and the composite blend up top, then names ranked by composite (0.65 flow / 0.35 tech) with their chips, why, trade dates, flow and tech scores, and a 30-session candle strip. A yellow star on the name marks an Active Spotlight. Each row opens a trade card: header tags, ticker / contract / timestamp, the analysis band, and the metric grid with the six-month chart on the left; Flow Intelligence on the right in order (trade summary, IV and open catalyst, OI and dealer levels, technical lines, fundamentals with three past and one upcoming earnings box, Spotlight). Sections without a live pull show an empty state rather than a number.
+- SPX Levels. Placeholder for this phase.
 
-Options Flow data lives in `public/data/flow/`: `plays.json` is the watchlist seed, `bars/<TICKER>.json` holds committed daily bars (`t,o,h,l,c,v`), `spotlights.json` holds the Spotlight tickets by row (`active`, `open`, `closed`) with their daily bars in `bars/` too, and `scorecard.json` is the weekly board snapshot. Charts are drawn as SVG from committed data, so no page needs a chart service.
+Options Flow data lives in `public/data/flow/`: `plays.json` is the Shopping List seed (with `industry.broad` / `industry.focus`), `bars/<TICKER>.json` holds committed daily bars (`t,o,h,l,c,v`), `spotlights.json` holds the Spotlight tickets by row (`active`, `open`, `closed`) with their daily bars in `bars/` too, and `scorecard.json` is the weekly board snapshot. Charts are drawn as SVG from committed data, so no page needs a chart service.
 
-Each sector card shows the percentile, a timeframe, a status, and a Soft to Crowded bar. Green is the soft end. Dark is crowded. The triangle marks that week’s print.
+Each sector card shows the percentile, a status, and a Soft to Crowded bar; one timeframe select drives every card. Green is the soft end. Dark is crowded. The triangle marks that week’s print.
 
 ## Develop
 

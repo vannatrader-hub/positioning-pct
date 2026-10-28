@@ -10,7 +10,7 @@ import {
   SOURCES,
   VOL_SHIFT,
   WEEKS,
-} from "./sample.js";
+} from "./series.js";
 
 export { CANON, JPM_MONITOR_REF, SECTORS, SOURCES, WEEKS };
 
