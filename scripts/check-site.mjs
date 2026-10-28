@@ -8,6 +8,19 @@ import { breakeven, chartLevels, resolveExpiry } from "../src/flow-chart.js";
 import { SIDES, alertLabel, sortPlays } from "../src/options-flow.js";
 import { SECTION_ORDER, STATUS, allPlays, levelKind, outcomeLabel, sortCards, spotlightLevels, spotlightLines } from "../src/spotlights.js";
 import { activeSpotlights, earningsBoxes, spotlightStar, tradeDates } from "../src/scorecard.js";
+import {
+  CHARTS,
+  CHART_IDS,
+  CHART_SOURCES,
+  SECTOR_BUCKETS,
+  broadEquityChart,
+  chartFacts,
+  creditChart,
+  fundManagerChart,
+  riskChart,
+  sectorChart,
+  softVolChart,
+} from "../src/pct-charts.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
@@ -373,7 +386,95 @@ for (const id of ["secnav-links", "chips", "week", "overview", "overview-grid", 
 assert(deskPage.includes('src="/src/positioning.js"'), "Positioning desk runs positioning.js");
 assert(deskPage.includes('class="subnav-back" href="../"'), "Positioning desk links back to the hub");
 assert(/class="lockup" href="\.\.\/\.\.\/"/.test(deskPage), "Positioning desk lockup links home");
-for (const page of ["positioning/index.html", "positioning/desk/index.html"]) {
+assert(deskPage.includes('<a href="../charts/">Charts</a>'), "Positioning desk subnav links to the charts");
+const deskScript = readFileSync(join(root, "src/positioning.js"), "utf8");
+for (const id of ["soft-vol", "sectors"]) assert(deskScript.includes(`chartLink("${id}"`), `desk links its ${id} panel to the chart`);
+
+/* Positioning % charts, batch 1 */
+assert(
+  JSON.stringify(CHART_IDS) === JSON.stringify(["soft-vol", "sectors", "broad-equity", "credit-stress", "fund-managers", "risk-appetite"]),
+  `charts batch 1 is the six locked charts, got ${CHART_IDS}`,
+);
+for (const chart of CHARTS) {
+  assert(houses.has(chart.house), `chart ${chart.id} house ${chart.house}`);
+  assert(sectionIds.has(chart.deskSection), `chart ${chart.id} links to missing desk section ${chart.deskSection}`);
+  for (const id of chart.reads ?? []) assert(INDICATORS.some((indicator) => indicator.id === id), `chart ${chart.id} reads unknown ${id}`);
+}
+const chartsPage = readFileSync(join(root, "positioning/charts/index.html"), "utf8");
+assert(viteConfig.includes('"positioning/charts/index.html"'), "vite builds positioning/charts/index.html");
+assert(chartsPage.includes('src="/src/charts.js"'), "charts page runs charts.js");
+assert(chartsPage.includes('class="subnav-back" href="../"'), "charts page links back to the Positioning hub");
+assert(chartsPage.includes('<a href="../desk/">Soft ↔ Crowded desk</a>'), "charts page links to the desk");
+assert(/class="lockup" href="\.\.\/\.\.\/"/.test(chartsPage), "charts page lockup links home");
+for (const id of ["chart-nav", "week", "history-date", "asof-line", "charts"]) assert(chartsPage.includes(`id="${id}"`), `charts page keeps #${id}`);
+const chartCards = [...chartsPage.matchAll(/<article class="pchart[^"]*" id="([^"]+)" data-chart="([^"]+)"/g)];
+assert(JSON.stringify(chartCards.map((match) => match[1])) === JSON.stringify(CHART_IDS), `charts page cards ${chartCards.map((match) => match[1])}`);
+assert(chartCards.every((match) => match[1] === match[2]), "chart card ids match data-chart");
+const chartNav = [...chartsPage.matchAll(/<a href="#([^"]+)" data-target="\1">/g)].map((match) => match[1]);
+assert(JSON.stringify(chartNav) === JSON.stringify(CHART_IDS), `charts secnav ${chartNav}`);
+for (const chart of CHARTS) {
+  const card = chartsPage.split(`id="${chart.id}"`)[1]?.split("</article>")[0] ?? "";
+  assert(card.includes(`>${chart.title.replace(/&/g, "&amp;")}</h2>`), `chart ${chart.id} title "${chart.title}"`);
+  assert(card.includes(`class="house h-${chart.house}">${HOUSES[chart.house]}<`), `chart ${chart.id} shows its ${HOUSES[chart.house]} chip`);
+  assert(card.includes('class="pchart-body"'), `chart ${chart.id} has a body to draw into`);
+}
+const hubCharts = [...posHub.matchAll(/<a class="tile chart-tile" href="charts\/#([^"]+)">/g)].map((match) => match[1]);
+assert(JSON.stringify(hubCharts) === JSON.stringify(CHART_IDS), `hub chart cards ${hubCharts}`);
+for (const id of CHART_IDS) {
+  assert(posHub.includes(`data-preview="${id}"`) && posHub.includes(`data-hub="chart-${id}"`), `hub chart card ${id} has a preview and a fact`);
+}
+assert(posHub.includes('href="charts/"'), "hub links to all charts");
+for (const file of ["positioning/charts/index.html", "positioning/index.html", "src/charts.js", "src/chart-svg.js", "src/pct-charts.js"]) {
+  const text = readFileSync(join(root, file), "utf8");
+  assert(!/<img\b|\.(png|jpe?g|webp|gif)\b|ref-pack|chart\d\.(png|jpe?g)/i.test(text), `${file} shows source images instead of a redraw`);
+}
+
+const vol = softVolChart("desk", 7);
+assert(vol.display === "−1.2" && vol.name === "Soft Vol" && vol.tone === "soft", `Soft Vol chart desk ${vol.display} ${vol.name}`);
+assert(softVolChart("jpm", 7).display === "−1.4", "Soft Vol chart JPM matches the desk's JPM gauge");
+assert(Math.abs(vol.now * 10 - all.volTenths) < 1e-9, "Soft Vol chart Desk matches the desk gauge under All");
+assert(vol.points.length === WEEKS.length && CHART_SOURCES.every((id) => vol.houses[id].length === WEEKS.length), "Soft Vol chart has every house for every week");
+for (const source of CHART_SOURCES) {
+  const chart = sectorChart(source, 7);
+  const want = buildReading(source, 7, 4).sectors;
+  assert(JSON.stringify(chart.bars.map((bar) => bar.ticker)) === JSON.stringify(CANON), `${source} sector chart runs XLF to XLC`);
+  for (const bar of chart.bars) {
+    if (!bar.available) {
+      assert(want[bar.ticker].available === false, `${source} ${bar.ticker} hides a printed sector`);
+      continue;
+    }
+    assert(bar.points === want[bar.ticker].points, `${source} ${bar.ticker} chart ${bar.points} vs desk ${want[bar.ticker].points}`);
+    assert(SECTOR_BUCKETS.find((bucket) => bucket.level === bar.bucket)?.tone === bar.tone, `${source} ${bar.ticker} bucket tone`);
+    assert(bar.bucket === want[bar.ticker].level, `${source} ${bar.ticker} bucket ${bar.bucket} matches the desk column ${want[bar.ticker].level}`);
+  }
+  const printed = chart.bars.filter((bar) => bar.available).length;
+  assert(Object.values(chart.counts).reduce((sum, n) => sum + n, 0) === printed, `${source} bucket counts cover every printed sector`);
+}
+const softest = sectorChart("jpm", 7, "softest").bars.filter((bar) => bar.available);
+assert(softest[0].ticker === "XLF" && softest.every((bar, index) => !index || bar.points >= softest[index - 1].points), "Softest first sorts by percentile");
+assert(sectorChart("jpm", 7).bars.find((bar) => bar.ticker === "XLRE").available === false, "XLRE has no JPM column");
+const broadChart = broadEquityChart(7);
+assert(broadChart.read.value === "0.66" && broadChart.read.house === "jpm", `broad equity chart ${broadChart.read.value}`);
+assert(JSON.stringify(broadChart.lines.find((line) => line.label === "Equities").path) === JSON.stringify(broadChart.read.pctPath), "broad equity chart is the monitor's Equities line");
+const creditData = creditChart(7);
+assert(creditData.cdx.value === "351" && creditData.bbb.value === "0.63", `credit chart CDX ${creditData.cdx.value} BBB−AAA ${creditData.bbb.value}`);
+assert(creditData.pct === Math.round((creditData.cdx.pct + creditData.bbb.pct) / 2), "credit bar sits between its two panels");
+const fmsData = fundManagerChart(7);
+assert(fmsData.crowded.value === "53" && fmsData.cash.value === "3.9" && fmsData.trades[0].label === "Long global semis", "fund manager chart reads 53% semis and 3.9% cash");
+const riskData = riskChart(7);
+assert(
+  JSON.stringify(riskData.reads.map((read) => `${read.houseLabel} ${read.value}`)) === '["GS +0.9","GS +1.6","GS 74","Desk 51.7"]',
+  `risk appetite panel ${riskData.reads.map((read) => `${read.houseLabel} ${read.value}`)}`,
+);
+for (const read of riskData.reads) assert(read.basis === "Desk estimate" || read.basis.startsWith("Ref chart"), `${read.id} basis "${read.basis}"`);
+const facts = chartFacts();
+assert(JSON.stringify(Object.keys(facts)) === JSON.stringify(CHART_IDS), "hub has a live fact for every chart");
+assert(Object.values(facts).every((text) => /^(JPM|MS|GS|BoA|Desk) · /.test(text)), "every hub chart fact leads with its house");
+for (let week = 0; week < WEEKS.length; week += 1) {
+  assert(softVolChart("desk", week).week === week && creditChart(week).cdx.path.length === WEEKS.length, `charts follow week ${week}`);
+}
+
+for (const page of ["positioning/index.html", "positioning/desk/index.html", "positioning/charts/index.html"]) {
   assert(viteConfig.includes(`"${page}"`), `vite builds ${page}`);
   const html = readFileSync(join(root, page), "utf8");
   assert(/<nav class="nav"[\s\S]*?class="is-current"[^>]*>Positioning</.test(html), `${page} marks Positioning current`);
@@ -545,7 +646,7 @@ for (const source of ["jpm", "ms", "gs", "boa", "desk"]) {
 }
 
 const nav = /<nav class="nav" aria-label="Pages">[\s\S]*?<\/nav>/;
-const deskPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "spx-levels/index.html", "options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html"];
+const deskPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "positioning/charts/index.html", "spx-levels/index.html", "options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html"];
 const publicPages = [...deskPages, "vault/index.html"];
 for (const file of publicPages) {
   const html = readFileSync(join(root, file), "utf8");
@@ -594,7 +695,7 @@ assert(!/<form|<input|<button|type="password"|checkout|sign up|log ?in\b/i.test(
 
 const monetization = /\b(free|paid|premium|subscri\w*|paywall\w*|upgrad\w*|trials?|pric(e|es|ed|ing)|members?hips?|unlock\w*)\b/i;
 const chromeCopy = [
-  ...["index.html", "positioning/index.html", "options-flow/index.html", "spx-levels/index.html", "vault/index.html", "404.html"].map((file) => [
+  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "vault/index.html", "404.html"].map((file) => [
     file,
     readFileSync(join(root, file), "utf8"),
   ]),
