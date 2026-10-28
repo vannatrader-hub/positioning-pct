@@ -11,7 +11,7 @@ Public sources are bank labels only: JPM, Morgan Stanley, BoA, GS, and a desk co
 Two surfaces, switched from the `Desk | Vault` control in every topbar:
 
 - Desk. Everything live today: home, the Positioning hub and its desk, Options Flow and its subpages, SPX Levels. URLs stay where they are; Desk is the surface name, not a path.
-- Vault (`/vault/`). The Phase 2 surface stub: a hero, three `Soon` preview tiles that do not link, and a panel pointing back to the Desk pages. It has its own darker theme scoped under `body.is-vault`. No sign-in, forms, or checkout.
+- Vault (`/vault/`). Behind a sign-in wall. Signed out, the page shows one centered card ("Sign in to open Vault", an email field, and a link back to the Desk) and nothing else. Signed in, it shows the Phase 2 surface stub: a hero, three `Soon` preview tiles that do not link, and a panel pointing back to the Desk pages. It has its own darker theme scoped under `body.is-vault`. No password field and no checkout. See [Vault sign-in](#vault-sign-in).
 
 Surface chrome (home, hubs, Vault, 404, and every topbar and footer) never carries monetization words or `$` outside the `$$$` flow mark; `npm run check` enforces this along with the switcher on every page.
 
@@ -61,6 +61,25 @@ npm run preview
 ```
 
 Preview serves the production build at http://127.0.0.1:4173/positioning-pct/
+
+## Vault sign-in
+
+`vault/index.html` renders the wall by default and keeps the Vault content in an inert `<template id="vault-content">`. `src/vault-gate.js` decides what happens next, based on `VITE_CLERK_PUBLISHABLE_KEY` at build time:
+
+- Key set. Clerk (`@clerk/clerk-js`, loaded on demand) sends a magic link to the email entered. Opening the link signs the visitor in and the wall swaps for the Vault, with a quiet "Signed in as … / Sign out" line. Known emails sign in; new emails sign up through the same link, or join the Clerk waitlist when sign-up is restricted.
+- Key empty. Same card, but the button reads "Request access". The email is kept in this browser's `localStorage` (`positioning-pct-vault-requests`) and nothing is sent anywhere. Clerk is left out of the build entirely.
+
+To turn on magic links with Clerk's Hobby plan (no cost, up to 50,000 monthly retained users):
+
+1. Create an application at [dashboard.clerk.com](https://dashboard.clerk.com) with **Email** as the sign-in identifier.
+2. Under the email settings, turn on **Email verification link** (magic link) for sign-in and sign-up. Password is optional and the wall never asks for one.
+3. Optional: under **Restrictions**, set sign-up to Restricted or Waitlist (or add an allowlist) so only invited emails open Vault.
+4. Copy the publishable key from **API keys**. Locally: `cp .env.example .env.local`, paste it into `VITE_CLERK_PUBLISHABLE_KEY`, and restart `npm run dev`. `.env.local` is git-ignored.
+5. For GitHub Pages: **Settings → Secrets and variables → Actions → Variables → New repository variable**, name `VITE_CLERK_PUBLISHABLE_KEY`. The Pages workflow passes it to the build. Re-run **Deploy to GitHub Pages**.
+
+A publishable key is meant to ship in browser code, but it still lives only in env and repo settings, never in a committed file. Clerk secret keys (`sk_…`) are never needed by this site. Clerk production instances need a domain you own; on `github.io`, use the development instance key until the site moves to its own domain.
+
+The gate is a client-side UX lock for GitHub Pages, not access control. The Vault page and its template still ship in the public static build, so anyone can read them from the source or the `dist` files. Before Vault carries anything that must stay private, move hosting to Vercel or Cloudflare (Pages/Workers) and gate Vault on the server (Clerk middleware or an edge check of the session), so Vault HTML, data, and assets are only served to signed-in users and are not part of the public bundle.
 
 ## GitHub Pages
 
