@@ -184,7 +184,7 @@ export function mountLevels(host, play, bars) {
       const ex = x(utc(expiry));
       svg.append(
         node("line", { x1: ex, x2: ex, y1: pad.top, y2: pad.top + plotH, stroke: COLORS.expiry, "stroke-dasharray": "3 4", "stroke-width": 1 }),
-        node("text", { x: ex - 5, y: pad.top + 10, "text-anchor": "end", fill: COLORS.expiry, class: "tl-tag" }, `Exp ${shortDate(expiry)}`),
+        node("text", { x: ex - 5, y: pad.top + plotH - 6, "text-anchor": "end", fill: COLORS.expiry, class: "tl-tag" }, `Exp ${shortDate(expiry)}`),
       );
     }
 
@@ -216,13 +216,19 @@ export function mountLevels(host, play, bars) {
 
     const sx = x(lastT);
     const sy = y(spot);
-    let labelY = sy - 9;
+    const spotText = `Spot ${usd(spot)}`;
+    const roomRight = right - sx > spotText.length * 6.6 + 14;
+    let labelY = roomRight ? sy + 4 : sy - 9;
     if (placed.some((ty) => Math.abs(ty - labelY) < 13)) labelY = sy + 17;
     if (placed.some((ty) => Math.abs(ty - labelY) < 13)) labelY = sy - 22;
     svg.append(
       node("circle", { cx: sx, cy: sy, r: 6, fill: COLORS.price, opacity: 0.22 }),
       node("circle", { cx: sx, cy: sy, r: 3, fill: COLORS.price }),
-      node("text", { x: sx - 8, y: labelY, "text-anchor": "end", fill: COLORS.spot, class: "tl-tag" }, `Spot ${usd(spot)}`),
+      node(
+        "text",
+        { x: roomRight ? sx + 10 : sx - 8, y: labelY, "text-anchor": roomRight ? "start" : "end", fill: COLORS.spot, class: "tl-tag" },
+        spotText,
+      ),
     );
 
     hoverLayer = node("g", { class: "tl-hover", visibility: "hidden" });
