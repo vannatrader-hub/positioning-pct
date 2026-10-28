@@ -405,7 +405,7 @@ function gaugePanel(reading) {
   copy.append(
     el("p", "", "Soft Vol means the VIX is cheaper than the S&P 500 usually implies. Stretched means the VIX is richer than fair."),
     el("p", "", "Live history comes from desk-ingested bank notes. Public labels are bank names only."),
-    el("p", "", "The calculation note is not in this phase."),
+    el("p", "", "The calculation note is not on the Desk yet."),
   );
 
   panel.append(top, main, copy);

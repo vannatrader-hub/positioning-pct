@@ -545,12 +545,76 @@ for (const source of ["jpm", "ms", "gs", "boa", "desk"]) {
 }
 
 const nav = /<nav class="nav" aria-label="Pages">[\s\S]*?<\/nav>/;
-const publicPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "spx-levels/index.html", "options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html"];
+const deskPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "spx-levels/index.html", "options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html"];
+const publicPages = [...deskPages, "vault/index.html"];
 for (const file of publicPages) {
   const html = readFileSync(join(root, file), "utf8");
   const order = [...(html.match(nav)?.[0] ?? "").matchAll(/>(Positioning|Options Flow|SPX Levels)</g)].map((m) => m[1]);
   assert(JSON.stringify(order) === '["Positioning","Options Flow","SPX Levels"]', `${file} nav order ${order}`);
 }
+
+const surfaceNav = /<nav class="surface" aria-label="Surface">([\s\S]*?)<\/nav>/;
+for (const file of publicPages) {
+  const html = readFileSync(join(root, file), "utf8");
+  const topbar = html.match(/<header class="topbar">[\s\S]*?<\/header>/)?.[0] ?? "";
+  const links = [...(topbar.match(surfaceNav)?.[1] ?? "").matchAll(/<a([^>]*)>([\s\S]*?)<\/a>/g)].map(([, attrs, inner]) => ({
+    label: inner.replace(/<[^>]*>/g, "").trim(),
+    href: attrs.match(/href="([^"]*)"/)?.[1],
+    current: /class="is-current"/.test(attrs) && /aria-current="(page|true)"/.test(attrs),
+  }));
+  const where = `${file} surface switcher`;
+  assert(JSON.stringify(links.map((link) => link.label)) === '["Desk","Vault"]', `${where} reads Desk | Vault, got ${links.map((link) => link.label)}`);
+  if (links.length !== 2) continue;
+  const [desk, vault] = links;
+  const isVault = file === "vault/index.html";
+  assert(desk.current === !isVault && vault.current === isVault, `${where} marks ${isVault ? "Vault" : "Desk"} as current`);
+  if (isVault) {
+    assert(desk.href === "../" && vault.href === "./", `${where} Desk links home, got ${desk.href}`);
+  } else {
+    assert(desk.href === "./" || /^(\.\.\/)+$/.test(desk.href), `${where} Desk links home, got ${desk.href}`);
+    assert(vault.href === `${desk.href === "./" ? "" : desk.href}vault/`, `${where} Vault links to /vault/, got ${vault.href}`);
+  }
+}
+const home = readFileSync(join(root, "index.html"), "utf8");
+assert(!home.includes('class="phase"'), "home topbar swaps the phase badge for the surface switcher");
+for (const file of deskPages) {
+  const footer = readFileSync(join(root, file), "utf8").match(/<footer class="site-footer">[\s\S]*?<\/footer>/)?.[0] ?? "";
+  assert(footer.includes('<p class="foot-note">Desk · public reading.</p>'), `${file} footer reads Desk · public reading.`);
+}
+
+const vaultPage = readFileSync(join(root, "vault/index.html"), "utf8");
+assert(viteConfig.includes('"vault/index.html"'), "vite builds vault/index.html");
+assert(vaultPage.includes('<body class="is-vault">'), "Vault page carries the Vault theme");
+assert(css.includes(".is-vault {"), "stylesheet scopes Vault theme tokens under .is-vault");
+assert(deskPages.every((file) => !readFileSync(join(root, file), "utf8").includes("is-vault")), "Desk pages stay on the light theme");
+assert(/<h1>Vault/.test(vaultPage), "Vault hero");
+assert((vaultPage.match(/class="tile vault-tile"/g) ?? []).length === 3, "Vault shows three preview tiles");
+assert(!/<a\s[^>]*class="tile vault-tile/.test(vaultPage), "Vault preview tiles do not link anywhere");
+assert(!/<form|<input|<button|type="password"|checkout|sign up|log ?in\b/i.test(vaultPage), "Vault has no login, form, or checkout");
+
+const monetization = /\b(free|paid|premium|subscri\w*|paywall\w*|upgrad\w*|trials?|pric(e|es|ed|ing)|members?hips?|unlock\w*)\b/i;
+const chromeCopy = [
+  ...["index.html", "positioning/index.html", "options-flow/index.html", "spx-levels/index.html", "vault/index.html", "404.html"].map((file) => [
+    file,
+    readFileSync(join(root, file), "utf8"),
+  ]),
+  ...deskPages.flatMap((file) => {
+    const html = readFileSync(join(root, file), "utf8");
+    return [
+      [`${file} topbar`, html.match(/<header class="topbar">[\s\S]*?<\/header>/)?.[0] ?? ""],
+      [`${file} footer`, html.match(/<footer class="site-footer">[\s\S]*?<\/footer>/)?.[0] ?? ""],
+    ];
+  }),
+];
+for (const [where, text] of chromeCopy) {
+  const hit = text.match(monetization);
+  assert(!hit, `${where} chrome says "${hit?.[0]}"`);
+  assert(!text.replaceAll("$$$", "").includes("$"), `${where} chrome shows a $ outside the $$$ flow mark`);
+  assert(!/\bphase\s*\d/i.test(text), `${where} chrome names a phase`);
+}
+const hubScript = readFileSync(join(root, "src/options-flow-hub.js"), "utf8").match(/(["'`])(?:(?!\1)[^\\]|\\.)*\1/g) ?? [];
+const hubHit = hubScript.find((text) => monetization.test(text));
+assert(!hubHit, `src/options-flow-hub.js UI copy says ${hubHit}`);
 
 const scrubbed = /\bsample\b|\beducation\b|not advice|illustrative|textbook|curriculum|\blessons?\b|\bdesk [ab]\b|get_equity_|spotlight watch/i;
 for (const file of [...publicPages, "README.md", "public/data/flow/scorecard.json", "public/data/flow/plays.json", "public/data/flow/spotlights.json"]) {

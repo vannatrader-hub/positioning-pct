@@ -17,6 +17,7 @@ export default defineConfig({
         flowDollar: resolve(root, "options-flow/dollar/index.html"),
         flowSpotlights: resolve(root, "options-flow/spotlights/index.html"),
         flowScorecard: resolve(root, "options-flow/scorecard/index.html"),
+        vault: resolve(root, "vault/index.html"),
         notFound: resolve(root, "404.html"),
       },
     },
