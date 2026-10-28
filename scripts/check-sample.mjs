@@ -4,6 +4,8 @@ import { fileURLToPath } from "node:url";
 import { HOUSES, INDICATORS, SECTIONS, readIndicator } from "../src/desk.js";
 import { CANON, WEEKS, buildReading, ordinal } from "../src/readings.js";
 import { CURRICULUM, creditSpreadMath, leapMath, price } from "../src/study.js";
+import { breakeven, chartLevels, resolveExpiry } from "../src/flow-chart.js";
+import { alertLabel, sortPlays } from "../src/options-flow.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
@@ -215,6 +217,59 @@ for (const [ticker, want] of Object.entries(studyWant)) {
     spot: price(marks.underlyings[ticker].spot),
   };
   assert(JSON.stringify(got) === JSON.stringify(want), `${ticker} study math ${JSON.stringify(got)}`);
+}
+
+const flow = JSON.parse(readFileSync(join(root, "public/data/flow/plays.json"), "utf8"));
+const flowTickers = ["JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN", "ALAB", "CSCO"];
+assert(
+  JSON.stringify(sortPlays(flow.plays).map((play) => play.ticker)) === JSON.stringify(flowTickers),
+  `flow watchlist newest alert first: ${sortPlays(flow.plays).map((play) => play.ticker)}`,
+);
+assert(
+  JSON.stringify(flow.plays.map((play) => play.ticker)) === JSON.stringify(flowTickers),
+  "plays.json is stored newest alert first",
+);
+const windowStart = new Date(Date.UTC(2026, 9, 27) - 21 * 86400000).toISOString().slice(0, 10);
+for (const play of flow.plays) {
+  const where = `flow ${play.ticker}`;
+  assert(play.confidence === "$$$", `${where} confidence`);
+  assert(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2} (AM|PM) CT$/.test(play.alertedAtCt), `${where} alert stamp ${play.alertedAtCt}`);
+  assert(play.alertedAtCt.startsWith(play.date), `${where} alert date matches date`);
+  assert(play.date >= windowStart && play.date <= flow.asOf, `${where} outside the 3-week window`);
+  assert(play.flow.length >= 1 && play.flow.length <= 3, `${where} keeps 1–3 flow paragraphs`);
+  assert(typeof play.recommendation === "string" && play.recommendation.length > 20, `${where} recommendation`);
+  assert(!("link" in play), `${where} carries a source link`);
+  assert(["call", "put"].includes(play.lead.type), `${where} lead type`);
+  assert(["bought", "sold", "long"].includes(play.lead.action), `${where} lead action`);
+  assert(play.lead.strike > 0, `${where} lead strike`);
+  assert(resolveExpiry(play.lead.expiry, play.date) > play.date, `${where} lead expiry ${play.lead.expiry}`);
+
+  const bars = JSON.parse(readFileSync(join(root, `public/data/flow/bars/${play.ticker}.json`), "utf8")).bars;
+  assert(bars.length >= 250, `${where} needs at least a year of bars`);
+  assert(bars.every((bar, index) => index === 0 || bar.t > bars[index - 1].t), `${where} bars ascend`);
+  assert(bars.every((bar) => bar.l <= Math.min(bar.o, bar.c) && bar.h >= Math.max(bar.o, bar.c)), `${where} OHLC`);
+  const last = bars[bars.length - 1];
+  assert(play.quote.date === last.t && play.quote.last === last.c, `${where} quote matches the last bar`);
+  assert(play.quote.prev === bars[bars.length - 2].c, `${where} prev close matches`);
+  const levels = chartLevels(play, bars);
+  assert(levels.window.length >= 110 && levels.window.length <= 135, `${where} six-month window ${levels.window.length}`);
+}
+const flowBy = Object.fromEntries(flow.plays.map((play) => [play.ticker, play]));
+const beWant = { JCI: 163.54, MMM: 179.8, COIN: 123.5, ALAB: 183.8, CRWD: null, DDOG: null, CORT: null, QCOM: null, CSCO: null };
+for (const [ticker, want] of Object.entries(beWant)) {
+  assert(breakeven(flowBy[ticker].lead) === want, `${ticker} break-even ${breakeven(flowBy[ticker].lead)} !== ${want}`);
+}
+assert(resolveExpiry("December", "2026-10-27") === "2026-12-18", "December resolves to Dec 18, 2026");
+assert(resolveExpiry("January", "2026-10-22") === "2027-01-15", "January resolves to Jan 15, 2027");
+assert(resolveExpiry("January 2028", "2026-10-25") === "2028-01-21", "January 2028 resolves to Jan 21, 2028");
+assert(resolveExpiry("", "2026-10-25") === null, "blank expiry resolves to null");
+assert(alertLabel("2026-10-27 05:15 PM CT") === "Alerted Oct 27, 5:15 PM CT", "alert label");
+const jciBars = JSON.parse(readFileSync(join(root, "public/data/flow/bars/JCI.json"), "utf8")).bars;
+assert(chartLevels(flowBy.JCI, jciBars).expiryInView, "JCI Dec expiry is marked on the chart");
+assert(!chartLevels(flowBy.CRWD, JSON.parse(readFileSync(join(root, "public/data/flow/bars/CRWD.json"), "utf8")).bars).expiryInView, "CRWD 2028 expiry stays off the axis");
+const chartSource = readFileSync(join(root, "src/flow-chart.js"), "utf8").toLowerCase();
+for (const phrase of ["tradingview", "candlestick", "max gain", "dip buyer"]) {
+  assert(!chartSource.includes(phrase), `trade-levels chart should not include "${phrase}"`);
 }
 
 const banned = [

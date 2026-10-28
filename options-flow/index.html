@@ -4,7 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Options Flow · Positioning %.</title>
-    <meta name="description" content="Where options premium is concentrating. A placeholder in this phase." />
+    <meta
+      name="description"
+      content="A $$$ options flow watchlist. Each name opens a calling card with the flow, the open interest that stayed, and a daily chart. Education only, not advice."
+    />
     <meta name="theme-color" content="#f4f5f7" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
     <link rel="stylesheet" href="/src/styles.css" />
@@ -23,13 +26,92 @@
     </header>
     <div class="wrap">
       <main id="content">
-        <article class="soon-card">
-          <span class="badge">Soon</span>
+        <section class="page-head">
+          <span class="pill">$$$ watchlist</span>
           <h1>Options Flow</h1>
-          <p>Where options premium is concentrating. This page is a placeholder in this phase.</p>
-          <a class="back" href="../">← Back to home</a>
-        </article>
+          <p class="lede">
+            Names where large opening options trades lined up on one side. Open a name for its calling card:
+            the flow, the open interest that stayed, a recommendation, and the daily chart.
+          </p>
+          <p class="sample-line pill" id="flow-asof">Loading watchlist…</p>
+        </section>
+
+        <section class="desk-section flow-list-section" aria-labelledby="watchlist-title">
+          <div class="section-head">
+            <div class="section-title-row">
+              <h2 id="watchlist-title">$$$ watchlist</h2>
+              <span class="section-count" id="flow-count"></span>
+            </div>
+            <p class="hint">
+              <span class="conf" aria-hidden="true">$$$</span> marks the highest-confidence flow. Last three weeks,
+              newest alert first. Alert times are Central (CT). Last close is from a committed daily snapshot.
+            </p>
+          </div>
+          <div class="flow-head" aria-hidden="true">
+            <span>Name</span>
+            <span>Flow</span>
+            <span>Alerted (CT)</span>
+            <span>Last close</span>
+          </div>
+          <ul class="flow-list" id="flow-list" aria-labelledby="watchlist-title"></ul>
+        </section>
       </main>
+
+      <dialog class="cc" id="calling-card" aria-labelledby="cc-ticker" aria-describedby="cc-title">
+        <div class="cc-frame">
+          <header class="cc-head">
+            <div class="cc-ident">
+              <h2 class="cc-ticker" id="cc-ticker"></h2>
+              <span class="conf" id="cc-conf"></span>
+              <span class="cc-name" id="cc-name"></span>
+            </div>
+            <button class="cc-close" type="button" id="cc-close" aria-label="Close calling card">
+              <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+                <path d="M5 5 L15 15 M15 5 L5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+            </button>
+          </header>
+          <div class="cc-body">
+            <section class="cc-left" aria-label="Flow">
+              <p class="cc-meta">
+                <time class="cc-alert" id="cc-alert"></time>
+                <span id="cc-meta"></span>
+              </p>
+              <h3 class="cc-title" id="cc-title"></h3>
+              <div class="cc-block">
+                <h4 class="cc-label">Flow</h4>
+                <div class="cc-flow" id="cc-flow"></div>
+              </div>
+              <div class="cc-block" id="cc-oi-block">
+                <h4 class="cc-label">Flow in open interest</h4>
+                <dl class="cc-oi" id="cc-oi"></dl>
+              </div>
+              <div class="cc-rec">
+                <h4 class="cc-label">Recommendation</h4>
+                <p id="cc-rec"></p>
+              </div>
+            </section>
+            <section class="cc-right" aria-labelledby="tl-kicker">
+              <div class="tl-top">
+                <span class="tl-kicker" id="tl-kicker">Trade levels</span>
+                <span class="tl-contract" id="tl-contract"></span>
+              </div>
+              <dl class="tl-tiles" id="tl-tiles"></dl>
+              <div class="tl-panel">
+                <p class="tl-chart-head" id="tl-chart-head"></p>
+                <div class="cc-chart" id="cc-chart"></div>
+                <div class="tl-foot">
+                  <span class="tl-legend" id="tl-legend"></span>
+                  <span class="tl-move" id="tl-move"></span>
+                </div>
+              </div>
+              <p class="cc-chart-note" id="cc-chart-note"></p>
+            </section>
+          </div>
+          <p class="cc-foot">Education only · not advice. Flow notes are a dated snapshot, not a live feed.</p>
+        </div>
+      </dialog>
+
       <footer class="site-footer">
         <div>
           <a class="lockup" href="../">Positioning<span class="mark">%.</span></a>
@@ -44,5 +126,7 @@
         </nav>
       </footer>
     </div>
+    <noscript>This watchlist needs JavaScript to draw. Education only, not advice.</noscript>
+    <script type="module" src="/src/options-flow.js"></script>
   </body>
 </html>
