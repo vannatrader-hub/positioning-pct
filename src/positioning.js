@@ -89,8 +89,8 @@ function zones() {
 }
 
 /** The Soft ↔ Crowded bar: zoned track, a marker at the percentile, labelled ends, caption below. */
-function bar({ pct, caption, ends = ["Soft", "Crowded"], name = "", hero = false, crowded = false, label }) {
-  const root = el("div", hero ? "sc is-hero" : "sc");
+function bar({ pct, caption, ends = ["Soft", "Crowded"], crowded = false, label }) {
+  const root = el("div", "sc");
   if (crowded) root.classList.add("is-crowded");
   root.setAttribute("role", "img");
   root.setAttribute("aria-label", label ?? `${caption}. ${ends[0]} on the left, ${ends[1]} on the right.`);
@@ -99,11 +99,6 @@ function bar({ pct, caption, ends = ["Soft", "Crowded"], name = "", hero = false
   const wrap = el("div", "sc-track-wrap");
   const left = `${pinLeft(pct)}%`;
 
-  if (name) {
-    const tag = el("div", "sc-name", name);
-    tag.style.left = left;
-    wrap.append(tag);
-  }
   const pin = el("i", "sc-pin");
   pin.style.left = left;
   pin.setAttribute("aria-hidden", "true");
@@ -127,8 +122,9 @@ function statusPill(text, tone) {
 }
 
 function weeksSelect() {
+  const label = el("label", "weeks-label");
+  label.append(el("span", "", "Timeframe"));
   const select = el("select", "weeks");
-  select.setAttribute("aria-label", "Timeframe");
   for (const weeks of [4, 8]) {
     const option = el("option", "", `${weeks} Weeks`);
     option.value = String(weeks);
@@ -140,61 +136,53 @@ function weeksSelect() {
     remember();
     paint();
   });
-  return select;
+  label.append(select);
+  return label;
 }
 
-function unavailableCard(sector) {
-  const card = el("article", "card is-unavailable");
-  card.dataset.ticker = sector.ticker;
+/** Four columns on the Soft ↔ Crowded scale, keyed to the level each card's status pill names. */
+export const BUCKETS = [
+  { level: "extreme soft", title: "Extreme soft", range: "under 0.25", tone: "xsoft" },
+  { level: "soft", title: "Soft", range: "0.25 – 0.39", tone: "soft" },
+  { level: "mid", title: "Mid", range: "0.40 – 0.66", tone: "mid" },
+  { level: "crowded", title: "Crowded", range: "0.67 and up", tone: "crowded" },
+];
 
-  const top = el("div", "card-top");
-  const ident = el("div", "ident");
-  const names = el("span");
-  names.append(el("span", "ticker", sector.ticker), el("span", "fund", sector.name));
-  ident.append(chartIcon(), names);
-  top.append(ident);
-
-  const body = el("div", "card-body");
-  const figure = el("div", "figure");
-  figure.append(
-    el("p", "pct", "—"),
-    el("p", "pct-kicker", "no JPM print"),
+function missingRow(sector) {
+  const row = el("div", "bucket-miss");
+  row.dataset.ticker = sector.ticker;
+  row.setAttribute("aria-label", `${sector.ticker} has no reading: ${sector.short} is not in the ${sector.unavailable.replace(/^Not in /, "")}.`);
+  const id = el("span", "map-id");
+  id.append(el("strong", "", sector.ticker), el("span", "", sector.short));
+  row.append(
+    id,
     statusPill(sector.unavailable, "none"),
+    el("span", "hint", "Switch the source to MS, GS, or BoA for a read."),
   );
-  const track = el("div", "sc");
-  track.setAttribute("role", "img");
-  track.setAttribute("aria-label", `${sector.ticker} has no reading: ${sector.short} is not in the JPM Cross Asset Positioning Monitor.`);
-  const line = el("div", "sc-line");
-  const wrap = el("div", "sc-track-wrap");
-  wrap.append(zones(), el("div", "sc-caption", `${sector.short} is not on the JPM sector list`));
-  line.append(el("span", "sc-end", "Soft"), wrap, el("span", "sc-end", "Crowded"));
-  track.append(line);
-  body.append(figure, track);
-
-  card.append(top, body, el("p", "hint unavailable-note", "Switch the source to MS, GS, or BoA for a sample read."));
-  return card;
+  return row;
 }
 
-function sectorCard(sector, hero) {
-  if (!sector.available) return unavailableCard(sector);
-  const card = el("article", hero ? "card is-hero" : "card");
+function sectorCard(sector, selected) {
+  const card = el("article", "card is-compact");
   card.dataset.ticker = sector.ticker;
   const crowded = isCrowdedSector(sector);
   if (crowded) card.classList.add("is-crowded");
+  if (selected) card.classList.add("is-on");
 
   const top = el("div", "card-top");
   const ident = el("button", "feature ident");
   ident.type = "button";
-  ident.setAttribute("aria-pressed", hero ? "true" : "false");
+  ident.title = sector.name;
+  ident.setAttribute("aria-pressed", selected ? "true" : "false");
   ident.setAttribute(
     "aria-label",
     `${sector.ticker}, ${sector.name}, ${sector.display} positioning percentile, ${sector.pill}. ${sector.caption}`,
   );
   const names = el("span");
-  names.append(el("span", "ticker", sector.ticker), el("span", "fund", sector.name));
+  names.append(el("span", "ticker", sector.ticker), el("span", "fund", sector.short));
   ident.append(chartIcon(), names);
   ident.addEventListener("click", () => feature(sector.ticker));
-  top.append(ident, weeksSelect());
+  top.append(ident);
 
   const body = el("div", "card-body");
   const figure = el("div", "figure");
@@ -208,8 +196,6 @@ function sectorCard(sector, hero) {
     bar({
       pct: sector.points,
       caption: sector.caption,
-      name: hero ? sector.ticker : "",
-      hero,
       crowded,
       label: `${sector.ticker}, ${sector.caption}. Soft on the left, crowded on the right.`,
     }),
@@ -218,6 +204,19 @@ function sectorCard(sector, hero) {
 
   card.append(top, body);
   return card;
+}
+
+function bucketColumn(bucket, sectors, lead) {
+  const col = el("section", `bucket is-${bucket.tone}`);
+  col.setAttribute("aria-label", `${bucket.title}, ${bucket.range}`);
+  const head = el("header", "bucket-head");
+  const title = el("div", "bucket-title");
+  title.append(el("h3", "", bucket.title), el("span", "bucket-range", bucket.range));
+  head.append(title, el("span", "bucket-count", String(sectors.length)));
+  col.append(head);
+  if (!sectors.length) col.append(el("p", "bucket-empty", "None"));
+  for (const sector of sectors) col.append(sectorCard(sector, sector.ticker === lead));
+  return col;
 }
 
 function mapRow(sector) {
@@ -507,19 +506,26 @@ function renderSectors(body, reading, reads, count) {
   const lead = featuredTicker(reading);
   const printed = CANON.filter((ticker) => reading.sectors[ticker].available);
   const missing = CANON.filter((ticker) => !reading.sectors[ticker].available);
-  const order = [lead, ...printed.filter((ticker) => ticker !== lead), ...missing];
-  const cards = el("div", "sector-cards");
+  const cards = el("div", "bucket-grid");
   cards.id = "cards";
-  const grid = el("div", "card-grid");
-  for (const ticker of order.slice(1)) grid.append(sectorCard(reading.sectors[ticker], false));
-  cards.append(sectorCard(reading.sectors[order[0]], true), grid);
+  for (const bucket of BUCKETS) {
+    const inBucket = printed
+      .map((ticker) => reading.sectors[ticker])
+      .filter((sector) => sector.level === bucket.level)
+      .sort((a, b) => a.points - b.points || a.ticker.localeCompare(b.ticker));
+    cards.append(bucketColumn(bucket, inBucket, lead));
+  }
+  const unprinted = el("div", "bucket-missing");
+  unprinted.append(el("span", "bucket-missing-label", "No print"), ...missing.map((ticker) => missingRow(reading.sectors[ticker])));
 
+  const bar = el("div", "sector-bar");
   const note = el(
     "p",
     "hint sector-source",
-    `Sector cards read from ${reading.sectorSource}. The large number is the positioning percentile for the week you pick. ${order[0]} is the featured card.`,
+    `Sector cards read from ${reading.sectorSource}, grouped by where each sits on the Soft ↔ Crowded scale. The large number is the positioning percentile for the week you pick.`,
   );
   note.id = "cards-blurb";
+  bar.append(note, weeksSelect());
 
   const mapWrap = el("div", "subblock");
   const mapHead = el("div", "subhead");
@@ -551,7 +557,8 @@ function renderSectors(body, reading, reads, count) {
   map.append(header, rows);
   mapWrap.append(mapHead, map);
 
-  body.replaceChildren(note, cards);
+  body.replaceChildren(bar, cards);
+  if (missing.length) body.append(unprinted);
   if (reads.length) {
     const extras = el("div", "icard-grid subblock");
     extras.append(...reads.map(indicatorCard));
@@ -639,8 +646,8 @@ function paint() {
   );
   const gaugeVisible = showAll || state.source === "desk";
 
-  document.getElementById("sample-line").textContent =
-    `Sample week · ${reading.weekLabel} · ${showAll ? "All sources" : reading.sourceLabel}`;
+  document.getElementById("asof-line").textContent =
+    `Week of ${reading.weekLabel} · ${showAll ? "All sources" : reading.sourceLabel}`;
   document.getElementById("history-date").textContent = reading.weekLabel;
 
   const range = document.getElementById("week");
@@ -708,12 +715,13 @@ function bind() {
 }
 
 function startStudy() {
-  const latest = buildReading("jpm", WEEKS.length - 1, 4).sectors;
+  const reading = buildReading("jpm", WEEKS.length - 1, 4);
+  const latest = reading.sectors;
   const printed = CANON.map((ticker) => latest[ticker]).filter((sector) => sector.available);
   const soft = printed.filter((sector) => sector.points < 25).sort((a, b) => a.points - b.points);
   const crowded = printed.filter((sector) => sector.points >= 75).sort((a, b) => b.points - a.points);
   const selected = (new URLSearchParams(location.search).get("study") || "").toUpperCase();
-  renderStudy(document.getElementById("study"), { soft, crowded, selected });
+  renderStudy(document.getElementById("study"), { soft, crowded, selected, weekLabel: reading.weekLabel });
 }
 
 readState();

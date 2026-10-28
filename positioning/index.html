@@ -6,7 +6,7 @@
     <title>Positioning desk · Positioning %.</title>
     <meta
       name="description"
-      content="A full desk of positioning reads: sectors, broad equity, retail and funds, prime book, options and vol, correlation, credit, policy, futures, and semis and AI. Sample figures."
+      content="A full desk of positioning reads: sectors, broad equity, retail and funds, prime book, options and vol, correlation, credit, policy, futures, and semis and AI, each on one Soft ↔ Crowded scale."
     />
     <meta name="theme-color" content="#f4f5f7" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
@@ -19,8 +19,8 @@
         <a class="lockup" href="../">Positioning<span class="mark">%.</span></a>
         <nav class="nav" aria-label="Pages">
           <a class="is-current" href="./" aria-current="page">Positioning</a>
-          <a href="../spx-levels/">SPX Levels</a>
           <a href="../options-flow/">Options Flow</a>
+          <a href="../spx-levels/">SPX Levels</a>
         </nav>
       </div>
       <nav class="secnav" aria-label="Desk sections">
@@ -33,13 +33,13 @@
     <div class="wrap">
       <main id="content">
         <section class="page-head">
-          <span class="pill">Sample series</span>
+          <span class="pill">Weekly reads</span>
           <h1>Positioning desk</h1>
           <p class="lede">
             Ten categories of bank-style positioning reads, each redrawn on one Soft ↔ Crowded scale.
             Green is light positioning. Dark is crowded. The triangle marks the week you pick.
           </p>
-          <p class="sample-line pill" id="sample-line">Sample week · Oct 23, 2026 · All sources</p>
+          <p class="asof-line pill" id="asof-line">Week of Oct 23, 2026 · All sources</p>
         </section>
 
         <section class="controls" aria-label="Reading controls">
@@ -54,7 +54,7 @@
               <p class="history-date" id="history-date">Oct 23, 2026</p>
             </div>
             <input id="week" type="range" min="0" max="7" value="7" aria-labelledby="history-label" />
-            <p class="hint">8 sample weeks. Every card, bar, and note follows the week you pick.</p>
+            <p class="hint">8 weeks of history. Every card, bar, and note follows the week you pick.</p>
           </div>
         </section>
 
@@ -76,21 +76,17 @@
           <div class="section-head">
             <div class="section-title-row">
               <h2 id="study-title">Study desk</h2>
-              <span class="section-count">Sample week · Oct 23, 2026 · JPM</span>
+              <span class="section-count" id="study-count">JPM · week of Oct 23, 2026</span>
             </div>
             <p class="overview-headline" id="study-summary">Soft JPM sectors this week.</p>
             <p class="hint">
-              Structures people study when a sector sits on the soft side or the crowded side, with strikes and
-              marks from a committed snapshot. The study desk stays on the latest sample week whatever the history
-              slider shows.
+              Only sectors that meet the criteria get a tab: JPM reads under 0.25 (soft) or 0.75 and up (crowded),
+              with strikes and marks from the latest session close. The study desk stays on the latest week whatever
+              the history slider shows.
             </p>
           </div>
           <div class="study-tabs" id="study-tabs" role="tablist" aria-label="Soft and crowded sectors"></div>
           <div id="study-body"><p class="hint">Loading study marks…</p></div>
-          <p class="closer">
-            Desk cards above are sample series: each card’s last print is read off a reference chart dated on the card, earlier weeks are a
-            sample path, and cards marked illustrative are sample values throughout.
-          </p>
         </section>
       </main>
 
@@ -102,12 +98,12 @@
         <nav class="foot-links" aria-label="Footer">
           <a href="../">Home</a>
           <a class="is-current" href="./" aria-current="page">Positioning</a>
-          <a href="../spx-levels/">SPX Levels</a>
           <a href="../options-flow/">Options Flow</a>
+          <a href="../spx-levels/">SPX Levels</a>
         </nav>
       </footer>
     </div>
-    <noscript>This desk needs JavaScript to draw the sample reads.</noscript>
+    <noscript>This desk needs JavaScript to draw the reads.</noscript>
     <script type="module" src="/src/positioning.js"></script>
   </body>
 </html>

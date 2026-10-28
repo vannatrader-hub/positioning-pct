@@ -64,8 +64,8 @@ export function leapMath(leap) {
   return { premium, breakeven };
 }
 
-/** Which structures and chains each side of the curriculum reads. */
-export const CURRICULUM = {
+/** Which structures and chains each side of the study desk reads. */
+export const STRUCTURES = {
   soft: { spread: "bullPut", leap: "callLeap", strip: "putStrip", leapRows: "leapCalls" },
   crowded: { spread: "bearCall", leap: "putLeap", strip: "callStrip", leapRows: "leapPuts" },
 };
@@ -74,30 +74,30 @@ const COPY = {
   soft: {
     spreadTitle: "Bull put",
     spreadCopy: (s) =>
-      `An example studied when a sector is soft: short the ${strike(s.short.strike)} put and long the ${strike(s.long.strike)} put, same expiration. The long put sets a floor, so the most it can lose is known up front.`,
+      `Short the ${strike(s.short.strike)} put, long the ${strike(s.long.strike)} put, same expiration. The long put sets a floor, so the max loss is known up front.`,
     spreadEmpty: "A defined-risk structure: two puts, same expiration, the short strike above the long strike.",
     leapTitle: "Call LEAP",
     leapCopy: (l) =>
-      `An example long-dated call near the money: long the ${strike(l.long.strike)} call expiring ${expiry(l.expiration)}.`,
-    leapEmpty: "A long-dated call. Textbooks use it to carry a view on a distant expiration instead of one that ends this month.",
+      `Long-dated call near the money: long the ${strike(l.long.strike)} call expiring ${expiry(l.expiration)}.`,
+    leapEmpty: "A long-dated call. It carries the view out to a distant expiration instead of one that ends this month.",
     stripTitle: "Put chain strip",
-    stripKicker: "the bull put curriculum",
+    stripKicker: "bull put strikes",
     lead: (sector) =>
-      `${sector.ticker} (${sector.short}) reads ${sector.display} on the JPM monitor, inside the soft quartile under 0.25. These are the structures people study when a sector sits on the soft side.`,
+      `${sector.ticker} (${sector.short}) reads ${sector.display} on the JPM monitor, inside the soft quartile under 0.25. Structures that line up with a soft read.`,
   },
   crowded: {
     spreadTitle: "Bear call",
     spreadCopy: (s) =>
-      `An example studied when a sector is crowded: short the ${strike(s.short.strike)} call and long the ${strike(s.long.strike)} call, same expiration. The long call sets a ceiling on the loss, so the most it can lose is known up front.`,
+      `Short the ${strike(s.short.strike)} call, long the ${strike(s.long.strike)} call, same expiration. The long call caps the loss, so the max loss is known up front.`,
     spreadEmpty: "A defined-risk structure: two calls, same expiration, the short strike below the long strike.",
     leapTitle: "Put LEAP",
     leapCopy: (l) =>
-      `An example long-dated put near the money: long the ${strike(l.long.strike)} put expiring ${expiry(l.expiration)}. Textbooks use it as distant protection when positioning is full.`,
-    leapEmpty: "A long-dated put. Textbooks use it as distant protection when positioning is full.",
+      `Long-dated put near the money: long the ${strike(l.long.strike)} put expiring ${expiry(l.expiration)}. Distant protection when positioning is full.`,
+    leapEmpty: "A long-dated put. Distant protection when positioning is full.",
     stripTitle: "Call chain strip",
-    stripKicker: "the bear call curriculum",
+    stripKicker: "bear call strikes",
     lead: (sector) =>
-      `${sector.ticker} (${sector.short}) reads ${sector.display} on the JPM monitor, at the 0.75 line where the crowded quartile starts. These are the structures people study when a sector sits on the crowded side.`,
+      `${sector.ticker} (${sector.short}) reads ${sector.display} on the JPM monitor, at the 0.75 line where the crowded quartile starts. Structures that line up with a crowded read.`,
   },
 };
 
@@ -143,7 +143,7 @@ function sharesCard(ticker, underlying, marks) {
   return studyCard(
     "Shares",
     ticker,
-    el("p", "study-copy", "The sector fund itself. Lessons treat this as the plain way to hold the basket, with no contract and no expiration."),
+    el("p", "study-copy", "The sector fund itself: the plain way to hold the basket, with no contract and no expiration."),
     quoteGrid(pairs),
     stamp(marks),
   );
@@ -282,7 +282,7 @@ function leapCard(ticker, leap, leapRows, underlying, copy, marks) {
 
 function panel(sector, marks) {
   const { ticker, side } = sector;
-  const plan = CURRICULUM[side];
+  const plan = STRUCTURES[side];
   const copy = COPY[side];
   const underlying = marks.underlyings[ticker] ?? {};
   const chains = marks.chains?.[ticker] ?? {};
@@ -348,10 +348,11 @@ function tabGroup(label, side) {
 }
 
 /** soft: JPM sector reads under 0.25 this week; crowded: 0.75 and up. */
-export async function renderStudy(root, { soft, crowded, selected }) {
+export async function renderStudy(root, { soft, crowded, selected, weekLabel }) {
   const tabs = root.querySelector("#study-tabs");
   const body = root.querySelector("#study-body");
   const summary = root.querySelector("#study-summary");
+  root.querySelector("#study-count").textContent = `JPM · week of ${weekLabel}`;
 
   const list = (items) => items.map((sector) => `${sector.ticker} ${sector.display}`).join(" · ");
   summary.replaceChildren(
@@ -370,7 +371,12 @@ export async function renderStudy(root, { soft, crowded, selected }) {
   const sectors = [
     ...soft.map((sector) => ({ ...sector, side: "soft" })),
     ...crowded.map((sector) => ({ ...sector, side: "crowded" })),
-  ];
+  ].filter((sector) => marks.underlyings?.[sector.ticker]);
+  if (!sectors.length) {
+    tabs.replaceChildren();
+    body.replaceChildren(el("p", "bucket-empty", "None"));
+    return;
+  }
   let current = sectors.some((sector) => sector.ticker === selected) ? selected : sectors[0]?.ticker;
 
   const choose = (ticker) => {
