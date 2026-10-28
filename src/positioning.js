@@ -361,6 +361,12 @@ function indicatorCard(read) {
   return card;
 }
 
+function chartLink(id, text) {
+  const link = el("a", "panel-link", `${text} →`);
+  link.href = `../charts/#${id}`;
+  return link;
+}
+
 function gaugePanel(reading) {
   const panel = el("div", "panel gauge");
   panel.dataset.house = "desk";
@@ -408,7 +414,7 @@ function gaugePanel(reading) {
     el("p", "", "The calculation note is not on the Desk yet."),
   );
 
-  panel.append(top, main, copy);
+  panel.append(top, main, copy, chartLink("soft-vol", "Open the Soft Vol ↔ Stretched chart"));
   return panel;
 }
 
@@ -532,6 +538,7 @@ function renderSectors(body, reading, reads, count) {
   mapHead.append(
     el("h3", "", "Ranked, softest first"),
     el("p", "hint", "Every sector on one scale. The triangle marks this week’s percentile."),
+    chartLink("sectors", "Open the sector chart"),
   );
   const map = el("div", "map");
   const header = el("div", "map-head");

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Positioning charts · Positioning %.</title>
+    <meta
+      name="description"
+      content="Six positioning reads redrawn as interactive Soft ↔ Crowded charts: Soft Vol ↔ Stretched VIX, sector bars XLF to XLC, broad equity, credit stress, the fund manager survey, and GS risk appetite."
+    />
+    <meta name="theme-color" content="#f4f5f7" />
+    <link rel="icon" href="%BASE_URL%favicon.svg" />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <a class="skip" href="#content">Skip to content</a>
+    <header class="topbar">
+      <div class="wrap topbar-in">
+        <div class="topbar-start">
+          <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+          <nav class="surface" aria-label="Surface">
+            <a class="is-current" href="../../" aria-current="true"><i class="surface-dot" aria-hidden="true"></i>Desk</a>
+            <a href="../../vault/"><svg class="surface-dial" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.75" /><circle cx="6" cy="6" r="1.5" /></svg>Vault</a>
+          </nav>
+        </div>
+        <nav class="nav" aria-label="Pages">
+          <a class="is-current" href="../" aria-current="true">Positioning</a>
+          <a href="../../options-flow/">Options Flow</a>
+          <a href="../../spx-levels/">SPX Levels</a>
+        </nav>
+      </div>
+      <nav class="secnav" aria-label="Charts">
+        <div class="wrap secnav-in" id="chart-nav">
+          <a href="#soft-vol" data-target="soft-vol">Soft Vol</a>
+          <a href="#sectors" data-target="sectors">Sectors</a>
+          <a href="#broad-equity" data-target="broad-equity">Broad equity</a>
+          <a href="#credit-stress" data-target="credit-stress">Credit</a>
+          <a href="#fund-managers" data-target="fund-managers">Fund managers</a>
+          <a href="#risk-appetite" data-target="risk-appetite">Risk appetite</a>
+        </div>
+      </nav>
+    </header>
+
+    <div class="wrap">
+      <main id="content">
+        <nav class="subnav" aria-label="Positioning">
+          <a class="subnav-back" href="../"><span aria-hidden="true">←</span> Positioning</a>
+          <a class="is-current" href="./" aria-current="page">Charts</a>
+          <a href="../desk/">Soft ↔ Crowded desk</a>
+        </nav>
+        <section class="page-head">
+          <span class="pill">Weekly reads</span>
+          <h1>Positioning charts</h1>
+          <p class="lede">
+            Six headline reads redrawn on the Soft ↔ Crowded scale. Hover any chart for the week’s print, tap a week
+            to move every chart to it, and switch houses where more than one bank reads the same thing.
+          </p>
+          <p class="asof-line pill" id="asof-line">Week of Oct 23, 2026 · JPM · MS · GS · BoA · Desk</p>
+        </section>
+
+        <section class="controls" aria-label="Reading controls">
+          <div class="control">
+            <h2 class="control-label">How to read</h2>
+            <div class="legend pchart-legend">
+              <span><i class="sw" style="background: var(--soft)"></i>Soft, light positioning</span>
+              <span><i class="sw" style="background: var(--mid)"></i>Mid</span>
+              <span><i class="sw" style="background: var(--crowded)"></i>Crowded</span>
+              <span><i class="tri"></i>The week you pick</span>
+            </div>
+            <p class="hint">Each chart carries its house chip and the reference chart it was read from.</p>
+          </div>
+          <div class="control">
+            <div class="history-top">
+              <h2 id="history-label">History</h2>
+              <p class="history-date" id="history-date">Oct 23, 2026</p>
+            </div>
+            <input id="week" type="range" min="0" max="7" value="7" aria-labelledby="history-label" />
+            <p class="hint">8 weeks of history. Every chart follows the week you pick.</p>
+          </div>
+        </section>
+
+        <div class="pchart-grid" id="charts">
+          <article class="pchart is-wide" id="soft-vol" data-chart="soft-vol" aria-labelledby="soft-vol-title">
+            <div class="icard-top"><span class="house h-desk">Desk</span><span class="basis">Desk composite of JPM, MS, GS, BoA</span></div>
+            <header class="pchart-head">
+              <span class="section-num">01</span>
+              <h2 id="soft-vol-title">Soft Vol ↔ Stretched VIX</h2>
+              <p class="icard-sub">The VIX against what the S&amp;P 500 implies, as a residual in vol points. Below zero the VIX is cheap.</p>
+            </header>
+            <div class="pchart-body"></div>
+          </article>
+
+          <article class="pchart is-wide" id="sectors" data-chart="sectors" aria-labelledby="sectors-title">
+            <div class="icard-top"><span class="house h-jpm">JPM</span><span class="basis">Ref chart 06-Oct-26 (JPM)</span></div>
+            <header class="pchart-head">
+              <span class="section-num">02</span>
+              <h2 id="sectors-title">Sector Soft ↔ Crowded</h2>
+              <p class="icard-sub">The 11 Select Sector funds, XLF to XLC, as positioning percentiles on one Soft ↔ Crowded scale.</p>
+            </header>
+            <div class="pchart-body"></div>
+          </article>
+
+          <article class="pchart" id="broad-equity" data-chart="broad-equity" aria-labelledby="broad-equity-title">
+            <div class="icard-top"><span class="house h-jpm">JPM</span><span class="basis">Ref chart 06-Oct-26 (JPM)</span></div>
+            <header class="pchart-head">
+              <span class="section-num">03</span>
+              <h2 id="broad-equity-title">Broad equity positioning</h2>
+              <p class="icard-sub">The Equities line of the cross-asset positioning monitor, as a percentile. Add other lines to compare.</p>
+            </header>
+            <div class="pchart-body"></div>
+          </article>
+
+          <article class="pchart" id="credit-stress" data-chart="credit-stress" aria-labelledby="credit-stress-title">
+            <div class="icard-top"><span class="house h-desk">Desk</span><span class="basis">Ref chart Oct 22, 2026</span></div>
+            <header class="pchart-head">
+              <span class="section-num">04</span>
+              <h2 id="credit-stress-title">Credit stress</h2>
+              <p class="icard-sub">CDX default swaps and the BBB minus AAA spread on one time axis. Wider means investors are paying for risk.</p>
+            </header>
+            <div class="pchart-body"></div>
+          </article>
+
+          <article class="pchart" id="fund-managers" data-chart="fund-managers" aria-labelledby="fund-managers-title">
+            <div class="icard-top"><span class="house h-boa">BoA</span><span class="basis">Aug 2026 survey</span></div>
+            <header class="pchart-head">
+              <span class="section-num">05</span>
+              <h2 id="fund-managers-title">Fund manager survey · crowded trades</h2>
+              <p class="icard-sub">The survey’s most crowded trade and the cash fund managers hold, week by week.</p>
+            </header>
+            <div class="pchart-body"></div>
+          </article>
+
+          <article class="pchart" id="risk-appetite" data-chart="risk-appetite" aria-labelledby="risk-appetite-title">
+            <div class="icard-top"><span class="house h-gs">GS</span><span class="basis">Desk estimate</span></div>
+            <header class="pchart-head">
+              <span class="section-num">06</span>
+              <h2 id="risk-appetite-title">GS risk appetite</h2>
+              <p class="icard-sub">Risk appetite, equity positioning, risky versus safe assets, and the short-term composite on one panel.</p>
+            </header>
+            <div class="pchart-body"></div>
+          </article>
+        </div>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+          <p class="foot-note">Desk · public reading.</p>
+        </div>
+        <nav class="foot-links" aria-label="Footer">
+          <a href="../../">Home</a>
+          <a class="is-current" href="../" aria-current="true">Positioning</a>
+          <a href="../../options-flow/">Options Flow</a>
+          <a href="../../spx-levels/">SPX Levels</a>
+        </nav>
+      </footer>
+    </div>
+    <noscript>These charts need JavaScript to draw.</noscript>
+    <script type="module" src="/src/charts.js"></script>
+  </body>
+</html>

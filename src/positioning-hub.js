@@ -1,5 +1,7 @@
 import { CANON, WEEKS, buildReading, ordinal } from "./readings.js";
 import { INDICATORS, SECTIONS, leanOf, median, readIndicator } from "./desk.js";
+import { VOL_RANGE, broadEquityChart, chartFacts, creditChart, fundManagerChart, riskChart, sectorChart, softVolChart } from "./pct-charts.js";
+import { TONE, gaugeSvg, miniBars, miniColumns, miniLines, miniTracks } from "./chart-svg.js";
 
 const base = import.meta.env ? import.meta.env.BASE_URL : "/";
 
@@ -33,3 +35,34 @@ if (credit.length) {
 
 const desk = buildReading("all", latest, 4);
 fact("vol", `${desk.volName} ${desk.volDisplay} pts · week of ${desk.weekLabel}`);
+
+for (const [id, text] of Object.entries(chartFacts(latest))) fact(`chart-${id}`, text);
+
+const vol = softVolChart("desk", latest);
+const cut = (points) => (points + VOL_RANGE) / (2 * VOL_RANGE);
+const broad = broadEquityChart(latest).read;
+const creditCharts = creditChart(latest);
+const fms = fundManagerChart(latest);
+const previews = {
+  "soft-vol": () => gaugeSvg({ position: vol.position, cuts: [cut(-0.4), cut(0.4)], compact: true }),
+  sectors: () => miniColumns(sectorChart("jpm", latest).bars),
+  "broad-equity": () =>
+    miniLines([{ values: broad.pctPath, color: TONE.ink }], {
+      domain: [0, 100],
+      bands: [
+        { from: 0, to: 40, fill: TONE.bandSoft },
+        { from: 67, to: 100, fill: TONE.bandCrowded },
+      ],
+    }),
+  "credit-stress": () =>
+    miniLines([
+      { values: creditCharts.cdx.pctPath, color: TONE.ink },
+      { values: creditCharts.bbb.pctPath, color: "#4a6cf7" },
+    ], { domain: [60, 100] }),
+  "fund-managers": () => miniBars(fms.trades, Math.max(...fms.trades.map((item) => item.value)) * 1.1),
+  "risk-appetite": () => miniTracks(riskChart(latest).reads.map((read) => read.pct)),
+};
+for (const host of document.querySelectorAll("[data-preview]")) {
+  const make = previews[host.dataset.preview];
+  if (make) host.replaceChildren(make());
+}
