@@ -120,12 +120,21 @@
       "confidence": "$$$",
       "refPrice": 177.3,
       "flow": [
-        "Qualcomm (QCOM) will report on 11-3 and shares forming a two-week basing pattern on a breakout retest and key AVWAP level have seen plenty of bullish options positioning."
+        "Qualcomm (QCOM) will report on 11-3 and shares forming a two-week basing pattern on a breakout retest and key AVWAP level have seen plenty of bullish options positioning.",
+        "QCOM June $160 short puts opened 5000X on 9/22 for $7.8M, June $250 calls bought 4500X for $9M on 9/21 and now 9000 in open interest, 1500 March $160 short puts, mixed buys and sells of June and Jan. 2028 $300 calls, a 9/25 buy of 3500 February $250 calls for $4.4M and more recently 1200 February $200 calls bought for $1.3M and 1500 Sep. $125 short puts opened for $1.3M."
       ],
-      "customerPurchased": [],
-      "oi": [],
+      "customerPurchased": [
+        { "contract": "Feb $200 calls", "detail": "1,200 bought · $1.3M · more recently", "side": "calls_bought" },
+        { "contract": "Sep $125 puts", "detail": "1,500 sold to open · $1.3M · more recently", "side": "puts_sold" },
+        { "contract": "Feb $250 calls", "detail": "3,500 bought · $4.4M · 9/25", "side": "calls_bought" }
+      ],
+      "oi": [
+        { "contract": "Jun $250 calls", "detail": "9,000 in OI · 4,500 bought 9/21 · $9M" },
+        { "contract": "Jun $160 short puts", "detail": "5,000 opened 9/22 · $7.8M" },
+        { "contract": "Mar $160 short puts", "detail": "1,500 in OI" }
+      ],
       "recommendation": "QCOM has a clear $169 level to trade against providing a real nice risk-reward here and put sales seem more popular that call buys.",
-      "lead": null,
+      "lead": { "type": "call", "action": "bought", "qty": 1200, "strike": 200, "expiry": "February", "price": null },
       "quote": { "date": "2026-10-26", "last": 179.6, "prev": 175.91 }
     },
     {
