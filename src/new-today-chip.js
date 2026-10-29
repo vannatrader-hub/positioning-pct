@@ -14,12 +14,12 @@ function paint(chip, items) {
   const sub = chip.querySelector('[data-nt="sub"]');
   chip.classList.toggle("is-lit", count > 0);
   chip.classList.toggle("is-quiet", count === 0);
-  if (sub) sub.textContent = count ? `${count} new since 5 AM CT` : "Quiet since 5 AM CT";
+  if (sub) sub.textContent = count ? `${count} new since 12 AM CT` : "Quiet since 12 AM CT";
   chip.setAttribute(
     "aria-label",
-    count ? `New Today: ${count} new on the Desk since 5:00 AM CT` : "New Today: nothing new on the Desk since 5:00 AM CT",
+    count ? `New Today: ${count} new on the Desk since 12:00 AM CT` : "New Today: nothing new on the Desk since 12:00 AM CT",
   );
-  /* Go quiet on its own at the 5:00 AM CT rollover if the page stays open. */
+  /* Go quiet on its own at the midnight CT rollover if the page stays open. */
   const wait = deskWindow(day).end - Date.now();
   if (wait > 0 && wait < 2 ** 31 - 1) setTimeout(() => paint(chip, items), wait + 1000);
 }

@@ -8,7 +8,7 @@ import { breakeven, chartLevels, resolveExpiry } from "../src/flow-chart.js";
 import { SIDES, alertLabel, sortPlays } from "../src/options-flow.js";
 import { SECTION_ORDER, STATUS, allPlays, levelKind, outcomeLabel, sortCards, spotlightLevels, spotlightLines } from "../src/spotlights.js";
 import { activeSpotlights, earningsBoxes, spotlightStar, tradeDates } from "../src/scorecard.js";
-import { NT_SECTIONS, SOURCE_LABELS, deskDay, deskDayStart, deskWindow, itemsForDay } from "../src/new-today-window.js";
+import { NT_SECTIONS, SOURCE_LABELS, deskDay, deskDayStart, deskWindow, itemsForDay, windowLabel } from "../src/new-today-window.js";
 import {
   CHARTS,
   CHART_IDS,
@@ -654,27 +654,49 @@ for (const source of ["jpm", "ms", "gs", "boa", "desk"]) {
   }
 }
 
-/* New Today: desk day is 5:00 AM CT to 4:59:59 AM CT the next morning, DST-aware. */
+/* New Today: desk day is midnight CT through 11:59:59 PM CT the same calendar date, DST-aware. */
 const deskDayCases = {
-  "2026-10-28T04:59:59-05:00": "2026-10-27",
-  "2026-10-28T05:00:00-05:00": "2026-10-28",
-  "2026-10-29T04:59:59-05:00": "2026-10-28",
-  "2026-10-29T05:00:00-05:00": "2026-10-29",
+  "2026-10-27T23:59:59-05:00": "2026-10-27",
+  "2026-10-28T00:00:00-05:00": "2026-10-28",
+  "2026-10-28T04:05:00-05:00": "2026-10-28",
+  "2026-10-29T04:05:00-05:00": "2026-10-29",
+  "2026-10-28T23:59:59-05:00": "2026-10-28",
+  "2026-10-29T00:00:00-05:00": "2026-10-29",
   "2026-10-28T23:03:00Z": "2026-10-28",
-  "2026-11-01T04:30:00-06:00": "2026-10-31",
-  "2026-11-01T05:00:00-06:00": "2026-11-01",
-  "2026-03-08T09:59:00Z": "2026-03-07",
-  "2026-03-08T10:00:00Z": "2026-03-08",
+  "2026-11-01T00:00:00-05:00": "2026-11-01",
+  "2026-11-01T04:30:00-06:00": "2026-11-01",
+  "2026-11-02T00:00:00-06:00": "2026-11-02",
+  "2026-03-08T05:59:59Z": "2026-03-07",
+  "2026-03-08T06:00:00Z": "2026-03-08",
+  "2026-03-08T09:05:00Z": "2026-03-08",
 };
 for (const [stamp, want] of Object.entries(deskDayCases)) assert(deskDay(stamp) === want, `desk day of ${stamp} ${deskDay(stamp)} !== ${want}`);
-assert(deskDayStart("2026-10-28") === "2026-10-28T05:00:00-05:00", `desk day start CDT ${deskDayStart("2026-10-28")}`);
-assert(deskDayStart("2026-11-02") === "2026-11-02T05:00:00-06:00", `desk day start CST ${deskDayStart("2026-11-02")}`);
-const fallBack = deskWindow("2026-10-31");
-assert(fallBack.end - fallBack.start === 25 * 3600000, "the desk day over the Nov 1 fall-back runs 25 hours");
-const springForward = deskWindow("2026-03-07");
-assert(springForward.end - springForward.start === 23 * 3600000, "the desk day over the Mar 8 spring-forward runs 23 hours");
+assert(deskDayStart("2026-10-28") === "2026-10-28T00:00:00-05:00", `desk day start CDT ${deskDayStart("2026-10-28")}`);
+assert(deskDayStart("2026-11-01") === "2026-11-01T00:00:00-05:00", `desk day start fall-back midnight ${deskDayStart("2026-11-01")}`);
+assert(deskDayStart("2026-11-02") === "2026-11-02T00:00:00-06:00", `desk day start CST ${deskDayStart("2026-11-02")}`);
+assert(deskDayStart("2026-03-08") === "2026-03-08T00:00:00-06:00", `desk day start spring-forward midnight ${deskDayStart("2026-03-08")}`);
+assert(deskDayStart("2026-03-09") === "2026-03-09T00:00:00-05:00", `desk day start after spring-forward ${deskDayStart("2026-03-09")}`);
+const fallBack = deskWindow("2026-11-01");
+assert(fallBack.end - fallBack.start === 25 * 3600000, "the Nov 1 fall-back desk day runs 25 hours");
+const springForward = deskWindow("2026-03-08");
+assert(springForward.end - springForward.start === 23 * 3600000, "the Mar 8 spring-forward desk day runs 23 hours");
+assert(deskWindow("2026-10-28").end - deskWindow("2026-10-28").start === 24 * 3600000, "a normal desk day runs 24 hours");
+assert(
+  windowLabel("2026-10-29") === "Thu, Oct 29 · 12:00 AM CT → Thu, Oct 29 · 11:59 PM CT",
+  `window label ${windowLabel("2026-10-29")}`,
+);
 
 const ntPage = readFileSync(join(root, "new-today/index.html"), "utf8");
+const homePage = readFileSync(join(root, "index.html"), "utf8");
+assert(ntPage.includes("12:00 AM through 11:59 PM"), "New Today lede describes the calendar desk day");
+for (const [file, text] of [
+  ["new-today/index.html", ntPage],
+  ["index.html", homePage],
+  ["src/new-today-chip.js", readFileSync(join(root, "src/new-today-chip.js"), "utf8")],
+  ["README.md", readFileSync(join(root, "README.md"), "utf8")],
+]) {
+  assert(!/5:00 AM|4:59 AM|(^|[^0-9:])5 AM CT/.test(text), `${file} still describes the overnight desk-day cut`);
+}
 assert(viteConfig.includes('"new-today/index.html"'), "vite builds new-today/index.html");
 assert(ntPage.includes('src="/src/new-today.js"') && ntPage.includes('id="nt-body"'), "New Today page runs new-today.js");
 for (const section of NT_SECTIONS) assert(ntPage.includes(`href="#nt-${section.id}"`), `New Today subnav jumps to ${section.title}`);
@@ -682,12 +704,13 @@ assert(
   JSON.stringify(NT_SECTIONS.map((section) => section.title)) === '["Positioning","Options Flow","SPX Levels","Research desk"]',
   "New Today sections run Positioning, Options Flow, SPX Levels, Research desk",
 );
-assert(/<section class="hero">[\s\S]*?<div class="hero-row">[\s\S]*?class="lockup"[\s\S]*?<a class="nt-chip" href="new-today\/" data-new-today/.test(readFileSync(join(root, "index.html"), "utf8")), "home hero carries the New Today chip beside the wordmark");
-assert(readFileSync(join(root, "index.html"), "utf8").includes('src="/src/new-today-chip.js"'), "home runs new-today-chip.js");
+assert(/<section class="hero">[\s\S]*?<div class="hero-row">[\s\S]*?class="lockup"[\s\S]*?<a class="nt-chip" href="new-today\/" data-new-today/.test(homePage), "home hero carries the New Today chip beside the wordmark");
+assert(homePage.includes('src="/src/new-today-chip.js"'), "home runs new-today-chip.js");
+assert(homePage.includes("Since 12 AM CT"), "home chip counts from midnight CT");
 
 const nt = JSON.parse(readFileSync(join(root, "public/data/new-today.json"), "utf8"));
-assert(nt.timeZone === "America/Chicago" && nt.dayStartsAt === "05:00", "new-today.json documents the Chicago 5:00 AM desk day");
-assert(nt.dayStart === deskDayStart(deskDay(nt.dayStart)), `new-today.json dayStart ${nt.dayStart} is a 5:00 AM CT open`);
+assert(nt.timeZone === "America/Chicago" && nt.dayStartsAt === "00:00", "new-today.json documents the Chicago midnight desk day");
+assert(nt.dayStart === deskDayStart(deskDay(nt.dayStart)), `new-today.json dayStart ${nt.dayStart} is a midnight CT open`);
 assert(Array.isArray(nt.items), "new-today.json items is a list");
 const ntIds = new Set();
 const ntSectionIds = new Set(NT_SECTIONS.map((section) => section.id));
@@ -710,7 +733,10 @@ for (const item of nt.items ?? []) {
 }
 const ntNewest = [...(nt.items ?? [])].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))[0];
 if (ntNewest) assert(deskDay(ntNewest.publishedAt) === deskDay(nt.dayStart), "new-today.json dayStart is the desk day of the newest item");
-assert(itemsForDay(nt.items ?? [], "2026-10-28").length === 13, "Oct 28 desk day lists thirteen items");
+assert(itemsForDay(nt.items ?? [], "2026-10-28").length === 8, "Oct 28 desk day lists eight items");
+const earlyThursday = (nt.items ?? []).filter((item) => item.publishedAt === "2026-10-29T04:05:00-05:00");
+assert(earlyThursday.length === 5 && earlyThursday.every((item) => deskDay(item.publishedAt) === "2026-10-29"), "4:05 AM CT Thursday belongs to the Thursday desk day");
+assert(itemsForDay(nt.items ?? [], "2026-10-29").length === 5, "Oct 29 desk day lists the five pre-open research notes");
 
 const nav = /<nav class="nav" aria-label="Pages">[\s\S]*?<\/nav>/;
 const deskPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "positioning/charts/index.html", "spx-levels/index.html", "options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html", "new-today/index.html"];

@@ -46,15 +46,15 @@ Site nav, in order: Positioning | Options Flow | SPX Levels.
 
 The chip runs an RGB outline (a conic gradient turning around the border) with a soft pulse while the current desk day has at least one item, and sits on a quiet static outline when it has none. Motion stops under `prefers-reduced-motion`.
 
-Desk day: **5:00 AM America/Chicago → 4:59:59 AM the next calendar day.** `src/new-today-window.js` reads each stamp on the Chicago wall clock (`Intl.DateTimeFormat`, `timeZone: "America/Chicago"`); if the hour is before 5, the item belongs to the previous calendar day's desk day. The same file gives the window's 5:00 AM open with the CDT/CST offset in force, so the fall-back night runs 25 hours and the spring-forward night 23. The browser filters on every load and the chip goes quiet on its own at the 5:00 AM rollover.
+Desk day: **12:00:00 AM America/Chicago → 11:59:59 PM the same calendar day** (half-open [midnight, next midnight)). `src/new-today-window.js` reads each stamp on the Chicago wall clock (`Intl.DateTimeFormat`, `timeZone: "America/Chicago"`); the item belongs to that calendar date, so 4:05 AM CT stays on the same desk day as the afternoon. The same file gives the window's midnight open with the CDT/CST offset in force, so the fall-back day runs 25 hours and the spring-forward day 23. The browser filters on every load and the chip goes quiet on its own at the midnight rollover.
 
 Feed: `public/data/new-today.json`.
 
 ```json
 {
   "timeZone": "America/Chicago",
-  "dayStartsAt": "05:00",
-  "dayStart": "2026-10-28T05:00:00-05:00",
+  "dayStartsAt": "00:00",
+  "dayStart": "2026-10-28T00:00:00-05:00",
   "updatedAt": "2026-10-28T17:32:00-05:00",
   "items": [
     {
