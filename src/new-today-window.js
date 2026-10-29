@@ -1,6 +1,6 @@
-/** New Today: the desk day runs 5:00 AM America/Chicago to 4:59:59 AM the next calendar day. */
+/** New Today: the desk day is the America/Chicago calendar date, 12:00:00 AM through 11:59:59 PM (half-open [midnight, next midnight)). */
 export const DESK_TZ = "America/Chicago";
-export const DAY_START_HOUR = 5;
+export const DAY_START_HOUR = 0;
 
 export const NT_SECTIONS = [
   { id: "positioning", title: "Positioning", empty: "Nothing new in Positioning this desk day." },
@@ -56,10 +56,15 @@ export function prevDeskDay(day) {
   return shiftDay(day, -1);
 }
 
-/** UTC offset of Chicago at 5:00 AM on a calendar day, as "-05:00" or "-06:00". 5 AM never sits in a DST gap. */
+/**
+ * UTC offset of Chicago at local midnight on a calendar day, as "-05:00" or "-06:00".
+ * The clock change is at 2:00 AM, so midnight is never in the DST gap or the repeated hour.
+ * The first guess is 18:00 UTC (early afternoon in Chicago, same calendar date); two passes
+ * settle on the offset in force at DAY_START_HOUR:00.
+ */
 function startOffset(day) {
   const [y, m, d] = day.split("-").map(Number);
-  let guess = Date.UTC(y, m - 1, d, DAY_START_HOUR + 6);
+  let guess = Date.UTC(y, m - 1, d, 18);
   for (let i = 0; i < 2; i += 1) {
     const ct = wallClock(new Date(guess));
     const asUtc = Date.UTC(ct.year, ct.month - 1, ct.day, ct.hour, ct.minute, ct.second);
@@ -71,12 +76,12 @@ function startOffset(day) {
   return `${sign}${String(Math.floor(abs / 60)).padStart(2, "0")}:${String(abs % 60).padStart(2, "0")}`;
 }
 
-/** ISO stamp of a desk day's 5:00 AM CT open, with the Chicago offset in force that morning. */
+/** ISO stamp of a desk day's midnight CT open, with the Chicago offset in force at that midnight. */
 export function deskDayStart(day) {
-  return `${day}T0${DAY_START_HOUR}:00:00${startOffset(day)}`;
+  return `${day}T${String(DAY_START_HOUR).padStart(2, "0")}:00:00${startOffset(day)}`;
 }
 
-/** The half-open window [start, end) in epoch ms; end is the next desk day's open, so 4:59:59 AM is the last second in. */
+/** The half-open window [start, end) in epoch ms; end is the next midnight, so 11:59:59 PM is the last second in. */
 export function deskWindow(day) {
   return { start: Date.parse(deskDayStart(day)), end: Date.parse(deskDayStart(nextDeskDay(day))) };
 }
@@ -104,9 +109,9 @@ export function dayLabel(day) {
   return dayFmt.format(new Date(`${day}T12:00:00Z`));
 }
 
-/** "Wed, Oct 28 · 5:00 AM CT → Thu, Oct 29 · 4:59 AM CT" */
+/** "Thu, Oct 29 · 12:00 AM CT → Thu, Oct 29 · 11:59 PM CT" */
 export function windowLabel(day) {
-  return `${dayLabel(day)} · 5:00 AM CT → ${dayLabel(nextDeskDay(day))} · 4:59 AM CT`;
+  return `${dayLabel(day)} · 12:00 AM CT → ${dayLabel(day)} · 11:59 PM CT`;
 }
 
 /** Site-relative hrefs resolve against the Vite base; absolute http(s) links pass through. */
