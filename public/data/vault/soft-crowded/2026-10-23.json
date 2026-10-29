@@ -1,0 +1,261 @@
+{
+  "$schema": "./schema.json",
+  "sku": "soft-crowded",
+  "product": "SKU1",
+  "week": "2026-10-23",
+  "weekLabel": "Oct 23, 2026",
+  "house": "jpm",
+  "houseLabel": "JPM",
+  "windowWeeks": 4,
+  "basis": "Ref chart 06-Oct-26 (JPM)",
+  "sectorSource": "the JPM Cross Asset Positioning Monitor (ref chart 06-Oct-26)",
+  "read": {
+    "kicker": "Week of Oct 23, 2026",
+    "headline": "Financials and staples are the soft end. Technology and energy are crowded.",
+    "lede": "Ten JPM sector prints fall into four columns for the week of Oct 23. Two sit under 0.25, three more are soft, three are mid, and two are at 0.67 or higher. Real Estate is not on this monitor.",
+    "stance": "No sector changed columns versus last week. The soft side kept easing, led by Financials at 0.18. Technology at 0.75 is the fullest print and is still building. Energy at 0.69 is the other crowded print and is still building too.",
+    "moved": [
+      "Financials fell 4 points to 0.18, the softest print, and call skew stays soft.",
+      "Energy rose 2 points to 0.69 and is still building inside the crowded column.",
+      "Utilities rose 1 point to 0.33 and are catching up from the soft column.",
+      "Communication Services firmed 1 point to 0.49 and remains mid."
+    ],
+    "watch": [
+      "Broad equities read 0.66 on the monitor, easing from a September peak near 0.80.",
+      "Desk Soft Vol is −1.2 points, so the VIX is cheap against what the S&P 500 implies.",
+      "Credit stress sits at the 79th percentile: CDX 351 bp, BBB−AAA 0.63.",
+      "The fund-manager survey names long global semis at 53%, with cash at 3.9%. GS risk appetite is +0.9 z and equity sentiment is +1.6, above the stretched line."
+    ]
+  },
+  "buckets": [
+    {
+      "level": "extreme soft",
+      "title": "Extreme soft",
+      "range": "under 0.25",
+      "tone": "xsoft",
+      "sectors": [
+        {
+          "ticker": "XLF",
+          "short": "Financials",
+          "name": "Financial Select Sector SPDR Fund",
+          "points": 18,
+          "display": "0.18",
+          "ile": "18th %ile",
+          "pill": "extreme soft → easing",
+          "caption": "18th %ile · call skew soft",
+          "wowText": "WoW −4 pts",
+          "regime": "Soft",
+          "level": "extreme soft"
+        },
+        {
+          "ticker": "XLP",
+          "short": "Consumer Staples",
+          "name": "Consumer Staples Select Sector SPDR Fund",
+          "points": 21,
+          "display": "0.21",
+          "ile": "21st %ile",
+          "pill": "extreme soft → easing",
+          "caption": "21st %ile · soft",
+          "wowText": "WoW −1 pts",
+          "regime": "Soft",
+          "level": "extreme soft"
+        }
+      ]
+    },
+    {
+      "level": "soft",
+      "title": "Soft",
+      "range": "0.25 – 0.39",
+      "tone": "soft",
+      "sectors": [
+        {
+          "ticker": "XLU",
+          "short": "Utilities",
+          "name": "Utilities Select Sector SPDR Fund",
+          "points": 33,
+          "display": "0.33",
+          "ile": "33rd %ile",
+          "pill": "soft → catching up",
+          "caption": "33rd %ile · soft",
+          "wowText": "WoW +1 pts",
+          "regime": "Soft",
+          "level": "soft"
+        },
+        {
+          "ticker": "XLV",
+          "short": "Health Care",
+          "name": "Health Care Select Sector SPDR Fund",
+          "points": 34,
+          "display": "0.34",
+          "ile": "34th %ile",
+          "pill": "soft → easing",
+          "caption": "34th %ile · soft",
+          "wowText": "WoW −1 pts",
+          "regime": "Soft",
+          "level": "soft"
+        },
+        {
+          "ticker": "XLI",
+          "short": "Industrials",
+          "name": "Industrial Select Sector SPDR Fund",
+          "points": 35,
+          "display": "0.35",
+          "ile": "35th %ile",
+          "pill": "soft → easing",
+          "caption": "35th %ile · soft",
+          "wowText": "WoW −1 pts",
+          "regime": "Soft",
+          "level": "soft"
+        }
+      ]
+    },
+    {
+      "level": "mid",
+      "title": "Mid",
+      "range": "0.40 – 0.66",
+      "tone": "mid",
+      "sectors": [
+        {
+          "ticker": "XLB",
+          "short": "Materials",
+          "name": "Materials Select Sector SPDR Fund",
+          "points": 46,
+          "display": "0.46",
+          "ile": "46th %ile",
+          "pill": "mid → easing",
+          "caption": "46th %ile · mid",
+          "wowText": "WoW −1 pts",
+          "regime": "Mid",
+          "level": "mid"
+        },
+        {
+          "ticker": "XLY",
+          "short": "Consumer Discretionary",
+          "name": "Consumer Discretionary Select Sector SPDR Fund",
+          "points": 48,
+          "display": "0.48",
+          "ile": "48th %ile",
+          "pill": "mid → easing",
+          "caption": "48th %ile · mid",
+          "wowText": "WoW −1 pts",
+          "regime": "Mid",
+          "level": "mid"
+        },
+        {
+          "ticker": "XLC",
+          "short": "Communication Services",
+          "name": "Communication Services Select Sector SPDR Fund",
+          "points": 49,
+          "display": "0.49",
+          "ile": "49th %ile",
+          "pill": "mid → firming",
+          "caption": "49th %ile · mid",
+          "wowText": "WoW +1 pts",
+          "regime": "Mid",
+          "level": "mid"
+        }
+      ]
+    },
+    {
+      "level": "crowded",
+      "title": "Crowded",
+      "range": "0.67 and up",
+      "tone": "crowded",
+      "sectors": [
+        {
+          "ticker": "XLE",
+          "short": "Energy",
+          "name": "Energy Select Sector SPDR Fund",
+          "points": 69,
+          "display": "0.69",
+          "ile": "69th %ile",
+          "pill": "crowded → still building",
+          "caption": "69th %ile · crowded",
+          "wowText": "WoW +2 pts",
+          "regime": "Crowded",
+          "level": "crowded"
+        },
+        {
+          "ticker": "XLK",
+          "short": "Technology",
+          "name": "Technology Select Sector SPDR Fund",
+          "points": 75,
+          "display": "0.75",
+          "ile": "75th %ile",
+          "pill": "crowded → still building",
+          "caption": "75th %ile · crowded",
+          "wowText": "WoW +1 pts",
+          "regime": "Crowded",
+          "level": "crowded"
+        }
+      ]
+    }
+  ],
+  "unprinted": [
+    {
+      "ticker": "XLRE",
+      "short": "Real Estate",
+      "name": "Real Estate Select Sector SPDR Fund",
+      "note": "Not in JPM monitor"
+    }
+  ],
+  "charts": {
+    "batch": 1,
+    "refs": [
+      {
+        "id": "soft-vol",
+        "nav": "Soft Vol",
+        "title": "Soft Vol ↔ Stretched VIX",
+        "house": "desk",
+        "houseLabel": "Desk",
+        "deskSection": "vol",
+        "fact": "Desk · Soft Vol −1.2 pts"
+      },
+      {
+        "id": "sectors",
+        "nav": "Sectors",
+        "title": "Sector Soft ↔ Crowded",
+        "house": "jpm",
+        "houseLabel": "JPM",
+        "deskSection": "sectors",
+        "fact": "JPM · 5 soft · 3 mid · 2 crowded"
+      },
+      {
+        "id": "broad-equity",
+        "nav": "Broad equity",
+        "title": "Broad equity positioning",
+        "house": "jpm",
+        "houseLabel": "JPM",
+        "deskSection": "broad",
+        "fact": "JPM · Equities 0.66 · 66th %ile"
+      },
+      {
+        "id": "credit-stress",
+        "nav": "Credit",
+        "title": "Credit stress",
+        "house": "desk",
+        "houseLabel": "Desk",
+        "deskSection": "credit",
+        "fact": "Desk · CDX 351 bp · BBB−AAA 0.63"
+      },
+      {
+        "id": "fund-managers",
+        "nav": "Fund managers",
+        "title": "Fund manager survey · crowded trades",
+        "house": "boa",
+        "houseLabel": "BoA",
+        "deskSection": "retail",
+        "fact": "BoA · Long global semis 53% · cash 3.9%"
+      },
+      {
+        "id": "risk-appetite",
+        "nav": "Risk appetite",
+        "title": "GS risk appetite",
+        "house": "gs",
+        "houseLabel": "GS",
+        "deskSection": "broad",
+        "fact": "GS · risk appetite +0.9 z · 73rd %ile"
+      }
+    ]
+  }
+}

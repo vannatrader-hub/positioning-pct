@@ -647,7 +647,11 @@ for (const source of ["jpm", "ms", "gs", "boa", "desk"]) {
 
 const nav = /<nav class="nav" aria-label="Pages">[\s\S]*?<\/nav>/;
 const deskPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "positioning/charts/index.html", "spx-levels/index.html", "options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html"];
-const publicPages = [...deskPages, "vault/index.html"];
+const vaultSurface = {
+  "vault/index.html": { desk: "../", vault: "./" },
+  "vault/soft-crowded/index.html": { desk: "../../", vault: "../" },
+};
+const publicPages = [...deskPages, ...Object.keys(vaultSurface)];
 for (const file of publicPages) {
   const html = readFileSync(join(root, file), "utf8");
   const order = [...(html.match(nav)?.[0] ?? "").matchAll(/>(Positioning|Options Flow|SPX Levels)</g)].map((m) => m[1]);
@@ -667,10 +671,10 @@ for (const file of publicPages) {
   assert(JSON.stringify(links.map((link) => link.label)) === '["Desk","Vault"]', `${where} reads Desk | Vault, got ${links.map((link) => link.label)}`);
   if (links.length !== 2) continue;
   const [desk, vault] = links;
-  const isVault = file === "vault/index.html";
-  assert(desk.current === !isVault && vault.current === isVault, `${where} marks ${isVault ? "Vault" : "Desk"} as current`);
-  if (isVault) {
-    assert(desk.href === "../" && vault.href === "./", `${where} Desk links home, got ${desk.href}`);
+  const vaultLinks = vaultSurface[file];
+  assert(desk.current === !vaultLinks && vault.current === Boolean(vaultLinks), `${where} marks ${vaultLinks ? "Vault" : "Desk"} as current`);
+  if (vaultLinks) {
+    assert(desk.href === vaultLinks.desk && vault.href === vaultLinks.vault, `${where} Desk ${desk.href} Vault ${vault.href}`);
   } else {
     assert(desk.href === "./" || /^(\.\.\/)+$/.test(desk.href), `${where} Desk links home, got ${desk.href}`);
     assert(vault.href === `${desk.href === "./" ? "" : desk.href}vault/`, `${where} Vault links to /vault/, got ${vault.href}`);
@@ -696,7 +700,7 @@ assert(!/type="password"|checkout/i.test(vaultPage), "Vault has no password fiel
 
 const monetization = /\b(free|paid|premium|subscri\w*|paywall\w*|upgrad\w*|trials?|pric(e|es|ed|ing)|members?hips?|unlock\w*)\b/i;
 const chromeCopy = [
-  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "vault/index.html", "404.html"].map((file) => [
+  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "vault/index.html", "vault/soft-crowded/index.html", "404.html"].map((file) => [
     file,
     readFileSync(join(root, file), "utf8"),
   ]),
@@ -727,7 +731,9 @@ assert(/<section class="vault-wall" id="vault-wall" data-state="checking"/.test(
 assert(/<h1 id="vault-wall-title">Sign in to open Vault<\/h1>/.test(vaultOutside), "Vault wall reads Sign in to open Vault");
 assert(/<input id="wall-email"[^>]*type="email"/.test(vaultOutside), "Vault wall asks for an email");
 assert(/<h1>Vault/.test(vaultTemplate) && (vaultTemplate.match(/class="tile vault-tile"/g) ?? []).length === 3, "Vault hero and tiles live in the template");
-assert(!/vault-hero|vault-tile|vault-desk/.test(vaultOutside), "no Vault content renders outside the template");
+assert(vaultTemplate.includes('class="tile vault-pack" href="soft-crowded/"'), "signed-in Vault links to the Soft ↔ Crowded pack");
+assert(!vaultOutside.includes("soft-crowded"), "the pack link stays inside the signed-in template");
+assert(!/vault-hero|vault-tile|vault-desk|vault-pack/.test(vaultOutside), "no Vault content renders outside the template");
 const gateSource = readFileSync(join(root, "src/vault-gate.js"), "utf8");
 assert(gateSource.includes("import.meta.env.VITE_CLERK_PUBLISHABLE_KEY"), "Vault gate reads VITE_CLERK_PUBLISHABLE_KEY");
 assert(gateSource.includes('import("@clerk/clerk-js")'), "Vault gate loads Clerk only on demand");
@@ -754,6 +760,157 @@ for (const name of readdirSync(join(root, "src"))) {
 }
 assert(page.includes("Soft") && page.includes("Crowded"), "cards render Soft and Crowded labels");
 assert(!page.includes("linear-gradient(90deg, #3"), "no blue-green card fill");
+
+/* Vault SKU1 slice 1: Soft ↔ Crowded pack stays behind the wall and off the Desk. */
+assert(viteConfig.includes('"vault/soft-crowded/index.html"'), "vite builds vault/soft-crowded/index.html");
+const packPage = readFileSync(join(root, "vault/soft-crowded/index.html"), "utf8");
+assert(packPage.includes('<body class="is-vault">'), "pack page carries the Vault theme");
+assert(packPage.includes('src="/src/vault-gate.js"') && packPage.includes('src="/src/vault-pack.js"'), "pack page runs the gate and the pack");
+assert(/class="lockup" href="\.\.\/\.\.\/"/.test(packPage), "pack lockup links home");
+const packMain = packPage.match(/<main id="content">([\s\S]*?)<\/main>/)?.[1] ?? "";
+const packTemplate = packMain.match(/<template id="vault-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
+const packOutside = packMain.replace(/<template id="vault-content">[\s\S]*?<\/template>/, "");
+assert(/<section class="vault-wall" id="vault-wall" data-state="checking"/.test(packOutside), "pack wall renders before the gate opens");
+assert(/<h1 id="vault-wall-title">Sign in to open Vault<\/h1>/.test(packOutside), "pack wall reads Sign in to open Vault");
+assert(packTemplate.includes('id="pack"') && packTemplate.includes('href="#read"') && packTemplate.includes('href="#sectors"') && packTemplate.includes('href="#charts"'), "pack shell lives in the template");
+assert(!/id="pack"|pack-sheet|bucket-grid/.test(packOutside), "pack content does not render outside the template");
+assert(readFileSync(join(root, "src/vault-gate.js"), "utf8").includes('new CustomEvent("vault-open")'), "gate tells the pack when Vault opens");
+for (const file of [...deskPages, "404.html", "index.html"]) {
+  assert(!readFileSync(join(root, file), "utf8").includes("soft-crowded"), `${file} links into the Vault pack`);
+}
+for (const name of readdirSync(join(root, "src"))) {
+  if (extname(name) !== ".js" || name === "vault-pack.js") continue;
+  assert(!readFileSync(join(root, "src", name), "utf8").includes("soft-crowded"), `src/${name} links into the Vault pack`);
+}
+
+const packDir = join(root, "public/data/vault/soft-crowded");
+const packSchema = JSON.parse(readFileSync(join(packDir, "schema.json"), "utf8"));
+const packIndex = JSON.parse(readFileSync(join(packDir, "index.json"), "utf8"));
+const packWeek = JSON.parse(readFileSync(join(packDir, `${packIndex.latest}.json`), "utf8"));
+assert(packSchema.$schema === "https://json-schema.org/draft/2020-12/schema", "pack schema is draft 2020-12");
+for (const key of ["read", "buckets", "charts"]) assert(packSchema.properties[key], `pack schema defines ${key}`);
+assert(packSchema.$defs.read.description?.includes("One-page read"), "schema names the one-page read");
+assert(packSchema.properties.buckets.description?.includes("Soft"), "schema names the Soft ↔ Crowded buckets");
+assert(packSchema.$defs.chartBatch.description?.includes("Batch-1"), "schema names the batch-1 chart refs");
+
+function derefSchema(root, node) {
+  if (!node || typeof node !== "object" || !node.$ref) return node;
+  assert(node.$ref.startsWith("#/"), `schema ref ${node.$ref}`);
+  return node.$ref.slice(2).split("/").reduce((cur, key) => cur?.[key], root);
+}
+
+function validatePack(rootSchema, schema, data, path) {
+  const node = derefSchema(rootSchema, schema);
+  if (!node) {
+    assert(false, `${path} missing schema`);
+    return;
+  }
+  if (Object.prototype.hasOwnProperty.call(node, "const")) {
+    assert(data === node.const, `${path} ${JSON.stringify(data)} !== ${JSON.stringify(node.const)}`);
+  }
+  if (node.enum) assert(node.enum.includes(data), `${path} ${JSON.stringify(data)} is not in ${node.enum}`);
+  if (node.type === "object") {
+    assert(data && typeof data === "object" && !Array.isArray(data), `${path} should be an object`);
+    if (!data || typeof data !== "object" || Array.isArray(data)) return;
+    for (const key of node.required ?? []) assert(key in data, `${path} missing ${key}`);
+    if (node.additionalProperties === false) {
+      for (const key of Object.keys(data)) assert(key in (node.properties ?? {}), `${path} unexpected ${key}`);
+    }
+    for (const [key, prop] of Object.entries(node.properties ?? {})) {
+      if (key in data) validatePack(rootSchema, prop, data[key], `${path}.${key}`);
+    }
+    return;
+  }
+  if (node.type === "array") {
+    assert(Array.isArray(data), `${path} should be an array`);
+    if (!Array.isArray(data)) return;
+    if (typeof node.minItems === "number") assert(data.length >= node.minItems, `${path} has ${data.length} items`);
+    if (typeof node.maxItems === "number") assert(data.length <= node.maxItems, `${path} has ${data.length} items`);
+    if (node.items) data.forEach((item, index) => validatePack(rootSchema, node.items, item, `${path}[${index}]`));
+    return;
+  }
+  if (node.type === "string") {
+    assert(typeof data === "string", `${path} should be a string`);
+    if (typeof data !== "string") return;
+    if (typeof node.minLength === "number") assert(data.length >= node.minLength, `${path} is empty`);
+    if (node.pattern) assert(new RegExp(node.pattern).test(data), `${path} "${data}" misses ${node.pattern}`);
+    return;
+  }
+  if (node.type === "integer") {
+    assert(Number.isInteger(data), `${path} ${data} should be an integer`);
+    if (!Number.isInteger(data)) return;
+    if (typeof node.minimum === "number") assert(data >= node.minimum, `${path} ${data} below ${node.minimum}`);
+    if (typeof node.maximum === "number") assert(data <= node.maximum, `${path} ${data} above ${node.maximum}`);
+  }
+}
+
+validatePack(packSchema, packSchema, packWeek, "week");
+assert(packIndex.sku === "soft-crowded" && packIndex.product === "SKU1" && packIndex.schema === "schema.json", "pack index names the schema");
+assert(packIndex.title === "Soft ↔ Crowded", `pack index title ${packIndex.title}`);
+assert(packIndex.latest === WEEKS[WEEKS.length - 1], `pack latest ${packIndex.latest} should be the Desk's current week`);
+assert(packWeek.$schema === "./schema.json", "week document points at the schema");
+
+const packAt = WEEKS.length - 1;
+const packReading = buildReading("jpm", packAt, 4);
+const packChart = sectorChart("jpm", packAt);
+const packFacts = chartFacts(packAt);
+assert(packWeek.week === packReading.weekIso && packWeek.weekLabel === packReading.weekLabel, "pack week label matches the Desk");
+assert(packWeek.house === "jpm" && packWeek.houseLabel === "JPM" && packWeek.windowWeeks === 4, "pack is the JPM 4-week read");
+assert(packWeek.basis === packChart.basis, `pack basis ${packWeek.basis}`);
+assert(packWeek.sectorSource === packReading.sectorSource, `pack sector source ${packWeek.sectorSource}`);
+assert(
+  JSON.stringify(packWeek.buckets.map((bucket) => [bucket.level, bucket.title, bucket.range, bucket.tone])) ===
+    JSON.stringify(SECTOR_BUCKETS.map((bucket) => [bucket.level, bucket.title, bucket.range, bucket.tone])),
+  "pack buckets follow the Desk Soft ↔ Crowded columns",
+);
+const seenTickers = [];
+for (const bucket of packWeek.buckets) {
+  const want = CANON.filter((ticker) => packReading.sectors[ticker].available && packReading.sectors[ticker].level === bucket.level)
+    .map((ticker) => packReading.sectors[ticker])
+    .sort((a, b) => a.points - b.points || a.ticker.localeCompare(b.ticker));
+  assert(bucket.sectors.length === want.length, `${bucket.level} has ${bucket.sectors.length} sectors, Desk has ${want.length}`);
+  bucket.sectors.forEach((sector, index) => {
+    const desk = want[index];
+    seenTickers.push(sector.ticker);
+    for (const key of ["ticker", "short", "name", "points", "display", "ile", "pill", "caption", "wowText", "regime", "level"]) {
+      assert(sector[key] === desk[key], `${sector.ticker} ${key} ${sector[key]} !== ${desk[key]}`);
+    }
+  });
+}
+const missing = CANON.filter((ticker) => !packReading.sectors[ticker].available);
+assert(
+  JSON.stringify(packWeek.unprinted) ===
+    JSON.stringify(missing.map((ticker) => {
+      const sector = packReading.sectors[ticker];
+      return { ticker, short: sector.short, name: sector.name, note: sector.unavailable };
+    })),
+  `pack unprinted ${JSON.stringify(packWeek.unprinted)}`,
+);
+assert(new Set(seenTickers).size === seenTickers.length, "a sector appears in two buckets");
+assert(JSON.stringify([...seenTickers].sort()) === JSON.stringify(CANON.filter((ticker) => !missing.includes(ticker)).sort()), "pack covers every printed sector");
+const prior = buildReading("jpm", packAt - 1, 4);
+for (const ticker of CANON) {
+  const now = packReading.sectors[ticker];
+  const then = prior.sectors[ticker];
+  if (!now.available || !then.available) continue;
+  assert(now.level === then.level, `${ticker} changed columns since last week (${then.level} → ${now.level})`);
+}
+assert(/No sector changed columns versus last week/.test(packWeek.read.stance), "one-page read records that columns were unchanged");
+for (const phrase of ["0.18", "0.75", "0.69", "0.66", "−1.2", "351", "3.9", "53%"]) {
+  assert(JSON.stringify(packWeek.read).includes(phrase), `one-page read names ${phrase}`);
+}
+assert(packWeek.charts.batch === 1, "chart refs are batch 1");
+assert(
+  JSON.stringify(packWeek.charts.refs.map((ref) => ref.id)) === JSON.stringify(CHART_IDS),
+  `pack chart refs ${packWeek.charts.refs.map((ref) => ref.id)}`,
+);
+packWeek.charts.refs.forEach((ref, index) => {
+  const chart = CHARTS[index];
+  assert(ref.id === chart.id && ref.nav === chart.nav && ref.title === chart.title, `chart ref ${ref.id} drifted from batch 1`);
+  assert(ref.house === chart.house && ref.houseLabel === HOUSES[chart.house] && ref.deskSection === chart.deskSection, `chart ref ${ref.id} house or section`);
+  assert(ref.fact === packFacts[ref.id], `chart ref ${ref.id} fact ${ref.fact} !== ${packFacts[ref.id]}`);
+});
+assert(readFileSync(join(root, "src/vault-pack.js"), "utf8").includes("data/vault/soft-crowded/"), "pack page loads the week document");
 
 if (failed) {
   console.error(`${failed} check(s) failed`);

@@ -3370,6 +3370,104 @@ body:has(.cc[open]) { overflow: hidden; }
 
 .vault-account button:hover { background: rgba(255, 255, 255, 0.07); color: var(--ink); }
 
+/* Vault pack: Desk cards and chart refs, in the Vault room. */
+.is-vault .vault-pack .tile-icon { background: #f1f3f6; }
+
+.vault-pack::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold, #f5c451), rgba(96, 132, 255, 0.55) 55%, transparent);
+}
+
+.subnav + #pack > .page-head { padding-top: 24px; }
+
+#pack-status { margin-top: 28px; }
+
+.pack-sheet {
+  display: grid;
+  gap: 22px;
+  padding: 22px 24px 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.pack-stance {
+  margin: 0;
+  max-width: 78ch;
+  font-size: 16.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+
+.pack-cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 36px;
+}
+
+.pack-sheet h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.pack-points {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.pack-points li {
+  position: relative;
+  padding-left: 14px;
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+.pack-points li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold, #f5c451);
+}
+
+#pack .card-body { cursor: default; }
+
+#pack .card:hover {
+  box-shadow: var(--shadow);
+  border-color: var(--line);
+}
+
+#pack .asof-line { gap: 8px; }
+
+#pack .asof-line .house { font-size: 11px; }
+
+.is-vault .subnav a:hover { background: rgba(255, 255, 255, 0.06); }
+
+.is-vault .subnav a.subnav-back:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #0b0d12;
+}
+
+.is-vault .open .arrow { background: rgba(255, 255, 255, 0.06); }
+.is-vault .tile:hover .open .arrow { color: #0b0d12; }
+.is-vault .bucket-missing { background: rgba(255, 255, 255, 0.03); }
+
 /* Positioning charts */
 .pchart-legend { margin-top: 12px; }
 
@@ -3829,6 +3927,7 @@ body:has(.cc[open]) { overflow: hidden; }
   .chart-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .bucket-key { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .bucket-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pack-cols { grid-template-columns: 1fr; }
   .sector-bar { flex-direction: column; align-items: flex-start; }
   .gauge-main { grid-template-columns: 1fr; gap: 16px; }
   .method-pill { justify-self: start; }
