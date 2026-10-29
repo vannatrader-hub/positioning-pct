@@ -11,7 +11,7 @@ Public sources are bank labels only: JPM, Morgan Stanley, BoA, GS, and a desk co
 Two surfaces, switched from the `Desk | Vault` control in every topbar:
 
 - Desk. Everything live today: home, the Positioning hub and its desk, Options Flow and its subpages, SPX Levels. URLs stay where they are; Desk is the surface name, not a path.
-- Vault (`/vault/`). Behind a sign-in wall. Signed out, the page shows one centered card ("Sign in to open Vault", an email field, and a link back to the Desk) and nothing else. Signed in, it shows the Phase 2 surface stub: a hero, three `Soon` preview tiles that do not link, and a panel pointing back to the Desk pages. It has its own darker theme scoped under `body.is-vault`. No password field and no checkout. See [Vault sign-in](#vault-sign-in).
+- Vault (`/vault/`). Behind a sign-in wall. Signed out, the page shows one centered card ("Sign in to open Vault", an email field, and a link back to the Desk) and nothing else. Signed in, it shows the private desk: a Soft ↔ Crowded weekly pack (`/vault/soft-crowded/`), three `Soon` preview tiles that do not link, and a panel pointing back to the Desk pages. The pack is linked only from the Vault. It has its own darker theme scoped under `body.is-vault`. No password field and no checkout. See [Vault sign-in](#vault-sign-in).
 
 Surface chrome (home, hubs, Vault, 404, and every topbar and footer) never carries monetization words or `$` outside the `$$$` flow mark; `npm run check` enforces this along with the switcher on every page.
 
@@ -82,6 +82,8 @@ For desk pipelines (site refreshes, X pulls, bank notes, research charts): appen
 Options Flow data lives in `public/data/flow/`: `plays.json` is the Shopping List seed (with `industry.broad` / `industry.focus`), `bars/<TICKER>.json` holds committed daily bars (`t,o,h,l,c,v`), `spotlights.json` holds the Spotlight tickets by row (`active`, `open`, `closed`) with their daily bars in `bars/` too, and `scorecard.json` is the weekly board snapshot. Charts are drawn as SVG from committed data, so no page needs a chart service.
 
 Each sector card shows the percentile, a status, and a Soft to Crowded bar; one timeframe select drives every card. Green is the soft end. Dark is crowded. The triangle marks that week’s print.
+
+The Vault Soft ↔ Crowded pack (`/vault/soft-crowded/`) reads `public/data/vault/soft-crowded/`. `schema.json` is the week document: sector buckets on the Soft ↔ Crowded scale, batch-1 chart refs, and the one-page read. `index.json` names the latest week. `2026-10-23.json` is that week, seeded from the Desk’s JPM sector read for the same date. The chart cards link out to the public Positioning charts. The Desk does not link back.
 
 ## Develop
 

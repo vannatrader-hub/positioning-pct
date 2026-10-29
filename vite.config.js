@@ -20,6 +20,7 @@ export default defineConfig({
         flowScorecard: resolve(root, "options-flow/scorecard/index.html"),
         newToday: resolve(root, "new-today/index.html"),
         vault: resolve(root, "vault/index.html"),
+        vaultSoftCrowded: resolve(root, "vault/soft-crowded/index.html"),
         notFound: resolve(root, "404.html"),
       },
     },

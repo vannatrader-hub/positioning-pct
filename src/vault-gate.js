@@ -59,6 +59,7 @@ function openVault(email) {
   accountEmail.textContent = email ? `Signed in as ${email}` : "Signed in";
   account.hidden = false;
   account.after(content.content.cloneNode(true));
+  document.dispatchEvent(new CustomEvent("vault-open"));
 }
 
 function noteRequest(email) {

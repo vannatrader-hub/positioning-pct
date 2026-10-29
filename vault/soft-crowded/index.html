@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Soft ↔ Crowded · Vault · Positioning %.</title>
+    <meta
+      name="description"
+      content="Vault weekly pack: sector Soft ↔ Crowded columns, a one-page read, and the batch-1 Positioning charts. Behind the Vault sign-in wall."
+    />
+    <meta name="theme-color" content="#0a0c10" />
+    <link rel="icon" href="%BASE_URL%favicon.svg" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <script type="module" src="/src/vault-gate.js"></script>
+    <script type="module" src="/src/vault-pack.js"></script>
+  </head>
+  <body class="is-vault">
+    <a class="skip" href="#content">Skip to content</a>
+    <header class="topbar">
+      <div class="wrap topbar-in">
+        <div class="topbar-start">
+          <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+          <nav class="surface" aria-label="Surface">
+            <a href="../../"><i class="surface-dot" aria-hidden="true"></i>Desk</a>
+            <a class="is-current" href="../" aria-current="page"><svg class="surface-dial" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.75" /><circle cx="6" cy="6" r="1.5" /></svg>Vault</a>
+          </nav>
+        </div>
+        <nav class="nav" aria-label="Pages">
+          <a href="../../positioning/">Positioning</a>
+          <a href="../../options-flow/">Options Flow</a>
+          <a href="../../spx-levels/">SPX Levels</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <main id="content">
+        <section class="vault-wall" id="vault-wall" data-state="checking" aria-labelledby="vault-wall-title">
+          <div class="wall-card">
+            <svg class="wall-dial" viewBox="0 0 48 48" aria-hidden="true">
+              <circle class="vd-ring" cx="24" cy="24" r="22" />
+              <circle class="vd-knob" cx="24" cy="24" r="14" />
+              <path class="vd-pointer" d="M24 12.5 V17" />
+              <circle class="vd-core" cx="24" cy="24" r="2.5" />
+            </svg>
+            <h1 id="vault-wall-title">Sign in to open Vault</h1>
+            <p class="wall-lede" id="wall-lede">Enter your email and we will send you a sign-in link.</p>
+            <form class="wall-form" id="wall-form" novalidate>
+              <label class="wall-label" for="wall-email">Email</label>
+              <div class="wall-row">
+                <input id="wall-email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" required />
+                <button class="wall-submit" id="wall-submit" type="submit">Email me a link</button>
+              </div>
+            </form>
+            <p class="wall-status" id="wall-status" role="status" aria-live="polite"></p>
+            <button class="wall-reset" id="wall-reset" type="button" hidden>Use a different email</button>
+            <a class="wall-back" href="../../"><span aria-hidden="true">←</span> Back to the Desk</a>
+          </div>
+        </section>
+
+        <div class="vault-account" id="vault-account" hidden>
+          <span id="vault-account-email"></span>
+          <button type="button" id="vault-signout">Sign out</button>
+        </div>
+
+        <template id="vault-content">
+          <nav class="subnav" aria-label="Vault">
+            <a class="subnav-back" href="../"><span aria-hidden="true">←</span> Vault</a>
+            <a class="is-current" href="./" aria-current="page">Soft ↔ Crowded</a>
+            <a href="#read">Read</a>
+            <a href="#sectors">Sectors</a>
+            <a href="#charts">Charts</a>
+          </nav>
+          <div id="pack">
+            <p class="hint" id="pack-status">Loading the week…</p>
+          </div>
+        </template>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+          <p class="foot-note">Vault · Soft ↔ Crowded pack.</p>
+        </div>
+        <nav class="foot-links" aria-label="Footer">
+          <a href="../../">Home</a>
+          <a href="../../positioning/">Positioning</a>
+          <a href="../../options-flow/">Options Flow</a>
+          <a href="../../spx-levels/">SPX Levels</a>
+          <a class="is-current" href="../" aria-current="page">Vault</a>
+        </nav>
+      </footer>
+    </div>
+  </body>
+</html>
