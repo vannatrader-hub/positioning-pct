@@ -2,8 +2,80 @@
   "timeZone": "America/Chicago",
   "dayStartsAt": "00:00",
   "dayStart": "2026-10-29T00:00:00-05:00",
-  "updatedAt": "2026-10-29T05:45:00-05:00",
+  "updatedAt": "2026-10-29T16:30:00-05:00",
   "items": [
+    {
+      "id": "2026-10-29-qqq-puts-1402",
+      "section": "options-flow",
+      "title": "QQQ: large Dec 31 $695 put buy",
+      "summary": "Buyer took 8,000 Dec 31 (quarterly) $695 puts in a large print around 2:02 PM CT; price printed as $17/27 (~$17.27 estimate).",
+      "href": "options-flow/",
+      "publishedAt": "2026-10-29T14:02:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-29-desk-recap",
+      "section": "options-flow",
+      "title": "Desk market wrap 10/29",
+      "summary": "Tech soft on Alphabet spend worries; breadth improved and vol compressed. Equal-weight indexes hit multi-week highs. Autos, retail, building materials, payments rotated higher. Watching Amazon into the week close.",
+      "href": "options-flow/",
+      "publishedAt": "2026-10-29T14:24:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-29-jazz-featured",
+      "section": "options-flow",
+      "title": "JAZZ ($$$): Dec $240 calls into earnings",
+      "summary": "2,700 Dec $240 calls bought 10/22 for about $865K; stock ~$205; earnings 11/2. Desk likes upside calls from key support.",
+      "href": "options-flow/dollar/#JAZZ",
+      "publishedAt": "2026-10-29T14:24:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-29-p-featured",
+      "section": "options-flow",
+      "title": "P ($$): long-dated $210 calls",
+      "summary": "Sept 2027 $210 calls bought; ~$138.6 spot; desk target $157.57 with the 50-day near $119 as support.",
+      "href": "options-flow/",
+      "publishedAt": "2026-10-29T14:24:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-29-qqq-puts-0946",
+      "section": "options-flow",
+      "title": "QQQ: 35K Jan $650 puts (~$32M)",
+      "summary": "Morning size: about 35,000 Jan $650 puts at $9.16, plus 5,000 Nov 28 weekly $680 puts.",
+      "href": "options-flow/",
+      "publishedAt": "2026-10-29T09:46:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-29-xyz-push",
+      "section": "options-flow",
+      "title": "XYZ Active Spotlight still live",
+      "summary": "Payments name with Dec $75/$85 call spreads; desk noted a strong push this morning with no cut language.",
+      "href": "options-flow/spotlights/#XYZ",
+      "publishedAt": "2026-10-29T08:46:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-29-research-db-latam",
+      "section": "research",
+      "title": "Deutsche Bank: LatAm’s silicon dividend",
+      "summary": "Bank note on Latin America’s semiconductor / silicon opportunity, logged mid-morning on the research desk.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-10-29T10:45:00-05:00",
+      "sourceLabel": "Bank note"
+    },
+    {
+      "id": "2026-10-29-desk-blitz",
+      "section": "options-flow",
+      "title": "Desk open wrap 10/29",
+      "summary": "Morning desk open wrap for Thursday’s session (Blitz 10/29).",
+      "href": "options-flow/",
+      "publishedAt": "2026-10-29T06:55:00-05:00",
+      "sourceLabel": "Desk"
+    },
     {
       "id": "2026-10-29-research-gs",
       "section": "research",
