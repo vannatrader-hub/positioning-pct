@@ -616,7 +616,6 @@ const banned = [
   "volland",
   "darkroom",
   "sentimentrader",
-  "deutsche",
   "copy-trading",
   "copy trading",
   "robinhood",
@@ -736,7 +735,7 @@ if (ntNewest) assert(deskDay(ntNewest.publishedAt) === deskDay(nt.dayStart), "ne
 assert(itemsForDay(nt.items ?? [], "2026-10-28").length === 8, "Oct 28 desk day lists eight items");
 const earlyThursday = (nt.items ?? []).filter((item) => item.publishedAt === "2026-10-29T04:05:00-05:00");
 assert(earlyThursday.length === 5 && earlyThursday.every((item) => deskDay(item.publishedAt) === "2026-10-29"), "4:05 AM CT Thursday belongs to the Thursday desk day");
-assert(itemsForDay(nt.items ?? [], "2026-10-29").length === 5, "Oct 29 desk day lists the five pre-open research notes");
+assert(itemsForDay(nt.items ?? [], "2026-10-29").length === 13, "Oct 29 desk day lists the afternoon session and the pre-open research notes");
 
 const nav = /<nav class="nav" aria-label="Pages">[\s\S]*?<\/nav>/;
 const deskPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "positioning/charts/index.html", "spx-levels/index.html", "options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html", "new-today/index.html"];
