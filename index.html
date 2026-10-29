@@ -34,7 +34,13 @@
       <main id="content">
         <section class="hero">
           <span class="pill"><i class="surface-dot" aria-hidden="true"></i>Desk reading</span>
-          <h1><a class="lockup" href="./">Positioning<span class="mark">%.</span></a></h1>
+          <div class="hero-row">
+            <h1><a class="lockup" href="./">Positioning<span class="mark">%.</span></a></h1>
+            <a class="nt-chip" href="new-today/" data-new-today aria-label="New Today: what landed on the Desk since 5:00 AM CT">
+              <span class="nt-chip-top"><i class="nt-dot" aria-hidden="true"></i>New Today</span>
+              <span class="nt-chip-sub" data-nt="sub">Since 5 AM CT</span>
+            </a>
+          </div>
           <p class="tagline">Where positioning sits — soft, crowded, or somewhere between.</p>
           <p class="tagline-sub">Pick a page. It opens on its own.</p>
         </section>
@@ -104,5 +110,6 @@
         </nav>
       </footer>
     </div>
+    <script type="module" src="/src/new-today-chip.js"></script>
   </body>
 </html>

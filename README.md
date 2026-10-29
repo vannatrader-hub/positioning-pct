@@ -40,6 +40,44 @@ Site nav, in order: Positioning | Options Flow | SPX Levels.
   - Spotlight trades (`/options-flow/spotlights/`). Live Spotlight tickets in three dropdown rows: Active (open, inside the current October window, expanded by default), Open (still open, posted earlier), and Closed (banked with a link to the public close note, or expired worthless at OpEx). Each card opens the idea, the structure, and a Recommendation on the left; on the right, the same six-month line chart as the $$$ calling cards, with the ticket's stop, strike, break-even, and target drawn across the price path, the expiry rule, and markers where the ticket posted and closed. An empty row reads "None".
   - Weekly scorecard (`/options-flow/scorecard/`). Week meta and the composite blend up top, then names ranked by composite (0.65 flow / 0.35 tech) with their chips, why, trade dates, flow and tech scores, and a 30-session candle strip. A yellow star on the name marks an Active Spotlight. Each row opens a trade card: header tags, ticker / contract / timestamp, the analysis band, and the metric grid with the six-month chart on the left; Flow Intelligence on the right in order (trade summary, IV and open catalyst, OI and dealer levels, technical lines, fundamentals with three past and one upcoming earnings box, Spotlight). Sections without a live pull show an empty state rather than a number.
 - SPX Levels. Placeholder for this phase.
+- New Today (`/new-today/`). A catch-up directory of everything that landed on the Desk this desk day, opened from the small New Today chip in the home hero, to the right of the wordmark. Rows are grouped Positioning · Options Flow · SPX Levels · Research desk (or one flat All list), newest first, each with its time (CT), title, one-line summary, and a deep link; Research rows can carry a chart thumb. `← Earlier desk day` (`?day=YYYY-MM-DD`) steps back through days still in the file.
+
+## New Today
+
+The chip runs an RGB outline (a conic gradient turning around the border) with a soft pulse while the current desk day has at least one item, and sits on a quiet static outline when it has none. Motion stops under `prefers-reduced-motion`.
+
+Desk day: **5:00 AM America/Chicago → 4:59:59 AM the next calendar day.** `src/new-today-window.js` reads each stamp on the Chicago wall clock (`Intl.DateTimeFormat`, `timeZone: "America/Chicago"`); if the hour is before 5, the item belongs to the previous calendar day's desk day. The same file gives the window's 5:00 AM open with the CDT/CST offset in force, so the fall-back night runs 25 hours and the spring-forward night 23. The browser filters on every load and the chip goes quiet on its own at the 5:00 AM rollover.
+
+Feed: `public/data/new-today.json`.
+
+```json
+{
+  "timeZone": "America/Chicago",
+  "dayStartsAt": "05:00",
+  "dayStart": "2026-10-28T05:00:00-05:00",
+  "updatedAt": "2026-10-28T17:32:00-05:00",
+  "items": [
+    {
+      "id": "2026-10-28-casy-dollar",
+      "section": "options-flow",
+      "title": "CASY joins the $$$ Shopping List",
+      "summary": "One line on why it is new.",
+      "href": "options-flow/dollar/#CASY",
+      "publishedAt": "2026-10-28T08:40:00-05:00",
+      "sourceLabel": "Desk",
+      "thumb": "data/new-today/thumbs/example.png"
+    }
+  ]
+}
+```
+
+- `section`: `positioning`, `options-flow`, `spx`, or `research`.
+- `href`: site-relative without a leading slash (`options-flow/spotlights/#XYZ`, `positioning/charts/#sectors`); hash links open the matching card or chart. Research rows may link out over `https`, or carry only a `thumb`.
+- `publishedAt`: when the item landed on the Desk, ISO with its offset. That stamp alone decides the desk day.
+- `sourceLabel`: `Desk`, `X`, `Bank note`, or a bank label (`JPM`, `MS`, `GS`, `BoA`, `Citi`, `UBS`, `Barclays`, `BNP`, `Nomura`, `WSJ`). The list lives in `SOURCE_LABELS`.
+- `thumb` (optional, Research): a chart image committed under `public/data/new-today/thumbs/` or an `https` URL, with optional `thumbAlt`.
+
+For desk pipelines (site refreshes, X pulls, bank notes, research charts): append items, set `dayStart` to `deskDayStart(deskDay(newest.publishedAt))` and `updatedAt` to the write time, keep about a week of desk days, and run `npm run check`. Public copy follows the same scrub as the rest of the site: research rows name the bank or a generic label, never the upstream service or author, and `npm run check` fails on a banned source name anywhere in the file. Live scraper wiring is not part of this page yet; the file ships with the Oct 27 and Oct 28 desk days seeded from site timestamps and an empty Research desk.
 
 Options Flow data lives in `public/data/flow/`: `plays.json` is the Shopping List seed (with `industry.broad` / `industry.focus`), `bars/<TICKER>.json` holds committed daily bars (`t,o,h,l,c,v`), `spotlights.json` holds the Spotlight tickets by row (`active`, `open`, `closed`) with their daily bars in `bars/` too, and `scorecard.json` is the weekly board snapshot. Charts are drawn as SVG from committed data, so no page needs a chart service.
 
