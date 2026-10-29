@@ -1,8 +1,31 @@
 {
   "asOf": "2026-10-28",
-  "asOfLabel": "Wed Oct 28, 2026 pre-market · quotes Tue Oct 27 close",
+  "asOfLabel": "Thu Oct 29, 2026 pre-market · JAZZ quote Wed Oct 28 close; earlier names Tue Oct 27 close",
   "window": "Last 3 weeks · Oct 13 – Oct 28, 2026",
   "plays": [
+    {
+      "id": 43910,
+      "ticker": "JAZZ",
+      "exchange": "NASDAQ",
+      "name": "Jazz Pharmaceuticals",
+      "industry": { "broad": "Health Care", "focus": "Biopharma · sleep & oncology" },
+      "date": "2026-10-28",
+      "alertedAtCt": "2026-10-28 08:32 PM CT",
+      "title": "Calls Bought into Earnings with Shares Back at Key Support",
+      "confidence": "$$$",
+      "refPrice": 205,
+      "flow": [
+        "Jazz Pharmaceuticals (JAZZ) saw 2,700 December 2026 $240 calls bought on 10/22 for about $865K, bullish flow into the November 2 earnings report.",
+        "Shares are back near the 38.2% retracement around $200. Deeper support sits at the anchored VWAP from the 2025 lows near $173. The reference price is about $205."
+      ],
+      "customerPurchased": [
+        { "contract": "Dec 2026 $240 calls", "detail": "2,700 bought · $865K · 10/22", "side": "calls_bought" }
+      ],
+      "oi": [],
+      "recommendation": "JAZZ is back at key support into the November 2 report, and the desk likes upside calls here for a reaction off that level.",
+      "lead": { "type": "call", "action": "bought", "qty": 2700, "strike": 240, "expiry": "December 2026", "price": null },
+      "quote": { "date": "2026-10-28", "last": 205.06, "prev": 206.78 }
+    },
     {
       "id": 43866,
       "ticker": "CASY",
