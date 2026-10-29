@@ -236,7 +236,7 @@ for (const [ticker, want] of Object.entries(studyWant)) {
 }
 
 const flow = JSON.parse(readFileSync(join(root, "public/data/flow/plays.json"), "utf8"));
-const flowTickers = ["CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN", "ALAB", "CSCO"];
+const flowTickers = ["JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN", "ALAB", "CSCO"];
 assert(
   JSON.stringify(sortPlays(flow.plays).map((play) => play.ticker)) === JSON.stringify(flowTickers),
   `Shopping List newest alert first: ${sortPlays(flow.plays).map((play) => play.ticker)}`,
@@ -329,6 +329,14 @@ const casyLevels = chartLevels(flowBy.CASY, JSON.parse(readFileSync(join(root, "
 assert(JSON.stringify(casyLevels.lines.map((line) => line.value)) === "[890,671.2]", `CASY chart draws the $890 strike and break-even ${casyLevels.lines.map((line) => line.value)}`);
 assert(casyLevels.expiry === "2027-12-17", `CASY December 2027 expiry ${casyLevels.expiry}`);
 assert(!flowBy.UPS, "UPS is a $$ alert and stays off the $$$ watchlist");
+assert(!flowBy.P && !flowBy.BX, "P and BX are $$ alerts and stay off the $$$ watchlist");
+assert(
+  JSON.stringify(flowBy.JAZZ.lead) === JSON.stringify({ type: "call", action: "bought", qty: 2700, strike: 240, expiry: "December 2026", price: null }),
+  `JAZZ lead is the Dec 2026 $240 call buy ${JSON.stringify(flowBy.JAZZ.lead)}`,
+);
+assert(flowBy.JAZZ.customerPurchased[0]?.contract === "Dec 2026 $240 calls" && flowBy.JAZZ.customerPurchased[0]?.side === "calls_bought", "JAZZ Customer purchased is the Dec 2026 $240 call buy");
+const jazzLevels = chartLevels(flowBy.JAZZ, JSON.parse(readFileSync(join(root, "public/data/flow/bars/JAZZ.json"), "utf8")).bars);
+assert(JSON.stringify(jazzLevels.lines.map((line) => line.value)) === "[240]", `JAZZ chart draws only the $240 strike ${jazzLevels.lines.map((line) => line.value)}`);
 assert(resolveExpiry("December", "2026-10-27") === "2026-12-18", "December resolves to Dec 18, 2026");
 assert(resolveExpiry("January", "2026-10-22") === "2027-01-15", "January resolves to Jan 15, 2027");
 assert(resolveExpiry("January 2028", "2026-10-25") === "2028-01-21", "January 2028 resolves to Jan 21, 2028");
@@ -702,7 +710,7 @@ for (const item of nt.items ?? []) {
 }
 const ntNewest = [...(nt.items ?? [])].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))[0];
 if (ntNewest) assert(deskDay(ntNewest.publishedAt) === deskDay(nt.dayStart), "new-today.json dayStart is the desk day of the newest item");
-assert(itemsForDay(nt.items ?? [], "2026-10-28").length === 5, "Oct 28 desk day seeds five items");
+assert(itemsForDay(nt.items ?? [], "2026-10-28").length === 13, "Oct 28 desk day lists thirteen items");
 
 const nav = /<nav class="nav" aria-label="Pages">[\s\S]*?<\/nav>/;
 const deskPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "positioning/charts/index.html", "spx-levels/index.html", "options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html", "new-today/index.html"];

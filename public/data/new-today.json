@@ -2,8 +2,80 @@
   "timeZone": "America/Chicago",
   "dayStartsAt": "05:00",
   "dayStart": "2026-10-28T05:00:00-05:00",
-  "updatedAt": "2026-10-28T17:32:00-05:00",
+  "updatedAt": "2026-10-29T05:45:00-05:00",
   "items": [
+    {
+      "id": "2026-10-29-research-gs",
+      "section": "research",
+      "title": "Goldman: Wall Street’s positioning cleanout",
+      "summary": "GS note logged on the research desk before the open.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-10-29T04:05:00-05:00",
+      "sourceLabel": "GS"
+    },
+    {
+      "id": "2026-10-29-research-ms",
+      "section": "research",
+      "title": "Morgan Stanley’s Mike Wilson outlook",
+      "summary": "MS note logged on the research desk before the open.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-10-29T04:05:00-05:00",
+      "sourceLabel": "MS"
+    },
+    {
+      "id": "2026-10-29-research-boa",
+      "section": "research",
+      "title": "BofA: the age of idiosyncratic risk",
+      "summary": "BoA note logged on the research desk before the open.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-10-29T04:05:00-05:00",
+      "sourceLabel": "BoA"
+    },
+    {
+      "id": "2026-10-29-research-citadel",
+      "section": "research",
+      "title": "Citadel: a narrow margin of safety",
+      "summary": "Citadel note logged on the research desk before the open.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-10-29T04:05:00-05:00",
+      "sourceLabel": "Citadel"
+    },
+    {
+      "id": "2026-10-29-research-ubs",
+      "section": "research",
+      "title": "UBS: gold’s $4,082 question",
+      "summary": "UBS note logged on the research desk before the open.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-10-29T04:05:00-05:00",
+      "sourceLabel": "UBS"
+    },
+    {
+      "id": "2026-10-28-jazz-dollar",
+      "section": "options-flow",
+      "title": "JAZZ joins the $$$ Shopping List",
+      "summary": "2,700 Dec 2026 $240 calls bought on Oct 22 for about $865K; alerted Oct 28, 8:32 PM CT.",
+      "href": "options-flow/dollar/#JAZZ",
+      "publishedAt": "2026-10-28T20:32:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-28-p-flow",
+      "section": "options-flow",
+      "title": "P ($$): long-dated calls bought",
+      "summary": "900 Sep 2027 $210 calls bought Oct 8 at $28.50 ($2.5M+); 800 Nov 2026 $180 calls Oct 7; 300 Nov 2026 $170 calls Oct 14. Pullback held the 50-day near $119; $157.57 is the 10/13 high. Alerted Oct 28, 5:28 PM CT.",
+      "href": "options-flow/",
+      "publishedAt": "2026-10-28T17:28:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-28-bx-flow",
+      "section": "options-flow",
+      "title": "BX ($$): long-dated puts sold",
+      "summary": "2,000 Jan 2028 $115 puts sold to open Oct 28 at $17.60, a bullish put sale. Also 1,000 Jan 2029 $105 calls bought Oct 16 ($2.4M) and 2,500 Jan 2029 $105/$70 bull put spreads opened Oct 21. $105 support, $124 resistance. Alerted Oct 28, 5:27 PM CT.",
+      "href": "options-flow/",
+      "publishedAt": "2026-10-28T17:27:00-05:00",
+      "sourceLabel": "Desk"
+    },
     {
       "id": "2026-10-28-positioning-charts",
       "section": "positioning",
