@@ -1,9 +1,81 @@
 {
   "timeZone": "America/Chicago",
   "dayStartsAt": "00:00",
-  "dayStart": "2026-10-29T00:00:00-05:00",
-  "updatedAt": "2026-10-29T16:30:00-05:00",
+  "dayStart": "2026-10-30T00:00:00-05:00",
+  "updatedAt": "2026-10-30T06:30:00-05:00",
   "items": [
+    {
+      "id": "2026-10-30-research-gs-gpif",
+      "section": "research",
+      "title": "Goldman: is Japan's pension giant bringing money home?",
+      "summary": "Goldman's latest look at Japan's Government Pension Investment Fund weighs whether the GPIF trims foreign assets and repatriates to yen, the question every USD/JPY trader is watching.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-10-30T02:15:00-05:00",
+      "sourceLabel": "Goldman Sachs"
+    },
+    {
+      "id": "2026-10-29-research-bbg-index-shorts",
+      "section": "research",
+      "title": "Bloomberg: hedge funds shift to index shorts",
+      "summary": "Hedge funds are moving from single-stock shorts to shorting the Nasdaq via QQQ, which can lift correlations and threaten the low-VIX regime after October’s ~8% tech drawdown.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-10-29T23:30:00-05:00",
+      "sourceLabel": "Bloomberg"
+    },
+    {
+      "id": "2026-10-29-research-asia-chips",
+      "section": "research",
+      "title": "Asia open: Korea chips hit by US AI selloff",
+      "summary": "Alphabet, Intel and Amazon weakness carried into Asia; KOSPI opened lower with SK Hynix and Samsung sold on hyperscaler capex-payback doubts rather than an HBM demand drop.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-10-29T20:32:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-29-dar-dollar",
+      "section": "options-flow",
+      "title": "DAR joins the $$$ Shopping List",
+      "summary": "Large call spread on 10/28: 10,000 April $62.50 calls bought against 13,000 $72.50 calls sold; ~$55 spot near key support after a ~20% pullback from summer highs. Desk likes the setup for a recovery.",
+      "href": "options-flow/dollar/#DAR",
+      "publishedAt": "2026-10-29T20:09:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-29-research-gs-alphabet",
+      "section": "research",
+      "title": "Goldman: Alphabet’s $350B capex bill",
+      "summary": "Goldman’s Q3 review: Cloud revenue up ~103% with a huge backlog while Search slows; capex seen near $203B in 2026 and $350B in 2027, so free cash flow gets squeezed.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-10-29T19:30:00-05:00",
+      "sourceLabel": "Goldman Sachs"
+    },
+    {
+      "id": "2026-10-29-nxpi-flow",
+      "section": "options-flow",
+      "title": "NXPI ($$): March 2027 $300 calls bought",
+      "summary": "Buyer of 250 March 2027 $300 calls at $17.10 on 10/29 as the stock (~$266) bounced off the 200-day and set a 60-day high; Jan $290/$320 call ratio spreads still in open interest. Desk sees the 200-day near $247 as support.",
+      "href": "options-flow/",
+      "publishedAt": "2026-10-29T19:27:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-29-lyv-flow",
+      "section": "options-flow",
+      "title": "LYV ($$): Dec $155 puts sold into earnings",
+      "summary": "1,350 Dec $155 puts sold to open at $2.12 on 10/22 ahead of the 11/5 report, followed by Sept 2027 $180 call buying; ~$178 spot coiled under the August highs. Desk views the put sales as the bullish way in.",
+      "href": "options-flow/",
+      "publishedAt": "2026-10-29T19:27:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-29-research-alphabet-door",
+      "section": "research",
+      "title": "Alphabet slides, but breadth finds another door",
+      "summary": "Nasdaq looked far worse than the tape underneath: 400+ S&P names rose as money rotated to small caps, value and rate-sensitive cyclicals while investors questioned AI capex payback.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-10-29T16:06:00-05:00",
+      "sourceLabel": "Desk"
+    },
     {
       "id": "2026-10-29-qqq-puts-1402",
       "section": "options-flow",

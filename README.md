@@ -74,7 +74,7 @@ Feed: `public/data/new-today.json`.
 - `section`: `positioning`, `options-flow`, `spx`, or `research`.
 - `href`: site-relative without a leading slash (`options-flow/spotlights/#XYZ`, `positioning/charts/#sectors`); hash links open the matching card or chart. Research rows may link out over `https`, or carry only a `thumb`.
 - `publishedAt`: when the item landed on the Desk, ISO with its offset. That stamp alone decides the desk day.
-- `sourceLabel`: `Desk`, `X`, `Bank note`, or a bank label (`JPM`, `MS`, `GS`, `BoA`, `Citi`, `UBS`, `Barclays`, `BNP`, `Nomura`, `Citadel`, `WSJ`). The list lives in `SOURCE_LABELS`.
+- `sourceLabel`: `Desk`, `X`, `Bank note`, or a public bank or outlet label (`JPM`, `MS`, `GS`, `Goldman Sachs`, `BoA`, `Citi`, `UBS`, `Barclays`, `BNP`, `Nomura`, `Citadel`, `WSJ`, `Bloomberg`). The list lives in `SOURCE_LABELS`.
 - `thumb` (optional, Research): a chart image committed under `public/data/new-today/thumbs/` or an `https` URL, with optional `thumbAlt`.
 
 For desk pipelines (site refreshes, X pulls, bank notes, research charts): append items, set `dayStart` to `deskDayStart(deskDay(newest.publishedAt))` and `updatedAt` to the write time, keep about a week of desk days, and run `npm run check`. Public copy follows the same scrub as the rest of the site: research rows name the bank or a generic label, never the upstream service or author, and `npm run check` fails on a banned source name anywhere in the file. Live scraper wiring is not part of this page yet; the file ships with the Oct 27 and Oct 28 desk days seeded from site timestamps and an empty Research desk.
