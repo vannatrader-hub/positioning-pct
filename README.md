@@ -11,7 +11,7 @@ Public sources are bank labels only: JPM, Morgan Stanley, BoA, GS, and a desk co
 Two surfaces, switched from the `Desk | Vault` control in every topbar:
 
 - Desk. Everything live today: home, the Positioning hub and its desk, Options Flow and its subpages, SPX Levels. URLs stay where they are; Desk is the surface name, not a path.
-- Vault (`/vault/`). Behind a sign-in wall. Signed out, the page shows one centered card ("Sign in to open Vault", email and password fields, a disabled "Create account · Coming soon", and a link back to the Desk) and nothing else. Signed in, it shows the private desk: a Soft ↔ Crowded weekly pack (`/vault/soft-crowded/`), the Vol · Credit · Momentum wall (`/vault/vol-credit-momentum/`, with the NY and Nasdaq Summation breadth cards), three `Soon` preview tiles that do not link, and a panel pointing back to the Desk pages. The pack is linked only from the Vault. It has its own darker theme scoped under `body.is-vault`. Sign-in is email and password for allowlisted emails only, and there is no checkout. See [Vault sign-in](#vault-sign-in).
+- Vault (`/vault/`). Behind a sign-in wall. Signed out, the page shows one centered card ("Sign in to open Vault", email and password fields, a disabled "Create account · Coming soon", and a link back to the Desk) and nothing else. Signed in, it shows the private desk: a Soft ↔ Crowded weekly pack (`/vault/soft-crowded/`), the Vol · Credit · Momentum wall (`/vault/vol-credit-momentum/`, with the NY and Nasdaq Summation breadth cards), a Portfolio journal (`/vault/portfolio/`), three `Soon` preview tiles that do not link, and a panel pointing back to the Desk pages. The pack, the wall, and the journal are linked only from the Vault. It has its own darker theme scoped under `body.is-vault`. Sign-in is email and password for allowlisted emails only, and there is no checkout. See [Vault sign-in](#vault-sign-in).
 
 Surface chrome (home, hubs, Vault, 404, and every topbar and footer) never carries monetization words or `$` outside the `$$$` flow mark; `npm run check` enforces this along with the switcher on every page.
 
@@ -83,6 +83,8 @@ Options Flow data lives in `public/data/flow/`: `plays.json` is the Shopping Lis
 
 Each sector card shows the percentile, a status, and a Soft to Crowded bar; one timeframe select drives every card. Green is the soft end. Dark is crowded. The triangle marks that week’s print.
 
+The Vault Portfolio journal (`/vault/portfolio/`) reads `public/data/vault/portfolio/journal.json` (`ahead-portfolio-journal-v1`). It is the locked personal book: category, structure, entry and exit, and the result. A line with status `exit_pending_fill` stays pending and out of the closed total until it fills. The Desk does not link to it.
+
 The Vault Soft ↔ Crowded pack (`/vault/soft-crowded/`) reads `public/data/vault/soft-crowded/`. `schema.json` is the week document: sector buckets on the Soft ↔ Crowded scale, batch-1 chart refs, the one-page read, and a short article under each chart (`headline`, `bodyMarkdown`, `bias`, `dumbMoney`, `smartMoney`, `invalidation`). `index.json` names the latest week. `2026-10-23.json` is that week, seeded from the Desk’s JPM sector read for the same date. The chart cards link out to the public Positioning charts. The Desk does not link back.
 
 The Vault Vol · Credit · Momentum wall (`/vault/vol-credit-momentum/`) carries five cards in order: Spot Vol Beta and Credit Spread Regime side by side (stacked under 1360px), then the MAG7 Oscillator, NY Summation, and Nasdaq Summation, each across the full width.
@@ -132,7 +134,7 @@ Preview serves the production build at http://127.0.0.1:4173/positioning-pct/
 
 `vault/index.html` renders the wall by default and keeps the Vault content in an inert `<template id="vault-content">`. `src/vault-gate.js` decides what happens next, based on `VITE_CLERK_PUBLISHABLE_KEY` at build time:
 
-- Key set. Allowlisted emails sign in with email and password through Clerk (`@clerk/clerk-js`, loaded on demand). Everything happens on this page with no redirect, and the wall swaps for the Vault with a quiet "Signed in as … / Sign out" line. `/vault/` and `/vault/soft-crowded/` share the same gate.
+- Key set. Allowlisted emails sign in with email and password through Clerk (`@clerk/clerk-js`, loaded on demand). Everything happens on this page with no redirect, and the wall swaps for the Vault with a quiet "Signed in as … / Sign out" line. `/vault/`, `/vault/soft-crowded/`, `/vault/vol-credit-momentum/`, and `/vault/portfolio/` share the same gate.
 - Key empty. Same card, but sign-in is switched off and the card says so. Clerk is left out of the build entirely.
 
 Rules the wall follows:
@@ -149,7 +151,7 @@ To set this up with Clerk's Hobby plan (no cost, up to 50,000 monthly retained u
 3. Create each Vault user under **Users → Create user** (email and password), or set a password on an existing user from that user's page.
 4. Copy the publishable key from **API keys**. Locally: `cp .env.example .env.local`, paste it into `VITE_CLERK_PUBLISHABLE_KEY`, and restart `npm run dev`. `.env.local` is git-ignored.
 5. For GitHub Pages: **Settings → Secrets and variables → Actions → Variables → New repository variable**, name `VITE_CLERK_PUBLISHABLE_KEY`. The Pages workflow passes it to the build. Re-run **Deploy to GitHub Pages**.
-6. Keep `https://vannatrader-hub.github.io/positioning-pct/vault/` and `https://vannatrader-hub.github.io/positioning-pct/vault/soft-crowded/` in the Clerk allowed origins and redirect URLs. Password sign-in does not redirect, but sign-out and any later SSO do.
+6. Keep `https://vannatrader-hub.github.io/positioning-pct/vault/`, `https://vannatrader-hub.github.io/positioning-pct/vault/soft-crowded/`, `https://vannatrader-hub.github.io/positioning-pct/vault/vol-credit-momentum/`, and `https://vannatrader-hub.github.io/positioning-pct/vault/portfolio/` in the Clerk allowed origins and redirect URLs. Password sign-in does not redirect, but sign-out and any later SSO do.
 
 Password sign-in replaced the magic link because a link has to come back through a redirect. On `github.io` the development instance keeps the session in the dev-browser token (`__clerk_db_jwt`), and links opened in another browser, or a new email that Clerk turned into a sign-up transfer, left Vault on the signed-out wall.
 

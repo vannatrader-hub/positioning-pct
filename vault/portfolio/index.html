@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Portfolio · Vault · Positioning %.</title>
+    <meta
+      name="description"
+      content="Vault portfolio: the personal book of closed lines and working exits. Behind the Vault sign-in wall."
+    />
+    <meta name="theme-color" content="#0a0c10" />
+    <link rel="icon" href="%BASE_URL%favicon.svg" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <script type="module" src="/src/vault-gate.js"></script>
+    <script type="module" src="/src/vault-portfolio.js"></script>
+  </head>
+  <body class="is-vault">
+    <a class="skip" href="#content">Skip to content</a>
+    <header class="topbar">
+      <div class="wrap is-wide topbar-in">
+        <div class="topbar-start">
+          <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+          <nav class="surface" aria-label="Surface">
+            <a href="../../"><i class="surface-dot" aria-hidden="true"></i>Desk</a>
+            <a class="is-current" href="../" aria-current="page"><svg class="surface-dial" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.75" /><circle cx="6" cy="6" r="1.5" /></svg>Vault</a>
+          </nav>
+        </div>
+        <nav class="nav" aria-label="Pages">
+          <a href="../../positioning/">Positioning</a>
+          <a href="../../options-flow/">Options Flow</a>
+          <a href="../../spx-levels/">SPX Levels</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="wrap is-wide">
+      <main id="content">
+        <section class="vault-wall" id="vault-wall" data-state="checking" aria-labelledby="vault-wall-title">
+          <div class="wall-card">
+            <svg class="wall-dial" viewBox="0 0 48 48" aria-hidden="true">
+              <circle class="vd-ring" cx="24" cy="24" r="22" />
+              <circle class="vd-knob" cx="24" cy="24" r="14" />
+              <path class="vd-pointer" d="M24 12.5 V17" />
+              <circle class="vd-core" cx="24" cy="24" r="2.5" />
+            </svg>
+            <h1 id="vault-wall-title">Sign in to open Vault</h1>
+            <p class="wall-lede" id="wall-lede">Vault opens by invitation. Sign in with your email and password.</p>
+            <form class="wall-form" id="wall-form" novalidate>
+              <div class="wall-field">
+                <label class="wall-label" for="wall-email">Email</label>
+                <input id="wall-email" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="you@example.com" required />
+              </div>
+              <div class="wall-field" id="wall-code-field" hidden>
+                <label class="wall-label" id="wall-code-label" for="wall-code">Code from your email</label>
+                <input id="wall-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit code" />
+              </div>
+              <div class="wall-field" id="wall-password-field">
+                <label class="wall-label" id="wall-password-label" for="wall-password">Password</label>
+                <input id="wall-password" name="password" type="password" autocomplete="current-password" required />
+              </div>
+              <button class="wall-submit" id="wall-submit" type="submit">Sign in</button>
+            </form>
+            <p class="wall-status" id="wall-status" role="status" aria-live="polite"></p>
+            <div class="wall-links">
+              <button class="wall-reset" id="wall-forgot" type="button">Set or reset password</button>
+              <button class="wall-reset" id="wall-reset" type="button" hidden>Start over</button>
+            </div>
+            <div class="wall-create">
+              <span>New to Vault?</span>
+              <button class="wall-create-button" id="wall-create" type="button" disabled aria-disabled="true">Create account <span class="badge is-soon">Coming soon</span></button>
+            </div>
+            <a class="wall-back" href="../../"><span aria-hidden="true">←</span> Back to the Desk</a>
+          </div>
+        </section>
+
+        <div class="vault-account" id="vault-account" hidden>
+          <span id="vault-account-email"></span>
+          <button type="button" id="vault-signout">Sign out</button>
+        </div>
+
+        <template id="vault-content">
+          <nav class="subnav" aria-label="Vault">
+            <a class="subnav-back" href="../"><span aria-hidden="true">←</span> Vault</a>
+            <a class="is-current" href="./" aria-current="page">Portfolio</a>
+            <a href="#journal">Journal</a>
+          </nav>
+
+          <section class="page-head">
+            <span class="pill vault-pill">Personal book</span>
+            <h1>Portfolio</h1>
+            <p class="lede">
+              Closed lines and working exits for the personal book. A close that is still working stays pending until it fills.
+            </p>
+          </section>
+
+          <div id="journal">
+            <p class="hint" id="journal-status">Loading the journal…</p>
+          </div>
+        </template>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+          <p class="foot-note">Vault · Portfolio.</p>
+        </div>
+        <nav class="foot-links" aria-label="Footer">
+          <a href="../../">Home</a>
+          <a href="../../positioning/">Positioning</a>
+          <a href="../../options-flow/">Options Flow</a>
+          <a href="../../spx-levels/">SPX Levels</a>
+          <a class="is-current" href="../" aria-current="page">Vault</a>
+        </nav>
+      </footer>
+    </div>
+  </body>
+</html>

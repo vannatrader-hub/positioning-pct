@@ -22,6 +22,7 @@ export default defineConfig({
         vault: resolve(root, "vault/index.html"),
         vaultSoftCrowded: resolve(root, "vault/soft-crowded/index.html"),
         vaultWall: resolve(root, "vault/vol-credit-momentum/index.html"),
+        vaultPortfolio: resolve(root, "vault/portfolio/index.html"),
         notFound: resolve(root, "404.html"),
       },
     },
