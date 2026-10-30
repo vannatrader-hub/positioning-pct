@@ -112,12 +112,22 @@ function mountCsr(card, doc) {
     renderPanel(table, csrPanel(series));
     renderLegend(legend, series, series.t.length - 1, false);
     const label = summary(series, doc);
-    frame.setAttribute("aria-label", label);
+    frame.querySelector("canvas").setAttribute("aria-label", label);
     live.textContent = label;
   }
 
   chart.setSeries(series);
   paint();
+
+  /* The panel floats in the pane's right margin, so the last session stays clear of it. */
+  const stage = card.querySelector(".csr-stage");
+  const fitGutter = () => {
+    if (getComputedStyle(table).position !== "absolute") return chart.setGutter(null);
+    const right = stage.getBoundingClientRect().right - table.getBoundingClientRect().right;
+    chart.setGutter(table.offsetWidth + right - 66 + 16);
+  };
+  new ResizeObserver(fitGutter).observe(stage);
+  fitGutter();
   asof.textContent = `Through ${dayLabel(doc.asOf)} · ${doc.series.t.length - series.first} sessions of Z`;
 
   for (const group of card.querySelectorAll("[data-seg]")) {

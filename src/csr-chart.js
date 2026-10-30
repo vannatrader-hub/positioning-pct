@@ -8,7 +8,8 @@ import { CSR_COLORS, bgAlpha, zColor } from "./csr.js";
 const FONT = '-apple-system, BlinkMacSystemFont, "Trebuchet MS", Roboto, Ubuntu, sans-serif';
 const AXIS_RIGHT = 66;
 const AXIS_BOTTOM = 28;
-const MARKER_ROW = 30;
+const MARKER_ROW = 56;
+const MARKER_Y = 40;
 const RIGHT_PAD = 0.07;
 const MIN_BARS = 30;
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -48,8 +49,11 @@ export function createCsrChart(frame, { onHover } = {}) {
   const canvas = document.createElement("canvas");
   canvas.className = "csr-canvas";
   canvas.tabIndex = 0;
+  canvas.setAttribute("role", "img");
   frame.prepend(canvas);
   const ctx = canvas.getContext("2d");
+  const layer = document.createElement("canvas");
+  const layerCtx = layer.getContext("2d");
 
   let series = null;
   let showSpx = true;
@@ -62,14 +66,25 @@ export function createCsrChart(frame, { onHover } = {}) {
   let dates = [];
   let future = [];
   let frameRequest = 0;
+  let gutter = null;
+  let moved = false;
+  let range = 0;
 
   const lastIndex = () => series.t.length - 1;
   const span = () => view.to - view.from;
 
+  /** Bars of empty margin after the last session, sized in pixels when the panel sits over the pane. */
+  function padBars(visible) {
+    const pane = width - AXIS_RIGHT;
+    const px = gutter ?? pane * RIGHT_PAD;
+    if (!pane || pane - px < 120) return visible * RIGHT_PAD;
+    return (visible * px) / (pane - px);
+  }
+
   function fullView() {
     const first = series.first;
     const bars = lastIndex() - first + 1;
-    return { from: first - 0.5, to: lastIndex() + 0.5 + bars * RIGHT_PAD };
+    return { from: first - 0.5, to: lastIndex() + 0.5 + padBars(bars) };
   }
 
   function rangeView(bars) {
@@ -77,7 +92,7 @@ export function createCsrChart(frame, { onHover } = {}) {
     const last = lastIndex();
     const from = Math.max(series.first, last - bars + 1) - 0.5;
     const visible = last + 0.5 - from;
-    return { from, to: last + 0.5 + visible * RIGHT_PAD };
+    return { from, to: last + 0.5 + padBars(visible) };
   }
 
   function clampView(next) {
@@ -147,9 +162,10 @@ export function createCsrChart(frame, { onHover } = {}) {
         ctx.fillStyle = style;
         current = style;
       }
-      const x0 = Math.floor(g.x(i - 0.5));
-      const x1 = i === last ? g.x(i + 0.5) : Math.ceil(g.x(i + 0.5));
-      ctx.fillRect(x0, g.top, Math.max(1, x1 - x0), g.bottom - g.top);
+      const x0 = Math.round(g.x(i - 0.5));
+      const x1 = Math.round(g.x(i + 0.5));
+      if (x1 > x0) ctx.fillRect(x0, g.top, x1 - x0, g.bottom - g.top);
+      else if (i === last) ctx.fillRect(x0, g.top, 1, g.bottom - g.top);
     }
   }
 
@@ -212,7 +228,7 @@ export function createCsrChart(frame, { onHover } = {}) {
       if (i === Math.max(0, g.lo - 1)) ctx.moveTo(px, py);
       else ctx.lineTo(px, py);
     }
-    ctx.strokeStyle = "rgba(214, 220, 230, 0.42)";
+    ctx.strokeStyle = "rgba(214, 220, 230, 0.34)";
     ctx.lineWidth = 1.25;
     ctx.lineJoin = "round";
     ctx.stroke();
@@ -231,46 +247,60 @@ export function createCsrChart(frame, { onHover } = {}) {
     ctx.restore();
   }
 
+  function strokeZ(target, g, lineWidth) {
+    const from = Math.max(series.first, g.lo - 1);
+    const to = Math.min(lastIndex(), g.hi + 1);
+    target.lineCap = "round";
+    target.lineJoin = "round";
+    target.lineWidth = lineWidth;
+    let style = "";
+    for (let i = from + 1; i <= to; i += 1) {
+      const next = rgba(zColor(series.z[i], series.params));
+      if (next !== style) {
+        if (style) target.stroke();
+        target.strokeStyle = next;
+        style = next;
+        target.beginPath();
+        target.moveTo(g.x(i - 1), g.y(series.z[i - 1]));
+      }
+      target.lineTo(g.x(i), g.y(series.z[i]));
+    }
+    if (style) target.stroke();
+  }
+
+  /* Each glow width is stroked opaque off-screen, then laid down at its own alpha, so color changes do not bead where segments overlap. */
   function drawLine(g) {
-    const layers = [
+    const glow = [
       [12, 0.1],
       [8, 0.15],
       [5, 0.25],
       [3, 0.5],
-      [2, 1],
     ];
-    const from = Math.max(series.first, g.lo - 1);
-    const to = Math.min(lastIndex(), g.hi + 1);
+    const dpr = window.devicePixelRatio || 1;
+    if (layer.width !== canvas.width || layer.height !== canvas.height) {
+      layer.width = canvas.width;
+      layer.height = canvas.height;
+    }
     ctx.save();
     ctx.beginPath();
     ctx.rect(g.left, g.top, g.right - g.left, g.bottom - g.top);
     ctx.clip();
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    for (const [lineWidth, alpha] of layers) {
-      ctx.lineWidth = lineWidth;
-      let style = "";
-      let open = false;
-      for (let i = from + 1; i <= to; i += 1) {
-        const next = rgba(zColor(series.z[i], series.params), alpha);
-        if (next !== style) {
-          if (open) ctx.stroke();
-          ctx.strokeStyle = next;
-          style = next;
-          ctx.beginPath();
-          ctx.moveTo(g.x(i - 1), g.y(series.z[i - 1]));
-          open = true;
-        }
-        ctx.lineTo(g.x(i), g.y(series.z[i]));
-      }
-      if (open) ctx.stroke();
+    for (const [lineWidth, alpha] of glow) {
+      layerCtx.setTransform(1, 0, 0, 1, 0, 0);
+      layerCtx.clearRect(0, 0, layer.width, layer.height);
+      layerCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      strokeZ(layerCtx, g, lineWidth);
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(layer, 0, 0, width, height);
     }
+    ctx.globalAlpha = 1;
+    strokeZ(ctx, g, 2);
     ctx.restore();
   }
 
   function drawMarkers(g) {
     const { bull, bear } = CSR_COLORS;
-    const yy = g.top + MARKER_ROW / 2;
+    const yy = g.top + MARKER_Y;
     const r = Math.max(2.5, Math.min(4, g.bw * 0.45));
     for (let i = g.lo; i <= g.hi; i += 1) {
       const px = g.x(i);
@@ -426,6 +456,7 @@ export function createCsrChart(frame, { onHover } = {}) {
     canvas.height = Math.round(height * dpr);
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
+    if (series && !moved) view = rangeView(range);
     draw();
   }
 
@@ -449,6 +480,7 @@ export function createCsrChart(frame, { onHover } = {}) {
     if (drag) {
       const bw = (width - AXIS_RIGHT) / span();
       const shift = (drag.x - event.clientX) / bw;
+      if (shift) moved = true;
       view = clampView({ from: drag.view.from + shift, to: drag.view.to + shift });
     }
     const y = event.clientY - box.top;
@@ -484,6 +516,7 @@ export function createCsrChart(frame, { onHover } = {}) {
       const anchor = view.from + ratio * span();
       const factor = Math.exp(Math.sign(event.deltaY) * Math.min(Math.abs(event.deltaY), 120) * 0.0022);
       const size = span() * factor;
+      moved = true;
       view = clampView({ from: anchor - ratio * size, to: anchor + (1 - ratio) * size });
       schedule();
     },
@@ -507,6 +540,7 @@ export function createCsrChart(frame, { onHover } = {}) {
     else if (event.key === "+" || event.key === "=" || event.key === "-") {
       const size = span() * (event.key === "-" ? 1.25 : 0.8);
       const anchor = hover ?? lastIndex();
+      moved = true;
       view = clampView({ from: anchor - size * 0.75, to: anchor + size * 0.25 });
       schedule();
     } else return;
@@ -515,7 +549,6 @@ export function createCsrChart(frame, { onHover } = {}) {
 
   new ResizeObserver(resize).observe(frame);
 
-  let range = 0;
   const api = {
     setSeries(next, { keepView = false } = {}) {
       series = next;
@@ -526,6 +559,7 @@ export function createCsrChart(frame, { onHover } = {}) {
     },
     setRange(bars) {
       range = bars;
+      moved = false;
       view = rangeView(bars);
       schedule();
     },
@@ -533,7 +567,14 @@ export function createCsrChart(frame, { onHover } = {}) {
       showSpx = on;
       schedule();
     },
+    /** Pixels kept clear on the right of the pane, or null for the default margin. */
+    setGutter(px) {
+      gutter = px;
+      if (series && !moved) view = rangeView(range);
+      schedule();
+    },
     reset() {
+      moved = false;
       view = rangeView(range);
       schedule();
     },

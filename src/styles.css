@@ -3770,19 +3770,17 @@ body:has(.cc[open]) { overflow: hidden; }
 
 .csr-panel th,
 .csr-panel td {
-  padding: 2px 7px;
+  padding: 1px 6px;
   font-weight: 400;
   text-align: center;
   white-space: nowrap;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .csr-panel thead th {
   background: rgba(38, 38, 38, 0.95);
-  padding: 4px 7px;
+  padding: 3px 6px;
 }
-
-.csr-panel thead th:last-child { min-width: 64px; }
 
 #csr-status { position: absolute; left: 14px; bottom: 36px; margin: 0; }
 
