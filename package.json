@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
-    "check": "node scripts/check-site.mjs"
+    "check": "node scripts/check-site.mjs",
+    "pull:breadth": "node scripts/pull-breadth.mjs",
+    "data:csr": "node scripts/fetch-csr.mjs"
   },
   "engines": {
     "node": ">=20"

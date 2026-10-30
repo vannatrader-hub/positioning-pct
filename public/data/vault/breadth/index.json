@@ -1,0 +1,22 @@
+{
+  "sku": "wall",
+  "title": "Vol / breadth wall",
+  "asOf": "2026-10-29",
+  "period": "1D",
+  "defaultRangeMonths": 12,
+  "maxRangeMonths": 120,
+  "overlay": {
+    "id": "spx",
+    "file": "spx.json"
+  },
+  "charts": [
+    {
+      "id": "nysi",
+      "file": "nysi.json"
+    },
+    {
+      "id": "nasi",
+      "file": "nasi.json"
+    }
+  ]
+}

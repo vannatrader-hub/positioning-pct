@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vol · Credit · Momentum · Vault · Positioning %.</title>
+    <meta
+      name="description"
+      content="Vault wall for vol, credit, mega-cap momentum, and breadth: Spot Vol Beta, Credit Spread Regime, the MAG7 Oscillator, and NY and Nasdaq Summation. Behind the Vault sign-in wall."
+    />
+    <meta name="theme-color" content="#0a0c10" />
+    <link rel="icon" href="%BASE_URL%favicon.svg" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <script type="module" src="/src/vault-gate.js"></script>
+    <script type="module" src="/src/vault-wall.js"></script>
+    <script type="module" src="/src/vault-breadth.js"></script>
+  </head>
+  <body class="is-vault">
+    <a class="skip" href="#content">Skip to content</a>
+    <header class="topbar">
+      <div class="wrap is-wide topbar-in">
+        <div class="topbar-start">
+          <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+          <nav class="surface" aria-label="Surface">
+            <a href="../../"><i class="surface-dot" aria-hidden="true"></i>Desk</a>
+            <a class="is-current" href="../" aria-current="page"><svg class="surface-dial" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.75" /><circle cx="6" cy="6" r="1.5" /></svg>Vault</a>
+          </nav>
+        </div>
+        <nav class="nav" aria-label="Pages">
+          <a href="../../positioning/">Positioning</a>
+          <a href="../../options-flow/">Options Flow</a>
+          <a href="../../spx-levels/">SPX Levels</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="wrap is-wide">
+      <main id="content">
+        <section class="vault-wall" id="vault-wall" data-state="checking" aria-labelledby="vault-wall-title">
+          <div class="wall-card">
+            <svg class="wall-dial" viewBox="0 0 48 48" aria-hidden="true">
+              <circle class="vd-ring" cx="24" cy="24" r="22" />
+              <circle class="vd-knob" cx="24" cy="24" r="14" />
+              <path class="vd-pointer" d="M24 12.5 V17" />
+              <circle class="vd-core" cx="24" cy="24" r="2.5" />
+            </svg>
+            <h1 id="vault-wall-title">Sign in to open Vault</h1>
+            <p class="wall-lede" id="wall-lede">Vault opens by invitation. Sign in with your email and password.</p>
+            <form class="wall-form" id="wall-form" novalidate>
+              <div class="wall-field">
+                <label class="wall-label" for="wall-email">Email</label>
+                <input id="wall-email" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="you@example.com" required />
+              </div>
+              <div class="wall-field" id="wall-code-field" hidden>
+                <label class="wall-label" id="wall-code-label" for="wall-code">Code from your email</label>
+                <input id="wall-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit code" />
+              </div>
+              <div class="wall-field" id="wall-password-field">
+                <label class="wall-label" id="wall-password-label" for="wall-password">Password</label>
+                <input id="wall-password" name="password" type="password" autocomplete="current-password" required />
+              </div>
+              <button class="wall-submit" id="wall-submit" type="submit">Sign in</button>
+            </form>
+            <p class="wall-status" id="wall-status" role="status" aria-live="polite"></p>
+            <div class="wall-links">
+              <button class="wall-reset" id="wall-forgot" type="button">Set or reset password</button>
+              <button class="wall-reset" id="wall-reset" type="button" hidden>Start over</button>
+            </div>
+            <div class="wall-create">
+              <span>New to Vault?</span>
+              <button class="wall-create-button" id="wall-create" type="button" disabled aria-disabled="true">Create account <span class="badge is-soon">Coming soon</span></button>
+            </div>
+            <a class="wall-back" href="../../"><span aria-hidden="true">←</span> Back to the Desk</a>
+          </div>
+        </section>
+
+        <div class="vault-account" id="vault-account" hidden>
+          <span id="vault-account-email"></span>
+          <button type="button" id="vault-signout">Sign out</button>
+        </div>
+
+        <template id="vault-content">
+          <nav class="subnav" aria-label="Vault">
+            <a class="subnav-back" href="../"><span aria-hidden="true">←</span> Vault</a>
+            <a class="is-current" href="./" aria-current="page">Vol · Credit · Momentum</a>
+            <a href="#spot-vol-beta">Spot Vol Beta</a>
+            <a href="#credit-spread-regime">Credit Spread Regime</a>
+            <a href="#mag7">MAG7 Oscillator</a>
+            <a href="#nysi">NY Summation</a>
+            <a href="#nasi">Nasdaq Summation</a>
+          </nav>
+
+          <section class="page-head">
+            <span class="pill vault-pill">Desk wall</span>
+            <h1>Vol · Credit · Momentum</h1>
+            <p class="lede">
+              Three reads on one wall: the vol event gauge, the credit regime, and mega-cap momentum. When all three lean
+              the same way, the tape is telling you something. NY and Nasdaq Summation sit underneath as the breadth check.
+            </p>
+          </section>
+
+          <div class="wall-grid" id="wall">
+            <article class="pchart svb-card" id="spot-vol-beta" aria-labelledby="svb-title">
+              <header class="pchart-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">01</span>
+                  <span class="basis svb-asof" id="svb-asof"></span>
+                  <span class="house h-desk">Desk</span>
+                </div>
+                <h2 id="svb-title">Spot Vol Beta</h2>
+                <p class="wall-sub">The gauge and the desk estimate, on one close per session with SPX behind the line. The band is the house possible-bottom signal at 2.</p>
+              </header>
+              <div id="svb-body">
+                <p class="hint" id="svb-status">Loading Spot Vol Beta…</p>
+              </div>
+            </article>
+
+            <article class="pchart csr-card" id="credit-spread-regime" aria-labelledby="csr-title">
+              <header class="pchart-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">02</span>
+                  <span class="csr-asof" id="csr-asof">FRED ICE BofA OAS</span>
+                  <span class="house h-desk">Desk</span>
+                </div>
+                <h2 id="csr-title">Credit Spread Regime</h2>
+                <p class="wall-sub">High yield minus investment grade excess spread as a Z score, with Low, Normal, Elevated, and Stress zones and SPX behind it.</p>
+              </header>
+
+              <div class="csr-controls">
+                <div class="seg" data-seg="range" role="group" aria-label="Window">
+                  <button type="button" data-range="3m" aria-pressed="false">3M</button>
+                  <button type="button" data-range="6m" aria-pressed="false">6M</button>
+                  <button type="button" data-range="1y" aria-pressed="false">1Y</button>
+                  <button type="button" class="is-on" data-range="all" aria-pressed="true">All</button>
+                </div>
+                <div class="seg" data-seg="metric" role="group" aria-label="Spread">
+                  <button type="button" class="is-on" data-metric="excess" aria-pressed="true">HY−IG excess</button>
+                  <button type="button" data-metric="hy" aria-pressed="false">HY only</button>
+                </div>
+                <button type="button" class="toggle csr-spx" id="csr-spx" aria-pressed="true"><i aria-hidden="true"></i>SPX overlay</button>
+              </div>
+
+              <div class="csr-stage">
+                <div class="csr-frame" id="csr-frame">
+                  <div class="csr-legend" id="csr-legend" aria-hidden="true"></div>
+                </div>
+                <table class="csr-panel" id="csr-panel" aria-label="Credit Spread Regime statistics"></table>
+                <p class="hint" id="csr-status">Loading the credit series…</p>
+              </div>
+              <p class="csr-help">Hover for a session. Click the chart, then scroll to zoom; drag to pan; double-click resets. Arrow keys step sessions.</p>
+              <p class="visually-hidden" id="csr-live" aria-live="polite"></p>
+
+              <div class="csr-notes">
+                <div class="csr-key">
+                  <span><i class="k-low" aria-hidden="true"></i>Low · Z under −1</span>
+                  <span><i class="k-normal" aria-hidden="true"></i>Normal · −1 to 1</span>
+                  <span><i class="k-elevated" aria-hidden="true"></i>Elevated · 1 to 2</span>
+                  <span><i class="k-stress" aria-hidden="true"></i>Stress · 2 and up</span>
+                  <span><i class="k-dot" aria-hidden="true"></i>Stress rolling over</span>
+                  <span><i class="k-cross" aria-hidden="true"></i>Calm turning up</span>
+                </div>
+                <div class="csr-read">
+                  <h3>How the desk reads it</h3>
+                  <ul class="pack-points">
+                    <li>The line is the HY−IG excess spread, smoothed with a 5-session EMA, as a Z-score against its trailing 252 sessions. Widening pushes it up.</li>
+                    <li>A red dot marks a session with Z at 2 or more while the spread is already narrowing. A green cross marks Z at −2 or less with the spread widening off the lows.</li>
+                    <li>Elevated or Stress credit while Spot Vol Beta prints 2 or more is the possible SPX bottom the desk watches for. Credit Z alone is not a buy.</li>
+                  </ul>
+                  <p class="csr-invalid"><strong>Invalidation</strong> FRED prints lag a session and holidays carry the prior close. The 252-session window can move a regime with no new event behind it.</p>
+                </div>
+                <p class="csr-source">
+                  Desk · FRED: ICE BofA US High Yield Index OAS (BAMLH0A0HYM2) and ICE BofA US Corporate Index OAS (BAMLC0A0CM), in basis points;
+                  S&amp;P 500 close (SP500); Cboe VIX close (VIXCLS). Spreads carried onto S&amp;P 500 sessions. After Collin-Dufresne, Goldstein &amp; Martin (2001)
+                  and Gilchrist &amp; Zakrajšek (2012).
+                </p>
+              </div>
+            </article>
+
+            <article class="pchart is-wide mo-card" id="mag7" aria-labelledby="mag7-title">
+              <header class="pchart-head mo-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">03</span>
+                  <span class="house h-desk">Desk</span>
+                </div>
+                <h2 id="mag7-title">MAG7 Oscillator</h2>
+                <p class="mo-sub">Equal-weight AAPL · MSFT · GOOGL · AMZN · NVDA · TSLA · META. 14-day momentum %, smoothed over 5 sessions.</p>
+              </header>
+
+              <div class="pchart-controls" id="mo-controls"></div>
+
+              <div class="mo-pane" id="mo-pane">
+                <div class="mo-plot" id="mo-plot"></div>
+                <p class="mo-legend" id="mo-legend" aria-live="off"><span class="mo-legend-name">MAG7</span></p>
+                <table class="mo-table" id="mo-table" aria-label="MAG7 Oscillator, latest bar"></table>
+                <p class="mo-status" id="mo-status">Loading the oscillator…</p>
+              </div>
+
+              <div class="legend mo-key" id="mo-key">
+                <span><i class="sw" style="background: #4caf50"></i><b data-key="bull">Bullish above +2</b></span>
+                <span><i class="sw" style="background: #2196f3"></i>Neutral</span>
+                <span><i class="sw" style="background: #ff5252"></i><b data-key="bear">Bearish below −2</b></span>
+                <span data-key="caution"><i class="mo-dash is-caution"></i>Caution +9</span>
+                <span data-key="stretched"><i class="mo-dash is-stretched"></i>Stretched −5</span>
+              </div>
+
+              <footer class="pchart-foot mo-foot">
+                <div class="pchart-notes">
+                  <p class="mo-now" id="mo-now"></p>
+                  <p class="mo-read">
+                    Mega-cap leadership tape. Above +2 the seven are pulling the index; below −2 they are dragging it.
+                    Breadth is how many of the seven are up over the window. Bearish with breadth under 40% is the
+                    risk-off read, strongest when Credit Spread Regime sits in Elevated and Spot Vol Beta prints 2 or
+                    more. The caution line near +9 and the stretched line near −5 have tended to mark index pivots in
+                    sideways-to-trending tape.
+                  </p>
+                  <p class="basis mo-basis" id="mo-basis"></p>
+                </div>
+              </footer>
+            </article>
+
+            <article class="pchart is-wide bw-card" id="nysi" data-breadth="nysi" aria-labelledby="nysi-title">
+              <header class="pchart-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">04</span>
+                  <span class="badge is-live"><i aria-hidden="true"></i>Daily close</span>
+                </div>
+                <h2 id="nysi-title">NY Summation</h2>
+              </header>
+              <p class="hint bw-load">Loading NY Summation…</p>
+            </article>
+
+            <article class="pchart is-wide bw-card" id="nasi" data-breadth="nasi" aria-labelledby="nasi-title">
+              <header class="pchart-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">05</span>
+                  <span class="badge is-live"><i aria-hidden="true"></i>Daily close</span>
+                </div>
+                <h2 id="nasi-title">Nasdaq Summation</h2>
+              </header>
+              <p class="hint bw-load">Loading Nasdaq Summation…</p>
+            </article>
+          </div>
+        </template>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+          <p class="foot-note">Vault · Vol · Credit · Momentum.</p>
+        </div>
+        <nav class="foot-links" aria-label="Footer">
+          <a href="../../">Home</a>
+          <a href="../../positioning/">Positioning</a>
+          <a href="../../options-flow/">Options Flow</a>
+          <a href="../../spx-levels/">SPX Levels</a>
+          <a class="is-current" href="../" aria-current="page">Vault</a>
+        </nav>
+      </footer>
+    </div>
+  </body>
+</html>

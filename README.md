@@ -11,7 +11,7 @@ Public sources are bank labels only: JPM, Morgan Stanley, BoA, GS, and a desk co
 Two surfaces, switched from the `Desk | Vault` control in every topbar:
 
 - Desk. Everything live today: home, the Positioning hub and its desk, Options Flow and its subpages, SPX Levels. URLs stay where they are; Desk is the surface name, not a path.
-- Vault (`/vault/`). Behind a sign-in wall. Signed out, the page shows one centered card ("Sign in to open Vault", email and password fields, a disabled "Create account · Coming soon", and a link back to the Desk) and nothing else. Signed in, it shows the private desk: a Soft ↔ Crowded weekly pack (`/vault/soft-crowded/`), three `Soon` preview tiles that do not link, and a panel pointing back to the Desk pages. The pack is linked only from the Vault. It has its own darker theme scoped under `body.is-vault`. Sign-in is email and password for allowlisted emails only, and there is no checkout. See [Vault sign-in](#vault-sign-in).
+- Vault (`/vault/`). Behind a sign-in wall. Signed out, the page shows one centered card ("Sign in to open Vault", email and password fields, a disabled "Create account · Coming soon", and a link back to the Desk) and nothing else. Signed in, it shows the private desk: a Soft ↔ Crowded weekly pack (`/vault/soft-crowded/`), the Vol · Credit · Momentum wall (`/vault/vol-credit-momentum/`, with the NY and Nasdaq Summation breadth cards), three `Soon` preview tiles that do not link, and a panel pointing back to the Desk pages. The pack is linked only from the Vault. It has its own darker theme scoped under `body.is-vault`. Sign-in is email and password for allowlisted emails only, and there is no checkout. See [Vault sign-in](#vault-sign-in).
 
 Surface chrome (home, hubs, Vault, 404, and every topbar and footer) never carries monetization words or `$` outside the `$$$` flow mark; `npm run check` enforces this along with the switcher on every page.
 
@@ -84,6 +84,32 @@ Options Flow data lives in `public/data/flow/`: `plays.json` is the Shopping Lis
 Each sector card shows the percentile, a status, and a Soft to Crowded bar; one timeframe select drives every card. Green is the soft end. Dark is crowded. The triangle marks that week’s print.
 
 The Vault Soft ↔ Crowded pack (`/vault/soft-crowded/`) reads `public/data/vault/soft-crowded/`. `schema.json` is the week document: sector buckets on the Soft ↔ Crowded scale, batch-1 chart refs, the one-page read, and a short article under each chart (`headline`, `bodyMarkdown`, `bias`, `dumbMoney`, `smartMoney`, `invalidation`). `index.json` names the latest week. `2026-10-23.json` is that week, seeded from the Desk’s JPM sector read for the same date. The chart cards link out to the public Positioning charts. The Desk does not link back.
+
+The Vault Vol · Credit · Momentum wall (`/vault/vol-credit-momentum/`) carries five cards in order: Spot Vol Beta and Credit Spread Regime side by side (stacked under 1360px), then the MAG7 Oscillator, NY Summation, and Nasdaq Summation, each across the full width.
+
+Spot Vol Beta (`src/vault-svb.js`) reads `public/data/vault/spot-vol-beta/`. `latest.json` is the gauge and the inputs for the desk estimate `UV_Δ − (−0.70 × SPX%)`; the card shows the gauge first and the estimate second. `series.json` is the daily close line, one point per session, appended at the close. SPX sits behind that line, and a band marks closes at or above 2. The committed gauge is not a live feed.
+
+Credit Spread Regime (`src/vault-csr.js`) reads `public/data/vault/credit-spread-regime/csr.json`: FRED ICE BofA US High Yield OAS (`BAMLH0A0HYM2`) and US Corporate OAS (`BAMLC0A0CM`) in bps, the S&P 500 close (`SP500`), and the Cboe VIX close (`VIXCLS`), one column each, on S&P 500 sessions with OAS and VIX carried forward over gaps. `src/csr.js` scores the HY−IG excess spread (or HY alone): EMA 5, then Z against the trailing 252 sessions, percentile rank, 5-session momentum, and regimes Low (Z under −1), Normal, Elevated (1 and up), Stress (2 and up). `src/csr-chart.js` draws the pane on a canvas: per-session regime tint, zone fills, threshold lines, the glowing Z line, roll-over markers (red: Z 2 and up with the spread narrowing; green: Z −2 and down with it widening), and the SPX overlay with its own scale. The statistics panel is the last session. FRED serves the last three years of ICE BofA history, so Z starts one 252-session window after the first print. Refresh with `npm run data:csr`, then `npm run check`; the check recomputes the snapshot from the series and pins the Oct 29, 2026 panel (HY 326 / IG 89 / excess 237 / Z 1.85 Elevated, 95.2%, Risk-off).
+
+The MAG7 Oscillator card:
+
+- Math (`src/mag7-osc.js`, pure, shared with `npm run check`). Equal weight across AAPL, MSFT, GOOGL, AMZN, NVDA, TSLA, META. Each name's momentum is the % change over 14 sessions; the average is smoothed with a 5-session simple average. Bullish above +2, bearish below −2, neutral between. Breadth is the share of the seven with momentum above zero. Mode switches between MAG7, S&P EW (the equal-weight S&P 500 fund), and Relative (MAG7 minus S&P EW, ±1 thresholds). Type reshapes the smoothed line into Momentum (default), RSI, Stochastic, Williams %R, or CCI, each centred on zero.
+- Pane (`src/mag7-chart.js`). Near-black chart room with a vertical band per bar in the regime colour, the line coloured by regime, the zero line, the ±threshold lines, and two dashed horizontals in the default MAG7 Momentum view: caution at +9 and stretched at −5. Right-hand value scale with last-value, caution, and stretched tags; month scale with the year on January; crosshair on hover, or arrow keys once the chart has focus.
+- Stats panel. Value, Mode, Signal, Type, Breadth, Threshold for the last bar (plus the MAG7 and S&P EW legs in Relative), top right of the pane; under the plot on phones.
+- Data (`public/data/vault/mag7/oscillator.json`). Split-adjusted daily closes for the seven names and RSP from Jan 2, 2024, so every type has settled before the default window opens on Jan 13, 2025. `asOf` and `lastBar` (`close` or `intraday`) describe the last bar; `snapshot` records what the panel should read and `npm run check` recomputes it. Refresh with `node scripts/vault-mag7-seed.mjs` (last session close) or `node scripts/vault-mag7-seed.mjs --at HH:MM` (today's 5-minute bar at that CT time as the last bar).
+
+Card copy uses Desk labels only. The cards are redrawn from committed data: no embedded chart widget, no third-party indicator source in the repo. `npm run check` fails on either.
+
+The breadth cards on the same wall (`#nysi`, `#nasi`) are two end-of-day charts, NY Summation (NYSI) and Nasdaq Summation (NASI), the ratio-adjusted McClellan Summation Index for each exchange. Each chart frame follows the familiar EOD layout: symbol and name header with Open / High / Low / Close / Chg for the hovered session, an SPX pane on top for context, the summation line drawn black on rising sessions and red on falling ones, MA(8), right-axis value tags, and a horizontal **buy line at −1000** marked `BUY`. Defaults are daily bars (1D) over one year; presets (3M to 10Y) and a range slider run the window out to ten years, and the SPX pane can be hidden. `src/breadth.js` holds the math (MA, windows, ticks) and `src/vault-breadth.js` draws the SVG into the wall's `[data-breadth]` cards. Cards use desk labels only; no chart-vendor branding.
+
+Data lives in `public/data/vault/breadth/`: `index.json` (as-of date, `period`, `defaultRangeMonths`, `maxRangeMonths`, chart list), `nysi.json` and `nasi.json` (label, title, `ma`, `buyLine`, and daily `bars` as `{t, c}`), and `spx.json` (SPX daily closes on the same sessions). The seed runs eleven years through Oct 29, 2026 so the ten-year window has its MA lead-in. To refresh after the close:
+
+```bash
+BREADTH_FEED="<desk EOD text feed>" npm run pull:breadth
+npm run check
+```
+
+The feed address is kept in env, never in a committed file. `npm run check` pins the Oct 29, 2026 prints (NYSI −504.41, NASI −699.51 with MA(8) −769.33, SPX 7720.39), the 1Y / 10Y defaults, and the −1000 buy line.
 
 ## Develop
 

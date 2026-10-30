@@ -91,7 +91,7 @@ function tooltip(root, bounds) {
           svg("tspan", { x: 0, dy: index ? 15 : 0, "font-weight": index ? 500 : 700 }, line),
         ),
       );
-      const width = Math.max(...lines.map((line) => line.length)) * 6.3 + 20;
+      const width = Math.max(...lines.map((line) => line.length)) * 6.9 + 24;
       const height = lines.length * 15 + 12;
       const left = Math.min(Math.max(x - width / 2, bounds.left), bounds.right - width);
       box.setAttribute("x", left);
@@ -244,6 +244,234 @@ export function drawLines(root, spec, width, height) {
     leave: () => tip.hide(),
     click(px, py) {
       if (inside(px, py) && spec.onPick) spec.onPick(nearest(px));
+    },
+  };
+}
+
+/**
+ * Daily line with a second series on its own scale, drawn behind the first.
+ * spec: { labels, primary, overlay, signal, signalLabel, primaryColor, signalColor,
+ * overlayColor, overlayFill, bandFill, markFill, grid, tip(index), label }
+ * Hover uses the same crosshair tooltip as the weekly lines.
+ */
+export function drawDualLine(root, spec, width, height) {
+  const { labels, primary, overlay } = spec;
+  const n = labels.length;
+  const narrow = width < 520;
+  const pad = { top: 16, right: narrow ? 12 : 62, bottom: 28, left: 42 };
+  const plotW = width - pad.left - pad.right;
+  const plotH = height - pad.top - pad.bottom;
+  const signal = spec.signal ?? 2;
+  const pMin = Math.min(...primary);
+  const pMax = Math.max(...primary);
+  const span = Math.max(pMax - pMin, signal - pMin, 1);
+  const lo = Math.min(0, pMin) - span * 0.08;
+  const hi = Math.max(signal, pMax) + span * 0.16;
+  const oMin = Math.min(...overlay);
+  const oMax = Math.max(...overlay);
+  const oSpan = Math.max(oMax - oMin, 1);
+  const oLo = oMin - oSpan * 0.16;
+  const oHi = oMax + oSpan * 0.16;
+  const x = (index) => pad.left + (n === 1 ? plotW / 2 : (index / (n - 1)) * plotW);
+  const y = (value) => pad.top + (1 - (value - lo) / (hi - lo)) * plotH;
+  const yOverlay = (value) => pad.top + (1 - (value - oLo) / (oHi - oLo)) * plotH;
+  const right = pad.left + plotW;
+  const bottom = pad.top + plotH;
+  const primaryColor = spec.primaryColor ?? TONE.ink;
+  const signalColor = spec.signalColor ?? "#9a6b12";
+  const overlayColor = spec.overlayColor ?? OVERLAY_COLORS[0];
+
+  const overlayPts = overlay.map((value, index) => [x(index), yOverlay(value)]);
+  const overlayPath = overlayPts.map(([px, py]) => `${px.toFixed(1)},${py.toFixed(1)}`).join(" ");
+  root.append(
+    svg("polygon", {
+      points: `${overlayPts[0][0].toFixed(1)},${bottom} ${overlayPath} ${overlayPts[overlayPts.length - 1][0].toFixed(1)},${bottom}`,
+      fill: spec.overlayFill ?? overlayColor,
+      opacity: spec.overlayFill ? 1 : 0.12,
+    }),
+    svg("polyline", {
+      points: overlayPath,
+      fill: "none",
+      stroke: overlayColor,
+      "stroke-width": 1.6,
+      opacity: 0.55,
+      "stroke-linejoin": "round",
+      "stroke-linecap": "round",
+    }),
+  );
+
+  const bandTop = y(hi);
+  const bandBottom = y(signal);
+  if (bandBottom > bandTop) {
+    root.append(svg("rect", { x: pad.left, y: bandTop, width: plotW, height: bandBottom - bandTop, fill: spec.bandFill ?? "rgba(245, 196, 81, 0.34)" }));
+  }
+
+  const step = n === 1 ? 8 : plotW / (n - 1);
+  primary.forEach((value, index) => {
+    if (value < signal) return;
+    const markW = Math.max(4, step * 0.72);
+    const left = Math.max(pad.left, x(index) - markW / 2);
+    const markRight = Math.min(right, left + markW);
+    root.append(svg("rect", { x: left, y: pad.top, width: markRight - left, height: plotH, fill: spec.markFill ?? "rgba(245, 196, 81, 0.42)" }));
+  });
+
+  const ticks = niceTicks(lo, hi, Math.max(3, Math.round(plotH / 52)));
+  for (const tick of ticks) {
+    if (tick < lo - 1e-9 || tick > hi + 1e-9) continue;
+    const ty = y(tick);
+    root.append(
+      svg("line", { x1: pad.left, x2: right, y1: ty, y2: ty, stroke: spec.grid ?? TONE.grid }),
+      svg("text", { x: pad.left - 8, y: ty + 3.5, "text-anchor": "end", class: "pc-axis" }, Number.isInteger(tick) ? String(tick) : tick.toFixed(1)),
+    );
+  }
+  if (!narrow) {
+    for (const tick of niceTicks(oLo, oHi, 4)) {
+      if (tick < oLo - 1e-6 || tick > oHi + 1e-6) continue;
+      root.append(
+        svg("text", {
+          x: right + 8,
+          y: yOverlay(tick) + 3.5,
+          "text-anchor": "start",
+          class: "pc-axis",
+        }, Math.round(tick).toLocaleString("en-US")),
+      );
+    }
+  }
+
+  const gy = y(signal);
+  root.append(svg("line", { x1: pad.left, x2: right, y1: gy, y2: gy, stroke: signalColor, "stroke-width": 1.25, "stroke-dasharray": "5 4" }));
+  if (bandBottom - bandTop > 18) {
+    root.append(svg("text", { x: pad.left + 8, y: bandTop + 13, class: "pc-guide svb-signal", fill: signalColor }, spec.signalLabel ?? "≥ 2"));
+  }
+
+  const linePts = primary.map((value, index) => [x(index), y(value)]);
+  root.append(
+    svg("polyline", {
+      points: linePts.map(([px, py]) => `${px.toFixed(1)},${py.toFixed(1)}`).join(" "),
+      fill: "none",
+      stroke: primaryColor,
+      "stroke-width": 2.15,
+      "stroke-linejoin": "round",
+      "stroke-linecap": "round",
+    }),
+  );
+
+  const runs = [];
+  let run = [];
+  const flush = () => {
+    if (run.length >= 2) runs.push(run);
+    run = [];
+  };
+  const push = (px, py) => {
+    const last = run[run.length - 1];
+    if (last && Math.abs(last[0] - px) < 0.2 && Math.abs(last[1] - py) < 0.2) return;
+    run.push([px, py]);
+  };
+  for (let index = 0; index < n - 1; index += 1) {
+    const a = primary[index];
+    const b = primary[index + 1];
+    const aOn = a >= signal;
+    const bOn = b >= signal;
+    const ax = x(index);
+    const bx = x(index + 1);
+    if (aOn && bOn) {
+      if (!run.length) push(ax, y(a));
+      push(bx, y(b));
+      continue;
+    }
+    if (aOn === bOn || a === b) {
+      flush();
+      continue;
+    }
+    const t = (signal - a) / (b - a);
+    const cx = ax + (bx - ax) * t;
+    const cy = y(signal);
+    if (aOn) {
+      if (!run.length) push(ax, y(a));
+      push(cx, cy);
+      flush();
+    } else {
+      flush();
+      push(cx, cy);
+      push(bx, y(b));
+    }
+  }
+  flush();
+  for (const path of runs) {
+    root.append(
+      svg("polyline", {
+        points: path.map(([px, py]) => `${px.toFixed(1)},${py.toFixed(1)}`).join(" "),
+        fill: "none",
+        stroke: signalColor,
+        "stroke-width": 2.7,
+        "stroke-linejoin": "round",
+        "stroke-linecap": "round",
+      }),
+    );
+  }
+
+  primary.forEach((value, index) => {
+    const on = value >= signal;
+    const last = index === n - 1;
+    if (!on && !last) return;
+    root.append(
+      svg("circle", {
+        cx: x(index),
+        cy: y(value),
+        r: on ? 4.4 : 4.6,
+        fill: on ? "#f5c451" : "#fff",
+        stroke: on ? signalColor : primaryColor,
+        "stroke-width": 1.8,
+      }),
+    );
+  });
+
+  const marks = labels.map((label, index) => ({ label, index })).filter((item) => item.label);
+  const kept = [];
+  for (const item of marks) {
+    const last = item.index === n - 1;
+    const px = x(item.index);
+    if (!last && kept.length && px - x(kept[kept.length - 1].index) < 64) continue;
+    if (last && kept.length && px - x(kept[kept.length - 1].index) < 56) kept.pop();
+    kept.push(item);
+  }
+  for (const item of kept) {
+    const last = item.index === n - 1;
+    const first = item.index === kept[0].index;
+    root.append(
+      svg("text", {
+        x: x(item.index),
+        y: height - 8,
+        "text-anchor": last ? "end" : first ? "start" : "middle",
+        class: "pc-axis",
+      }, item.label),
+    );
+  }
+
+  const marker = svg("circle", { r: 5.5, fill: "#fff", stroke: primaryColor, "stroke-width": 2, visibility: "hidden", "pointer-events": "none" });
+  root.append(marker);
+  const tip = tooltip(root, { top: pad.top, bottom, left: pad.left, right });
+  const nearest = (px) => Math.round(Math.min(n - 1, Math.max(0, ((px - pad.left) / plotW) * (n - 1))));
+  const inside = (px, py) => px >= pad.left - 8 && px <= right + 8 && py >= pad.top - 8 && py <= bottom + 8;
+  return {
+    move(px, py) {
+      if (!inside(px, py)) {
+        marker.setAttribute("visibility", "hidden");
+        tip.hide();
+        return;
+      }
+      const index = nearest(px);
+      const on = primary[index] >= signal;
+      marker.setAttribute("cx", x(index));
+      marker.setAttribute("cy", y(primary[index]));
+      marker.setAttribute("fill", on ? "#f5c451" : "#fff");
+      marker.setAttribute("stroke", on ? signalColor : primaryColor);
+      marker.setAttribute("visibility", "visible");
+      tip.show(x(index), spec.tip ? spec.tip(index) : [labels[index]]);
+    },
+    leave() {
+      marker.setAttribute("visibility", "hidden");
+      tip.hide();
     },
   };
 }
