@@ -99,6 +99,16 @@
             </p>
           </section>
 
+          <section class="wall-status" aria-labelledby="wall-status-title">
+            <div class="wall-status-head">
+              <h2 id="wall-status-title">Data as of</h2>
+              <p class="hint">Every reading on this wall is read from committed files. None is a live quote; each line says how old its data is.</p>
+            </div>
+            <div id="wall-status">
+              <p class="hint">Checking data dates…</p>
+            </div>
+          </section>
+
           <div class="wall-grid" id="wall">
             <article class="pchart svb-card" id="spot-vol-beta" aria-labelledby="svb-title">
               <header class="pchart-head">
@@ -240,6 +250,12 @@
               <p class="hint bw-load">Loading Nasdaq Summation…</p>
             </article>
           </div>
+          <nav class="vault-next" aria-label="More in the Vault">
+            <span class="vault-next-label">More in the Vault</span>
+            <a href="../soft-crowded/">This week's pack</a>
+            <a href="../portfolio/">Portfolio</a>
+            <a href="../archive/">Desk-day archive</a>
+          </nav>
         </template>
       </main>
 
