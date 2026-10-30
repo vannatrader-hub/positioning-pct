@@ -10,6 +10,7 @@ import { SECTION_ORDER, STATUS, allPlays, levelKind, outcomeLabel, sortCards, sp
 import { activeSpotlights, earningsBoxes, spotlightStar, tradeDates } from "../src/scorecard.js";
 import { emailLinkAttemptPlan, emailLinkReturnPlan, readClerkLinkCallback, withoutClerkQuery } from "../src/vault-link.js";
 import { NT_SECTIONS, SOURCE_LABELS, deskDay, deskDayStart, deskWindow, itemsForDay, windowLabel } from "../src/new-today-window.js";
+import { DEFAULTS as MAG7_DEFAULTS, MAG7, TYPES as MAG7_TYPES, buildOscillator, fmtPct, momentum, panelAt, rangeStart, regimeOf, sma } from "../src/mag7-osc.js";
 import {
   CHARTS,
   CHART_IDS,
@@ -751,6 +752,7 @@ const deskPages = ["index.html", "positioning/index.html", "positioning/desk/ind
 const vaultSurface = {
   "vault/index.html": { desk: "../", vault: "./" },
   "vault/soft-crowded/index.html": { desk: "../../", vault: "../" },
+  "vault/vol-credit-momentum/index.html": { desk: "../../", vault: "../" },
 };
 const publicPages = [...deskPages, ...Object.keys(vaultSurface)];
 for (const file of publicPages) {
@@ -806,7 +808,7 @@ assert(!/opening later/i.test(vaultTopbar + vaultFooter), "Vault chrome no longe
 
 const monetization = /\b(free|paid|premium|subscri\w*|paywall\w*|upgrad\w*|trials?|pric(e|es|ed|ing)|members?hips?|unlock\w*)\b/i;
 const chromeCopy = [
-  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "404.html"].map((file) => [
+  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "404.html"].map((file) => [
     file,
     readFileSync(join(root, file), "utf8"),
   ]),
@@ -1124,6 +1126,102 @@ for (const piece of ["bodyMarkdown", "dumbMoney", "smartMoney", "invalidation", 
   assert(packJs.includes(piece), `pack page renders ${piece}`);
 }
 assert(css.includes("#pack .pack-article") && css.includes("@media print") && css.includes("break-inside: avoid"), "pack articles keep a print stylesheet");
+
+/* Vault wall: Vol · Credit · Momentum, with the MAG7 Oscillator beside Spot Vol Beta and Credit Spread Regime. */
+const wallFile = "vault/vol-credit-momentum/index.html";
+assert(viteConfig.includes(`"${wallFile}"`), `vite builds ${wallFile}`);
+const wallPage = readFileSync(join(root, wallFile), "utf8");
+assert(wallPage.includes('<body class="is-vault">'), "wall page carries the Vault theme");
+assert(wallPage.includes('src="/src/vault-gate.js"') && wallPage.includes('src="/src/vault-wall.js"'), "wall page runs the gate and the wall");
+assert(/class="lockup" href="\.\.\/\.\.\/"/.test(wallPage), "wall lockup links home");
+const wallMain = wallPage.match(/<main id="content">([\s\S]*?)<\/main>/)?.[1] ?? "";
+const wallTemplate = wallMain.match(/<template id="vault-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
+const wallOutside = wallMain.replace(/<template id="vault-content">[\s\S]*?<\/template>/, "");
+assert(/<section class="vault-wall" id="vault-wall" data-state="checking"/.test(wallOutside), "wall page sign-in card renders before the gate opens");
+assert(/<h1 id="vault-wall-title">Sign in to open Vault<\/h1>/.test(wallOutside), "wall page reads Sign in to open Vault");
+assert(!/id="mag7"|mo-pane|wall-grid|wall-slot/.test(wallOutside), "wall content does not render outside the template");
+const wallOrder = [...wallTemplate.matchAll(/<article class="[^"]*" id="([^"]+)"/g)].map((match) => match[1]);
+assert(JSON.stringify(wallOrder) === '["spot-vol-beta","credit-spread-regime","mag7"]', `wall order ${wallOrder}`);
+for (const id of ["mo-controls", "mo-pane", "mo-plot", "mo-legend", "mo-table", "mo-now", "mo-basis"]) assert(wallTemplate.includes(`id="${id}"`), `MAG7 card keeps #${id}`);
+assert(wallTemplate.includes("Caution +9") && wallTemplate.includes("Stretched −5"), "MAG7 key names the caution and stretched lines");
+assert(wallTemplate.includes("Bullish above +2") && wallTemplate.includes("Bearish below −2"), "MAG7 key names the ±2 signal thresholds");
+assert(vaultTemplate.includes('class="tile vault-pack" href="vol-credit-momentum/"'), "signed-in Vault links to the wall");
+assert(!vaultOutside.includes("vol-credit-momentum"), "the wall link stays inside the signed-in template");
+for (const file of [...deskPages, "404.html"]) {
+  assert(!readFileSync(join(root, file), "utf8").includes("vol-credit-momentum"), `${file} links into the Vault wall`);
+}
+
+const wallSources = [wallFile, "src/vault-wall.js", "src/mag7-chart.js", "src/mag7-osc.js", "scripts/vault-mag7-seed.mjs", "public/data/vault/mag7/oscillator.json"];
+for (const file of wallSources) {
+  const text = readFileSync(join(root, file), "utf8");
+  assert(!/tradingview|\btdv\b|\bpine\b|pinescript|<iframe|©/i.test(text), `${file} carries third-party chart branding, script source, or an embed`);
+}
+function noPineFiles(dir) {
+  for (const name of readdirSync(dir)) {
+    if (["node_modules", "dist", ".git"].includes(name)) continue;
+    const path = join(dir, name);
+    if (statSync(path).isDirectory()) noPineFiles(path);
+    else assert(extname(name) !== ".pine", `${path} ships indicator script source`);
+  }
+}
+noPineFiles(root);
+
+assert(JSON.stringify(momentum([100, 110, 121, 99], 2).map((value) => Math.round(value * 1e6) / 1e6)) === "[0,0,21,-10]", "momentum is % change over the lookback, 0 during warmup");
+assert(JSON.stringify(sma([1, 2, 3, null, 5], 2)) === "[null,1.5,2.5,null,null]", "smoothing skips windows with a missing bar");
+assert(regimeOf(2, 2, -2) === "neutral" && regimeOf(2.01, 2, -2) === "bull" && regimeOf(-2.01, 2, -2) === "bear", "signal fires strictly beyond ±2");
+assert(fmtPct(-4.578) === "−4.58" && fmtPct(2, 1) === "2" && fmtPct(-4.5) === "−4.5", "table numbers keep up to two decimals");
+
+const oscDoc = JSON.parse(readFileSync(join(root, "public/data/vault/mag7/oscillator.json"), "utf8"));
+assert(oscDoc.sku === "mag7-oscillator" && oscDoc.houseLabel === "Desk", "oscillator document is the Desk MAG7 read");
+assert(JSON.stringify(oscDoc.names) === JSON.stringify(MAG7) && JSON.stringify(MAG7) === '["AAPL","MSFT","GOOGL","AMZN","NVDA","TSLA","META"]', "oscillator runs the seven names");
+assert(JSON.stringify(oscDoc.params) === JSON.stringify(MAG7_DEFAULTS), "oscillator document carries the desk parameters");
+assert(
+  MAG7_DEFAULTS.momentumLength === 14 && MAG7_DEFAULTS.smoothingLength === 5 && MAG7_DEFAULTS.bullishThreshold === 2 && MAG7_DEFAULTS.bearishThreshold === -2,
+  "MAG7 is 14-day momentum, 5-session smoothing, ±2 thresholds",
+);
+assert(MAG7_DEFAULTS.stretched === -5 && MAG7_DEFAULTS.caution === 9, "MAG7 stretched line at −5 and caution line at +9");
+assert(oscDoc.dates.every((date, index) => !index || date > oscDoc.dates[index - 1]), "oscillator sessions ascend");
+for (const ticker of [...MAG7, oscDoc.ew.ticker]) {
+  const closes = oscDoc.closes[ticker];
+  assert(closes?.length === oscDoc.dates.length && closes.every((close) => typeof close === "number" && close > 0), `${ticker} closes cover every session`);
+}
+assert(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/.test(oscDoc.asOf) && oscDoc.asOf.startsWith(oscDoc.dates[oscDoc.dates.length - 1]), `oscillator asOf ${oscDoc.asOf} is the last session`);
+assert(["close", "intraday"].includes(oscDoc.lastBar), `oscillator lastBar ${oscDoc.lastBar}`);
+
+const osc = buildOscillator(oscDoc);
+const oscLast = osc.values.length - 1;
+const oscPanel = panelAt(osc, oscLast);
+assert(oscPanel.valueText === "−4.58%" && oscPanel.signal === "BEARISH" && oscPanel.breadth === 29, `MAG7 panel ${oscPanel.valueText} ${oscPanel.signal} ${oscPanel.breadth}% should read −4.58% BEARISH 29%`);
+assert(oscPanel.mode === "MAG7" && oscPanel.type === "Momentum" && oscPanel.threshold === "±2%" && oscPanel.breadthUp === 2, "MAG7 panel mode, type, threshold, 2 of 7 up");
+assert(
+  JSON.stringify(oscDoc.snapshot) === JSON.stringify({ value: oscPanel.valueRounded, signal: oscPanel.signal, breadth: oscPanel.breadth, mode: oscPanel.mode, type: oscPanel.type }),
+  "oscillator snapshot matches the computed last bar",
+);
+assert(osc.pivots?.caution === 9 && osc.pivots?.stretched === -5, "default MAG7 view draws the caution and stretched lines");
+assert(osc.dates[rangeStart(osc, "desk", oscDoc.defaultFrom)] === oscDoc.defaultFrom, `default window opens on ${oscDoc.defaultFrom}`);
+const oscFrom = rangeStart(osc, "desk", oscDoc.defaultFrom);
+const oscWindow = osc.values.slice(oscFrom);
+assert(oscWindow.every((value) => typeof value === "number"), "default window has a value on every bar");
+assert(Math.min(...oscWindow) < -12 && Math.max(...oscWindow) > 14, "default window spans the deep low and the high spike");
+const oscRegimes = new Set(osc.regime.slice(oscFrom));
+assert(oscRegimes.has("bull") && oscRegimes.has("bear") && oscRegimes.has("neutral"), "default window shows all three regime bands");
+const rel = buildOscillator(oscDoc, { mode: "relative" });
+const relPanel = panelAt(rel, oscLast);
+assert(rel.thresholds.upper === 1 && relPanel.threshold === "±1%" && relPanel.legs.length === 2 && !rel.pivots, "Relative mode reads ±1% with MAG7 and S&P EW legs");
+assert(["OUTPERFORM", "UNDERPERFORM", "NEUTRAL"].includes(relPanel.signal), `Relative signal ${relPanel.signal}`);
+for (const type of MAG7_TYPES) {
+  for (const mode of ["mag7", "ew", "relative"]) {
+    const built = buildOscillator(oscDoc, { mode, type });
+    assert(built.values.slice(rangeStart(built, "max")).every((value) => typeof value === "number"), `${mode} ${type} has a value on every plotted bar`);
+  }
+}
+const wallJs = readFileSync(join(root, "src/vault-wall.js"), "utf8");
+for (const label of ['"Value"', '"Mode"', '"Signal"', '"Type"', '"Breadth"', '"Threshold"', '"MAG7 Oscillator", "Values"']) {
+  assert(wallJs.includes(label), `MAG7 stats panel keeps ${label}`);
+}
+assert(wallJs.includes("data/vault/mag7/oscillator.json"), "wall loads the oscillator document");
+const chartJs = readFileSync(join(root, "src/mag7-chart.js"), "utf8");
+for (const piece of ["PANE.band", "mo-pivot", '"caution"', '"stretched"', "thresholds", "mo-line"]) assert(chartJs.includes(piece), `MAG7 pane draws ${piece}`);
 
 if (failed) {
   console.error(`${failed} check(s) failed`);
