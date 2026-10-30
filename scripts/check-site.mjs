@@ -8,7 +8,8 @@ import { breakeven, chartLevels, resolveExpiry } from "../src/flow-chart.js";
 import { SIDES, alertLabel, sortPlays } from "../src/options-flow.js";
 import { SECTION_ORDER, STATUS, allPlays, levelKind, outcomeLabel, sortCards, spotlightLevels, spotlightLines } from "../src/spotlights.js";
 import { activeSpotlights, earningsBoxes, spotlightStar, tradeDates } from "../src/scorecard.js";
-import { emailLinkAttemptPlan, emailLinkReturnPlan, readClerkLinkCallback, withoutClerkQuery } from "../src/vault-link.js";
+import { VAULT_ALLOWLIST, isAllowlisted } from "../src/vault-allowlist.js";
+import { errorCopy, nextStep } from "../src/vault-signin.js";
 import { NT_SECTIONS, SOURCE_LABELS, deskDay, deskDayStart, deskWindow, itemsForDay, windowLabel } from "../src/new-today-window.js";
 import { BUY_LINE, DEFAULT_MONTHS, MAX_MONTHS, RANGES, breadthRead, dayChange, monthsBack, sma as breadthSma, windowStart as breadthWindowStart } from "../src/breadth.js";
 import { CSR_PARAMS, biasOf, csrPanel, csrSeries, cycleOf, panelText, regimeOf as csrRegimeOf, zColor } from "../src/csr.js";
@@ -804,7 +805,7 @@ assert(deskPages.every((file) => !readFileSync(join(root, file), "utf8").include
 assert(/<h1>Vault/.test(vaultPage), "Vault hero");
 assert((vaultPage.match(/class="tile vault-tile"/g) ?? []).length === 3, "Vault shows three preview tiles");
 assert(!/<a\s[^>]*class="tile vault-tile/.test(vaultPage), "Vault preview tiles do not link anywhere");
-assert(!/type="password"|checkout/i.test(vaultPage), "Vault has no password field or checkout");
+assert(!/checkout/i.test(vaultPage), "Vault has no checkout");
 const vaultTopbar = vaultPage.match(/<header class="topbar">[\s\S]*?<\/header>/)?.[0] ?? "";
 assert(!/on the desk|nav-tag/i.test(vaultTopbar), "Vault topbar drops the On the Desk label");
 const vaultFooter = vaultPage.match(/<footer class="site-footer">[\s\S]*?<\/footer>/)?.[0] ?? "";
@@ -844,6 +845,13 @@ assert(vaultPage.includes('src="/src/vault-gate.js"'), "Vault page runs vault-ga
 assert(/<section class="vault-wall" id="vault-wall" data-state="checking"/.test(vaultOutside), "Vault wall renders by default, before the gate decides");
 assert(/<h1 id="vault-wall-title">Sign in to open Vault<\/h1>/.test(vaultOutside), "Vault wall reads Sign in to open Vault");
 assert(/<input id="wall-email"[^>]*type="email"/.test(vaultOutside), "Vault wall asks for an email");
+assert(/<input id="wall-password"[^>]*type="password"/.test(vaultOutside), "Vault wall asks for a password");
+assert(/<input id="wall-code"[^>]*autocomplete="one-time-code"/.test(vaultOutside), "Vault wall has a code field for the email check");
+assert(
+  /<button class="wall-create-button" id="wall-create" type="button" disabled aria-disabled="true">Create account <span class="badge is-soon">Coming soon<\/span><\/button>/.test(vaultOutside),
+  "Vault wall shows Create account disabled as Coming soon",
+);
+assert(!/magic link|sign-in link|email me a link/i.test(vaultOutside), "Vault wall no longer offers email links");
 assert(/<h1>Vault/.test(vaultTemplate) && (vaultTemplate.match(/class="tile vault-tile"/g) ?? []).length === 3, "Vault hero and tiles live in the template");
 assert(vaultTemplate.includes('class="tile vault-pack" href="soft-crowded/"'), "signed-in Vault links to the Soft ↔ Crowded pack");
 assert(!vaultOutside.includes("soft-crowded"), "the pack link stays inside the signed-in template");
@@ -851,30 +859,36 @@ assert(!/vault-hero|vault-tile|vault-desk|vault-pack/.test(vaultOutside), "no Va
 const gateSource = readFileSync(join(root, "src/vault-gate.js"), "utf8");
 assert(gateSource.includes("import.meta.env.VITE_CLERK_PUBLISHABLE_KEY"), "Vault gate reads VITE_CLERK_PUBLISHABLE_KEY");
 assert(gateSource.includes('import("@clerk/clerk-js")'), "Vault gate loads Clerk only on demand");
-assert(gateSource.indexOf("const linkCallback = readClerkLinkCallback") < gateSource.indexOf("await clerk.load()"), "email-link callback is captured before Clerk load rewrites the URL");
-assert(!gateSource.includes("redirectUrlComplete"), "email-link completion does not pass redirectUrlComplete");
-assert(!gateSource.includes("clerk.handleEmailLinkVerification"), "email-link completion does not use the redirecting helper");
 assert(!/setActive\(\{[^}]*redirectUrl/.test(gateSource), "setActive stays on this page");
-assert(gateSource.includes("redirectUrl: vaultUrl()"), "magic link still returns to the Vault");
+assert(gateSource.includes('strategy: "password"'), "Vault signs in with email and password");
+assert(gateSource.includes("isAllowlisted(email)"), "Vault checks the allowlist before calling Clerk");
 
-const liveReturn = "https://vannatrader-hub.github.io/positioning-pct/vault/?__clerk_status=verified&__clerk_created_session=sess_1&__clerk_db_jwt=dvb_token";
-const callback = readClerkLinkCallback(new URL(liveReturn).search);
-assert(callback?.status === "verified" && callback.createdSessionId === "sess_1", "return URL keeps status and the created session");
-assert(withoutClerkQuery(liveReturn) === "/positioning-pct/vault/", "cleaning the return URL stays on Vault and does not navigate");
-assert(withoutClerkQuery("https://vannatrader-hub.github.io/positioning-pct/vault/soft-crowded/?__clerk_status=verified") === "/positioning-pct/vault/soft-crowded/", "cleaning a pack return keeps the pack path");
-assert(withoutClerkQuery("https://vannatrader-hub.github.io/positioning-pct/vault/vol-credit-momentum/?__clerk_status=verified#credit-spread-regime") === "/positioning-pct/vault/vol-credit-momentum/#credit-spread-regime", "cleaning a wall return keeps the wall path and the card");
-const activate = emailLinkReturnPlan({ status: "verified", createdSessionId: "sess_1", sessionIds: ["sess_1"] });
-assert(activate.action === "activate" && activate.sessionId === "sess_1" && !("redirectUrl" in activate), "same-browser verify activates in place");
-assert(emailLinkReturnPlan({ status: "verified", createdSessionId: "sess_1", sessionIds: [] }).action === "elsewhere", "a verified session that is not on this client stays with the asking tab");
-assert(emailLinkReturnPlan({ status: "transferable", createdSessionId: null, sessionIds: [] }).action === "elsewhere", "a transferable link is not consumed on the return tab");
-assert(emailLinkReturnPlan({ status: "client_mismatch" }).code === "client_mismatch", "a different browser is reported on the return tab");
-assert(emailLinkReturnPlan({ status: "verified", createdSessionId: "sess_1", sessionIds: [], signUpStatus: "missing_requirements" }).code === "needs_more", "a half-finished sign-up is not treated as signed in");
-assert(emailLinkAttemptPlan({ status: "complete", createdSessionId: "sess_9" }).sessionId === "sess_9", "the asking tab activates a completed link");
-assert(emailLinkAttemptPlan({ status: "needs_first_factor", firstFactorVerification: { status: "transferable" } }).action === "transfer", "the asking tab transfers a new email");
-assert(emailLinkAttemptPlan({ status: "needs_first_factor", firstFactorVerification: { status: "expired" } }).code === "expired", "an expired link fails on the asking tab");
-assert(emailLinkAttemptPlan({ status: "needs_first_factor", firstFactorVerification: { status: "verified" } }).code === "incomplete", "verified without a session does not pretend to finish");
-const gateHit = (gateSource.match(/(["'`])(?:(?!\1)[^\\]|\\.)*\1/g) ?? []).find((text) => monetization.test(text));
-assert(!gateHit, `src/vault-gate.js UI copy says ${gateHit}`);
+/* Allowlist sign-in only: the wall never opens a sign-up, an email link, a transfer, or the waitlist. */
+const signInSource = readFileSync(join(root, "src/vault-signin.js"), "utf8");
+for (const [file, text] of [["src/vault-gate.js", gateSource], ["src/vault-signin.js", signInSource]]) {
+  assert(!/signUp|sign_up|createEmailLinkFlow|email_link|transfer|joinWaitlist|redirectUrl/.test(text), `${file} reaches for sign-up, email links, or redirects`);
+}
+assert(VAULT_ALLOWLIST.includes("vannatrader@gmail.com"), "allowlist carries the CEO login");
+assert(VAULT_ALLOWLIST.every((email) => email === email.trim().toLowerCase()), "allowlist entries are lowercase");
+assert(isAllowlisted(" VannaTrader@Gmail.com "), "allowlist ignores case and spaces");
+assert(!isAllowlisted("someone@example.com") && !isAllowlisted(""), "allowlist rejects other emails");
+
+const done = nextStep({ status: "complete", createdSessionId: "sess_1" });
+assert(done.action === "activate" && done.sessionId === "sess_1", "a complete sign-in activates its session");
+const trust = nextStep({ status: "needs_client_trust", supportedSecondFactors: [{ strategy: "email_code", emailAddressId: "idn_1" }] });
+assert(trust.action === "code" && trust.strategy === "email_code" && trust.emailAddressId === "idn_1", "a new-device check asks for the email code");
+assert(nextStep({ status: "needs_second_factor", supportedSecondFactors: [{ strategy: "totp" }] }).strategy === "totp", "an authenticator second factor asks for its code");
+assert(nextStep({ status: "needs_second_factor", supportedSecondFactors: [{ strategy: "phone_code" }] }).code === "second_factor", "an unsupported second factor is reported");
+assert(nextStep({ status: "needs_new_password" }).action === "new_password", "a verified reset code asks for the new password");
+assert(nextStep({ status: "complete", createdSessionId: null }).code === "incomplete", "complete without a session does not pretend to finish");
+assert(/password did not match/.test(errorCopy({ errors: [{ code: "form_password_incorrect" }] })), "a wrong password reads in Desk copy");
+assert(/no password yet/.test(errorCopy({ errors: [{ code: "strategy_for_user_invalid" }] })), "an account without a password points at Set or reset password");
+assert(/not switched on/.test(errorCopy({ errors: [{ code: "form_param_value_invalid", meta: { paramName: "strategy" } }] })), "a disabled strategy reads in Desk copy");
+
+const gateHit = [gateSource, signInSource, readFileSync(join(root, "src/vault-allowlist.js"), "utf8")]
+  .flatMap((text) => text.match(/(["'`])(?:(?!\1)[^\\]|\\.)*\1/g) ?? [])
+  .find((text) => monetization.test(text));
+assert(!gateHit, `Vault gate UI copy says ${gateHit}`);
 const envExample = readFileSync(join(root, ".env.example"), "utf8");
 assert(/^VITE_CLERK_PUBLISHABLE_KEY=$/m.test(envExample), ".env.example documents an empty VITE_CLERK_PUBLISHABLE_KEY");
 const ignored = readFileSync(join(root, ".gitignore"), "utf8");
@@ -908,6 +922,11 @@ const packTemplate = packMain.match(/<template id="vault-content">([\s\S]*?)<\/t
 const packOutside = packMain.replace(/<template id="vault-content">[\s\S]*?<\/template>/, "");
 assert(/<section class="vault-wall" id="vault-wall" data-state="checking"/.test(packOutside), "pack wall renders before the gate opens");
 assert(/<h1 id="vault-wall-title">Sign in to open Vault<\/h1>/.test(packOutside), "pack wall reads Sign in to open Vault");
+assert(
+  packOutside.match(/<section class="vault-wall"[\s\S]*?<\/section>/)?.[0].replaceAll('href="../../"', 'href="../"') ===
+    vaultOutside.match(/<section class="vault-wall"[\s\S]*?<\/section>/)?.[0],
+  "pack wall is the same sign-in card as the Vault wall",
+);
 assert(packTemplate.includes('id="pack"') && packTemplate.includes('href="#read"') && packTemplate.includes('href="#sectors"') && packTemplate.includes('href="#charts"'), "pack shell lives in the template");
 assert(!/id="pack"|pack-sheet|bucket-grid/.test(packOutside), "pack content does not render outside the template");
 assert(readFileSync(join(root, "src/vault-gate.js"), "utf8").includes('new CustomEvent("vault-open")'), "gate tells the pack when Vault opens");
@@ -1155,6 +1174,11 @@ const wallTemplate = wallMain.match(/<template id="vault-content">([\s\S]*?)<\/t
 const wallOutside = wallMain.replace(/<template id="vault-content">[\s\S]*?<\/template>/, "");
 assert(/<section class="vault-wall" id="vault-wall" data-state="checking"/.test(wallOutside), "wall page sign-in card renders before the gate opens");
 assert(/<h1 id="vault-wall-title">Sign in to open Vault<\/h1>/.test(wallOutside), "wall page reads Sign in to open Vault");
+assert(
+  wallOutside.match(/<section class="vault-wall"[\s\S]*?<\/section>/)?.[0].replaceAll('href="../../"', 'href="../"') ===
+    vaultOutside.match(/<section class="vault-wall"[\s\S]*?<\/section>/)?.[0],
+  "wall page sign-in card is the same allowlist sign-in card as the Vault",
+);
 assert(!/id="mag7"|mo-pane|wall-grid|wall-slot/.test(wallOutside), "wall content does not render outside the template");
 const wallOrder = [...wallTemplate.matchAll(/<article class="[^"]*" id="([^"]+)"/g)].map((match) => match[1]);
 assert(JSON.stringify(wallOrder) === '["spot-vol-beta","credit-spread-regime","mag7","nysi","nasi"]', `wall order ${wallOrder}`);

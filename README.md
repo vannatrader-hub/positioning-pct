@@ -11,7 +11,7 @@ Public sources are bank labels only: JPM, Morgan Stanley, BoA, GS, and a desk co
 Two surfaces, switched from the `Desk | Vault` control in every topbar:
 
 - Desk. Everything live today: home, the Positioning hub and its desk, Options Flow and its subpages, SPX Levels. URLs stay where they are; Desk is the surface name, not a path.
-- Vault (`/vault/`). Behind a sign-in wall. Signed out, the page shows one centered card ("Sign in to open Vault", an email field, and a link back to the Desk) and nothing else. Signed in, it shows the private desk: a Soft ↔ Crowded weekly pack (`/vault/soft-crowded/`), the Vol · Credit · Momentum wall (`/vault/vol-credit-momentum/`, with the NY and Nasdaq Summation breadth cards), three `Soon` preview tiles that do not link, and a panel pointing back to the Desk pages. The pack is linked only from the Vault. It has its own darker theme scoped under `body.is-vault`. No password field and no checkout. See [Vault sign-in](#vault-sign-in).
+- Vault (`/vault/`). Behind a sign-in wall. Signed out, the page shows one centered card ("Sign in to open Vault", email and password fields, a disabled "Create account · Coming soon", and a link back to the Desk) and nothing else. Signed in, it shows the private desk: a Soft ↔ Crowded weekly pack (`/vault/soft-crowded/`), the Vol · Credit · Momentum wall (`/vault/vol-credit-momentum/`, with the NY and Nasdaq Summation breadth cards), three `Soon` preview tiles that do not link, and a panel pointing back to the Desk pages. The pack is linked only from the Vault. It has its own darker theme scoped under `body.is-vault`. Sign-in is email and password for allowlisted emails only, and there is no checkout. See [Vault sign-in](#vault-sign-in).
 
 Surface chrome (home, hubs, Vault, 404, and every topbar and footer) never carries monetization words or `$` outside the `$$$` flow mark; `npm run check` enforces this along with the switcher on every page.
 
@@ -132,20 +132,26 @@ Preview serves the production build at http://127.0.0.1:4173/positioning-pct/
 
 `vault/index.html` renders the wall by default and keeps the Vault content in an inert `<template id="vault-content">`. `src/vault-gate.js` decides what happens next, based on `VITE_CLERK_PUBLISHABLE_KEY` at build time:
 
-- Key set. Clerk (`@clerk/clerk-js`, loaded on demand) sends a magic link to the email entered. The browser that opens the link signs in on this page when the session belongs to it, and the wall swaps for the Vault, with a quiet "Signed in as … / Sign out" line. If the link was confirmed in a different tab, that tab opens Vault and this one says so. Known emails sign in; new emails sign up through the same link, or join the Clerk waitlist when sign-up is restricted.
-- Key empty. Same card, but the button reads "Request access". The email is kept in this browser's `localStorage` (`positioning-pct-vault-requests`) and nothing is sent anywhere. Clerk is left out of the build entirely.
+- Key set. Allowlisted emails sign in with email and password through Clerk (`@clerk/clerk-js`, loaded on demand). Everything happens on this page with no redirect, and the wall swaps for the Vault with a quiet "Signed in as … / Sign out" line. `/vault/` and `/vault/soft-crowded/` share the same gate.
+- Key empty. Same card, but sign-in is switched off and the card says so. Clerk is left out of the build entirely.
 
-To turn on magic links with Clerk's Hobby plan (no cost, up to 50,000 monthly retained users):
+Rules the wall follows:
 
-1. Create an application at [dashboard.clerk.com](https://dashboard.clerk.com) with **Email** as the sign-in identifier.
-2. Under the email settings, turn on **Email verification link** (magic link) for sign-in and sign-up. Password is optional and the wall never asks for one.
-3. Optional: under **Restrictions**, set sign-up to Restricted or Waitlist (or add an allowlist) so only invited emails open Vault.
+- Only emails in `src/vault-allowlist.js` are sent to Clerk. Any other email gets "That email is not on the Vault list" and nothing leaves the browser. To add someone, follow the comment at the top of that file.
+- The wall never signs anyone up. There is no sign-up call, no email link, no sign-up transfer, and no waitlist. **Create account** is shown disabled as **Coming soon**. New people are added as users in the Clerk Dashboard.
+- If Clerk asks for a code on a new device (`needs_client_trust`) or a second step (`needs_second_factor`), the same card asks for the 6-digit code from the email (or an authenticator app).
+- **Set or reset password** sends a 6-digit code to an allowlisted email and sets a new password on the same card. Use it when an account has no password yet.
+
+To set this up with Clerk's Hobby plan (no cost, up to 50,000 monthly retained users):
+
+1. Create an application at [dashboard.clerk.com](https://dashboard.clerk.com) with **Email** as the identifier and **Password** turned on.
+2. Under **Restrictions**, set sign-up to **Restricted** and add allowlisted emails, so Clerk itself refuses new accounts.
+3. Create each Vault user under **Users → Create user** (email and password), or set a password on an existing user from that user's page.
 4. Copy the publishable key from **API keys**. Locally: `cp .env.example .env.local`, paste it into `VITE_CLERK_PUBLISHABLE_KEY`, and restart `npm run dev`. `.env.local` is git-ignored.
 5. For GitHub Pages: **Settings → Secrets and variables → Actions → Variables → New repository variable**, name `VITE_CLERK_PUBLISHABLE_KEY`. The Pages workflow passes it to the build. Re-run **Deploy to GitHub Pages**.
-6. In the Clerk Dashboard, add the Vault URL to **Allowed redirect URLs** (Configure → Developers → Paths, or the redirect allowlist next to the email-link setting). The live entry is `https://vannatrader-hub.github.io/positioning-pct/vault/`. For local dev, also add `http://localhost:5173/positioning-pct/vault/`. The link in the email returns to that URL. If it is missing, Clerk verifies and then cannot hand the session back to this page.
-7. **Require the same device and browser** sits on the email-link setting and defaults to on. On: the browser that clicks the link signs in only when it is the same browser that asked. A different browser shows a short note, and the tab that asked opens Vault. Off: a click on another device can finish there too. Leave it on unless mail is read on a phone while the Desk is open on a computer.
+6. Keep `https://vannatrader-hub.github.io/positioning-pct/vault/` and `https://vannatrader-hub.github.io/positioning-pct/vault/soft-crowded/` in the Clerk allowed origins and redirect URLs. Password sign-in does not redirect, but sign-out and any later SSO do.
 
-The return stays on this page. Vault does not send the browser through a second redirect after verify. On `github.io` the development instance keeps the session in the dev-browser token (`__clerk_db_jwt`), and a second navigation (including Clerk's `/client/touch` hop) comes back to the signed-out wall.
+Password sign-in replaced the magic link because a link has to come back through a redirect. On `github.io` the development instance keeps the session in the dev-browser token (`__clerk_db_jwt`), and links opened in another browser, or a new email that Clerk turned into a sign-up transfer, left Vault on the signed-out wall.
 
 A publishable key is meant to ship in browser code, but it still lives only in env and repo settings, never in a committed file. Clerk secret keys (`sk_…`) are never needed by this site. Clerk production instances need a domain you own; on `github.io`, use the development instance key until the site moves to its own domain.
 

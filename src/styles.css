@@ -3259,14 +3259,13 @@ body:has(.cc[open]) { overflow: hidden; }
   color: var(--faint);
 }
 
-.wall-row {
-  display: flex;
-  gap: 8px;
-}
+.wall-field + .wall-field { margin-top: 12px; }
+.wall-field[hidden] { display: none; }
 
-.wall-row input {
-  flex: 1;
-  min-width: 0;
+.wall-form input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
   padding: 11px 14px;
   border: 1px solid var(--line-strong);
   border-radius: 12px;
@@ -3276,17 +3275,19 @@ body:has(.cc[open]) { overflow: hidden; }
   font-size: 14.5px;
 }
 
-.wall-row input::placeholder { color: var(--faint); }
+.wall-form input::placeholder { color: var(--faint); }
 
-.wall-row input:focus-visible {
+.wall-form input:focus-visible {
   outline: 2px solid rgba(245, 196, 81, 0.6);
   outline-offset: 1px;
 }
 
-.wall-row input[aria-invalid="true"] { border-color: rgba(224, 50, 43, 0.6); }
+.wall-form input[aria-invalid="true"] { border-color: rgba(224, 50, 43, 0.6); }
+.wall-form input:read-only { color: var(--muted); }
 
 .wall-submit {
-  flex: none;
+  width: 100%;
+  margin-top: 16px;
   padding: 11px 16px;
   border: 1px solid var(--ink);
   border-radius: 12px;
@@ -3300,11 +3301,14 @@ body:has(.cc[open]) { overflow: hidden; }
 
 .wall-submit:hover { background: #fff; }
 
-.wall-row input:disabled,
-.wall-submit:disabled {
+.wall-form input:disabled,
+.wall-submit:disabled,
+.wall-reset:disabled {
   opacity: 0.6;
   cursor: progress;
 }
+
+.vault-wall[data-state="off"] :disabled { cursor: not-allowed; }
 
 .wall-status {
   margin: 14px 0 0;
@@ -3328,7 +3332,41 @@ body:has(.cc[open]) { overflow: hidden; }
   cursor: pointer;
 }
 
-.wall-reset:hover { color: var(--ink); }
+.wall-reset:hover:not(:disabled) { color: var(--ink); }
+
+.wall-links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0 18px;
+}
+
+.wall-create {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--faint);
+}
+
+.wall-create-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px 6px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: not-allowed;
+}
+
+.wall-create-button .badge { padding: 2px 8px; }
 
 .wall-back {
   display: flex;
@@ -3345,8 +3383,8 @@ body:has(.cc[open]) { overflow: hidden; }
 
 .wall-back:hover { color: var(--ink); }
 
-.vault-wall[data-state="checking"] .wall-form { visibility: hidden; }
-.vault-wall[data-state="sent"] .wall-form { display: none; }
+.vault-wall[data-state="checking"] .wall-form,
+.vault-wall[data-state="checking"] .wall-links { visibility: hidden; }
 
 .vault-account {
   display: flex;
@@ -4955,7 +4993,6 @@ a.nt-row:hover .nt-arrow { background: var(--ink); color: #fff; }
   .vault-hero { padding: 40px 0 28px; }
   .vault-wall { padding-top: 32px; min-height: 0; }
   .wall-card { padding: 28px 20px 20px; }
-  .wall-row { flex-direction: column; }
   .tagline { font-size: 17px; }
   .bucket-grid { grid-template-columns: 1fr; }
   .icard-grid { grid-template-columns: 1fr; }
