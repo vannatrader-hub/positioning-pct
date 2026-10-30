@@ -1,3 +1,5 @@
+import { emailLinkAttemptPlan, emailLinkReturnPlan, readClerkLinkCallback, withoutClerkQuery } from "./vault-link.js";
+
 const base = import.meta.env ? import.meta.env.BASE_URL : "/";
 const REQUESTS_KEY = "positioning-pct-vault-requests";
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -99,21 +101,109 @@ function clerkCode(error) {
 
 const LINK_ERRORS = {
   expired: "That sign-in link expired. Send a new one below.",
-  client_mismatch: "Open the link in the same browser you asked from, or send a new one below.",
+  client_mismatch: "That link opened in a different browser. Go back to the one where you asked for it, or send a new one below.",
   failed: "That sign-in link did not work. Send a new one below.",
+  needs_more: "This sign-in needs another step. Finish it in the tab where you asked for the link, or send a new one below.",
+  incomplete: "Sign-in did not finish. Send a new link to try again.",
 };
 
-async function finishLinkHere(clerk) {
-  try {
-    await clerk.handleEmailLinkVerification({
-      redirectUrlComplete: vaultUrl(),
-      redirectUrl: vaultUrl(),
-      onVerifiedOnOtherDevice: () => say("Link confirmed. Vault is open in the tab or device where you asked for it."),
-    });
-  } catch (error) {
-    say(LINK_ERRORS[error?.code] ?? LINK_ERRORS.failed, "error");
+const LEDE = "Enter your email and we will send you a sign-in link.";
+const ELSEWHERE = "Link confirmed. Vault opens in the tab where you asked for it. If that tab is closed, send a new link below.";
+
+function sessionIds(clerk) {
+  return (clerk.client?.sessions ?? []).map((session) => session.id);
+}
+
+/** Reload a stale client once so a session created by this click is visible. */
+async function refreshAttempts(clerk) {
+  for (const attempt of [clerk.client?.signIn, clerk.client?.signUp]) {
+    if (!attempt?.reload) continue;
+    try {
+      await attempt.reload();
+    } catch {
+      /* No live attempt on this client. */
+    }
   }
-  history.replaceState(null, "", vaultUrl());
+}
+
+/**
+ * Activate without redirectUrl. handleEmailLinkVerification's redirect
+ * (and the /client/touch hop it uses on a development instance) reloads
+ * the clean Vault URL before the session is the active one, so the next
+ * paint is the signed-out wall.
+ */
+async function activateSession(clerk, sessionId) {
+  await clerk.setActive({ session: sessionId });
+}
+
+function stripClerkQuery() {
+  const next = withoutClerkQuery(location.href);
+  const here = `${location.pathname}${location.search}${location.hash}`;
+  if (next !== here) history.replaceState(null, "", next);
+}
+
+async function finishLinkHere(clerk, callback) {
+  try {
+    if (clerk.user) return;
+    if (callback.status === "verified" && callback.createdSessionId && !sessionIds(clerk).includes(callback.createdSessionId)) {
+      await refreshAttempts(clerk);
+    }
+    const plan = emailLinkReturnPlan({
+      status: callback.status,
+      createdSessionId: callback.createdSessionId,
+      sessionIds: sessionIds(clerk),
+      signInStatus: clerk.client?.signIn?.status,
+      signUpStatus: clerk.client?.signUp?.status,
+    });
+    if (plan.action === "activate") {
+      await activateSession(clerk, plan.sessionId);
+      return;
+    }
+    setState("ready");
+    lede.textContent = LEDE;
+    if (plan.action === "elsewhere") say(ELSEWHERE);
+    else say(LINK_ERRORS[plan.code] ?? LINK_ERRORS.failed, "error");
+  } catch (error) {
+    setState("ready");
+    lede.textContent = LEDE;
+    say(clerkMessage(error), "error");
+  } finally {
+    stripClerkQuery();
+  }
+}
+
+async function completeAttempt(clerk, result, email) {
+  const plan = emailLinkAttemptPlan(result);
+  if (plan.action === "activate") {
+    await activateSession(clerk, plan.sessionId);
+    return;
+  }
+  if (plan.action === "transfer") {
+    try {
+      const signUp = await clerk.client.signUp.create({ transfer: true });
+      const transferred = emailLinkAttemptPlan(signUp);
+      if (transferred.action === "activate") {
+        await activateSession(clerk, transferred.sessionId);
+        return;
+      }
+      if (signUp?.status === "missing_requirements") {
+        setState("ready");
+        say(LINK_ERRORS.needs_more, "error");
+        return;
+      }
+    } catch (error) {
+      try {
+        await clerk.joinWaitlist({ emailAddress: email });
+        setState("sent");
+        say(`Thanks. Your request for ${email} is in. You will get an email when Vault opens to you.`);
+        return;
+      } catch {
+        throw error;
+      }
+    }
+  }
+  setState("ready");
+  say(LINK_ERRORS[plan.code] ?? LINK_ERRORS.incomplete, "error");
 }
 
 async function startLink(clerk, email) {
@@ -144,6 +234,10 @@ async function startLink(clerk, email) {
 }
 
 async function startClerk(publishableKey) {
+  /* Read before load. Clerk's dev-browser startup rewrites the URL, and the session id has to survive that. */
+  const linkCallback = readClerkLinkCallback(location.search);
+  if (linkCallback) lede.textContent = "Confirming your sign-in link…";
+
   let clerk;
   try {
     const { Clerk } = await import("@clerk/clerk-js");
@@ -152,11 +246,10 @@ async function startClerk(publishableKey) {
   } catch (error) {
     console.error(error);
     setState("ready");
+    lede.textContent = LEDE;
     say("Sign-in is not reachable right now. Try again in a moment.", "error");
     return;
   }
-
-  if (new URLSearchParams(location.search).has("__clerk_status")) await finishLinkHere(clerk);
 
   signOut.addEventListener("click", async () => {
     signOut.disabled = true;
@@ -168,6 +261,9 @@ async function startClerk(publishableKey) {
     if (user) openVault(user.primaryEmailAddress?.emailAddress);
     else if (opened) location.replace(vaultUrl());
   });
+
+  if (linkCallback) await finishLinkHere(clerk, linkCallback);
+  if (clerk.user) openVault(clerk.user.primaryEmailAddress?.emailAddress);
   if (opened) return;
 
   let pending = null;
@@ -200,13 +296,7 @@ async function startClerk(publishableKey) {
     try {
       const result = await link.done;
       if (mine !== attempt) return;
-      if (result.status === "complete" && result.createdSessionId) {
-        await clerk.setActive({ session: result.createdSessionId });
-        return;
-      }
-      const verification = result.firstFactorVerification ?? result.verifications?.emailAddress;
-      setState("ready");
-      say(verification?.status === "expired" ? LINK_ERRORS.expired : "Sign-in did not finish. Send a new link to try again.", "error");
+      await completeAttempt(clerk, result, email);
     } catch (error) {
       if (mine !== attempt) return;
       setState("ready");
