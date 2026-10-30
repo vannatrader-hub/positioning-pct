@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vol · Credit · Momentum · Vault · Positioning %.</title>
+    <meta
+      name="description"
+      content="Vault wall for vol, credit, and mega-cap momentum: the MAG7 Oscillator beside Spot Vol Beta and Credit Spread Regime. Behind the Vault sign-in wall."
+    />
+    <meta name="theme-color" content="#0a0c10" />
+    <link rel="icon" href="%BASE_URL%favicon.svg" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <script type="module" src="/src/vault-gate.js"></script>
+    <script type="module" src="/src/vault-wall.js"></script>
+  </head>
+  <body class="is-vault">
+    <a class="skip" href="#content">Skip to content</a>
+    <header class="topbar">
+      <div class="wrap topbar-in">
+        <div class="topbar-start">
+          <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+          <nav class="surface" aria-label="Surface">
+            <a href="../../"><i class="surface-dot" aria-hidden="true"></i>Desk</a>
+            <a class="is-current" href="../" aria-current="page"><svg class="surface-dial" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.75" /><circle cx="6" cy="6" r="1.5" /></svg>Vault</a>
+          </nav>
+        </div>
+        <nav class="nav" aria-label="Pages">
+          <a href="../../positioning/">Positioning</a>
+          <a href="../../options-flow/">Options Flow</a>
+          <a href="../../spx-levels/">SPX Levels</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <main id="content">
+        <section class="vault-wall" id="vault-wall" data-state="checking" aria-labelledby="vault-wall-title">
+          <div class="wall-card">
+            <svg class="wall-dial" viewBox="0 0 48 48" aria-hidden="true">
+              <circle class="vd-ring" cx="24" cy="24" r="22" />
+              <circle class="vd-knob" cx="24" cy="24" r="14" />
+              <path class="vd-pointer" d="M24 12.5 V17" />
+              <circle class="vd-core" cx="24" cy="24" r="2.5" />
+            </svg>
+            <h1 id="vault-wall-title">Sign in to open Vault</h1>
+            <p class="wall-lede" id="wall-lede">Enter your email and we will send you a sign-in link.</p>
+            <form class="wall-form" id="wall-form" novalidate>
+              <label class="wall-label" for="wall-email">Email</label>
+              <div class="wall-row">
+                <input id="wall-email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" required />
+                <button class="wall-submit" id="wall-submit" type="submit">Email me a link</button>
+              </div>
+            </form>
+            <p class="wall-status" id="wall-status" role="status" aria-live="polite"></p>
+            <button class="wall-reset" id="wall-reset" type="button" hidden>Use a different email</button>
+            <a class="wall-back" href="../../"><span aria-hidden="true">←</span> Back to the Desk</a>
+          </div>
+        </section>
+
+        <div class="vault-account" id="vault-account" hidden>
+          <span id="vault-account-email"></span>
+          <button type="button" id="vault-signout">Sign out</button>
+        </div>
+
+        <template id="vault-content">
+          <nav class="subnav" aria-label="Vault">
+            <a class="subnav-back" href="../"><span aria-hidden="true">←</span> Vault</a>
+            <a class="is-current" href="./" aria-current="page">Vol · Credit · Momentum</a>
+            <a href="#spot-vol-beta">Spot Vol Beta</a>
+            <a href="#credit-spread-regime">Credit Spread Regime</a>
+            <a href="#mag7">MAG7 Oscillator</a>
+          </nav>
+
+          <section class="page-head">
+            <span class="pill vault-pill">Desk wall</span>
+            <h1>Vol · Credit · Momentum</h1>
+            <p class="lede">
+              Three reads on one wall: the vol event gauge, the credit regime, and mega-cap momentum. When all three lean
+              the same way, the tape is telling you something.
+            </p>
+          </section>
+
+          <div class="wall-grid" id="wall">
+            <article class="wall-slot" id="spot-vol-beta" aria-labelledby="svb-title">
+              <div class="tile-kicker">
+                <span class="tile-num">01</span>
+                <span class="badge is-soon">Soon</span>
+              </div>
+              <h2 id="svb-title">Spot Vol Beta</h2>
+              <p>Vol event read with an SPX overlay. The 2.0 line marks a possible bottom path.</p>
+              <span class="vault-soon">Not open yet</span>
+            </article>
+
+            <article class="wall-slot" id="credit-spread-regime" aria-labelledby="csr-title">
+              <div class="tile-kicker">
+                <span class="tile-num">02</span>
+                <span class="badge is-soon">Soon</span>
+              </div>
+              <h2 id="csr-title">Credit Spread Regime</h2>
+              <p>High yield minus investment grade excess, as a Z score with Elevated and Stress zones.</p>
+              <span class="vault-soon">Not open yet</span>
+            </article>
+
+            <article class="pchart is-wide mo-card" id="mag7" aria-labelledby="mag7-title">
+              <header class="pchart-head mo-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">03</span>
+                  <span class="house h-desk">Desk</span>
+                </div>
+                <h2 id="mag7-title">MAG7 Oscillator</h2>
+                <p class="mo-sub">Equal-weight AAPL · MSFT · GOOGL · AMZN · NVDA · TSLA · META. 14-day momentum %, smoothed over 5 sessions.</p>
+              </header>
+
+              <div class="pchart-controls" id="mo-controls"></div>
+
+              <div class="mo-pane" id="mo-pane">
+                <div class="mo-plot" id="mo-plot"></div>
+                <p class="mo-legend" id="mo-legend" aria-live="off"><span class="mo-legend-name">MAG7</span></p>
+                <table class="mo-table" id="mo-table" aria-label="MAG7 Oscillator, latest bar"></table>
+                <p class="mo-status" id="mo-status">Loading the oscillator…</p>
+              </div>
+
+              <div class="legend mo-key" id="mo-key">
+                <span><i class="sw" style="background: #4caf50"></i><b data-key="bull">Bullish above +2</b></span>
+                <span><i class="sw" style="background: #2196f3"></i>Neutral</span>
+                <span><i class="sw" style="background: #ff5252"></i><b data-key="bear">Bearish below −2</b></span>
+                <span data-key="caution"><i class="mo-dash is-caution"></i>Caution +9</span>
+                <span data-key="stretched"><i class="mo-dash is-stretched"></i>Stretched −5</span>
+              </div>
+
+              <footer class="pchart-foot mo-foot">
+                <div class="pchart-notes">
+                  <p class="mo-now" id="mo-now"></p>
+                  <p class="mo-read">
+                    Mega-cap leadership tape. Above +2 the seven are pulling the index; below −2 they are dragging it.
+                    Breadth is how many of the seven are up over the window. Bearish with breadth under 40% is the
+                    risk-off read, strongest when Credit Spread Regime sits in Elevated and Spot Vol Beta prints 2 or
+                    more. The caution line near +9 and the stretched line near −5 have tended to mark index pivots in
+                    sideways-to-trending tape.
+                  </p>
+                  <p class="basis mo-basis" id="mo-basis"></p>
+                </div>
+              </footer>
+            </article>
+          </div>
+        </template>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+          <p class="foot-note">Vault · Vol · Credit · Momentum.</p>
+        </div>
+        <nav class="foot-links" aria-label="Footer">
+          <a href="../../">Home</a>
+          <a href="../../positioning/">Positioning</a>
+          <a href="../../options-flow/">Options Flow</a>
+          <a href="../../spx-levels/">SPX Levels</a>
+          <a class="is-current" href="../" aria-current="page">Vault</a>
+        </nav>
+      </footer>
+    </div>
+  </body>
+</html>
