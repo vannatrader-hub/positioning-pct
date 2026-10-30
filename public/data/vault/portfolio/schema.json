@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vannatrader-hub.github.io/positioning-pct/data/vault/portfolio/schema.json",
+  "title": "Portfolio journal",
+  "description": "The personal book behind the Vault wall. Closed lines carry their fill and PnL. Open lines may carry a mark (mtm_*); the page shows a dash and keeps the line Open until the journal has one. No broker mark is pulled by the page.",
+  "type": "object",
+  "required": ["schema", "summary", "trades"],
+  "properties": {
+    "schema": { "const": "ahead-portfolio-journal-v1" },
+    "summary": {
+      "type": "object",
+      "required": ["as_of_ct", "closed_pnl_usd", "closed_count", "open_count"],
+      "properties": {
+        "as_of_ct": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}", "description": "Journal stamp. The week strip totals the ISO week of this date." },
+        "closed_pnl_usd": { "type": "number" },
+        "closed_count": { "type": "integer", "minimum": 0 },
+        "open_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "trades": { "type": "array", "items": { "$ref": "#/$defs/trade" } }
+  },
+  "$defs": {
+    "trade": {
+      "type": "object",
+      "required": ["id", "ticker", "category", "structure", "qty", "entry_ts_ct", "entry_price", "status"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "ticker": { "type": "string", "minLength": 1 },
+        "category": { "type": "string", "minLength": 1 },
+        "structure": { "type": "string", "minLength": 1 },
+        "qty": { "type": "integer", "minimum": 1 },
+        "entry_ts_ct": { "type": "string", "minLength": 1 },
+        "entry_price": { "type": "number" },
+        "stop_stock": { "type": ["number", "null"], "description": "Stock stop for the line. Shown on open lines when present." },
+        "target_stock": { "type": ["number", "null"], "description": "Stock target for the line. Shown on open lines when present." },
+        "exit_ts_ct": { "type": ["string", "null"], "description": "Fill stamp. The week strip reads the date at the front." },
+        "exit_price": { "type": ["number", "null"] },
+        "outcome": { "enum": ["win", "loss", "open", "loss_pending", null] },
+        "pnl_usd": { "type": ["number", "null"] },
+        "status": { "enum": ["open", "closed", "exit_pending_fill"] },
+        "mtm_price": { "type": ["number", "null"], "description": "Mark for a line still held, per contract or spread. Optional; leave out or null when not marked." },
+        "mtm_pnl_usd": { "type": ["number", "null"], "description": "Mark PnL in dollars for a line still held. Optional; never folded into the closed total." },
+        "mtm_as_of_ct": { "type": ["string", "null"], "description": "When the mark was taken, Central time, e.g. 2026-10-30 3:00 PM CT. Optional." }
+      }
+    }
+  }
+}

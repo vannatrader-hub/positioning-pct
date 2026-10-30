@@ -29,7 +29,7 @@ import {
 } from "../src/pct-charts.js";
 import { columnMoves, isoWeek, isoWeekRange, packFrame } from "../src/vault-pack-frame.js";
 import { FORMULA, axisTicks, buildClose, closeEvent, closeRows, closeSpxPct, deskEstimate, formatSvb, gaugeFraction, readout, spotVolTip } from "../src/vault-svb.js";
-import { closedPnl, formatPx, formatUsd, isOpen, isPending, resultLabel } from "../src/vault-portfolio.js";
+import { closedPnl, deskCopy, formatPx, formatUsd, isOpen, isPending, markOf, resultLabel, stopOf, targetOf, weekStrip } from "../src/vault-portfolio.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
@@ -1675,6 +1675,40 @@ const working = { status: "exit_pending_fill", outcome: "loss_pending", pnl_usd:
 assert(isPending(working) && !isOpen(working) && resultLabel(working) === "Pending", "a working close stays pending");
 assert(closedPnl(book) === book.summary.closed_pnl_usd, `closed sum ${closedPnl(book)} drifted from the lock`);
 assert(css.includes(".pf-result.is-pending") && css.includes(".pf-result.is-open") && css.includes(".pf-table"), "portfolio table styles closed, pending, and open rows");
+
+/* Portfolio: the page never shows a source name from the locked journal, the week strip reads the journal's own ISO week, and marks stay blank until the journal carries them. */
+const shownFields = [book.summary.event, book.summary.journal_lock, book.summary.sources_note, book.summary.account, book.summary.as_of_ct];
+for (const trade of book.trades) shownFields.push(trade.notes, trade.ticket_lock, trade.title, trade.structure, trade.category, trade.hawk_post?.exact_ticket);
+for (const text of shownFields) {
+  const shown = deskCopy(text);
+  const hit = bannedSource(shown) || (/\bwsj\b|wall street journal/i.test(shown) ? "wsj" : "");
+  assert(!hit, `portfolio shows "${hit}" in ${shown}`);
+}
+assert(deskCopy(book.summary.event) === "October ticketed book (CEO port)", `portfolio headline ${deskCopy(book.summary.event)}`);
+assert(deskCopy(xyz.ticket_lock) === "team lead 2026-10-30" && deskCopy(byTicker["hawk-be-earnings-snapshot-2026-10-19"].notes).startsWith("Ticket: Long BE"), "journal copy reads ticket and team lead");
+assert(deskCopy(["Options", "Hawk", " ", "Vol", "land"].join("")) === "", "a line that would still name a source is dropped");
+for (const piece of ["deskCopy(summary.event)", "deskCopy(trade.notes)", "deskCopy(trade.ticket_lock)", "deskCopy(summary.journal_lock)"]) {
+  assert(bookJs.includes(piece), `portfolio scrubs ${piece}`);
+}
+assert(!/summary\.event\)\);|trade\.notes\)\);|"pf-lock", trade\.ticket_lock/.test(bookJs), "portfolio does not render raw journal copy");
+assert(stopOf(xyz) === 70 && targetOf(xyz) === 90 && stopOf(nflx) === null && targetOf(nflx) === null, "open lines read stop and target from the journal");
+assert(JSON.stringify(markOf(xyz)) === '{"price":null,"pnl":null,"asOf":"","marked":false}', "a line without mtm fields has no mark");
+assert(JSON.stringify(markOf({ mtm_price: 4.1, mtm_pnl_usd: 643, mtm_as_of_ct: "2026-10-30 3:00 PM CT" })) === '{"price":4.1,"pnl":643,"asOf":"2026-10-30 3:00 PM CT","marked":true}', "mtm fields read through");
+assert(markOf({ mtm_price: "4.1", mtm_pnl_usd: Number.NaN }).marked === false, "a malformed mark stays blank");
+const strip = weekStrip(book);
+assert(strip.week === "2026-W44" && strip.start === "2026-10-26" && strip.end === "2026-11-01", `portfolio week ${strip.week}`);
+assert(strip.closedPnl === -6516 && strip.closedCount === 5 && strip.wins === 1 && strip.losses === 4, `week closed ${strip.closedPnl} over ${strip.closedCount}`);
+assert(JSON.stringify(strip.closedTickers) === '["FCX","GLD","BE","META","TXN"]' && strip.openCount === 4 && strip.markedCount === 0 && strip.markPnl === null, "week strip closes and open count");
+const markedBook = structuredClone(book);
+markedBook.trades.filter(isOpen).forEach((trade, index) => Object.assign(trade, { mtm_price: 1, mtm_pnl_usd: index * 10, mtm_as_of_ct: "2026-10-30 3:00 PM CT" }));
+assert(weekStrip(markedBook).markPnl === 60 && weekStrip(markedBook).markedCount === 4, "open marks total only when every open line is marked");
+assert(css.includes(".pf-week-cells") && css.includes(".pf-open-grid"), "portfolio styles the week strip and open lines");
+const bookSchema = JSON.parse(readFileSync(join(root, "public/data/vault/portfolio/schema.json"), "utf8"));
+validatePack(bookSchema, bookSchema, book, "portfolio");
+for (const key of ["mtm_price", "mtm_pnl_usd", "mtm_as_of_ct"]) {
+  assert(JSON.stringify(bookSchema.$defs.trade.properties[key]?.type) === `["${key === "mtm_as_of_ct" ? "string" : "number"}","null"]` && !bookSchema.$defs.trade.required.includes(key), `portfolio schema has optional ${key}`);
+}
+validatePack(bookSchema, bookSchema, markedBook, "portfolio with marks");
 
 assert(breadthSpx.bars.find((bar) => bar.t === "2026-10-29")?.c === 7720.39, "wall SPX Oct 29 close 7720.39");
 const breadthJs = readFileSync(join(root, "src/vault-breadth.js"), "utf8");
