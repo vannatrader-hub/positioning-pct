@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json#/$defs/latest",
+  "session": "2026-10-30",
+  "asOf": "2026-10-30T12:18:00-05:00",
+  "asOfLabel": "Fri Oct 30, 2026 · 12:18 CT",
+  "live": false,
+  "closed": false,
+  "source": "desk-gauge",
+  "feedLabel": "Committed gauge · live feed not wired",
+  "gauge": 2.98,
+  "uvDelta": 3.41,
+  "spxPct": -1.2,
+  "spx": 6791.91
+}
