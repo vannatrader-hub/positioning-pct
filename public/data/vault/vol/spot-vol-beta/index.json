@@ -1,0 +1,8 @@
+{
+  "sku": "spot-vol-beta",
+  "title": "Spot Vol Beta",
+  "schema": "schema.json",
+  "series": "series.json",
+  "latest": "latest.json",
+  "append": "Add one object to series.json points at the session close. Keep dates ascending, one point per session. The intraday gauge lives in latest.json until that close is appended."
+}

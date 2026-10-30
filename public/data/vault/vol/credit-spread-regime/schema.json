@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vannatrader-hub.github.io/positioning-pct/data/vault/vol/credit-spread-regime/schema.json",
+  "title": "Credit spread regime",
+  "description": "Vol / breadth wall, beside Spot Vol Beta. Daily spread Z with an SPX overlay. Elevated and stress bands. Not charted yet. Card labels stay desk and bank names.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sku", "inputs", "zones", "points"],
+  "properties": {
+    "sku": { "const": "credit-spread-regime" },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hy", "ig", "excess", "ema", "lookback"],
+      "properties": {
+        "hy": { "const": "BAMLH0A0HYM2", "description": "High yield OAS series id. The card says high yield." },
+        "ig": { "const": "BAMLC0A0CM", "description": "Investment grade OAS series id. The card says investment grade." },
+        "excess": { "const": "hy-ig", "description": "High yield minus investment grade, in basis points." },
+        "ema": { "const": 5 },
+        "lookback": { "const": 252 }
+      }
+    },
+    "zones": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["elevated", "stress"],
+      "properties": {
+        "elevated": { "const": 1 },
+        "stress": { "const": 2 }
+      }
+    },
+    "points": {
+      "type": "array",
+      "description": "Append one close per session. Ascending dates. SPX is the overlay.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["date", "hyOasBps", "igOasBps", "excessBps", "z", "percentile", "regime", "momentum", "spx"],
+        "properties": {
+          "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+          "hyOasBps": { "type": "number" },
+          "igOasBps": { "type": "number" },
+          "excessBps": { "type": "number" },
+          "z": { "type": "number" },
+          "percentile": { "type": "number", "minimum": 0, "maximum": 100 },
+          "regime": { "type": "string", "minLength": 1 },
+          "momentum": { "type": "number" },
+          "vix": { "type": "number" },
+          "cycle": { "type": "string" },
+          "spx": { "type": "number" }
+        }
+      }
+    }
+  }
+}

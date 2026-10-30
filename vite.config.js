@@ -21,6 +21,7 @@ export default defineConfig({
         newToday: resolve(root, "new-today/index.html"),
         vault: resolve(root, "vault/index.html"),
         vaultSoftCrowded: resolve(root, "vault/soft-crowded/index.html"),
+        vaultVol: resolve(root, "vault/vol/index.html"),
         notFound: resolve(root, "404.html"),
       },
     },

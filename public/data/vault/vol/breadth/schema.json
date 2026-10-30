@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vannatrader-hub.github.io/positioning-pct/data/vault/vol/breadth/schema.json",
+  "title": "NYSI and NASI",
+  "description": "McClellan summation on the vol / breadth wall. Default one-year daily, range out to ten years, buy line at -1000 on each. Not charted yet.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sku", "defaultRange", "maxRange", "buyLine", "nysi", "nasi"],
+  "properties": {
+    "sku": { "const": "breadth" },
+    "defaultRange": { "const": "1y" },
+    "maxRange": { "const": "10y" },
+    "buyLine": { "const": -1000 },
+    "nysi": { "$ref": "#/$defs/series" },
+    "nasi": { "$ref": "#/$defs/series" }
+  },
+  "$defs": {
+    "series": {
+      "type": "array",
+      "description": "Append one daily close. SPX is optional context on the same date.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["date", "value"],
+        "properties": {
+          "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+          "value": { "type": "number" },
+          "spx": { "type": "number" }
+        }
+      }
+    }
+  }
+}

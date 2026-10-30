@@ -1,0 +1,35 @@
+{
+  "wall": "vol-breadth",
+  "title": "Vol / breadth",
+  "lede": "Spot Vol Beta is the gauge on this wall. Daily closes carry an SPX overlay and a band at 2. Credit, the seven-name oscillator, and the summation indexes are hooked beside it.",
+  "spotVolBeta": {
+    "series": "spot-vol-beta/series.json",
+    "latest": "spot-vol-beta/latest.json"
+  },
+  "hooks": [
+    {
+      "id": "credit",
+      "title": "Credit spread regime",
+      "schema": "credit-spread-regime/schema.json",
+      "blurb": "Daily spread Z with SPX behind it. Elevated from about 1, stress from about 2."
+    },
+    {
+      "id": "mag7",
+      "title": "MAG7 oscillator",
+      "schema": "mag7-oscillator/schema.json",
+      "blurb": "Equal-weight seven-name momentum. Signal lines at +2% and −2%, with pivot lines near −5 and +9."
+    },
+    {
+      "id": "nysi",
+      "title": "NYSI",
+      "schema": "breadth/schema.json",
+      "blurb": "McClellan summation, one-year daily, with a buy line at −1,000. The range can run out to ten years."
+    },
+    {
+      "id": "nasi",
+      "title": "NASI",
+      "schema": "breadth/schema.json",
+      "blurb": "Nasdaq McClellan summation on the same daily scale, the same buy line, and the same range."
+    }
+  ]
+}

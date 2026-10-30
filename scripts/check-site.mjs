@@ -23,6 +23,7 @@ import {
   sectorChart,
   softVolChart,
 } from "../src/pct-charts.js";
+import { FORMULA, axisTicks, formatSvb, readout, spotVolTip } from "../src/vault-vol.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
@@ -751,6 +752,7 @@ const deskPages = ["index.html", "positioning/index.html", "positioning/desk/ind
 const vaultSurface = {
   "vault/index.html": { desk: "../", vault: "./" },
   "vault/soft-crowded/index.html": { desk: "../../", vault: "../" },
+  "vault/vol/index.html": { desk: "../../", vault: "../" },
 };
 const publicPages = [...deskPages, ...Object.keys(vaultSurface)];
 for (const file of publicPages) {
@@ -806,7 +808,7 @@ assert(!/opening later/i.test(vaultTopbar + vaultFooter), "Vault chrome no longe
 
 const monetization = /\b(free|paid|premium|subscri\w*|paywall\w*|upgrad\w*|trials?|pric(e|es|ed|ing)|members?hips?|unlock\w*)\b/i;
 const chromeCopy = [
-  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "404.html"].map((file) => [
+  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "vault/vol/index.html", "404.html"].map((file) => [
     file,
     readFileSync(join(root, file), "utf8"),
   ]),
@@ -838,7 +840,9 @@ assert(/<h1 id="vault-wall-title">Sign in to open Vault<\/h1>/.test(vaultOutside
 assert(/<input id="wall-email"[^>]*type="email"/.test(vaultOutside), "Vault wall asks for an email");
 assert(/<h1>Vault/.test(vaultTemplate) && (vaultTemplate.match(/class="tile vault-tile"/g) ?? []).length === 3, "Vault hero and tiles live in the template");
 assert(vaultTemplate.includes('class="tile vault-pack" href="soft-crowded/"'), "signed-in Vault links to the Soft ↔ Crowded pack");
+assert(vaultTemplate.includes('class="tile vault-pack" href="vol/"'), "signed-in Vault links to the vol / breadth wall");
 assert(!vaultOutside.includes("soft-crowded"), "the pack link stays inside the signed-in template");
+assert(!vaultOutside.includes('href="vol/"'), "the vol wall link stays inside the signed-in template");
 assert(!/vault-hero|vault-tile|vault-desk|vault-pack/.test(vaultOutside), "no Vault content renders outside the template");
 const gateSource = readFileSync(join(root, "src/vault-gate.js"), "utf8");
 assert(gateSource.includes("import.meta.env.VITE_CLERK_PUBLISHABLE_KEY"), "Vault gate reads VITE_CLERK_PUBLISHABLE_KEY");
@@ -854,6 +858,7 @@ const callback = readClerkLinkCallback(new URL(liveReturn).search);
 assert(callback?.status === "verified" && callback.createdSessionId === "sess_1", "return URL keeps status and the created session");
 assert(withoutClerkQuery(liveReturn) === "/positioning-pct/vault/", "cleaning the return URL stays on Vault and does not navigate");
 assert(withoutClerkQuery("https://vannatrader-hub.github.io/positioning-pct/vault/soft-crowded/?__clerk_status=verified") === "/positioning-pct/vault/soft-crowded/", "cleaning a pack return keeps the pack path");
+assert(withoutClerkQuery("https://vannatrader-hub.github.io/positioning-pct/vault/vol/?__clerk_status=verified") === "/positioning-pct/vault/vol/", "cleaning a vol return keeps the vol path");
 const activate = emailLinkReturnPlan({ status: "verified", createdSessionId: "sess_1", sessionIds: ["sess_1"] });
 assert(activate.action === "activate" && activate.sessionId === "sess_1" && !("redirectUrl" in activate), "same-browser verify activates in place");
 assert(emailLinkReturnPlan({ status: "verified", createdSessionId: "sess_1", sessionIds: [] }).action === "elsewhere", "a verified session that is not on this client stays with the asking tab");
@@ -983,7 +988,16 @@ function validatePack(rootSchema, schema, data, path) {
     if (!Number.isInteger(data)) return;
     if (typeof node.minimum === "number") assert(data >= node.minimum, `${path} ${data} below ${node.minimum}`);
     if (typeof node.maximum === "number") assert(data <= node.maximum, `${path} ${data} above ${node.maximum}`);
+    return;
   }
+  if (node.type === "number") {
+    assert(typeof data === "number" && Number.isFinite(data), `${path} ${data} should be a number`);
+    if (typeof data !== "number" || !Number.isFinite(data)) return;
+    if (typeof node.minimum === "number") assert(data >= node.minimum, `${path} ${data} below ${node.minimum}`);
+    if (typeof node.maximum === "number") assert(data <= node.maximum, `${path} ${data} above ${node.maximum}`);
+    return;
+  }
+  if (node.type === "boolean") assert(typeof data === "boolean", `${path} should be a boolean`);
 }
 
 validatePack(packSchema, packSchema, packWeek, "week");
@@ -1124,6 +1138,87 @@ for (const piece of ["bodyMarkdown", "dumbMoney", "smartMoney", "invalidation", 
   assert(packJs.includes(piece), `pack page renders ${piece}`);
 }
 assert(css.includes("#pack .pack-article") && css.includes("@media print") && css.includes("break-inside: avoid"), "pack articles keep a print stylesheet");
+
+/* Vault vol / breadth: Spot Vol Beta behind the same wall. Sibling schemas are contracts only. */
+assert(viteConfig.includes('"vault/vol/index.html"'), "vite builds vault/vol/index.html");
+const volPage = readFileSync(join(root, "vault/vol/index.html"), "utf8");
+assert(volPage.includes('<body class="is-vault">'), "vol page carries the Vault theme");
+assert(volPage.includes('src="/src/vault-gate.js"') && volPage.includes('src="/src/vault-vol.js"'), "vol page runs the gate and the wall");
+assert(!volPage.includes("vault-pack.js"), "vol page does not load the Soft ↔ Crowded pack");
+const volMain = volPage.match(/<main id="content">([\s\S]*?)<\/main>/)?.[1] ?? "";
+const volTemplate = volMain.match(/<template id="vault-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
+const volOutside = volMain.replace(/<template id="vault-content">[\s\S]*?<\/template>/, "");
+assert(/<section class="vault-wall" id="vault-wall" data-state="checking"/.test(volOutside), "vol wall renders before the gate opens");
+assert(/<h1 id="vault-wall-title">Sign in to open Vault<\/h1>/.test(volOutside), "vol wall reads Sign in to open Vault");
+assert(volTemplate.includes('id="vol"') && volTemplate.includes('href="#spot-vol-beta"') && volTemplate.includes('href="#credit"') && volTemplate.includes('href="#mag7"') && volTemplate.includes('href="#nysi"') && volTemplate.includes('href="#nasi"'), "vol shell lives in the template");
+assert(!/id="vol"|svb-gauge|vol-hooks/.test(volOutside), "vol content does not render outside the template");
+assert(readFileSync(join(root, "src/vault-gate.js"), "utf8").includes('new CustomEvent("vault-open")'), "gate still tells Vault pages when the wall opens");
+for (const file of deskPages) assert(!readFileSync(join(root, file), "utf8").includes("vault/vol"), `${file} links into the vol wall`);
+const volJs = readFileSync(join(root, "src/vault-vol.js"), "utf8");
+assert(volJs.includes("data/vault/vol/") && volJs.includes("drawDualLine") && volJs.includes('new CustomEvent("vault-open")') === false, "vol page loads its series and does not mint a second gate event");
+assert(volJs.includes("vault-open") && volJs.includes("FORMULA"), "vol page listens for the gate and keeps the desk formula");
+assert(css.includes(".svb-plot") && css.includes(".svb-gauge") && css.includes(".vol-hook"), "vol wall has a gauge and a chart plate");
+assert(readFileSync(join(root, "src/chart-svg.js"), "utf8").includes("export function drawDualLine"), "daily line drawer is shared with the Positioning charts");
+
+const volDir = join(root, "public/data/vault/vol");
+const volIndex = JSON.parse(readFileSync(join(volDir, "index.json"), "utf8"));
+const svbSchema = JSON.parse(readFileSync(join(volDir, "spot-vol-beta/schema.json"), "utf8"));
+const svbSeries = JSON.parse(readFileSync(join(volDir, "spot-vol-beta/series.json"), "utf8"));
+const svbLatest = JSON.parse(readFileSync(join(volDir, "spot-vol-beta/latest.json"), "utf8"));
+assert(svbSchema.$schema === "https://json-schema.org/draft/2020-12/schema", "spot vol beta schema is draft 2020-12");
+assert(svbSchema.description.includes("Append one object"), "schema tells a writer to append one close");
+assert(svbSchema.$defs.latest.description.includes("Primary gauge"), "schema names the gauge document");
+validatePack(svbSchema, svbSchema, svbSeries, "svb");
+validatePack(svbSchema, svbSchema.$defs.latest, svbLatest, "svb.latest");
+assert(svbSeries.formula === FORMULA && svbSeries.formulaLabel === "desk estimate" && svbSeries.deskBeta === -0.7 && svbSeries.signal === 2, "desk estimate formula is the locked line");
+assert(JSON.parse(readFileSync(join(volDir, "spot-vol-beta/index.json"), "utf8")).append.includes("one point"), "series index says to append one point per session");
+const svbDates = svbSeries.points.map((point) => point.date);
+assert(new Set(svbDates).size === svbDates.length, "one Spot Vol Beta point per session");
+assert(JSON.stringify(svbDates) === JSON.stringify([...svbDates].sort()), "closes are appended in date order");
+for (const date of svbDates) {
+  const [year, month, day] = date.split("-").map(Number);
+  const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+  assert(weekday !== 0 && weekday !== 6, `${date} is not a weekday session`);
+}
+assert(!svbDates.includes("2026-09-07"), "Labor Day is not a session");
+assert(svbLatest.asOf === "2026-10-30T12:18:00-05:00" && svbLatest.asOfLabel === "Fri Oct 30, 2026 · 12:18 CT", "gauge stamp is the calibration print");
+assert(svbLatest.gauge === 2.98 && svbLatest.live === false && svbLatest.closed === false, "gauge is the committed 2.98 print, not a close");
+assert(svbLatest.feedLabel.includes("not wired"), "the card says the live feed is not wired");
+assert(svbSeries.points.at(-1).date < svbLatest.session && !svbDates.includes(svbLatest.session), "an open session is not appended to the close line");
+const impliedSpot = Math.round(svbSeries.points.at(-1).spx * (1 + svbLatest.spxPct / 100) * 100) / 100;
+assert(Math.abs(impliedSpot - svbLatest.spx) < 0.02, `session SPX ${svbLatest.spx} should match the prior close and SPX percent`);
+const svbView = readout(svbLatest, svbSeries);
+assert(svbView.gauge === "2.98" && svbView.estimate === "2.57", `readout ${svbView.gauge} / ${svbView.estimate}`);
+assert(formatSvb(svbView.estimateValue) === "2.57", "desk estimate rounds to 2.57");
+assert(Math.abs(svbLatest.gauge - svbView.estimateValue - 0.41) < 0.001, "gauge and desk estimate keep the calibration gap");
+assert(svbView.inputs === "UV Δ 3.41 · SPX −1.20%" && svbView.formula === FORMULA, "desk estimate shows its inputs");
+assert(svbView.agreement === "Gauge and desk estimate are both at or above 2.", svbView.agreement);
+assert(svbView.formalWait.includes("VIX close"), "an intraday print at or above 2 waits on the VIX close");
+assert(svbView.session.includes("6,791.91") && svbView.session.includes("−1.20%"), `session line ${svbView.session}`);
+const formal = svbSeries.points.find((point) => point.date === "2026-09-03");
+const marked = svbSeries.points.find((point) => point.date === "2026-10-12");
+const quiet = svbSeries.points.find((point) => point.date === "2026-10-29");
+assert(formal.svb >= 2 && formal.vixCloseMove >= 2, "September close is a formal vol event");
+assert(marked.svb >= 2 && marked.vixCloseMove < 2, "October close is the band without a formal vol event");
+assert(quiet.svb < 2 && quiet.date === "2026-10-29", "the last close sits under the band");
+assert(spotVolTip(formal).includes("Possible bottom") && spotVolTip(formal).some((line) => line.startsWith("Formal vol event")), "hover names the band and a formal vol event");
+assert(spotVolTip(marked).includes("Possible bottom") && !spotVolTip(marked).some((line) => line.startsWith("Formal")), "hover marks the band without calling a short VIX move formal");
+assert(!spotVolTip(quiet).includes("Possible bottom") && spotVolTip(quiet)[1] === "Spot Vol Beta 1.84" && spotVolTip(quiet)[2].startsWith("SPX "), "hover on a quiet close is the date, the beta, and SPX");
+assert(svbSeries.points.some((point) => point.svb >= svbSeries.signal) && svbSeries.note.includes("possible-bottom") && svbSeries.note.includes("prior SPX close"), "the series can paint the band and carries the house read");
+const ticks = axisTicks(svbSeries.points).filter(Boolean);
+assert(ticks[0] === "Aug 3" && ticks.at(-1) === "Oct 29" && ticks.length <= 6, `axis ticks ${ticks}`);
+assert(JSON.stringify(volIndex.hooks.map((hook) => hook.id)) === '["credit","mag7","nysi","nasi"]', "vol wall hooks credit, MAG7, NYSI, and NASI");
+for (const hook of volIndex.hooks) {
+  const schema = readFileSync(join(volDir, hook.schema), "utf8");
+  assert(schema.includes("Not charted yet"), `${hook.id} schema stays a contract`);
+  assert(!bannedSource(hook.blurb), `${hook.id} blurb names a banned source`);
+}
+const creditSchema = readFileSync(join(volDir, "credit-spread-regime/schema.json"), "utf8");
+const magSchema = readFileSync(join(volDir, "mag7-oscillator/schema.json"), "utf8");
+const breadthSchema = readFileSync(join(volDir, "breadth/schema.json"), "utf8");
+assert(creditSchema.includes('"elevated"') && creditSchema.includes('"stress"') && creditSchema.includes("BAMLH0A0HYM2") && creditSchema.includes('"spx"'), "credit schema foreshadows the Z bands and the overlay");
+assert(magSchema.includes('"stretched"') && magSchema.includes("-5") && magSchema.includes('"caution"') && magSchema.includes("AAPL"), "MAG7 schema foreshadows the pivots and the seven names");
+assert(breadthSchema.includes('"-1000"') === false && breadthSchema.includes("-1000") && breadthSchema.includes('"1y"') && breadthSchema.includes('"10y"') && breadthSchema.includes('"nysi"') && breadthSchema.includes('"nasi"'), "breadth schema foreshadows the buy line and the range");
 
 if (failed) {
   console.error(`${failed} check(s) failed`);
