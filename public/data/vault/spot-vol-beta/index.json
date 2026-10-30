@@ -4,5 +4,32 @@
   "schema": "schema.json",
   "series": "series.json",
   "latest": "latest.json",
-  "append": "Add one object to series.json points at the session close. Keep dates ascending, one point per session. The intraday gauge lives in latest.json until that close is appended."
+  "append": "Add one object to series.json points at the session close. Keep dates ascending, one point per session. The intraday gauge lives in latest.json until that close is appended. npm run svb:close writes both files.",
+  "routine": {
+    "cadence": "Weekdays, about 3:55 PM CT, after the cash close and the VIX close.",
+    "command": "npm run svb:close -- --date 2026-11-02 --svb 1.92 --spx 6801.25 --uv-delta 2.10 --vix-move 1.4",
+    "writes": [
+      "series.json: one close appended, origin close-routine, with the desk estimate close and recordedAt",
+      "latest.json: the same close, closed true"
+    ],
+    "example": {
+      "date": "2026-11-02",
+      "svb": 1.92,
+      "spx": 6801.25,
+      "vixCloseMove": 1.4,
+      "origin": "close-routine",
+      "recordedAt": "2026-11-02T15:55:00-06:00",
+      "estimate": {
+        "uvDelta": 2.1,
+        "spxPct": 0.14,
+        "value": 2.2
+      }
+    },
+    "rules": [
+      "Never rewrite or delete an earlier point.",
+      "svb is the gauge at the close, not an intraday print.",
+      "Leave estimate out when uvDelta was not recorded.",
+      "vixCloseMove is close to close; 2 points or more is a formal vol event."
+    ]
+  }
 }

@@ -28,7 +28,7 @@ import {
   softVolChart,
 } from "../src/pct-charts.js";
 import { columnMoves, isoWeek, isoWeekRange, packFrame } from "../src/vault-pack-frame.js";
-import { FORMULA, axisTicks, formatSvb, gaugeFraction, readout, spotVolTip } from "../src/vault-svb.js";
+import { FORMULA, axisTicks, buildClose, closeEvent, closeRows, closeSpxPct, deskEstimate, formatSvb, gaugeFraction, readout, spotVolTip } from "../src/vault-svb.js";
 import { closedPnl, formatPx, formatUsd, isOpen, isPending, resultLabel } from "../src/vault-portfolio.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -1447,32 +1447,96 @@ for (const date of svbDates) {
   assert(weekday !== 0 && weekday !== 6, `${date} is not a weekday session`);
 }
 assert(!svbDates.includes("2026-09-07"), "Labor Day is not a session");
-assert(svbLatest.asOf === "2026-10-30T12:18:00-05:00" && svbLatest.asOfLabel === "Fri Oct 30, 2026 · 12:18 CT", "gauge stamp is the calibration print");
-assert(svbLatest.gauge === 2.98 && svbLatest.live === false && svbLatest.closed === false, "gauge is the committed 2.98 print, not a close");
-assert(svbLatest.feedLabel.includes("not wired"), "the card says the live feed is not wired");
-assert(svbSeries.points.at(-1).date < svbLatest.session && !svbDates.includes(svbLatest.session), "an open session is not appended to the close line");
-const impliedSpot = Math.round(svbSeries.points.at(-1).spx * (1 + svbLatest.spxPct / 100) * 100) / 100;
-assert(Math.abs(impliedSpot - svbLatest.spx) < 0.02, `session SPX ${svbLatest.spx} should match the prior close and SPX percent`);
+const svbLast = svbSeries.points.at(-1);
+const svbCalibration = svbLatest.session === "2026-10-30" && !svbLatest.closed;
+assert(svbLatest.feedLabel.includes("not wired") || svbLatest.live, "the card says the live feed is not wired");
+if (svbLatest.closed) {
+  assert(svbLast.date === svbLatest.session && svbLast.svb === svbLatest.gauge && svbLast.spx === svbLatest.spx, "a closed gauge is the last close on the line");
+  assert(svbLast.origin === "close-routine" && svbLast.estimate?.value === readout(svbLatest, svbSeries).estimateValue, "a closed gauge carries the routine's desk estimate close");
+} else {
+  assert(svbLast.date < svbLatest.session && !svbDates.includes(svbLatest.session), "an open session is not appended to the close line");
+  const impliedSpot = Math.round(svbLast.spx * (1 + svbLatest.spxPct / 100) * 100) / 100;
+  assert(Math.abs(impliedSpot - svbLatest.spx) < 0.02, `session SPX ${svbLatest.spx} should match the prior close and SPX percent`);
+}
 const svbView = readout(svbLatest, svbSeries);
-assert(svbView.gauge === "2.98" && svbView.estimate === "2.57", `readout ${svbView.gauge} / ${svbView.estimate}`);
-assert(formatSvb(svbView.estimateValue) === "2.57", "desk estimate rounds to 2.57");
-assert(Math.abs(svbLatest.gauge - svbView.estimateValue - 0.41) < 0.001, "gauge and desk estimate keep the calibration gap");
-assert(svbView.inputs === "UV Δ 3.41 · SPX −1.20%" && svbView.formula === FORMULA, "desk estimate shows its inputs");
-assert(svbView.agreement === "Gauge and desk estimate are both at or above 2.", svbView.agreement);
-assert(svbView.formalWait.includes("VIX close"), "an intraday print at or above 2 waits on the VIX close");
-assert(svbView.session.includes("6,791.91") && svbView.session.includes("−1.20%"), `session line ${svbView.session}`);
+if (svbCalibration) {
+  assert(svbLatest.asOf === "2026-10-30T12:18:00-05:00" && svbLatest.asOfLabel === "Fri Oct 30, 2026 · 12:18 CT", "gauge stamp is the calibration print");
+  assert(svbLatest.gauge === 2.98 && svbLatest.live === false && svbLatest.closed === false, "gauge is the committed 2.98 print, not a close");
+  assert(svbView.gauge === "2.98" && svbView.estimate === "2.57", `readout ${svbView.gauge} / ${svbView.estimate}`);
+  assert(formatSvb(svbView.estimateValue) === "2.57", "desk estimate rounds to 2.57");
+  assert(Math.abs(svbLatest.gauge - svbView.estimateValue - 0.41) < 0.001, "gauge and desk estimate keep the calibration gap");
+  assert(svbView.inputs === "UV Δ 3.41 · SPX −1.20%" && svbView.formula === FORMULA, "desk estimate shows its inputs");
+  assert(svbView.agreement === "Gauge and desk estimate are both at or above 2.", svbView.agreement);
+  assert(svbView.formalWait.includes("VIX close"), "an intraday print at or above 2 waits on the VIX close");
+  assert(svbView.session.includes("6,791.91") && svbView.session.includes("−1.20%"), `session line ${svbView.session}`);
+}
 const formal = svbSeries.points.find((point) => point.date === "2026-09-03");
 const marked = svbSeries.points.find((point) => point.date === "2026-10-12");
 const quiet = svbSeries.points.find((point) => point.date === "2026-10-29");
 assert(formal.svb >= 2 && formal.vixCloseMove >= 2, "September close is a formal vol event");
 assert(marked.svb >= 2 && marked.vixCloseMove < 2, "October close is the band without a formal vol event");
-assert(quiet.svb < 2 && quiet.date === "2026-10-29", "the last close sits under the band");
+assert(quiet.svb === 1.84 && quiet.svb < 2, "the Oct 29 close sits under the band");
 assert(spotVolTip(formal).includes("Possible bottom") && spotVolTip(formal).some((line) => line.startsWith("Formal vol event")), "hover names the band and a formal vol event");
 assert(spotVolTip(marked).includes("Possible bottom") && !spotVolTip(marked).some((line) => line.startsWith("Formal")), "hover marks the band without calling a short VIX move formal");
 assert(!spotVolTip(quiet).includes("Possible bottom") && spotVolTip(quiet)[1] === "Spot Vol Beta 1.84" && spotVolTip(quiet)[2].startsWith("SPX "), "hover on a quiet close is the date, the beta, and SPX");
 assert(svbSeries.points.some((point) => point.svb >= svbSeries.signal) && svbSeries.note.includes("possible-bottom") && svbSeries.note.includes("prior SPX close"), "the series can paint the band and carries the house read");
 const ticks = axisTicks(svbSeries.points).filter(Boolean);
-assert(ticks[0] === "Aug 3" && ticks.at(-1) === "Oct 29" && ticks.length <= 6, `axis ticks ${ticks}`);
+const lastTick = `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][Number(svbLast.date.slice(5, 7)) - 1]} ${Number(svbLast.date.slice(8))}`;
+assert(ticks[0] === "Aug 3" && ticks.at(-1).startsWith(lastTick) && ticks.length <= 8, `axis ticks ${ticks}`);
+
+/* Spot Vol Beta session closes: the gauge close and the desk estimate close, appended by the weekday close routine. */
+const svbCloseDef = svbSchema.$defs.close;
+assert(JSON.stringify(svbCloseDef.required) === '["date","svb","spx","origin"]', `close requires ${svbCloseDef.required}`);
+assert(JSON.stringify(svbCloseDef.properties.origin.enum) === '["seed","close-routine"]', "close origin is seed or close-routine");
+assert(JSON.stringify(svbCloseDef.properties.estimate.required) === '["uvDelta","spxPct","value"]', "desk estimate close keeps its inputs");
+assert(svbCloseDef.properties.vixCloseMove.description.includes("Close-based"), "formal vol event is close-based");
+svbSeries.points.forEach((point, index) => {
+  const where = `svb close ${point.date}`;
+  if (point.estimate) {
+    assert(point.estimate.value === deskEstimate(point.estimate.uvDelta, point.estimate.spxPct, svbSeries.deskBeta), `${where} desk estimate ${point.estimate.value} is not ${FORMULA}`);
+    assert(index > 0 && point.estimate.spxPct === closeSpxPct(point, svbSeries.points[index - 1]), `${where} SPX % ${point.estimate.spxPct} does not match the prior close`);
+  }
+  if (point.origin === "close-routine") {
+    assert(point.estimate && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/.test(point.recordedAt ?? ""), `${where} routine close carries the desk estimate and recordedAt`);
+    assert(svbSeries.points.slice(index + 1).every((later) => later.origin === "close-routine"), `${where} seeded closes are never appended after routine closes`);
+  }
+});
+assert(svbSeries.points.filter((point) => point.estimate).length >= 10, "the card has at least ten desk estimate closes to list");
+const svbRows = closeRows(svbSeries, 10);
+assert(svbRows.length === 10 && svbRows[0].date === svbLast.date && svbRows.at(-1).date < svbRows[0].date, "close history lists the last ten sessions, newest first");
+const oct29 = svbRows.find((row) => row.date === "2026-10-29");
+assert(oct29 && oct29.gauge === "1.84" && oct29.estimate === "1.47" && oct29.spxPct === "+0.27%" && oct29.event.label === "Below 2", `Oct 29 close row ${JSON.stringify(oct29)}`);
+assert(oct29.origin === "Seeded" && oct29.seeded, "seeded closes are labelled Seeded");
+assert(closeEvent(formal).label === "Formal vol event" && closeEvent(marked).label === "≥ 2 · no formal event" && closeEvent(quiet).label === "Below 2", "close read follows the ≥ 2 band and the VIX close rule");
+assert(closeEvent({ svb: 1.2, vixCloseMove: 2.5 }).label === "VIX close +2 · gauge under 2", "a VIX close move without the band is not a formal vol event");
+const builtClose = buildClose({ date: "2026-10-30", svb: 2.71, spx: 6801.2 }, { date: "2026-11-02", svb: 1.92, spx: 6801.25, uvDelta: 2.1, vixCloseMove: 1.4, recordedAt: "2026-11-02T15:55:00-06:00" });
+assert(
+  JSON.stringify(builtClose) ===
+    '{"date":"2026-11-02","svb":1.92,"spx":6801.25,"vixCloseMove":1.4,"origin":"close-routine","recordedAt":"2026-11-02T15:55:00-06:00","estimate":{"uvDelta":2.1,"spxPct":0,"value":2.1}}',
+  `buildClose ${JSON.stringify(builtClose)}`,
+);
+for (const [input, message] of [
+  [{ date: "2026-10-30", svb: 1, spx: 6800 }, "a close at or before the last session"],
+  [{ date: "2026-11-07", svb: 1, spx: 6800 }, "a Saturday close"],
+  [{ date: "2026-11-02", svb: Number.NaN, spx: 6800 }, "a close without a gauge"],
+  [{ date: "2026-11-02", svb: 1, spx: 6800, recordedAt: "2026-11-02 15:55" }, "a recordedAt without an offset"],
+]) {
+  let threw = false;
+  try {
+    buildClose({ date: "2026-10-30", svb: 2.71, spx: 6801.2 }, input);
+  } catch {
+    threw = true;
+  }
+  assert(threw, `buildClose refuses ${message}`);
+}
+const svbIndex = JSON.parse(readFileSync(join(svbDir, "index.json"), "utf8"));
+assert(svbIndex.routine?.cadence.includes("3:55 PM CT") && svbIndex.routine.command.startsWith("npm run svb:close"), "series index documents the weekday close routine");
+validatePack(svbSchema, svbCloseDef, svbIndex.routine.example, "svb.index.routine.example");
+assert(svbIndex.routine.example.origin === "close-routine" && svbIndex.routine.example.estimate.value === deskEstimate(svbIndex.routine.example.estimate.uvDelta, svbIndex.routine.example.estimate.spxPct), "routine example is a valid close");
+const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+assert(packageJson.scripts["svb:close"] === "node scripts/svb-close.mjs" && existsSync(join(root, "scripts/svb-close.mjs")), "npm run svb:close appends a close");
+for (const piece of ["closesBlock(series)", "Session closes", "Gauge close", "Desk estimate close", "Entered by", "svb-close-table"]) assert(svbJs.includes(piece), `Spot Vol Beta card renders ${piece}`);
+assert(css.includes(".svb-close-table") && css.includes(".svb-origin.is-seed"), "close history has a table and a seeded tag");
 
 /* Breadth cards on the same wall: NY and Nasdaq Summation, 1Y / 1D default, 10Y range, −1000 buy line. */
 assert(wallPage.includes('src="/src/vault-breadth.js"'), "wall page runs the breadth cards");
