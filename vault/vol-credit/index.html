@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vol / Credit wall · Vault · Positioning %.</title>
+    <meta
+      name="description"
+      content="Vault Vol / Credit wall: Credit Spread Regime, the HY−IG excess OAS Z-score with regime zones and an SPX overlay, beside Spot Vol Beta. Behind the Vault sign-in wall."
+    />
+    <meta name="theme-color" content="#0a0c10" />
+    <link rel="icon" href="%BASE_URL%favicon.svg" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <script type="module" src="/src/vault-gate.js"></script>
+    <script type="module" src="/src/vault-wall.js"></script>
+  </head>
+  <body class="is-vault">
+    <a class="skip" href="#content">Skip to content</a>
+    <header class="topbar">
+      <div class="wrap is-wide topbar-in">
+        <div class="topbar-start">
+          <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+          <nav class="surface" aria-label="Surface">
+            <a href="../../"><i class="surface-dot" aria-hidden="true"></i>Desk</a>
+            <a class="is-current" href="../" aria-current="page"><svg class="surface-dial" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.75" /><circle cx="6" cy="6" r="1.5" /></svg>Vault</a>
+          </nav>
+        </div>
+        <nav class="nav" aria-label="Pages">
+          <a href="../../positioning/">Positioning</a>
+          <a href="../../options-flow/">Options Flow</a>
+          <a href="../../spx-levels/">SPX Levels</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="wrap is-wide">
+      <main id="content">
+        <section class="vault-wall" id="vault-wall" data-state="checking" aria-labelledby="vault-wall-title">
+          <div class="wall-card">
+            <svg class="wall-dial" viewBox="0 0 48 48" aria-hidden="true">
+              <circle class="vd-ring" cx="24" cy="24" r="22" />
+              <circle class="vd-knob" cx="24" cy="24" r="14" />
+              <path class="vd-pointer" d="M24 12.5 V17" />
+              <circle class="vd-core" cx="24" cy="24" r="2.5" />
+            </svg>
+            <h1 id="vault-wall-title">Sign in to open Vault</h1>
+            <p class="wall-lede" id="wall-lede">Enter your email and we will send you a sign-in link.</p>
+            <form class="wall-form" id="wall-form" novalidate>
+              <label class="wall-label" for="wall-email">Email</label>
+              <div class="wall-row">
+                <input id="wall-email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" required />
+                <button class="wall-submit" id="wall-submit" type="submit">Email me a link</button>
+              </div>
+            </form>
+            <p class="wall-status" id="wall-status" role="status" aria-live="polite"></p>
+            <button class="wall-reset" id="wall-reset" type="button" hidden>Use a different email</button>
+            <a class="wall-back" href="../../"><span aria-hidden="true">←</span> Back to the Desk</a>
+          </div>
+        </section>
+
+        <div class="vault-account" id="vault-account" hidden>
+          <span id="vault-account-email"></span>
+          <button type="button" id="vault-signout">Sign out</button>
+        </div>
+
+        <template id="vault-content">
+          <nav class="subnav" aria-label="Vault">
+            <a class="subnav-back" href="../"><span aria-hidden="true">←</span> Vault</a>
+            <a class="is-current" href="./" aria-current="page">Vol / Credit wall</a>
+            <a href="#svb">Spot Vol Beta</a>
+            <a href="#csr">Credit Spread Regime</a>
+          </nav>
+
+          <section class="page-head vc-head-page">
+            <span class="pill vault-pill">
+              <svg class="surface-dial" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.75" /><circle cx="6" cy="6" r="1.5" /></svg>
+              Desk wall
+            </span>
+            <h1>Vol / Credit</h1>
+            <p class="lede">
+              Two washout tapes side by side, each with SPX underneath. Spot Vol Beta at 2 or more and credit spreads in Elevated or Stress
+              are the desk's possible-bottom confluence. One alone is not a buy.
+            </p>
+          </section>
+
+          <div class="vc-wall" id="vc-wall">
+            <article class="vc-card is-slot" id="svb" data-card="svb" aria-labelledby="svb-title">
+              <header class="vc-head">
+                <div class="vc-kicker">
+                  <span class="vc-kicker-label">Vol · Desk</span>
+                  <span class="badge is-soon">Soon</span>
+                </div>
+                <h2 id="svb-title">Spot Vol Beta</h2>
+              </header>
+              <svg class="vc-slot-art" viewBox="0 0 120 64" aria-hidden="true">
+                <path d="M10 58 A50 50 0 0 1 110 58" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="8" stroke-linecap="round" />
+                <path d="M78 15.5 A50 50 0 0 1 110 58" fill="none" stroke="#ef4444" stroke-opacity="0.55" stroke-width="8" stroke-linecap="round" />
+                <path d="M60 58 L84 26" stroke="#f5c451" stroke-width="2.5" stroke-linecap="round" />
+                <circle cx="60" cy="58" r="4" fill="#e0322b" />
+              </svg>
+              <p class="vc-slot-copy">
+                The Spot Vol Beta gauge and its daily-close line with SPX, the 2.0 Vol Event band marked, land in this column beside
+                Credit Spread Regime.
+              </p>
+              <span class="vault-soon">Not open yet</span>
+            </article>
+
+            <article class="vc-card" id="csr" data-card="csr" aria-labelledby="csr-title">
+              <header class="vc-head">
+                <div class="vc-kicker">
+                  <span class="vc-kicker-label">Credit · Desk</span>
+                  <span class="vc-asof" id="csr-asof">FRED ICE BofA OAS</span>
+                </div>
+                <h2 id="csr-title">Credit Spread Regime</h2>
+              </header>
+
+              <div class="vc-controls">
+                <div class="seg" data-seg="range" role="group" aria-label="Window">
+                  <button type="button" data-range="3m" aria-pressed="false">3M</button>
+                  <button type="button" data-range="6m" aria-pressed="false">6M</button>
+                  <button type="button" data-range="1y" aria-pressed="false">1Y</button>
+                  <button type="button" class="is-on" data-range="all" aria-pressed="true">All</button>
+                </div>
+                <div class="seg" data-seg="metric" role="group" aria-label="Spread">
+                  <button type="button" class="is-on" data-metric="excess" aria-pressed="true">HY−IG excess</button>
+                  <button type="button" data-metric="hy" aria-pressed="false">HY only</button>
+                </div>
+                <button type="button" class="toggle vc-spx" id="csr-spx" aria-pressed="true"><i aria-hidden="true"></i>SPX overlay</button>
+              </div>
+
+              <div class="csr-stage">
+                <div class="csr-frame" id="csr-frame" role="img" aria-label="Credit Spread Regime chart">
+                  <div class="csr-legend" id="csr-legend" aria-hidden="true"></div>
+                </div>
+                <table class="csr-panel" id="csr-panel" aria-label="Credit Spread Regime statistics"></table>
+                <p class="hint" id="csr-status">Loading the credit series…</p>
+              </div>
+              <p class="vc-help">Hover for a session. Click the chart, then scroll to zoom; drag to pan; double-click resets. Arrow keys step sessions.</p>
+              <p class="visually-hidden" id="csr-live" aria-live="polite"></p>
+
+              <div class="vc-notes">
+                <div class="vc-key">
+                  <span><i class="k-low" aria-hidden="true"></i>Low · Z under −1</span>
+                  <span><i class="k-normal" aria-hidden="true"></i>Normal · −1 to 1</span>
+                  <span><i class="k-elevated" aria-hidden="true"></i>Elevated · 1 to 2</span>
+                  <span><i class="k-stress" aria-hidden="true"></i>Stress · 2 and up</span>
+                  <span><i class="k-dot" aria-hidden="true"></i>Stress rolling over</span>
+                  <span><i class="k-cross" aria-hidden="true"></i>Calm turning up</span>
+                </div>
+                <div class="vc-read">
+                  <h3>How the desk reads it</h3>
+                  <ul class="pack-points">
+                    <li>The line is the HY−IG excess spread, smoothed with a 5-session EMA, as a Z-score against its trailing 252 sessions. Widening pushes it up.</li>
+                    <li>A red dot marks a session with Z at 2 or more while the spread is already narrowing. A green cross marks Z at −2 or less with the spread widening off the lows.</li>
+                    <li>Elevated or Stress credit while Spot Vol Beta prints 2 or more is the possible SPX bottom the desk watches for. Credit Z alone is not a buy.</li>
+                  </ul>
+                  <p class="vc-invalid"><strong>Invalidation</strong> FRED prints lag a session and holidays carry the prior close. The 252-session window can move a regime with no new event behind it.</p>
+                </div>
+                <p class="vc-source">
+                  Desk · FRED: ICE BofA US High Yield Index OAS (BAMLH0A0HYM2) and ICE BofA US Corporate Index OAS (BAMLC0A0CM), in basis points;
+                  S&amp;P 500 close (SP500); Cboe VIX close (VIXCLS). Spreads carried onto S&amp;P 500 sessions. After Collin-Dufresne, Goldstein &amp; Martin (2001)
+                  and Gilchrist &amp; Zakrajšek (2012).
+                </p>
+              </div>
+            </article>
+          </div>
+        </template>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+          <p class="foot-note">Vault · Vol / Credit wall.</p>
+        </div>
+        <nav class="foot-links" aria-label="Footer">
+          <a href="../../">Home</a>
+          <a href="../../positioning/">Positioning</a>
+          <a href="../../options-flow/">Options Flow</a>
+          <a href="../../spx-levels/">SPX Levels</a>
+          <a class="is-current" href="../" aria-current="page">Vault</a>
+        </nav>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -10,6 +10,7 @@ import { SECTION_ORDER, STATUS, allPlays, levelKind, outcomeLabel, sortCards, sp
 import { activeSpotlights, earningsBoxes, spotlightStar, tradeDates } from "../src/scorecard.js";
 import { emailLinkAttemptPlan, emailLinkReturnPlan, readClerkLinkCallback, withoutClerkQuery } from "../src/vault-link.js";
 import { NT_SECTIONS, SOURCE_LABELS, deskDay, deskDayStart, deskWindow, itemsForDay, windowLabel } from "../src/new-today-window.js";
+import { CSR_PARAMS, biasOf, csrPanel, csrSeries, cycleOf, panelText, regimeOf, zColor } from "../src/csr.js";
 import {
   CHARTS,
   CHART_IDS,
@@ -627,6 +628,8 @@ const banned = [
   "copy-trading",
   "copy trading",
   "robinhood",
+  "edgetools",
+  "tradingview",
 ];
 const scanExt = new Set([".html", ".js", ".css", ".md", ".yml", ".svg", ".json"]);
 
@@ -751,6 +754,7 @@ const deskPages = ["index.html", "positioning/index.html", "positioning/desk/ind
 const vaultSurface = {
   "vault/index.html": { desk: "../", vault: "./" },
   "vault/soft-crowded/index.html": { desk: "../../", vault: "../" },
+  "vault/vol-credit/index.html": { desk: "../../", vault: "../" },
 };
 const publicPages = [...deskPages, ...Object.keys(vaultSurface)];
 for (const file of publicPages) {
@@ -806,7 +810,7 @@ assert(!/opening later/i.test(vaultTopbar + vaultFooter), "Vault chrome no longe
 
 const monetization = /\b(free|paid|premium|subscri\w*|paywall\w*|upgrad\w*|trials?|pric(e|es|ed|ing)|members?hips?|unlock\w*)\b/i;
 const chromeCopy = [
-  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "404.html"].map((file) => [
+  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "vault/vol-credit/index.html", "404.html"].map((file) => [
     file,
     readFileSync(join(root, file), "utf8"),
   ]),
@@ -1124,6 +1128,92 @@ for (const piece of ["bodyMarkdown", "dumbMoney", "smartMoney", "invalidation", 
   assert(packJs.includes(piece), `pack page renders ${piece}`);
 }
 assert(css.includes("#pack .pack-article") && css.includes("@media print") && css.includes("break-inside: avoid"), "pack articles keep a print stylesheet");
+
+/* Vault Vol / Credit wall: Credit Spread Regime beside the Spot Vol Beta slot, behind the wall. */
+assert(viteConfig.includes('"vault/vol-credit/index.html"'), "vite builds vault/vol-credit/index.html");
+const wallPage = readFileSync(join(root, "vault/vol-credit/index.html"), "utf8");
+assert(wallPage.includes('<body class="is-vault">'), "Vol / Credit wall carries the Vault theme");
+assert(wallPage.includes('src="/src/vault-gate.js"') && wallPage.includes('src="/src/vault-wall.js"'), "Vol / Credit wall runs the gate and the wall");
+assert(/class="lockup" href="\.\.\/\.\.\/"/.test(wallPage), "Vol / Credit wall lockup links home");
+const wallMain = wallPage.match(/<main id="content">([\s\S]*?)<\/main>/)?.[1] ?? "";
+const wallTemplate = wallMain.match(/<template id="vault-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
+const wallOutside = wallMain.replace(/<template id="vault-content">[\s\S]*?<\/template>/, "");
+assert(/<section class="vault-wall" id="vault-wall" data-state="checking"/.test(wallOutside), "Vol / Credit wall renders the sign-in wall first");
+assert(/<h1 id="vault-wall-title">Sign in to open Vault<\/h1>/.test(wallOutside), "Vol / Credit wall reads Sign in to open Vault");
+assert(!/vc-wall|csr-|id="svb"|id="csr"/.test(wallOutside), "Credit Spread Regime does not render outside the template");
+const svbAt = wallTemplate.indexOf('id="svb"');
+const csrAt = wallTemplate.indexOf('id="csr"');
+assert(svbAt > 0 && csrAt > svbAt && wallTemplate.includes('class="vc-wall"'), "Spot Vol Beta sits left of Credit Spread Regime on one wall");
+for (const id of ["csr-frame", "csr-panel", "csr-legend", "csr-spx", "csr-asof"]) assert(wallTemplate.includes(`id="${id}"`), `Credit Spread Regime card keeps #${id}`);
+assert(wallTemplate.includes(">SPX overlay<"), "Credit Spread Regime card offers the SPX overlay");
+for (const zone of ["Low · Z under −1", "Normal · −1 to 1", "Elevated · 1 to 2", "Stress · 2 and up"]) assert(wallTemplate.includes(zone), `Credit Spread Regime key names ${zone}`);
+assert(/BAMLH0A0HYM2/.test(wallTemplate) && /BAMLC0A0CM/.test(wallTemplate) && /FRED/.test(wallTemplate) && /ICE BofA/.test(wallTemplate), "Credit Spread Regime cites FRED ICE BofA OAS");
+assert(vaultTemplate.includes('class="tile vault-pack" href="vol-credit/"'), "signed-in Vault links to the Vol / Credit wall");
+assert(!vaultOutside.includes("vol-credit"), "the wall link stays inside the signed-in template");
+for (const file of [...deskPages, "404.html"]) {
+  assert(!readFileSync(join(root, file), "utf8").includes("vol-credit"), `${file} links into the Vault wall`);
+}
+
+const csrFiles = ["vault/vol-credit/index.html", "src/csr.js", "src/csr-chart.js", "src/vault-wall.js", "scripts/fetch-csr.mjs", "public/data/vault/vol-credit/csr.json"];
+for (const file of csrFiles) {
+  const text = readFileSync(join(root, file), "utf8");
+  assert(!/edge\s*tools|tradingview|\btdv\b|tv\.js|<iframe/i.test(text), `${file} carries third-party chart branding or an embed`);
+  assert(!/indicator\(|request\.security|\/\/@version/.test(text), `${file} ships indicator script source`);
+}
+function noPine(dir) {
+  for (const name of readdirSync(dir)) {
+    if (["node_modules", "dist", ".git"].includes(name)) continue;
+    const path = join(dir, name);
+    if (statSync(path).isDirectory()) noPine(path);
+    else assert(extname(name) !== ".pine", `${path} ships indicator script source`);
+  }
+}
+noPine(root);
+
+const csrDoc = JSON.parse(readFileSync(join(root, "public/data/vault/vol-credit/csr.json"), "utf8"));
+const csrCols = csrDoc.series;
+assert(csrDoc.sourceLabel === "Desk" && csrDoc.provider === "FRED", "csr.json is a Desk read of FRED series");
+assert(
+  JSON.stringify(csrDoc.sources.map((source) => source.id)) === '["BAMLH0A0HYM2","BAMLC0A0CM","SP500","VIXCLS"]',
+  `csr.json sources ${csrDoc.sources.map((source) => source.id)}`,
+);
+assert(JSON.stringify(csrDoc.params) === JSON.stringify(CSR_PARAMS), "csr.json params match the card (EMA 5, 252-session Z, 2 / 1 / −1)");
+assert(CSR_PARAMS.smoothing === 5 && CSR_PARAMS.lookback === 252 && CSR_PARAMS.stress === 2 && CSR_PARAMS.elevated === 1 && CSR_PARAMS.low === -1, "Credit Spread Regime runs EMA 5, 252-session Z, Stress 2, Elevated 1, Low −1");
+for (const key of ["hy", "ig", "spx", "vix"]) assert(csrCols[key]?.length === csrCols.t.length, `csr.json ${key} has a value for every session`);
+assert(csrCols.t.every((day, index) => /^\d{4}-\d{2}-\d{2}$/.test(day) && (index === 0 || day > csrCols.t[index - 1])), "csr.json sessions ascend");
+assert(csrCols.hy.every((v, i) => Number.isInteger(v) && Number.isInteger(csrCols.ig[i]) && v > csrCols.ig[i] && csrCols.ig[i] > 0), "csr.json HY and IG are whole bps with HY over IG");
+assert(csrCols.spx.every((v) => v > 0), "csr.json SPX closes are positive");
+assert(csrDoc.asOf === csrCols.t[csrCols.t.length - 1], "csr.json asOf is the last session");
+assert(csrCols.t.length - CSR_PARAMS.lookback >= 252, "csr.json carries at least a year of Z after the 252-session window");
+const csrRead = csrSeries(csrDoc);
+const csrLast = csrPanel(csrRead);
+const csrSnap = csrDoc.snapshot;
+assert(
+  csrSnap.date === csrLast.date && csrSnap.hy === csrLast.hy && csrSnap.ig === csrLast.ig && csrSnap.excess === csrLast.excess &&
+    csrSnap.z === Number(csrLast.z.toFixed(2)) && csrSnap.regime === csrLast.regime && csrSnap.percentile === Number(csrLast.percentile.toFixed(1)) &&
+    csrSnap.momentum === Number(csrLast.momentum.toFixed(1)) && csrSnap.bias === csrLast.bias && csrSnap.cycle === csrLast.cycle,
+  `csr.json snapshot ${JSON.stringify(csrSnap)} matches the computed last session`,
+);
+const lockAt = csrCols.t.indexOf("2026-10-29");
+if (lockAt >= 0) {
+  const lockDoc = { series: Object.fromEntries(Object.entries(csrCols).map(([key, values]) => [key, values.slice(0, lockAt + 1)])) };
+  const lockText = panelText(csrPanel(csrSeries(lockDoc)));
+  const want = { hy: "326 bps", ig: "89 bps", excess: "237 bps", z: "1.85", regime: "ELEVATED", percentile: "95.2%", momentum: "−8.4 bps", status: "NORMAL", cycle: "RECOVERING", bias: "RISK-OFF" };
+  const got = Object.fromEntries(Object.keys(want).map((key) => [key, lockText[key]]));
+  assert(JSON.stringify(got) === JSON.stringify(want), `Oct 29, 2026 panel ${JSON.stringify(got)} matches the desk lock`);
+}
+const peak = csrRead.z.reduce((best, z, i) => (z !== null && z > (csrRead.z[best] ?? -Infinity) ? i : best), csrRead.first);
+assert(csrRead.t[peak] >= "2025-04-01" && csrRead.t[peak] <= "2025-04-30" && csrRead.z[peak] > 4, `April 2025 is the Z peak (${csrRead.t[peak]} ${csrRead.z[peak]?.toFixed(2)})`);
+const octDots = csrRead.t.filter((day, i) => csrRead.sell[i] && day >= "2026-10-01");
+assert(JSON.stringify(octDots) === '["2026-10-21","2026-10-26","2026-10-27"]', `October 2026 stress roll-over dots ${octDots}`);
+assert(regimeOf(2) === "STRESS" && regimeOf(1.99) === "ELEVATED" && regimeOf(1) === "ELEVATED" && regimeOf(-1) === "NORMAL" && regimeOf(-1.01) === "LOW", "regime thresholds");
+assert(JSON.stringify(zColor(2.5)) === "[239,68,68]" && JSON.stringify(zColor(-1.5)) === "[34,197,94]" && JSON.stringify(zColor(1)) === "[115,115,115]", "Z line runs green, grey, red");
+assert(cycleOf(1.5, -1) === "RECOVERING" && cycleOf(1.5, 1) === "DETERIORATING" && cycleOf(-1.5, -1) === "TIGHTENING" && cycleOf(0, 1) === "STABLE", "credit cycle phases");
+assert(biasOf(1) === "RISK-OFF" && biasOf(-1.01) === "RISK-ON" && biasOf(0) === "NEUTRAL", "bias");
+const wallJs = readFileSync(join(root, "src/vault-wall.js"), "utf8");
+const chartJs = readFileSync(join(root, "src/csr-chart.js"), "utf8");
+assert(wallJs.includes("data/vault/vol-credit/") && wallJs.includes('"vault-open"'), "wall loads csr.json once the Vault opens");
+for (const piece of ["drawSpx", "drawZones", "drawBackground", "drawMarkers", "drawLevels", "drawCrosshair"]) assert(chartJs.includes(`function ${piece}(`), `Credit Spread Regime chart keeps ${piece}`);
 
 if (failed) {
   console.error(`${failed} check(s) failed`);
