@@ -29,6 +29,7 @@ import {
 } from "../src/pct-charts.js";
 import { columnMoves, isoWeek, isoWeekRange, packFrame } from "../src/vault-pack-frame.js";
 import { FORMULA, axisTicks, buildClose, closeEvent, closeRows, closeSpxPct, deskEstimate, formatSvb, gaugeFraction, readout, spotVolTip } from "../src/vault-svb.js";
+import { archiveGroups, deskWeekEntries, displaySource, filterEntries, newTodayDays, parseDateQuery } from "../src/vault-archive.js";
 import { closedPnl, deskCopy, formatPx, formatUsd, isOpen, isPending, markOf, resultLabel, stopOf, targetOf, weekStrip } from "../src/vault-portfolio.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -766,6 +767,7 @@ const vaultSurface = {
   "vault/soft-crowded/index.html": { desk: "../../", vault: "../" },
   "vault/vol-credit-momentum/index.html": { desk: "../../", vault: "../" },
   "vault/portfolio/index.html": { desk: "../../", vault: "../" },
+  "vault/archive/index.html": { desk: "../../", vault: "../" },
 };
 const publicPages = [...deskPages, ...Object.keys(vaultSurface)];
 for (const file of publicPages) {
@@ -821,7 +823,7 @@ assert(!/opening later/i.test(vaultTopbar + vaultFooter), "Vault chrome no longe
 
 const monetization = /\b(free|paid|premium|subscri\w*|paywall\w*|upgrad\w*|trials?|pric(e|es|ed|ing)|members?hips?|unlock\w*)\b/i;
 const chromeCopy = [
-  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "vault/portfolio/index.html", "404.html"].map((file) => [
+  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "vault/portfolio/index.html", "vault/archive/index.html", "404.html"].map((file) => [
     file,
     readFileSync(join(root, file), "utf8"),
   ]),
@@ -1709,6 +1711,60 @@ for (const key of ["mtm_price", "mtm_pnl_usd", "mtm_as_of_ct"]) {
   assert(JSON.stringify(bookSchema.$defs.trade.properties[key]?.type) === `["${key === "mtm_as_of_ct" ? "string" : "number"}","null"]` && !bookSchema.$defs.trade.required.includes(key), `portfolio schema has optional ${key}`);
 }
 validatePack(bookSchema, bookSchema, markedBook, "portfolio with marks");
+
+/* Vault desk-day archive: an index over committed Desk weeks and New Today days, gated, grouped by ISO week. */
+const archiveFile = "vault/archive/index.html";
+assert(viteConfig.includes(`"${archiveFile}"`), `vite builds ${archiveFile}`);
+const archivePage = readFileSync(join(root, archiveFile), "utf8");
+assert(archivePage.includes('<body class="is-vault">'), "archive page carries the Vault theme");
+assert(archivePage.includes('src="/src/vault-gate.js"') && archivePage.includes('src="/src/vault-archive.js"'), "archive page runs the gate and the archive");
+const archiveMain = archivePage.match(/<main id="content">([\s\S]*?)<\/main>/)?.[1] ?? "";
+const archiveTemplate = archiveMain.match(/<template id="vault-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
+const archiveOutside = archiveMain.replace(/<template id="vault-content">[\s\S]*?<\/template>/, "");
+assert(
+  archiveOutside.match(/<section class="vault-wall"[\s\S]*?<\/section>/)?.[0].replaceAll('href="../../"', 'href="../"') ===
+    vaultOutside.match(/<section class="vault-wall"[\s\S]*?<\/section>/)?.[0],
+  "archive sign-in card is the same allowlist sign-in card as the Vault",
+);
+for (const piece of ['id="archive-search"', 'id="archive-q"', 'data-kind="all"', 'data-kind="pack"', 'data-kind="day"', 'id="archive-count"', 'id="archive"', 'aria-current="page">Desk-day archive']) {
+  assert(archiveTemplate.includes(piece), `archive template has ${piece}`);
+}
+assert(!/id="archive|archive-search/.test(archiveOutside), "archive content does not render outside the template");
+assert(vaultTemplate.includes('class="tile vault-pack" href="archive/"') && !vaultOutside.includes("archive/"), "signed-in Vault links to the archive inside the template");
+for (const file of [...deskPages, "404.html"]) {
+  assert(!readFileSync(join(root, file), "utf8").includes("vault/archive"), `${file} links into the Vault archive`);
+}
+for (const file of ["vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "vault/portfolio/index.html"]) {
+  assert(readFileSync(join(root, file), "utf8").includes('href="../archive/"'), `${file} links to the archive from the Vault nav`);
+}
+const archiveEntries = [...deskWeekEntries(packIndex), ...newTodayDays(nt.items)];
+assert(archiveEntries.filter((entry) => entry.kind === "pack").length === WEEKS.length, "archive lists every committed Desk Friday");
+assert(
+  JSON.stringify(archiveEntries.filter((entry) => entry.hasPack).map((entry) => [entry.isoWeek, entry.href])) ===
+    JSON.stringify(packIndex.weeks.map((row) => [isoWeek(row.week), `../soft-crowded/?week=${isoWeek(row.week)}`])),
+  "archive links pack weeks to the pack",
+);
+assert(archiveEntries.filter((entry) => entry.kind === "pack" && !entry.hasPack).every((entry) => entry.href.startsWith("../../positioning/desk/?source=jpm&week=")), "weeks without a pack open on the Desk");
+assert(JSON.stringify(parseDateQuery("W44")) === '{"week":"2026-W44"}' && JSON.stringify(parseDateQuery("2026-w43")) === '{"week":"2026-W43"}', "archive reads ISO weeks");
+for (const query of ["2026-10-28", "10/28", "Oct 28", "October 28, 2026", "Wed Oct 28"]) {
+  assert(parseDateQuery(query)?.day === "2026-10-28", `archive reads ${query} as Oct 28`);
+}
+assert(parseDateQuery("XLE") === null, "a ticker is a word search");
+const oct28 = archiveGroups(filterEntries(archiveEntries, "2026-10-28"));
+assert(oct28.length === 1 && oct28[0].entries.length === 1 && oct28[0].entries[0].items.length === 8, "archive date search lists the eight Oct 28 items");
+const w44 = archiveGroups(filterEntries(archiveEntries, "W44"));
+assert(w44.length === 1 && w44[0].week === "2026-W44" && w44[0].gap === "No Soft ↔ Crowded print is committed for Fri Oct 30, 2026 yet.", "W44 says its Friday print is not committed");
+assert(w44[0].entries.every((entry) => entry.kind === "day"), "the archive does not invent a W44 pack");
+const w43 = archiveGroups(filterEntries(archiveEntries, "2026-W43"));
+assert(w43[0]?.entries[0]?.kind === "pack" && w43[0].entries[0].title === "2026-W43 Soft ↔ Crowded" && w43[0].gap === "", "W43 leads with its pack");
+const archivePacks = archiveGroups(filterEntries(archiveEntries, "", "pack"));
+assert(archivePacks.every((group) => group.entries.every((entry) => entry.kind === "pack")) && archivePacks[0].week === "2026-W43", "Soft ↔ Crowded filter lists packs newest first");
+const wordHit = filterEntries(archiveEntries, "goldman", "day");
+assert(wordHit.length > 0 && wordHit.every((entry) => entry.items.every((item) => item.text.includes("goldman"))), "a word search cuts a desk day to its matching lines");
+assert(displaySource(["W", "SJ"].join("")) === "Press note" && displaySource("GS") === "GS" && displaySource("") === "Desk", "archive press labels read as a press note");
+const archiveShown = archiveEntries.flatMap((entry) => [entry.title, entry.label, entry.summary, entry.headline ?? "", ...(entry.items ?? []).flatMap((item) => [item.title, item.summary, item.source])]).join("\n");
+assert(!bannedSource(archiveShown) && !/\bwsj\b/i.test(archiveShown), "archive shows no source names");
+assert(css.includes(".archive-entry") && css.includes(".archive-gap") && css.includes(".archive-items"), "archive styles entries, gaps, and items");
 
 assert(breadthSpx.bars.find((bar) => bar.t === "2026-10-29")?.c === 7720.39, "wall SPX Oct 29 close 7720.39");
 const breadthJs = readFileSync(join(root, "src/vault-breadth.js"), "utf8");

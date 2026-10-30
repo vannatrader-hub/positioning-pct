@@ -3232,6 +3232,103 @@ body:has(.cc[open]) { overflow: hidden; }
 .vault-pack-row-line { font-size: 14px; line-height: 1.4; color: var(--ink-2); }
 .vault-pack-row-meta { font-size: 12px; color: var(--faint); }
 
+.archive-search {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 26px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.archive-label { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); }
+.archive-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+.archive-row input {
+  flex: 1 1 280px;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+}
+
+.archive-row input:focus { outline: none; border-color: rgba(245, 196, 81, 0.6); }
+.archive-row input::placeholder { color: var(--faint); }
+.archive-count { margin: 0; min-height: 1.4em; font-size: 12.5px; color: var(--muted); }
+
+.archive-week { margin: 0 0 30px; }
+
+.archive-week-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.archive-week-head h2 { margin: 0; font-size: 19px; letter-spacing: -0.015em; }
+.archive-week-head span { font-size: 13px; color: var(--muted); }
+
+.archive-gap {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.archive-entries { display: grid; gap: 12px; }
+
+.archive-entry {
+  display: grid;
+  gap: 6px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-left: 3px solid #9db4ff;
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.archive-entry.is-pack { border-left-color: var(--gold); }
+.archive-entry .section-link { justify-self: start; margin-top: 4px; }
+.archive-entry-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.archive-entry-head h3 { margin: 0; font-size: 16px; letter-spacing: -0.01em; }
+.archive-entry-label { margin: 0; font-size: 12.5px; color: var(--faint); }
+.archive-entry-line { margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--ink); }
+.archive-entry-sub { margin: 0; font-size: 13px; line-height: 1.45; color: var(--ink-2); }
+
+.archive-items {
+  display: grid;
+  gap: 10px;
+  margin: 6px 0 0;
+  padding: 10px 0 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+}
+
+.archive-items li { display: grid; gap: 2px; }
+.archive-item-meta { font-size: 11.5px; font-weight: 650; letter-spacing: 0.02em; color: var(--faint); }
+.archive-item-title { font-size: 14.5px; font-weight: 650; line-height: 1.35; color: var(--ink); text-decoration: none; }
+a.archive-item-title:hover { text-decoration: underline; }
+.archive-item-summary { font-size: 13px; line-height: 1.45; color: var(--ink-2); }
+
+.archive-empty {
+  padding: 22px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 14px;
+  text-align: center;
+}
+
+.archive-empty p { margin: 0 0 6px; }
+
 .vault-tile {
   overflow: hidden;
   cursor: default;
