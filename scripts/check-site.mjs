@@ -904,6 +904,11 @@ function derefSchema(root, node) {
   return node.$ref.slice(2).split("/").reduce((cur, key) => cur?.[key], root);
 }
 
+function bannedSource(text) {
+  const lower = String(text).toLowerCase();
+  return banned.find((phrase) => lower.includes(phrase)) ?? "";
+}
+
 function validatePack(rootSchema, schema, data, path) {
   const node = derefSchema(rootSchema, schema);
   if (!node) {
@@ -938,7 +943,17 @@ function validatePack(rootSchema, schema, data, path) {
     assert(typeof data === "string", `${path} should be a string`);
     if (typeof data !== "string") return;
     if (typeof node.minLength === "number") assert(data.length >= node.minLength, `${path} is empty`);
+    if (typeof node.maxLength === "number") assert(data.length <= node.maxLength, `${path} is longer than ${node.maxLength}`);
     if (node.pattern) assert(new RegExp(node.pattern).test(data), `${path} "${data}" misses ${node.pattern}`);
+    if (typeof node.minWords === "number" || typeof node.maxWords === "number") {
+      const count = data.trim().split(/\s+/).filter(Boolean).length;
+      if (typeof node.minWords === "number") assert(count >= node.minWords, `${path} has ${count} words, minimum ${node.minWords}`);
+      if (typeof node.maxWords === "number") assert(count <= node.maxWords, `${path} has ${count} words, maximum ${node.maxWords}`);
+    }
+    if (node["x-banned-sources"] === true) {
+      const hit = bannedSource(data);
+      assert(!hit, `${path} contains forbidden phrase "${hit}"`);
+    }
     return;
   }
   if (node.type === "integer") {
@@ -950,6 +965,32 @@ function validatePack(rootSchema, schema, data, path) {
 }
 
 validatePack(packSchema, packSchema, packWeek, "week");
+assert(bannedSource("a Hawk chart") === "hawk", "banned-source scan rejects Hawk");
+assert(bannedSource("Volland levels") === "volland", "banned-source scan rejects Volland");
+assert(bannedSource("Darkroom note") === "darkroom", "banned-source scan rejects Darkroom");
+assert(bannedSource("OptionsHawk print") === "optionshawk", "banned-source scan rejects OptionsHawk");
+assert(bannedSource("JPM BoA GS Desk") === "", "banned-source scan allows bank labels");
+function expectPackReject(mutate, message) {
+  const before = failed;
+  const errors = [];
+  const report = console.error;
+  console.error = (...args) => errors.push(args.join(" "));
+  try {
+    const probe = structuredClone(packWeek);
+    mutate(probe);
+    validatePack(packSchema, packSchema, probe, "probe");
+  } finally {
+    console.error = report;
+    failed = before;
+  }
+  assert(errors.length > 0, message);
+}
+expectPackReject((probe) => {
+  probe.charts.refs[0].article.bodyMarkdown = `${probe.charts.refs[0].article.bodyMarkdown} Hawk`;
+}, "schema validation rejects a banned source name in an article");
+expectPackReject((probe) => {
+  probe.charts.refs[0].article.headline = "one two three four five six seven eight nine ten eleven twelve thirteen";
+}, "schema validation rejects a headline over 12 words");
 assert(packIndex.sku === "soft-crowded" && packIndex.product === "SKU1" && packIndex.schema === "schema.json", "pack index names the schema");
 assert(packIndex.title === "Soft ↔ Crowded", `pack index title ${packIndex.title}`);
 assert(packIndex.latest === WEEKS[WEEKS.length - 1], `pack latest ${packIndex.latest} should be the Desk's current week`);
@@ -1004,6 +1045,24 @@ assert(/No sector changed columns versus last week/.test(packWeek.read.stance), 
 for (const phrase of ["0.18", "0.75", "0.69", "0.66", "−1.2", "351", "3.9", "53%"]) {
   assert(JSON.stringify(packWeek.read).includes(phrase), `one-page read names ${phrase}`);
 }
+const articleSchema = packSchema.$defs.article;
+assert(articleSchema?.description?.includes("week read stays the overview"), "per-chart articles leave the week read as the overview");
+assert(articleSchema?.description?.includes("article"), "pack schema defines a per-chart article");
+assert(
+  JSON.stringify(articleSchema?.required) === JSON.stringify(["headline", "bodyMarkdown", "bias", "dumbMoney", "smartMoney", "invalidation"]),
+  "article requires headline, body, bias, cohorts, and invalidation",
+);
+assert(
+  JSON.stringify(articleSchema?.properties?.bias?.enum) === JSON.stringify(["long", "short", "neutral", "fade-long", "fade-short"]),
+  "article bias enum",
+);
+assert(articleSchema?.properties?.headline?.maxWords === 12, "article headline is at most 12 words");
+assert(articleSchema?.properties?.bodyMarkdown?.minWords === 120 && articleSchema?.properties?.bodyMarkdown?.maxWords === 220, "article body is 120 to 220 words");
+for (const key of ["headline", "bodyMarkdown", "dumbMoney", "smartMoney", "invalidation"]) {
+  assert(articleSchema?.properties?.[key]?.["x-banned-sources"] === true, `article ${key} rejects banned source names`);
+}
+assert(packSchema.$defs.chartRef.required.includes("article"), "each chart ref requires an article");
+assert(packSchema.$defs.read.description?.includes("One-page read"), "one-page read stays the week overview");
 assert(packWeek.charts.batch === 1, "chart refs are batch 1");
 assert(
   JSON.stringify(packWeek.charts.refs.map((ref) => ref.id)) === JSON.stringify(CHART_IDS),
@@ -1014,8 +1073,35 @@ packWeek.charts.refs.forEach((ref, index) => {
   assert(ref.id === chart.id && ref.nav === chart.nav && ref.title === chart.title, `chart ref ${ref.id} drifted from batch 1`);
   assert(ref.house === chart.house && ref.houseLabel === HOUSES[chart.house] && ref.deskSection === chart.deskSection, `chart ref ${ref.id} house or section`);
   assert(ref.fact === packFacts[ref.id], `chart ref ${ref.id} fact ${ref.fact} !== ${packFacts[ref.id]}`);
+  const article = ref.article;
+  const body = article.bodyMarkdown;
+  for (const [label, pattern] of [
+    ["hedge funds", /hedge funds?/i],
+    ["macro funds", /macro funds?/i],
+    ["mutual funds", /mutual funds?/i],
+    ["CTAs", /\bCTAs?\b/],
+    ["dealers", /dealers?/i],
+    ["sharpies", /sharpies?/i],
+    ["commercials", /commercials?/i],
+  ]) {
+    assert(pattern.test(body), `${ref.id} article names ${label}`);
+  }
+  assert(/smart money is positioned against/i.test(body), `${ref.id} article sets smart money against the crowded book`);
+  assert(
+    /hedge funds?/i.test(article.dumbMoney) && /macro funds?/i.test(article.dumbMoney) && /mutual funds?/i.test(article.dumbMoney) && /\bCTAs?\b/.test(article.dumbMoney),
+    `${ref.id} dumbMoney names the dumb-money cohort`,
+  );
+  assert(/(dealers?|sharpies?)/i.test(article.smartMoney) && /commercials?/i.test(article.smartMoney), `${ref.id} smartMoney names the smart-money cohort`);
+  if (article.bias === "fade-long" || article.bias === "fade-short") {
+    assert(/\b(fade|pullback|bounce|cover)\b/i.test(body), `${ref.id} fade bias is written into the article`);
+  }
 });
-assert(readFileSync(join(root, "src/vault-pack.js"), "utf8").includes("data/vault/soft-crowded/"), "pack page loads the week document");
+const packJs = readFileSync(join(root, "src/vault-pack.js"), "utf8");
+assert(packJs.includes("data/vault/soft-crowded/"), "pack page loads the week document");
+for (const piece of ["bodyMarkdown", "dumbMoney", "smartMoney", "invalidation", "article.headline", "fade-long", "pack-article"]) {
+  assert(packJs.includes(piece), `pack page renders ${piece}`);
+}
+assert(css.includes("#pack .pack-article") && css.includes("@media print") && css.includes("break-inside: avoid"), "pack articles keep a print stylesheet");
 
 if (failed) {
   console.error(`${failed} check(s) failed`);

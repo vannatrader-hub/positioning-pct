@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://vannatrader-hub.github.io/positioning-pct/data/vault/soft-crowded/schema.json",
   "title": "Soft ↔ Crowded weekly pack",
-  "description": "One week of the Vault Soft ↔ Crowded pack: sector buckets on the Soft ↔ Crowded scale, batch-1 chart references, and the one-page read.",
+  "description": "One week of the Vault Soft ↔ Crowded pack: sector buckets on the Soft ↔ Crowded scale, batch-1 chart references, a one-page read, and a short article on each chart.",
   "type": "object",
   "additionalProperties": false,
   "required": ["sku", "product", "week", "weekLabel", "house", "houseLabel", "windowWeeks", "basis", "sectorSource", "read", "buckets", "unprinted", "charts"],
@@ -100,8 +100,57 @@
         "note": { "type": "string", "minLength": 1 }
       }
     },
+    "article": {
+      "description": "Short considered article for one Batch-1 chart. The week read stays the overview. Bank labels only; banned source names fail validation.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["headline", "bodyMarkdown", "bias", "dumbMoney", "smartMoney", "invalidation"],
+      "properties": {
+        "headline": {
+          "description": "At most 12 words, one line.",
+          "type": "string",
+          "minLength": 1,
+          "maxWords": 12,
+          "pattern": "^[^\\n]+$",
+          "x-banned-sources": true
+        },
+        "bodyMarkdown": {
+          "description": "120 to 220 words. Paragraphs separated by a blank line.",
+          "type": "string",
+          "minLength": 1,
+          "minWords": 120,
+          "maxWords": 220,
+          "x-banned-sources": true
+        },
+        "bias": { "enum": ["long", "short", "neutral", "fade-long", "fade-short"] },
+        "dumbMoney": {
+          "description": "One line on the dumb-money cohort: hedge funds, macro funds, mutual funds, CTAs.",
+          "type": "string",
+          "minLength": 1,
+          "maxWords": 40,
+          "pattern": "^[^\\n]+$",
+          "x-banned-sources": true
+        },
+        "smartMoney": {
+          "description": "One line on the smart-money cohort: sharpies, dealers, commercials.",
+          "type": "string",
+          "minLength": 1,
+          "maxWords": 40,
+          "pattern": "^[^\\n]+$",
+          "x-banned-sources": true
+        },
+        "invalidation": {
+          "description": "One line. The print that kills the bias.",
+          "type": "string",
+          "minLength": 1,
+          "maxWords": 40,
+          "pattern": "^[^\\n]+$",
+          "x-banned-sources": true
+        }
+      }
+    },
     "chartBatch": {
-      "description": "Batch-1 chart references. Each ref points at a Positioning chart; the pack does not redraw it.",
+      "description": "Batch-1 chart references. Each ref points at a Positioning chart and carries that chart's article. The pack does not redraw the chart.",
       "type": "object",
       "additionalProperties": false,
       "required": ["batch", "refs"],
@@ -118,7 +167,7 @@
     "chartRef": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "nav", "title", "house", "houseLabel", "deskSection", "fact"],
+      "required": ["id", "nav", "title", "house", "houseLabel", "deskSection", "fact", "article"],
       "properties": {
         "id": { "enum": ["soft-vol", "sectors", "broad-equity", "credit-stress", "fund-managers", "risk-appetite"] },
         "nav": { "type": "string", "minLength": 1 },
@@ -126,7 +175,8 @@
         "house": { "enum": ["jpm", "ms", "gs", "boa", "desk"] },
         "houseLabel": { "type": "string", "minLength": 1 },
         "deskSection": { "type": "string", "minLength": 1 },
-        "fact": { "type": "string", "minLength": 1 }
+        "fact": { "type": "string", "minLength": 1 },
+        "article": { "$ref": "#/$defs/article" }
       }
     }
   }

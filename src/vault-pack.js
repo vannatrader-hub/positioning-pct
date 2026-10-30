@@ -169,6 +169,62 @@ function sectorSection(week) {
   return section;
 }
 
+const BIAS_LABEL = {
+  long: "Long",
+  short: "Short",
+  neutral: "Neutral",
+  "fade-long": "Fade long",
+  "fade-short": "Fade short",
+};
+
+function chartTile(ref, index) {
+  const tile = el("a", "tile chart-tile");
+  tile.href = `../../positioning/charts/#${ref.id}`;
+  const kicker = el("div", "tile-kicker");
+  kicker.append(el("span", "tile-num", String(index + 1).padStart(2, "0")), el("span", `house h-${ref.house}`, ref.houseLabel));
+  tile.append(kicker, el("h3", "", ref.title), el("p", "chart-tile-fact", ref.fact));
+  const open = el("span", "open", "Open chart ");
+  open.append(el("span", "arrow", "→"));
+  tile.append(open);
+  return tile;
+}
+
+function appendInline(parent, text) {
+  for (const part of text.split(/(\*\*[^*]+\*\*)/g)) {
+    if (/^\*\*[^*]+\*\*$/.test(part)) parent.append(el("strong", "", part.slice(2, -2)));
+    else if (part) parent.append(document.createTextNode(part));
+  }
+}
+
+function articleBody(markdown) {
+  const copy = el("div", "pack-article-copy");
+  for (const block of markdown.trim().split(/\n\n+/)) {
+    const paragraph = el("p");
+    appendInline(paragraph, block.replace(/\s*\n\s*/g, " ").trim());
+    copy.append(paragraph);
+  }
+  return copy;
+}
+
+function moneyLine(term, text) {
+  const row = el("div");
+  row.append(el("dt", "", term), el("dd", "", text));
+  return row;
+}
+
+function chartArticle(ref) {
+  const article = ref.article;
+  const block = el("div", "pack-article");
+  const kicker = el("p", "pack-article-kicker");
+  kicker.append(el("span", `pack-bias is-${article.bias}`, BIAS_LABEL[article.bias] || article.bias));
+  const money = el("dl", "pack-money");
+  money.append(moneyLine("Dumb money", article.dumbMoney), moneyLine("Smart money", article.smartMoney));
+  const invalid = el("p", "pack-invalidation");
+  invalid.append(el("strong", "", "Invalidation"), document.createTextNode(` ${article.invalidation}`));
+  block.append(kicker, el("h4", "pack-article-title", article.headline), articleBody(article.bodyMarkdown), money, invalid);
+  return block;
+}
+
 function chartSection(week) {
   const section = el("section", "desk-section");
   section.id = "charts";
@@ -177,18 +233,20 @@ function chartSection(week) {
   const all = el("a", "section-link", "Open all six on the Desk →");
   all.href = "../../positioning/charts/";
   row.append(el("h2", "", "Charts"), el("span", "section-count", `Batch ${week.charts.batch} · six refs`), all);
-  head.append(row, el("p", "hint", "The six Positioning charts for this week. Each card opens that chart on the Desk."));
+  head.append(
+    row,
+    el(
+      "p",
+      "hint",
+      "The six Positioning charts for this week. The article under each card is the week's framing. Each card opens that chart on the Desk.",
+    ),
+  );
   const tiles = el("div", "chart-tiles");
   week.charts.refs.forEach((ref, index) => {
-    const tile = el("a", "tile chart-tile");
-    tile.href = `../../positioning/charts/#${ref.id}`;
-    const kicker = el("div", "tile-kicker");
-    kicker.append(el("span", "tile-num", String(index + 1).padStart(2, "0")), el("span", `house h-${ref.house}`, ref.houseLabel));
-    tile.append(kicker, el("h3", "", ref.title), el("p", "chart-tile-fact", ref.fact));
-    const open = el("span", "open", "Open chart ");
-    open.append(el("span", "arrow", "→"));
-    tile.append(open);
-    tiles.append(tile);
+    const block = el("article", "pack-chart");
+    block.id = `chart-${ref.id}`;
+    block.append(chartTile(ref, index), chartArticle(ref));
+    tiles.append(block);
   });
   section.append(head, tiles);
   return section;
@@ -210,7 +268,12 @@ async function load(root) {
   const weekRes = await fetch(`${DATA}${index.latest}.json`);
   if (!weekRes.ok) throw new Error(`week ${weekRes.status}`);
   const week = await weekRes.json();
-  if (week.sku !== index.sku || !week.read || !Array.isArray(week.buckets) || !week.charts?.refs) {
+  if (
+    week.sku !== index.sku ||
+    !week.read ||
+    !Array.isArray(week.buckets) ||
+    !week.charts?.refs?.every((ref) => ref.article?.headline && ref.article?.bodyMarkdown && ref.article?.bias)
+  ) {
     throw new Error("week document is missing pack fields");
   }
   root.replaceChildren(pageHead(week), readSection(week), sectorSection(week), chartSection(week));
