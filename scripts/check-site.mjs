@@ -236,7 +236,7 @@ for (const [ticker, want] of Object.entries(studyWant)) {
 }
 
 const flow = JSON.parse(readFileSync(join(root, "public/data/flow/plays.json"), "utf8"));
-const flowTickers = ["JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN", "ALAB", "CSCO"];
+const flowTickers = ["DAR", "JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN", "ALAB", "CSCO"];
 assert(
   JSON.stringify(sortPlays(flow.plays).map((play) => play.ticker)) === JSON.stringify(flowTickers),
   `Shopping List newest alert first: ${sortPlays(flow.plays).map((play) => play.ticker)}`,
@@ -337,6 +337,13 @@ assert(
 assert(flowBy.JAZZ.customerPurchased[0]?.contract === "Dec 2026 $240 calls" && flowBy.JAZZ.customerPurchased[0]?.side === "calls_bought", "JAZZ Customer purchased is the Dec 2026 $240 call buy");
 const jazzLevels = chartLevels(flowBy.JAZZ, JSON.parse(readFileSync(join(root, "public/data/flow/bars/JAZZ.json"), "utf8")).bars);
 assert(JSON.stringify(jazzLevels.lines.map((line) => line.value)) === "[240]", `JAZZ chart draws only the $240 strike ${jazzLevels.lines.map((line) => line.value)}`);
+assert(
+  JSON.stringify(flowBy.DAR.lead) === JSON.stringify({ type: "call", action: "bought", qty: 10000, strike: 62.5, expiry: "April 2027", price: null }),
+  `DAR lead is the Apr 2027 $62.5 call buy ${JSON.stringify(flowBy.DAR.lead)}`,
+);
+assert(flowBy.DAR.customerPurchased[0]?.contract === "Apr 2027 $62.5 calls" && flowBy.DAR.customerPurchased[0]?.side === "calls_bought", "DAR Customer purchased is the Apr 2027 $62.5 call buy");
+const darLevels = chartLevels(flowBy.DAR, JSON.parse(readFileSync(join(root, "public/data/flow/bars/DAR.json"), "utf8")).bars);
+assert(JSON.stringify(darLevels.lines.map((line) => line.value)) === "[62.5]", `DAR chart draws only the $62.5 strike ${darLevels.lines.map((line) => line.value)}`);
 assert(resolveExpiry("December", "2026-10-27") === "2026-12-18", "December resolves to Dec 18, 2026");
 assert(resolveExpiry("January", "2026-10-22") === "2027-01-15", "January resolves to Jan 15, 2027");
 assert(resolveExpiry("January 2028", "2026-10-25") === "2028-01-21", "January 2028 resolves to Jan 21, 2028");
@@ -735,7 +742,8 @@ if (ntNewest) assert(deskDay(ntNewest.publishedAt) === deskDay(nt.dayStart), "ne
 assert(itemsForDay(nt.items ?? [], "2026-10-28").length === 8, "Oct 28 desk day lists eight items");
 const earlyThursday = (nt.items ?? []).filter((item) => item.publishedAt === "2026-10-29T04:05:00-05:00");
 assert(earlyThursday.length === 5 && earlyThursday.every((item) => deskDay(item.publishedAt) === "2026-10-29"), "4:05 AM CT Thursday belongs to the Thursday desk day");
-assert(itemsForDay(nt.items ?? [], "2026-10-29").length === 13, "Oct 29 desk day lists the afternoon session and the pre-open research notes");
+assert(itemsForDay(nt.items ?? [], "2026-10-29").length === 20, "Oct 29 desk day lists the afternoon session, the evening additions, and the pre-open research notes");
+assert(itemsForDay(nt.items ?? [], "2026-10-30").length === 1, "Oct 30 desk day lists the morning research note");
 
 const nav = /<nav class="nav" aria-label="Pages">[\s\S]*?<\/nav>/;
 const deskPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "positioning/charts/index.html", "spx-levels/index.html", "options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html", "new-today/index.html"];

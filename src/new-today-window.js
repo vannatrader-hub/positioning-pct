@@ -10,7 +10,7 @@ export const NT_SECTIONS = [
 ];
 
 /** Public source labels. Research rows carry a bank label or one of the generic desk labels. */
-export const SOURCE_LABELS = ["Desk", "X", "Bank note", "JPM", "MS", "GS", "BoA", "Citi", "UBS", "Barclays", "BNP", "Nomura", "Citadel", "WSJ"];
+export const SOURCE_LABELS = ["Desk", "X", "Bank note", "JPM", "MS", "GS", "BoA", "Citi", "UBS", "Barclays", "BNP", "Nomura", "Citadel", "WSJ", "Goldman Sachs", "Bloomberg"];
 
 const parts = new Intl.DateTimeFormat("en-US", {
   timeZone: DESK_TZ,
