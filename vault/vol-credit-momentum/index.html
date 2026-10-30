@@ -6,7 +6,7 @@
     <title>Vol · Credit · Momentum · Vault · Positioning %.</title>
     <meta
       name="description"
-      content="Vault wall for vol, credit, and mega-cap momentum: the MAG7 Oscillator beside Spot Vol Beta and Credit Spread Regime. Behind the Vault sign-in wall."
+      content="Vault wall for vol, credit, and mega-cap momentum: Spot Vol Beta, Credit Spread Regime, and the MAG7 Oscillator. Behind the Vault sign-in wall."
     />
     <meta name="theme-color" content="#0a0c10" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
@@ -17,7 +17,7 @@
   <body class="is-vault">
     <a class="skip" href="#content">Skip to content</a>
     <header class="topbar">
-      <div class="wrap topbar-in">
+      <div class="wrap is-wide topbar-in">
         <div class="topbar-start">
           <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
           <nav class="surface" aria-label="Surface">
@@ -33,7 +33,7 @@
       </div>
     </header>
 
-    <div class="wrap">
+    <div class="wrap is-wide">
       <main id="content">
         <section class="vault-wall" id="vault-wall" data-state="checking" aria-labelledby="vault-wall-title">
           <div class="wall-card">
@@ -82,24 +82,80 @@
           </section>
 
           <div class="wall-grid" id="wall">
-            <article class="wall-slot" id="spot-vol-beta" aria-labelledby="svb-title">
-              <div class="tile-kicker">
-                <span class="tile-num">01</span>
-                <span class="badge is-soon">Soon</span>
+            <article class="pchart svb-card" id="spot-vol-beta" aria-labelledby="svb-title">
+              <header class="pchart-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">01</span>
+                  <span class="basis svb-asof" id="svb-asof"></span>
+                  <span class="house h-desk">Desk</span>
+                </div>
+                <h2 id="svb-title">Spot Vol Beta</h2>
+                <p class="wall-sub">The gauge and the desk estimate, on one close per session with SPX behind the line. The band is the house possible-bottom signal at 2.</p>
+              </header>
+              <div id="svb-body">
+                <p class="hint" id="svb-status">Loading Spot Vol Beta…</p>
               </div>
-              <h2 id="svb-title">Spot Vol Beta</h2>
-              <p>Vol event read with an SPX overlay. The 2.0 line marks a possible bottom path.</p>
-              <span class="vault-soon">Not open yet</span>
             </article>
 
-            <article class="wall-slot" id="credit-spread-regime" aria-labelledby="csr-title">
-              <div class="tile-kicker">
-                <span class="tile-num">02</span>
-                <span class="badge is-soon">Soon</span>
+            <article class="pchart csr-card" id="credit-spread-regime" aria-labelledby="csr-title">
+              <header class="pchart-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">02</span>
+                  <span class="csr-asof" id="csr-asof">FRED ICE BofA OAS</span>
+                  <span class="house h-desk">Desk</span>
+                </div>
+                <h2 id="csr-title">Credit Spread Regime</h2>
+                <p class="wall-sub">High yield minus investment grade excess spread as a Z score, with Low, Normal, Elevated, and Stress zones and SPX behind it.</p>
+              </header>
+
+              <div class="csr-controls">
+                <div class="seg" data-seg="range" role="group" aria-label="Window">
+                  <button type="button" data-range="3m" aria-pressed="false">3M</button>
+                  <button type="button" data-range="6m" aria-pressed="false">6M</button>
+                  <button type="button" data-range="1y" aria-pressed="false">1Y</button>
+                  <button type="button" class="is-on" data-range="all" aria-pressed="true">All</button>
+                </div>
+                <div class="seg" data-seg="metric" role="group" aria-label="Spread">
+                  <button type="button" class="is-on" data-metric="excess" aria-pressed="true">HY−IG excess</button>
+                  <button type="button" data-metric="hy" aria-pressed="false">HY only</button>
+                </div>
+                <button type="button" class="toggle csr-spx" id="csr-spx" aria-pressed="true"><i aria-hidden="true"></i>SPX overlay</button>
               </div>
-              <h2 id="csr-title">Credit Spread Regime</h2>
-              <p>High yield minus investment grade excess, as a Z score with Elevated and Stress zones.</p>
-              <span class="vault-soon">Not open yet</span>
+
+              <div class="csr-stage">
+                <div class="csr-frame" id="csr-frame">
+                  <div class="csr-legend" id="csr-legend" aria-hidden="true"></div>
+                </div>
+                <table class="csr-panel" id="csr-panel" aria-label="Credit Spread Regime statistics"></table>
+                <p class="hint" id="csr-status">Loading the credit series…</p>
+              </div>
+              <p class="csr-help">Hover for a session. Click the chart, then scroll to zoom; drag to pan; double-click resets. Arrow keys step sessions.</p>
+              <p class="visually-hidden" id="csr-live" aria-live="polite"></p>
+
+              <div class="csr-notes">
+                <div class="csr-key">
+                  <span><i class="k-low" aria-hidden="true"></i>Low · Z under −1</span>
+                  <span><i class="k-normal" aria-hidden="true"></i>Normal · −1 to 1</span>
+                  <span><i class="k-elevated" aria-hidden="true"></i>Elevated · 1 to 2</span>
+                  <span><i class="k-stress" aria-hidden="true"></i>Stress · 2 and up</span>
+                  <span><i class="k-dot" aria-hidden="true"></i>Stress rolling over</span>
+                  <span><i class="k-cross" aria-hidden="true"></i>Calm turning up</span>
+                </div>
+                <div class="csr-read">
+                  <h3>How the desk reads it</h3>
+                  <ul class="pack-points">
+                    <li>The line is the HY−IG excess spread, smoothed with a 5-session EMA, as a Z-score against its trailing 252 sessions. Widening pushes it up.</li>
+                    <li>A red dot marks a session with Z at 2 or more while the spread is already narrowing. A green cross marks Z at −2 or less with the spread widening off the lows.</li>
+                    <li>Elevated or Stress credit while Spot Vol Beta prints 2 or more is the possible SPX bottom the desk watches for. Credit Z alone is not a buy.</li>
+                  </ul>
+                  <p class="csr-invalid"><strong>Invalidation</strong> FRED prints lag a session and holidays carry the prior close. The 252-session window can move a regime with no new event behind it.</p>
+                </div>
+                <p class="csr-source">
+                  Desk · FRED: ICE BofA US High Yield Index OAS (BAMLH0A0HYM2) and ICE BofA US Corporate Index OAS (BAMLC0A0CM), in basis points;
+                  S&amp;P 500 close (SP500); Cboe VIX close (VIXCLS). Spreads carried onto S&amp;P 500 sessions. After Collin-Dufresne, Goldstein &amp; Martin (2001)
+                  and Gilchrist &amp; Zakrajšek (2012).
+                </p>
+              </div>
             </article>
 
             <article class="pchart is-wide mo-card" id="mag7" aria-labelledby="mag7-title">

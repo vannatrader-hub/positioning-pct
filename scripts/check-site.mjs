@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { HOUSES, INDICATORS, SECTIONS, readIndicator } from "../src/desk.js";
@@ -10,6 +10,7 @@ import { SECTION_ORDER, STATUS, allPlays, levelKind, outcomeLabel, sortCards, sp
 import { activeSpotlights, earningsBoxes, spotlightStar, tradeDates } from "../src/scorecard.js";
 import { emailLinkAttemptPlan, emailLinkReturnPlan, readClerkLinkCallback, withoutClerkQuery } from "../src/vault-link.js";
 import { NT_SECTIONS, SOURCE_LABELS, deskDay, deskDayStart, deskWindow, itemsForDay, windowLabel } from "../src/new-today-window.js";
+import { CSR_PARAMS, biasOf, csrPanel, csrSeries, cycleOf, panelText, regimeOf as csrRegimeOf, zColor } from "../src/csr.js";
 import { DEFAULTS as MAG7_DEFAULTS, MAG7, TYPES as MAG7_TYPES, buildOscillator, fmtPct, momentum, panelAt, rangeStart, regimeOf, sma } from "../src/mag7-osc.js";
 import {
   CHARTS,
@@ -24,6 +25,7 @@ import {
   sectorChart,
   softVolChart,
 } from "../src/pct-charts.js";
+import { FORMULA, axisTicks, formatSvb, readout, spotVolTip } from "../src/vault-svb.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
@@ -628,6 +630,8 @@ const banned = [
   "copy-trading",
   "copy trading",
   "robinhood",
+  "edgetools",
+  "tradingview",
 ];
 const scanExt = new Set([".html", ".js", ".css", ".md", ".yml", ".svg", ".json"]);
 
@@ -856,6 +860,7 @@ const callback = readClerkLinkCallback(new URL(liveReturn).search);
 assert(callback?.status === "verified" && callback.createdSessionId === "sess_1", "return URL keeps status and the created session");
 assert(withoutClerkQuery(liveReturn) === "/positioning-pct/vault/", "cleaning the return URL stays on Vault and does not navigate");
 assert(withoutClerkQuery("https://vannatrader-hub.github.io/positioning-pct/vault/soft-crowded/?__clerk_status=verified") === "/positioning-pct/vault/soft-crowded/", "cleaning a pack return keeps the pack path");
+assert(withoutClerkQuery("https://vannatrader-hub.github.io/positioning-pct/vault/vol-credit-momentum/?__clerk_status=verified#credit-spread-regime") === "/positioning-pct/vault/vol-credit-momentum/#credit-spread-regime", "cleaning a wall return keeps the wall path and the card");
 const activate = emailLinkReturnPlan({ status: "verified", createdSessionId: "sess_1", sessionIds: ["sess_1"] });
 assert(activate.action === "activate" && activate.sessionId === "sess_1" && !("redirectUrl" in activate), "same-browser verify activates in place");
 assert(emailLinkReturnPlan({ status: "verified", createdSessionId: "sess_1", sessionIds: [] }).action === "elsewhere", "a verified session that is not on this client stays with the asking tab");
@@ -985,7 +990,16 @@ function validatePack(rootSchema, schema, data, path) {
     if (!Number.isInteger(data)) return;
     if (typeof node.minimum === "number") assert(data >= node.minimum, `${path} ${data} below ${node.minimum}`);
     if (typeof node.maximum === "number") assert(data <= node.maximum, `${path} ${data} above ${node.maximum}`);
+    return;
   }
+  if (node.type === "number") {
+    assert(typeof data === "number" && Number.isFinite(data), `${path} ${data} should be a number`);
+    if (typeof data !== "number" || !Number.isFinite(data)) return;
+    if (typeof node.minimum === "number") assert(data >= node.minimum, `${path} ${data} below ${node.minimum}`);
+    if (typeof node.maximum === "number") assert(data <= node.maximum, `${path} ${data} above ${node.maximum}`);
+    return;
+  }
+  if (node.type === "boolean") assert(typeof data === "boolean", `${path} should be a boolean`);
 }
 
 validatePack(packSchema, packSchema, packWeek, "week");
@@ -1222,6 +1236,135 @@ for (const label of ['"Value"', '"Mode"', '"Signal"', '"Type"', '"Breadth"', '"T
 assert(wallJs.includes("data/vault/mag7/oscillator.json"), "wall loads the oscillator document");
 const chartJs = readFileSync(join(root, "src/mag7-chart.js"), "utf8");
 for (const piece of ["PANE.band", "mo-pivot", '"caution"', '"stretched"', "thresholds", "mo-line"]) assert(chartJs.includes(piece), `MAG7 pane draws ${piece}`);
+
+for (const stray of ["vault/vol-credit", "vault/vol", "public/data/vault/vol-credit", "public/data/vault/vol"]) {
+  assert(!existsSync(join(root, stray)), `${stray} is gone; the wall lives at /vault/vol-credit-momentum/`);
+  assert(!viteConfig.includes(`"${stray}/index.html"`), `vite no longer builds ${stray}/index.html`);
+}
+
+/* Credit Spread Regime, card 02 on the wall. */
+assert(!/csr-|id="csr-title"/.test(wallOutside), "Credit Spread Regime does not render outside the template");
+const csrCard = wallTemplate.match(/<article class="[^"]*\bcsr-card\b[^"]*" id="credit-spread-regime"[\s\S]*?<\/article>/)?.[0] ?? "";
+assert(csrCard && !/wall-slot|is-soon|Not open yet/.test(csrCard), "Credit Spread Regime is a live card, not a Soon slot");
+for (const id of ["csr-frame", "csr-panel", "csr-legend", "csr-spx", "csr-asof"]) assert(csrCard.includes(`id="${id}"`), `Credit Spread Regime card keeps #${id}`);
+assert(csrCard.includes(">SPX overlay<"), "Credit Spread Regime card offers the SPX overlay");
+for (const zone of ["Low · Z under −1", "Normal · −1 to 1", "Elevated · 1 to 2", "Stress · 2 and up"]) assert(csrCard.includes(zone), `Credit Spread Regime key names ${zone}`);
+assert(/BAMLH0A0HYM2/.test(csrCard) && /BAMLC0A0CM/.test(csrCard) && /FRED/.test(csrCard) && /ICE BofA/.test(csrCard), "Credit Spread Regime cites FRED ICE BofA OAS");
+for (const file of ["src/csr.js", "src/csr-chart.js", "src/vault-csr.js", "scripts/fetch-csr.mjs", "public/data/vault/credit-spread-regime/csr.json"]) {
+  const text = readFileSync(join(root, file), "utf8");
+  assert(!/edge\s*tools|tradingview|\btdv\b|\bpine\b|pinescript|tv\.js|<iframe|©/i.test(text), `${file} carries third-party chart branding, script source, or an embed`);
+  assert(!/indicator\(|request\.security|\/\/@version/.test(text), `${file} ships indicator script source`);
+}
+
+const csrDoc = JSON.parse(readFileSync(join(root, "public/data/vault/credit-spread-regime/csr.json"), "utf8"));
+const csrCols = csrDoc.series;
+assert(csrDoc.sourceLabel === "Desk" && csrDoc.provider === "FRED", "csr.json is a Desk read of FRED series");
+assert(
+  JSON.stringify(csrDoc.sources.map((source) => source.id)) === '["BAMLH0A0HYM2","BAMLC0A0CM","SP500","VIXCLS"]',
+  `csr.json sources ${csrDoc.sources.map((source) => source.id)}`,
+);
+assert(JSON.stringify(csrDoc.params) === JSON.stringify(CSR_PARAMS), "csr.json params match the card (EMA 5, 252-session Z, 2 / 1 / −1)");
+assert(CSR_PARAMS.smoothing === 5 && CSR_PARAMS.lookback === 252 && CSR_PARAMS.stress === 2 && CSR_PARAMS.elevated === 1 && CSR_PARAMS.low === -1, "Credit Spread Regime runs EMA 5, 252-session Z, Stress 2, Elevated 1, Low −1");
+for (const key of ["hy", "ig", "spx", "vix"]) assert(csrCols[key]?.length === csrCols.t.length, `csr.json ${key} has a value for every session`);
+assert(csrCols.t.every((day, index) => /^\d{4}-\d{2}-\d{2}$/.test(day) && (index === 0 || day > csrCols.t[index - 1])), "csr.json sessions ascend");
+assert(csrCols.hy.every((v, i) => Number.isInteger(v) && Number.isInteger(csrCols.ig[i]) && v > csrCols.ig[i] && csrCols.ig[i] > 0), "csr.json HY and IG are whole bps with HY over IG");
+assert(csrCols.spx.every((v) => v > 0), "csr.json SPX closes are positive");
+assert(csrDoc.asOf === csrCols.t[csrCols.t.length - 1], "csr.json asOf is the last session");
+assert(csrCols.t.length - CSR_PARAMS.lookback >= 252, "csr.json carries at least a year of Z after the 252-session window");
+const csrRead = csrSeries(csrDoc);
+const csrLast = csrPanel(csrRead);
+const csrSnap = csrDoc.snapshot;
+assert(
+  csrSnap.date === csrLast.date && csrSnap.hy === csrLast.hy && csrSnap.ig === csrLast.ig && csrSnap.excess === csrLast.excess &&
+    csrSnap.z === Number(csrLast.z.toFixed(2)) && csrSnap.regime === csrLast.regime && csrSnap.percentile === Number(csrLast.percentile.toFixed(1)) &&
+    csrSnap.momentum === Number(csrLast.momentum.toFixed(1)) && csrSnap.bias === csrLast.bias && csrSnap.cycle === csrLast.cycle,
+  `csr.json snapshot ${JSON.stringify(csrSnap)} matches the computed last session`,
+);
+const lockAt = csrCols.t.indexOf("2026-10-29");
+if (lockAt >= 0) {
+  const lockDoc = { series: Object.fromEntries(Object.entries(csrCols).map(([key, values]) => [key, values.slice(0, lockAt + 1)])) };
+  const lockText = panelText(csrPanel(csrSeries(lockDoc)));
+  const want = { hy: "326 bps", ig: "89 bps", excess: "237 bps", z: "1.85", regime: "ELEVATED", percentile: "95.2%", momentum: "−8.4 bps", status: "NORMAL", cycle: "RECOVERING", bias: "RISK-OFF" };
+  const got = Object.fromEntries(Object.keys(want).map((key) => [key, lockText[key]]));
+  assert(JSON.stringify(got) === JSON.stringify(want), `Oct 29, 2026 panel ${JSON.stringify(got)} matches the desk lock`);
+}
+const peak = csrRead.z.reduce((best, z, i) => (z !== null && z > (csrRead.z[best] ?? -Infinity) ? i : best), csrRead.first);
+assert(csrRead.t[peak] >= "2025-04-01" && csrRead.t[peak] <= "2025-04-30" && csrRead.z[peak] > 4, `April 2025 is the Z peak (${csrRead.t[peak]} ${csrRead.z[peak]?.toFixed(2)})`);
+const octDots = csrRead.t.filter((day, i) => csrRead.sell[i] && day >= "2026-10-01");
+assert(JSON.stringify(octDots) === '["2026-10-21","2026-10-26","2026-10-27"]', `October 2026 stress roll-over dots ${octDots}`);
+assert(csrRegimeOf(2) === "STRESS" && csrRegimeOf(1.99) === "ELEVATED" && csrRegimeOf(1) === "ELEVATED" && csrRegimeOf(-1) === "NORMAL" && csrRegimeOf(-1.01) === "LOW", "regime thresholds");
+assert(JSON.stringify(zColor(2.5)) === "[239,68,68]" && JSON.stringify(zColor(-1.5)) === "[34,197,94]" && JSON.stringify(zColor(1)) === "[115,115,115]", "Z line runs green, grey, red");
+assert(cycleOf(1.5, -1) === "RECOVERING" && cycleOf(1.5, 1) === "DETERIORATING" && cycleOf(-1.5, -1) === "TIGHTENING" && cycleOf(0, 1) === "STABLE", "credit cycle phases");
+assert(biasOf(1) === "RISK-OFF" && biasOf(-1.01) === "RISK-ON" && biasOf(0) === "NEUTRAL", "bias");
+const csrJs = readFileSync(join(root, "src/vault-csr.js"), "utf8");
+const csrChartJs = readFileSync(join(root, "src/csr-chart.js"), "utf8");
+assert(wallJs.includes('import "./vault-csr.js"'), "the wall mounts Credit Spread Regime");
+assert(csrJs.includes("data/vault/credit-spread-regime/") && csrJs.includes('"vault-open"') && csrJs.includes('getElementById("credit-spread-regime")'), "Credit Spread Regime loads csr.json once the Vault opens");
+for (const piece of ["drawSpx", "drawZones", "drawBackground", "drawMarkers", "drawLevels", "drawCrosshair"]) assert(csrChartJs.includes(`function ${piece}(`), `Credit Spread Regime chart keeps ${piece}`);
+
+/* Spot Vol Beta, card 01 on the wall: the gauge first, the desk estimate second, then the daily close line. */
+assert(!/svb-|id="svb-title"/.test(wallOutside), "Spot Vol Beta does not render outside the template");
+const svbCard = wallTemplate.match(/<article class="[^"]*\bsvb-card\b[^"]*" id="spot-vol-beta"[\s\S]*?<\/article>/)?.[0] ?? "";
+assert(svbCard && !/wall-slot|is-soon|Not open yet/.test(svbCard), "Spot Vol Beta is a live card, not a Soon slot");
+for (const id of ["svb-title", "svb-asof", "svb-body", "svb-status"]) assert(svbCard.includes(`id="${id}"`), `Spot Vol Beta card keeps #${id}`);
+assert(readFileSync(join(root, "src/vault-gate.js"), "utf8").includes('new CustomEvent("vault-open")'), "gate still tells Vault pages when the wall opens");
+const svbJs = readFileSync(join(root, "src/vault-svb.js"), "utf8");
+assert(wallJs.includes('import "./vault-svb.js"'), "the wall mounts Spot Vol Beta");
+assert(svbJs.includes("data/vault/spot-vol-beta/") && svbJs.includes("drawDualLine") && svbJs.includes('new CustomEvent("vault-open")') === false, "Spot Vol Beta loads its series and does not mint a second gate event");
+assert(svbJs.includes("vault-open") && svbJs.includes("FORMULA") && svbJs.includes('getElementById("spot-vol-beta")'), "Spot Vol Beta listens for the gate and keeps the desk formula");
+assert(svbJs.indexOf('"pct svb-gauge') < svbJs.indexOf('"svb-desk"'), "the gauge renders before the desk estimate");
+assert(css.includes(".svb-plot") && css.includes(".svb-gauge") && css.includes(".svb-desk"), "Spot Vol Beta has a gauge, a desk estimate, and a chart plate");
+assert(readFileSync(join(root, "src/chart-svg.js"), "utf8").includes("export function drawDualLine"), "daily line drawer is shared with the Positioning charts");
+for (const file of ["src/vault-svb.js", "public/data/vault/spot-vol-beta/series.json", "public/data/vault/spot-vol-beta/latest.json"]) {
+  assert(!/tradingview|\btdv\b|\bpine\b|pinescript|<iframe|©/i.test(readFileSync(join(root, file), "utf8")), `${file} carries third-party chart branding, script source, or an embed`);
+}
+
+const svbDir = join(root, "public/data/vault/spot-vol-beta");
+const svbSchema = JSON.parse(readFileSync(join(svbDir, "schema.json"), "utf8"));
+const svbSeries = JSON.parse(readFileSync(join(svbDir, "series.json"), "utf8"));
+const svbLatest = JSON.parse(readFileSync(join(svbDir, "latest.json"), "utf8"));
+assert(svbSchema.$schema === "https://json-schema.org/draft/2020-12/schema", "spot vol beta schema is draft 2020-12");
+assert(svbSchema.description.includes("Append one object"), "schema tells a writer to append one close");
+assert(svbSchema.$defs.latest.description.includes("Primary gauge"), "schema names the gauge document");
+validatePack(svbSchema, svbSchema, svbSeries, "svb");
+validatePack(svbSchema, svbSchema.$defs.latest, svbLatest, "svb.latest");
+assert(svbSeries.formula === FORMULA && svbSeries.formulaLabel === "desk estimate" && svbSeries.deskBeta === -0.7 && svbSeries.signal === 2, "desk estimate formula is the locked line");
+assert(JSON.parse(readFileSync(join(svbDir, "index.json"), "utf8")).append.includes("one point"), "series index says to append one point per session");
+const svbDates = svbSeries.points.map((point) => point.date);
+assert(new Set(svbDates).size === svbDates.length, "one Spot Vol Beta point per session");
+assert(JSON.stringify(svbDates) === JSON.stringify([...svbDates].sort()), "closes are appended in date order");
+for (const date of svbDates) {
+  const [year, month, day] = date.split("-").map(Number);
+  const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+  assert(weekday !== 0 && weekday !== 6, `${date} is not a weekday session`);
+}
+assert(!svbDates.includes("2026-09-07"), "Labor Day is not a session");
+assert(svbLatest.asOf === "2026-10-30T12:18:00-05:00" && svbLatest.asOfLabel === "Fri Oct 30, 2026 · 12:18 CT", "gauge stamp is the calibration print");
+assert(svbLatest.gauge === 2.98 && svbLatest.live === false && svbLatest.closed === false, "gauge is the committed 2.98 print, not a close");
+assert(svbLatest.feedLabel.includes("not wired"), "the card says the live feed is not wired");
+assert(svbSeries.points.at(-1).date < svbLatest.session && !svbDates.includes(svbLatest.session), "an open session is not appended to the close line");
+const impliedSpot = Math.round(svbSeries.points.at(-1).spx * (1 + svbLatest.spxPct / 100) * 100) / 100;
+assert(Math.abs(impliedSpot - svbLatest.spx) < 0.02, `session SPX ${svbLatest.spx} should match the prior close and SPX percent`);
+const svbView = readout(svbLatest, svbSeries);
+assert(svbView.gauge === "2.98" && svbView.estimate === "2.57", `readout ${svbView.gauge} / ${svbView.estimate}`);
+assert(formatSvb(svbView.estimateValue) === "2.57", "desk estimate rounds to 2.57");
+assert(Math.abs(svbLatest.gauge - svbView.estimateValue - 0.41) < 0.001, "gauge and desk estimate keep the calibration gap");
+assert(svbView.inputs === "UV Δ 3.41 · SPX −1.20%" && svbView.formula === FORMULA, "desk estimate shows its inputs");
+assert(svbView.agreement === "Gauge and desk estimate are both at or above 2.", svbView.agreement);
+assert(svbView.formalWait.includes("VIX close"), "an intraday print at or above 2 waits on the VIX close");
+assert(svbView.session.includes("6,791.91") && svbView.session.includes("−1.20%"), `session line ${svbView.session}`);
+const formal = svbSeries.points.find((point) => point.date === "2026-09-03");
+const marked = svbSeries.points.find((point) => point.date === "2026-10-12");
+const quiet = svbSeries.points.find((point) => point.date === "2026-10-29");
+assert(formal.svb >= 2 && formal.vixCloseMove >= 2, "September close is a formal vol event");
+assert(marked.svb >= 2 && marked.vixCloseMove < 2, "October close is the band without a formal vol event");
+assert(quiet.svb < 2 && quiet.date === "2026-10-29", "the last close sits under the band");
+assert(spotVolTip(formal).includes("Possible bottom") && spotVolTip(formal).some((line) => line.startsWith("Formal vol event")), "hover names the band and a formal vol event");
+assert(spotVolTip(marked).includes("Possible bottom") && !spotVolTip(marked).some((line) => line.startsWith("Formal")), "hover marks the band without calling a short VIX move formal");
+assert(!spotVolTip(quiet).includes("Possible bottom") && spotVolTip(quiet)[1] === "Spot Vol Beta 1.84" && spotVolTip(quiet)[2].startsWith("SPX "), "hover on a quiet close is the date, the beta, and SPX");
+assert(svbSeries.points.some((point) => point.svb >= svbSeries.signal) && svbSeries.note.includes("possible-bottom") && svbSeries.note.includes("prior SPX close"), "the series can paint the band and carries the house read");
+const ticks = axisTicks(svbSeries.points).filter(Boolean);
+assert(ticks[0] === "Aug 3" && ticks.at(-1) === "Oct 29" && ticks.length <= 6, `axis ticks ${ticks}`);
 
 if (failed) {
   console.error(`${failed} check(s) failed`);
