@@ -83,7 +83,7 @@ Options Flow data lives in `public/data/flow/`: `plays.json` is the Shopping Lis
 
 Each sector card shows the percentile, a status, and a Soft to Crowded bar; one timeframe select drives every card. Green is the soft end. Dark is crowded. The triangle marks that week’s print.
 
-The Vault Portfolio journal (`/vault/portfolio/`) reads `public/data/vault/portfolio/journal.json` (`ahead-portfolio-journal-v1`). It is the locked personal book: category, structure, entry and exit, and the result. A line with status `exit_pending_fill` stays pending and out of the closed total until it fills. The Desk does not link to it.
+The Vault Portfolio journal (`/vault/portfolio/`) reads `public/data/vault/portfolio/journal.json` (`ahead-portfolio-journal-v1`). It is the locked personal book: category, structure, entry and exit, and the result. A line with status `open` (or outcome `open`) is still held and stays out of the closed total. A line with status `exit_pending_fill` stays pending and out of the closed total until it fills. The Desk does not link to it.
 
 The Vault Soft ↔ Crowded pack (`/vault/soft-crowded/`) reads `public/data/vault/soft-crowded/`. `schema.json` is the week document: sector buckets on the Soft ↔ Crowded scale, batch-1 chart refs, the one-page read, and a short article under each chart (`headline`, `bodyMarkdown`, `bias`, `dumbMoney`, `smartMoney`, `invalidation`). `index.json` names the latest week. `2026-10-23.json` is that week, seeded from the Desk’s JPM sector read for the same date. The chart cards link out to the public Positioning charts. The Desk does not link back.
 

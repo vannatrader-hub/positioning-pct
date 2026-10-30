@@ -3426,7 +3426,7 @@ body:has(.cc[open]) { overflow: hidden; }
 
 .subnav + #pack > .page-head { padding-top: 24px; }
 
-/* Portfolio: the personal book. Gold for a win or a working close, red for a filled loss. */
+/* Portfolio: the personal book. Gold for a win or a working close, red for a filled loss, blue for a line still held. */
 .subnav + .page-head + #journal { padding-top: 8px; }
 
 .pf-board {
@@ -3500,6 +3500,8 @@ body:has(.cc[open]) { overflow: hidden; }
 .pf-stat.is-pending .pf-figure,
 .pf-pnl.is-win,
 .pf-pnl.is-pending { color: var(--gold); }
+.pf-stat.is-open .pf-figure,
+.pf-pnl.is-open { color: #9db4ff; }
 
 .pf-aside {
   margin: 8px 0 0;
@@ -3529,14 +3531,18 @@ body:has(.cc[open]) { overflow: hidden; }
 .pf-cats .is-loss { color: #f08a84; }
 .pf-cats .is-win { color: var(--gold); }
 
+.pf-open-line,
 .pf-pending-line {
   margin: 4px 0 16px;
   max-width: 68ch;
-  color: var(--gold);
   font-size: 14.5px;
   font-weight: 650;
   line-height: 1.45;
 }
+
+.pf-open-line { color: #9db4ff; }
+.pf-pending-line { color: var(--gold); }
+.pf-open-line + .pf-pending-line { margin-top: -8px; }
 
 .pf-scroll {
   overflow-x: auto;
@@ -3586,6 +3592,7 @@ body:has(.cc[open]) { overflow: hidden; }
 }
 
 .pf-table tbody tr.is-pending td { background: rgba(245, 196, 81, 0.06); }
+.pf-table tbody tr.is-open td { background: rgba(96, 132, 255, 0.08); }
 
 .pf-ticker {
   font-weight: 750;
@@ -3652,6 +3659,12 @@ body:has(.cc[open]) { overflow: hidden; }
   color: var(--gold);
   background: transparent;
   box-shadow: inset 0 0 0 1.5px rgba(245, 196, 81, 0.7);
+}
+
+.pf-result.is-open {
+  color: #d7e2ff;
+  background: rgba(96, 132, 255, 0.16);
+  box-shadow: inset 0 0 0 1.5px rgba(157, 180, 255, 0.85);
 }
 
 .pf-pnl { font-weight: 750; white-space: nowrap; }

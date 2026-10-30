@@ -28,7 +28,7 @@ import {
   softVolChart,
 } from "../src/pct-charts.js";
 import { FORMULA, axisTicks, formatSvb, gaugeFraction, readout, spotVolTip } from "../src/vault-svb.js";
-import { closedPnl, isPending, resultLabel } from "../src/vault-portfolio.js";
+import { closedPnl, formatPx, formatUsd, isOpen, isPending, resultLabel } from "../src/vault-portfolio.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
@@ -1449,7 +1449,7 @@ for (const [id, want] of Object.entries(breadthWant)) {
   const read = breadthRead(doc);
   assert(read.buy === -1000 && read.touches > 0 && read.lastTouch, `wall ${id} finds closes through the buy line in ten years`);
 }
-/* Vault portfolio: personal book, gated like the other Vault pages. META stays pending until the close fills. */
+/* Vault portfolio: personal book, gated like the other Vault pages. Open lines are still held. */
 const bookFile = "vault/portfolio/index.html";
 assert(viteConfig.includes(`"${bookFile}"`), `vite builds ${bookFile}`);
 const bookPage = readFileSync(join(root, bookFile), "utf8");
@@ -1474,7 +1474,7 @@ for (const file of [...deskPages, "404.html"]) {
   assert(!readFileSync(join(root, file), "utf8").includes("portfolio/"), `${file} links into the Vault portfolio`);
 }
 const bookJs = readFileSync(join(root, "src/vault-portfolio.js"), "utf8");
-for (const piece of ["data/vault/portfolio/journal.json", "exit_pending_fill", "renderPortfolio", '"vault-open"', "Pending"]) {
+for (const piece of ["data/vault/portfolio/journal.json", "exit_pending_fill", "renderPortfolio", '"vault-open"', "Pending", 'return "Open"', 'status === "open"']) {
   assert(bookJs.includes(piece), `portfolio page keeps ${piece}`);
 }
 assert(bookJs.includes("!isPending(trade)") || bookJs.includes("!isPending(trade)"), "closed total skips a working close");
@@ -1482,37 +1482,66 @@ const bookPath = join(root, "public/data/vault/portfolio/journal.json");
 const book = JSON.parse(readFileSync(bookPath, "utf8"));
 assert(bannedAllow.has(bookPath) && bannedAllow.size === 1, "only the locked journal is exempt from the source-name scan");
 assert(book.schema === "ahead-portfolio-journal-v1", `portfolio schema ${book.schema}`);
-assert(book.summary.journal_lock === "2026-10-30" && book.summary.as_of_ct === "2026-10-30 ~2:27 PM CT", "portfolio journal is the Oct 30 lock");
-assert(book.summary.closed_pnl_usd === -6590 && book.summary.pending_est_pnl_usd === -666, "portfolio closed and pending figures");
-assert(book.summary.closed_count === 4 && book.summary.pending_count === 1, "portfolio closed and pending counts");
-assert(book.summary.by_category.Spotlight === -5462 && book.summary.by_category["Earnings Snapshot"] === -1128, "portfolio category totals exclude the working close");
-assert(book.trades.length === 5, `portfolio has ${book.trades.length} lines`);
+assert(book.summary.journal_lock === "2026-10-30-hawk-only-oct" && book.summary.as_of_ct === "2026-10-30 ~3:20 PM CT", "portfolio journal is the hawk-only Oct lock");
+assert(book.summary.closed_pnl_usd === -5097 && book.summary.closed_count === 8 && book.summary.open_count === 4, "portfolio closed PnL, closed count, and open count");
+assert(book.summary.hawk_october_book_locked === true, "portfolio book is locked");
+assert(JSON.stringify(book.summary.open_tickers) === JSON.stringify(["AZN", "NFLX", "GS", "XYZ"]), "open tickers are AZN, NFLX, GS, XYZ");
+assert(
+  book.summary.by_category.Spotlight === -5462 &&
+    book.summary.by_category["Earnings Snapshot"] === -447 &&
+    book.summary.by_category["Weekly Radar / Earnings Research"] === 812,
+  "portfolio category totals",
+);
+assert(book.trades.length === 12, `portfolio has ${book.trades.length} lines`);
 assert(
   JSON.stringify(book.trades.map((trade) => trade.id)) ===
     JSON.stringify([
       "hawk-fcx-spotlight-43676-lot1",
       "hawk-fcx-spotlight-43676-lot2",
       "hawk-gld-spotlight-43774",
+      "hawk-azn-featured-43721",
       "hawk-be-earnings-snapshot-2026-10-19",
       "hawk-meta-earnings-snapshot-2026-10-19",
+      "hawk-spcx-earnings-snapshot-2026-10-19",
+      "hawk-spot-earnings-snapshot-2026-10-19",
+      "hawk-nflx-earnings-snapshot-2026-10-19",
+      "hawk-txn-weekly-radar-43728",
+      "hawk-gs-weekly-radar-43728",
+      "hawk-xyz-spotlight-43878",
     ]),
-  "portfolio lines are the locked five",
+  "portfolio lines are the locked twelve",
 );
-assert(book.trades[0].hawk_post_ts_ct === "2026-10-14 8:52 PM CT" && book.trades[0].wp_id === 43676, "FCX post stamp");
-assert(book.trades[2].hawk_post_ts_ct === "2026-10-20 9:28 PM CT" && book.trades[2].wp_id === 43774, "GLD post stamp");
-for (const trade of book.trades.slice(3)) {
-  assert(trade.hawk_post?.wp_id === 43723 && trade.hawk_post.posted_ct === "2026-10-18 10:29 AM CT", `${trade.ticker} post lock`);
-  assert(trade.ticket_lock === "hawk-team-lead 2026-10-30" && trade.hawk_post.exact_ticket, `${trade.ticker} ticket lock`);
-  assert(trade.stop_stock === null && trade.target_stock === null, `${trade.ticker} has no stock stop or target`);
+assert(book.trades.every((trade) => trade.ticket_lock === "hawk-team-lead 2026-10-30"), "every line carries the team-lead ticket lock");
+const byTicker = Object.fromEntries(book.trades.map((trade) => [trade.id, trade]));
+const meta = byTicker["hawk-meta-earnings-snapshot-2026-10-19"];
+assert(meta.status === "closed" && meta.outcome === "loss" && meta.pnl_usd === -666 && meta.hawk_entry === 7.15, "META is a filled close");
+assert(!isPending(meta) && !isOpen(meta) && resultLabel(meta) === "Loss", "META reads as a closed loss");
+const xyz = byTicker["hawk-xyz-spotlight-43878"];
+assert(xyz.qty === 11 && xyz.entry_price === 3.5173 && xyz.status === "open" && xyz.outcome === "open", "XYZ is 11 at 3.5173 and still held");
+assert(formatPx(xyz.entry_price) === "3.5173", `XYZ average renders ${formatPx(xyz.entry_price)}`);
+assert(formatUsd(null) === "—" && formatUsd(undefined) === "—", "a missing PnL stays blank");
+const nflx = byTicker["hawk-nflx-earnings-snapshot-2026-10-19"];
+assert(nflx.status === "open" && nflx.outcome === null && nflx.pnl_usd === null, "NFLX stays open with an empty outcome");
+assert(isOpen(nflx) && !isPending(nflx) && resultLabel(nflx) === "Open", "NFLX reads as open, not pending");
+assert(
+  JSON.stringify(book.trades.filter(isOpen).map((trade) => trade.ticker)) === JSON.stringify(["AZN", "NFLX", "GS", "XYZ"]),
+  "open rows are AZN, NFLX, GS, XYZ",
+);
+assert(book.trades.filter((trade) => trade.status === "closed").length === 8, "eight closed lines");
+assert(!book.trades.some(isPending), "this lock has no working close");
+for (const [id, pnl] of [
+  ["hawk-fcx-spotlight-43676-lot1", 72],
+  ["hawk-spcx-earnings-snapshot-2026-10-19", 277],
+  ["hawk-spot-earnings-snapshot-2026-10-19", 1070],
+  ["hawk-txn-weekly-radar-43728", 812],
+]) {
+  assert(byTicker[id].outcome === "win" && byTicker[id].pnl_usd === pnl && resultLabel(byTicker[id]) === "Win", `${id} win ${pnl}`);
 }
-assert(book.trades[3].hawk_entry === 17 && book.trades[3].status === "closed" && book.trades[3].pnl_usd === -1128, "BE ticket and close");
-const meta = book.trades[4];
-assert(meta.status === "exit_pending_fill" && meta.outcome === "loss_pending" && meta.pnl_usd === -666 && meta.hawk_entry === 7.15, "META is a working close");
-assert(isPending(meta) && resultLabel(meta) === "Pending", "META reads as pending, not a closed loss");
 assert(resultLabel(book.trades[0]) === "Win" && resultLabel(book.trades[1]) === "Loss", "filled lines keep win and loss");
-assert(!book.trades.slice(0, 4).some(isPending), "filled lines are not pending");
+const working = { status: "exit_pending_fill", outcome: "loss_pending", pnl_usd: -1 };
+assert(isPending(working) && !isOpen(working) && resultLabel(working) === "Pending", "a working close stays pending");
 assert(closedPnl(book) === book.summary.closed_pnl_usd, `closed sum ${closedPnl(book)} drifted from the lock`);
-assert(css.includes(".pf-result.is-pending") && css.includes(".pf-table"), "portfolio table uses the Vault book styles");
+assert(css.includes(".pf-result.is-pending") && css.includes(".pf-result.is-open") && css.includes(".pf-table"), "portfolio table styles closed, pending, and open rows");
 
 assert(breadthSpx.bars.find((bar) => bar.t === "2026-10-29")?.c === 7720.39, "wall SPX Oct 29 close 7720.39");
 const breadthJs = readFileSync(join(root, "src/vault-breadth.js"), "utf8");
