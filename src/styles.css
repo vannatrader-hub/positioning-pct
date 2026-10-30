@@ -3429,12 +3429,39 @@ body:has(.cc[open]) { overflow: hidden; }
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(240px, 0.9fr);
   gap: 18px 28px;
-  align-items: stretch;
+  align-items: center;
 }
 
+.svb-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(100%, 300px);
+  min-width: 0;
+  text-align: center;
+}
+
+.svb-instrument {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.svb-dial {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.svb-dial-tick { fill: var(--muted); font-family: var(--sans); }
+.svb-dial-mark { fill: var(--gold); font-family: var(--sans); }
+
 .svb-gauge {
-  margin: 0;
-  font-size: clamp(68px, 8vw, 96px);
+  margin: -8px 0 0;
+  width: 100%;
+  text-align: center;
+  font-size: clamp(52px, 6.5vw, 72px);
   letter-spacing: -0.055em;
   line-height: 0.88;
 }
@@ -3540,6 +3567,7 @@ body:has(.cc[open]) { overflow: hidden; }
 
 @container svb (max-width: 479px) {
   .svb-read { grid-template-columns: 1fr; }
+  .svb-hero { margin-inline: auto; }
   .svb-plot .pc-plot { height: 280px; }
 }
 
@@ -3965,7 +3993,7 @@ body:has(.cc[open]) { overflow: hidden; }
 .csr-legend-name {
   padding: 2px 6px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.07);
+  background: #262626;
   color: #d1d4dc;
 }
 
@@ -3994,7 +4022,7 @@ body:has(.cc[open]) { overflow: hidden; }
   border-spacing: 1px;
   font: 11px -apple-system, BlinkMacSystemFont, "Trebuchet MS", Roboto, Ubuntu, sans-serif;
   color: #fafafa;
-  background: rgba(23, 23, 23, 0.86);
+  background: #171717;
   font-variant-numeric: tabular-nums;
   pointer-events: none;
 }
@@ -4009,7 +4037,7 @@ body:has(.cc[open]) { overflow: hidden; }
 }
 
 .csr-panel thead th {
-  background: rgba(38, 38, 38, 0.95);
+  background: #262626;
   padding: 3px 6px;
 }
 
@@ -4926,6 +4954,7 @@ a.nt-row:hover .nt-arrow { background: var(--ink); color: #fff; }
   .gauge-copy { grid-template-columns: 1fr; }
   .tile, .hub-grid.is-four .hub-tile { min-height: 0; }
   .svb-read { grid-template-columns: 1fr; }
+  .svb-hero { margin-inline: auto; }
   .svb-plot .pc-plot { height: 280px; }
   .vault-hero { grid-template-columns: 1fr; }
   .vault-dial { display: none; }

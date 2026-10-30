@@ -27,7 +27,7 @@ import {
   sectorChart,
   softVolChart,
 } from "../src/pct-charts.js";
-import { FORMULA, axisTicks, formatSvb, readout, spotVolTip } from "../src/vault-svb.js";
+import { FORMULA, axisTicks, formatSvb, gaugeFraction, readout, spotVolTip } from "../src/vault-svb.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
@@ -1327,6 +1327,10 @@ const csrChartJs = readFileSync(join(root, "src/csr-chart.js"), "utf8");
 assert(wallJs.includes('import "./vault-csr.js"'), "the wall mounts Credit Spread Regime");
 assert(csrJs.includes("data/vault/credit-spread-regime/") && csrJs.includes('"vault-open"') && csrJs.includes('getElementById("credit-spread-regime")'), "Credit Spread Regime loads csr.json once the Vault opens");
 for (const piece of ["drawSpx", "drawZones", "drawBackground", "drawMarkers", "drawLevels", "drawCrosshair"]) assert(csrChartJs.includes(`function ${piece}(`), `Credit Spread Regime chart keeps ${piece}`);
+assert(!/shadowBlur|backdrop-filter|feGaussian|filter:\s*blur|globalAlpha|drawImage\(/.test(csrChartJs), "Credit Spread Regime chart draws a sharp line with no glow or blur");
+const csrCss = css.slice(css.indexOf("/* Credit Spread Regime"), css.indexOf("/* Wall breadth"));
+assert(csrCss.includes(".csr-panel") && !/backdrop-filter|filter:\s*blur|-webkit-mask|mask-image/.test(csrCss), "Credit Spread Regime styles have no frost, blur, or soft mask");
+assert(csrCss.includes("background: #171717") && csrCss.includes("background: #262626") && !/rgba\(23,\s*23,\s*23,/.test(csrCss), "Credit Spread Regime stats panel is opaque");
 
 /* Spot Vol Beta, card 01 on the wall: the gauge first, the desk estimate second, then the daily close line. */
 assert(!/svb-|id="svb-title"/.test(wallOutside), "Spot Vol Beta does not render outside the template");
@@ -1340,6 +1344,10 @@ assert(svbJs.includes("data/vault/spot-vol-beta/") && svbJs.includes("drawDualLi
 assert(svbJs.includes("vault-open") && svbJs.includes("FORMULA") && svbJs.includes('getElementById("spot-vol-beta")'), "Spot Vol Beta listens for the gate and keeps the desk formula");
 assert(svbJs.indexOf('"pct svb-gauge') < svbJs.indexOf('"svb-desk"'), "the gauge renders before the desk estimate");
 assert(css.includes(".svb-plot") && css.includes(".svb-gauge") && css.includes(".svb-desk"), "Spot Vol Beta has a gauge, a desk estimate, and a chart plate");
+assert(svbJs.includes('class: "svb-dial"') && svbJs.includes('class: "svb-needle"') && svbJs.includes("svbDial("), "Spot Vol Beta paints the live reading on a dial with a needle");
+assert(css.includes(".svb-dial") && css.includes(".svb-dial-mark") && css.includes(".svb-instrument"), "Spot Vol Beta dial uses the house gold mark");
+assert(Math.abs(gaugeFraction(2.98) - 2.98 / 4) < 1e-9 && gaugeFraction(2) === 0.5, "2.98 sits on the 0–4 dial and 2 is the top of the arc");
+assert(gaugeFraction(-3) === 0 && gaugeFraction(8) === 1, "the dial clamps readings outside 0–4");
 assert(readFileSync(join(root, "src/chart-svg.js"), "utf8").includes("export function drawDualLine"), "daily line drawer is shared with the Positioning charts");
 for (const file of ["src/vault-svb.js", "public/data/vault/spot-vol-beta/series.json", "public/data/vault/spot-vol-beta/latest.json"]) {
   assert(!/tradingview|\btdv\b|\bpine\b|pinescript|<iframe|©/i.test(readFileSync(join(root, file), "utf8")), `${file} carries third-party chart branding, script source, or an embed`);

@@ -1,7 +1,8 @@
 /**
- * Credit Spread Regime pane: Z line with glow, zone fills, threshold lines,
+ * Credit Spread Regime pane: a crisp Z line, zone fills, threshold lines,
  * per-session regime tint, mean-reversion markers, and an SPX close overlay.
  * Canvas, so a few hundred per-session colors stay cheap to redraw on hover.
+ * The line and the stats panel stay sharp: no glow, blur, or frost.
  */
 import { CSR_COLORS, bgAlpha, zColor } from "./csr.js";
 
@@ -52,8 +53,6 @@ export function createCsrChart(frame, { onHover } = {}) {
   canvas.setAttribute("role", "img");
   frame.prepend(canvas);
   const ctx = canvas.getContext("2d");
-  const layer = document.createElement("canvas");
-  const layerCtx = layer.getContext("2d");
 
   let series = null;
   let showSpx = true;
@@ -268,32 +267,11 @@ export function createCsrChart(frame, { onHover } = {}) {
     if (style) target.stroke();
   }
 
-  /* Each glow width is stroked opaque off-screen, then laid down at its own alpha, so color changes do not bead where segments overlap. */
   function drawLine(g) {
-    const glow = [
-      [12, 0.1],
-      [8, 0.15],
-      [5, 0.25],
-      [3, 0.5],
-    ];
-    const dpr = window.devicePixelRatio || 1;
-    if (layer.width !== canvas.width || layer.height !== canvas.height) {
-      layer.width = canvas.width;
-      layer.height = canvas.height;
-    }
     ctx.save();
     ctx.beginPath();
     ctx.rect(g.left, g.top, g.right - g.left, g.bottom - g.top);
     ctx.clip();
-    for (const [lineWidth, alpha] of glow) {
-      layerCtx.setTransform(1, 0, 0, 1, 0, 0);
-      layerCtx.clearRect(0, 0, layer.width, layer.height);
-      layerCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      strokeZ(layerCtx, g, lineWidth);
-      ctx.globalAlpha = alpha;
-      ctx.drawImage(layer, 0, 0, width, height);
-    }
-    ctx.globalAlpha = 1;
     strokeZ(ctx, g, 2);
     ctx.restore();
   }
