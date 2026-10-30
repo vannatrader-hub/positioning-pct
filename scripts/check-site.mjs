@@ -28,6 +28,7 @@ import {
   softVolChart,
 } from "../src/pct-charts.js";
 import { FORMULA, axisTicks, formatSvb, gaugeFraction, readout, spotVolTip } from "../src/vault-svb.js";
+import { closedPnl, isPending, resultLabel } from "../src/vault-portfolio.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
@@ -637,6 +638,8 @@ const banned = [
   "stockcharts",
 ];
 const scanExt = new Set([".html", ".js", ".css", ".md", ".yml", ".svg", ".json"]);
+/* The locked portfolio journal names its source. Page copy stays scrubbed; this file is the one exception. */
+const bannedAllow = new Set([join(root, "public/data/vault/portfolio/journal.json")]);
 
 function walk(dir) {
   for (const name of readdirSync(dir)) {
@@ -648,6 +651,7 @@ function walk(dir) {
       continue;
     }
     if (!scanExt.has(extname(name))) continue;
+    if (bannedAllow.has(path)) continue;
     const text = readFileSync(path, "utf8").toLowerCase();
     for (const phrase of banned) {
       assert(!text.includes(phrase), `${path} contains forbidden phrase "${phrase}"`);
@@ -760,6 +764,7 @@ const vaultSurface = {
   "vault/index.html": { desk: "../", vault: "./" },
   "vault/soft-crowded/index.html": { desk: "../../", vault: "../" },
   "vault/vol-credit-momentum/index.html": { desk: "../../", vault: "../" },
+  "vault/portfolio/index.html": { desk: "../../", vault: "../" },
 };
 const publicPages = [...deskPages, ...Object.keys(vaultSurface)];
 for (const file of publicPages) {
@@ -815,7 +820,7 @@ assert(!/opening later/i.test(vaultTopbar + vaultFooter), "Vault chrome no longe
 
 const monetization = /\b(free|paid|premium|subscri\w*|paywall\w*|upgrad\w*|trials?|pric(e|es|ed|ing)|members?hips?|unlock\w*)\b/i;
 const chromeCopy = [
-  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "404.html"].map((file) => [
+  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "vault/portfolio/index.html", "404.html"].map((file) => [
     file,
     readFileSync(join(root, file), "utf8"),
   ]),
@@ -1444,6 +1449,71 @@ for (const [id, want] of Object.entries(breadthWant)) {
   const read = breadthRead(doc);
   assert(read.buy === -1000 && read.touches > 0 && read.lastTouch, `wall ${id} finds closes through the buy line in ten years`);
 }
+/* Vault portfolio: personal book, gated like the other Vault pages. META stays pending until the close fills. */
+const bookFile = "vault/portfolio/index.html";
+assert(viteConfig.includes(`"${bookFile}"`), `vite builds ${bookFile}`);
+const bookPage = readFileSync(join(root, bookFile), "utf8");
+assert(bookPage.includes('<body class="is-vault">'), "portfolio page carries the Vault theme");
+assert(bookPage.includes('src="/src/vault-gate.js"') && bookPage.includes('src="/src/vault-portfolio.js"'), "portfolio page runs the gate and the journal");
+assert(/class="lockup" href="\.\.\/\.\.\/"/.test(bookPage), "portfolio lockup links home");
+const bookMain = bookPage.match(/<main id="content">([\s\S]*?)<\/main>/)?.[1] ?? "";
+const bookTemplate = bookMain.match(/<template id="vault-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
+const bookOutside = bookMain.replace(/<template id="vault-content">[\s\S]*?<\/template>/, "");
+assert(/<section class="vault-wall" id="vault-wall" data-state="checking"/.test(bookOutside), "portfolio sign-in card renders before the gate opens");
+assert(/<h1 id="vault-wall-title">Sign in to open Vault<\/h1>/.test(bookOutside), "portfolio page reads Sign in to open Vault");
+assert(
+  bookOutside.match(/<section class="vault-wall"[\s\S]*?<\/section>/)?.[0].replaceAll('href="../../"', 'href="../"') ===
+    vaultOutside.match(/<section class="vault-wall"[\s\S]*?<\/section>/)?.[0],
+  "portfolio sign-in card is the same allowlist sign-in card as the Vault",
+);
+assert(bookTemplate.includes('id="journal"') && bookTemplate.includes('aria-current="page">Portfolio'), "portfolio shell lives in the template");
+assert(!/id="journal"|pf-table|pf-board/.test(bookOutside), "portfolio content does not render outside the template");
+assert(vaultTemplate.includes('class="tile vault-pack" href="portfolio/"') && vaultTemplate.includes(">Portfolio</h2>"), "signed-in Vault links to Portfolio");
+assert(!vaultOutside.includes("portfolio/"), "the portfolio link stays inside the signed-in template");
+for (const file of [...deskPages, "404.html"]) {
+  assert(!readFileSync(join(root, file), "utf8").includes("portfolio/"), `${file} links into the Vault portfolio`);
+}
+const bookJs = readFileSync(join(root, "src/vault-portfolio.js"), "utf8");
+for (const piece of ["data/vault/portfolio/journal.json", "exit_pending_fill", "renderPortfolio", '"vault-open"', "Pending"]) {
+  assert(bookJs.includes(piece), `portfolio page keeps ${piece}`);
+}
+assert(bookJs.includes("!isPending(trade)") || bookJs.includes("!isPending(trade)"), "closed total skips a working close");
+const bookPath = join(root, "public/data/vault/portfolio/journal.json");
+const book = JSON.parse(readFileSync(bookPath, "utf8"));
+assert(bannedAllow.has(bookPath) && bannedAllow.size === 1, "only the locked journal is exempt from the source-name scan");
+assert(book.schema === "ahead-portfolio-journal-v1", `portfolio schema ${book.schema}`);
+assert(book.summary.journal_lock === "2026-10-30" && book.summary.as_of_ct === "2026-10-30 ~2:27 PM CT", "portfolio journal is the Oct 30 lock");
+assert(book.summary.closed_pnl_usd === -6590 && book.summary.pending_est_pnl_usd === -666, "portfolio closed and pending figures");
+assert(book.summary.closed_count === 4 && book.summary.pending_count === 1, "portfolio closed and pending counts");
+assert(book.summary.by_category.Spotlight === -5462 && book.summary.by_category["Earnings Snapshot"] === -1128, "portfolio category totals exclude the working close");
+assert(book.trades.length === 5, `portfolio has ${book.trades.length} lines`);
+assert(
+  JSON.stringify(book.trades.map((trade) => trade.id)) ===
+    JSON.stringify([
+      "hawk-fcx-spotlight-43676-lot1",
+      "hawk-fcx-spotlight-43676-lot2",
+      "hawk-gld-spotlight-43774",
+      "hawk-be-earnings-snapshot-2026-10-19",
+      "hawk-meta-earnings-snapshot-2026-10-19",
+    ]),
+  "portfolio lines are the locked five",
+);
+assert(book.trades[0].hawk_post_ts_ct === "2026-10-14 8:52 PM CT" && book.trades[0].wp_id === 43676, "FCX post stamp");
+assert(book.trades[2].hawk_post_ts_ct === "2026-10-20 9:28 PM CT" && book.trades[2].wp_id === 43774, "GLD post stamp");
+for (const trade of book.trades.slice(3)) {
+  assert(trade.hawk_post?.wp_id === 43723 && trade.hawk_post.posted_ct === "2026-10-18 10:29 AM CT", `${trade.ticker} post lock`);
+  assert(trade.ticket_lock === "hawk-team-lead 2026-10-30" && trade.hawk_post.exact_ticket, `${trade.ticker} ticket lock`);
+  assert(trade.stop_stock === null && trade.target_stock === null, `${trade.ticker} has no stock stop or target`);
+}
+assert(book.trades[3].hawk_entry === 17 && book.trades[3].status === "closed" && book.trades[3].pnl_usd === -1128, "BE ticket and close");
+const meta = book.trades[4];
+assert(meta.status === "exit_pending_fill" && meta.outcome === "loss_pending" && meta.pnl_usd === -666 && meta.hawk_entry === 7.15, "META is a working close");
+assert(isPending(meta) && resultLabel(meta) === "Pending", "META reads as pending, not a closed loss");
+assert(resultLabel(book.trades[0]) === "Win" && resultLabel(book.trades[1]) === "Loss", "filled lines keep win and loss");
+assert(!book.trades.slice(0, 4).some(isPending), "filled lines are not pending");
+assert(closedPnl(book) === book.summary.closed_pnl_usd, `closed sum ${closedPnl(book)} drifted from the lock`);
+assert(css.includes(".pf-result.is-pending") && css.includes(".pf-table"), "portfolio table uses the Vault book styles");
+
 assert(breadthSpx.bars.find((bar) => bar.t === "2026-10-29")?.c === 7720.39, "wall SPX Oct 29 close 7720.39");
 const breadthJs = readFileSync(join(root, "src/vault-breadth.js"), "utf8");
 for (const piece of ["data/vault/breadth/", 'input.type = "range"', "MAX_MONTHS", "BUY ", "buyLine", "$SPX", "MA(", "directionRuns", "[data-breadth]", '"vault-open"']) {
