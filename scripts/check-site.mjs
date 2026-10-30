@@ -10,6 +10,7 @@ import { SECTION_ORDER, STATUS, allPlays, levelKind, outcomeLabel, sortCards, sp
 import { activeSpotlights, earningsBoxes, spotlightStar, tradeDates } from "../src/scorecard.js";
 import { emailLinkAttemptPlan, emailLinkReturnPlan, readClerkLinkCallback, withoutClerkQuery } from "../src/vault-link.js";
 import { NT_SECTIONS, SOURCE_LABELS, deskDay, deskDayStart, deskWindow, itemsForDay, windowLabel } from "../src/new-today-window.js";
+import { BUY_LINE, DEFAULT_MONTHS, MAX_MONTHS, RANGES, breadthRead, dayChange, monthsBack, sma, windowStart as breadthWindowStart } from "../src/breadth.js";
 import {
   CHARTS,
   CHART_IDS,
@@ -627,6 +628,7 @@ const banned = [
   "copy-trading",
   "copy trading",
   "robinhood",
+  "stockcharts",
 ];
 const scanExt = new Set([".html", ".js", ".css", ".md", ".yml", ".svg", ".json"]);
 
@@ -751,6 +753,7 @@ const deskPages = ["index.html", "positioning/index.html", "positioning/desk/ind
 const vaultSurface = {
   "vault/index.html": { desk: "../", vault: "./" },
   "vault/soft-crowded/index.html": { desk: "../../", vault: "../" },
+  "vault/wall/index.html": { desk: "../../", vault: "../" },
 };
 const publicPages = [...deskPages, ...Object.keys(vaultSurface)];
 for (const file of publicPages) {
@@ -806,7 +809,7 @@ assert(!/opening later/i.test(vaultTopbar + vaultFooter), "Vault chrome no longe
 
 const monetization = /\b(free|paid|premium|subscri\w*|paywall\w*|upgrad\w*|trials?|pric(e|es|ed|ing)|members?hips?|unlock\w*)\b/i;
 const chromeCopy = [
-  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "404.html"].map((file) => [
+  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "vault/wall/index.html", "404.html"].map((file) => [
     file,
     readFileSync(join(root, file), "utf8"),
   ]),
@@ -1124,6 +1127,68 @@ for (const piece of ["bodyMarkdown", "dumbMoney", "smartMoney", "invalidation", 
   assert(packJs.includes(piece), `pack page renders ${piece}`);
 }
 assert(css.includes("#pack .pack-article") && css.includes("@media print") && css.includes("break-inside: avoid"), "pack articles keep a print stylesheet");
+
+/* Vault vol / breadth wall: NY and Nasdaq Summation, behind the wall, 1Y / 1D default, 10Y range, −1000 buy line. */
+assert(viteConfig.includes('"vault/wall/index.html"'), "vite builds vault/wall/index.html");
+const wallPage = readFileSync(join(root, "vault/wall/index.html"), "utf8");
+assert(wallPage.includes('<body class="is-vault">'), "wall page carries the Vault theme");
+assert(wallPage.includes('src="/src/vault-gate.js"') && wallPage.includes('src="/src/vault-wall.js"'), "wall page runs the gate and the wall");
+assert(/class="lockup" href="\.\.\/\.\.\/"/.test(wallPage), "wall lockup links home");
+const wallMain = wallPage.match(/<main id="content">([\s\S]*?)<\/main>/)?.[1] ?? "";
+const wallTemplate = wallMain.match(/<template id="vault-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
+const wallOutside = wallMain.replace(/<template id="vault-content">[\s\S]*?<\/template>/, "");
+assert(/<section class="vault-wall" id="vault-wall" data-state="checking"/.test(wallOutside), "wall page sign-in renders before the gate opens");
+assert(/<h1 id="vault-wall-title">Sign in to open Vault<\/h1>/.test(wallOutside), "wall page sign-in reads Sign in to open Vault");
+assert(wallTemplate.includes('id="wall"') && wallTemplate.includes('href="#nysi"') && wallTemplate.includes('href="#nasi"'), "wall shell lives in the template");
+assert(wallTemplate.includes(">NY Summation<") && wallTemplate.includes(">Nasdaq Summation<"), "wall names NY Summation and Nasdaq Summation");
+assert(!/id="wall"|bw-/.test(wallOutside), "wall content does not render outside the template");
+assert(vaultTemplate.includes('class="tile vault-pack vault-wall-tile" href="wall/"'), "signed-in Vault links to the wall");
+assert(!vaultOutside.includes('href="wall/"'), "the wall link stays inside the signed-in template");
+for (const file of [...deskPages, "404.html"]) {
+  assert(!readFileSync(join(root, file), "utf8").includes("vault/wall"), `${file} links into the Vault wall`);
+}
+
+assert(DEFAULT_MONTHS === 12 && MAX_MONTHS === 120 && BUY_LINE === -1000, "wall defaults: 1Y window, 10Y range, −1000 buy line");
+assert(JSON.stringify(RANGES.map((range) => range.label)) === '["3M","6M","1Y","2Y","3Y","5Y","10Y"]', `wall range presets ${RANGES.map((range) => range.label)}`);
+assert(monthsBack("2026-10-29", 12) === "2025-10-29" && monthsBack("2026-03-31", 1) === "2026-02-28", "monthsBack keeps the calendar day");
+const wallDir = join(root, "public/data/vault/breadth");
+const wallIndex = JSON.parse(readFileSync(join(wallDir, "index.json"), "utf8"));
+assert(wallIndex.period === "1D" && wallIndex.defaultRangeMonths === 12 && wallIndex.maxRangeMonths === 120, "wall index: daily, 1Y default, 10Y range");
+assert(JSON.stringify(wallIndex.charts.map((chart) => chart.id)) === '["nysi","nasi"]' && wallIndex.overlay.id === "spx", "wall charts are NYSI and NASI over SPX");
+const wallSpx = JSON.parse(readFileSync(join(wallDir, wallIndex.overlay.file), "utf8"));
+const wallDocs = Object.fromEntries(wallIndex.charts.map((chart) => [chart.id, JSON.parse(readFileSync(join(wallDir, chart.file), "utf8"))]));
+const wallWant = {
+  nysi: { label: "NY Summation", symbol: "NYSI", close: -504.41, ma: -605.79, chg: 43.36, pct: 7.92 },
+  nasi: { label: "Nasdaq Summation", symbol: "NASI", close: -699.51, ma: -769.33, chg: 33.01, pct: 4.51 },
+};
+for (const doc of [...Object.values(wallDocs), wallSpx]) {
+  const where = `wall ${doc.id}`;
+  const bars = doc.bars;
+  assert(doc.asOf === wallIndex.asOf && bars[bars.length - 1].t === wallIndex.asOf, `${where} runs to ${wallIndex.asOf}`);
+  assert(bars.every((bar, i) => /^\d{4}-\d{2}-\d{2}$/.test(bar.t) && Number.isFinite(bar.c) && (i === 0 || bar.t > bars[i - 1].t)), `${where} bars are dated closes in order`);
+  assert(breadthWindowStart(bars, MAX_MONTHS) >= 7, `${where} covers ten years plus the MA(8) lead-in`);
+  assert(JSON.stringify(bars.map((bar) => bar.t)) === JSON.stringify(wallDocs.nysi.bars.map((bar) => bar.t)), `${where} sessions line up with NYSI`);
+}
+for (const [id, want] of Object.entries(wallWant)) {
+  const doc = wallDocs[id];
+  assert(doc.label === want.label && doc.symbol === want.symbol, `wall ${id} label ${doc.label}`);
+  assert(doc.buyLine === -1000 && doc.ma === 8, `wall ${id} buy line ${doc.buyLine} and MA(${doc.ma})`);
+  const at = doc.bars.findIndex((bar) => bar.t === "2026-10-29");
+  assert(at >= 0 && doc.bars[at].c === want.close, `wall ${id} Oct 29 close ${doc.bars[at]?.c}`);
+  assert(sma(doc.bars, 8)[at] === want.ma, `wall ${id} Oct 29 MA(8) ${sma(doc.bars, 8)[at]}`);
+  const change = dayChange(doc.bars, at);
+  assert(change.chg === want.chg && change.pct === want.pct, `wall ${id} Oct 29 change ${change.chg} (${change.pct}%)`);
+  const firstOfYear = doc.bars[breadthWindowStart(doc.bars, DEFAULT_MONTHS)].t;
+  assert(firstOfYear >= monthsBack(wallIndex.asOf, 12) && firstOfYear <= "2025-11-03", `wall ${id} 1Y window opens ${firstOfYear}`);
+  const read = breadthRead(doc);
+  assert(read.buy === -1000 && read.touches > 0 && read.lastTouch, `wall ${id} finds closes through the buy line in ten years`);
+}
+assert(wallSpx.bars.find((bar) => bar.t === "2026-10-29")?.c === 7720.39, "wall SPX Oct 29 close 7720.39");
+const wallJs = readFileSync(join(root, "src/vault-wall.js"), "utf8");
+for (const piece of ['data/vault/breadth/', 'input.type = "range"', "MAX_MONTHS", "BUY ", "buyLine", "$SPX", "MA(", "directionRuns", '"vault-open"']) {
+  assert(wallJs.includes(piece), `wall renders ${piece}`);
+}
+assert(!/<img\b|\.(png|jpe?g|webp|gif)\b|iframe/i.test(wallJs + wallPage), "wall draws its charts instead of embedding images or frames");
 
 if (failed) {
   console.error(`${failed} check(s) failed`);
