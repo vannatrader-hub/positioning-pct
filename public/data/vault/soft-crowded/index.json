@@ -3,5 +3,35 @@
   "product": "SKU1",
   "title": "Soft ↔ Crowded",
   "schema": "schema.json",
-  "latest": "2026-10-23"
+  "latest": "2026-10-23",
+  "weeks": [
+    {
+      "week": "2026-10-23",
+      "isoWeek": "2026-W43",
+      "title": "2026-W43 Soft ↔ Crowded",
+      "weekLabel": "Oct 23, 2026",
+      "file": "2026-10-23.json",
+      "headline": "Financials and staples are the soft end. Technology and energy are crowded.",
+      "counts": {
+        "extreme soft": 2,
+        "soft": 3,
+        "mid": 3,
+        "crowded": 2
+      }
+    },
+    {
+      "week": "2026-10-16",
+      "isoWeek": "2026-W42",
+      "title": "2026-W42 Soft ↔ Crowded",
+      "weekLabel": "Oct 16, 2026",
+      "file": "2026-10-16.json",
+      "headline": "Energy crosses into crowded as financials slide to extreme soft.",
+      "counts": {
+        "extreme soft": 2,
+        "soft": 3,
+        "mid": 3,
+        "crowded": 2
+      }
+    }
+  ]
 }

@@ -27,6 +27,7 @@ import {
   sectorChart,
   softVolChart,
 } from "../src/pct-charts.js";
+import { columnMoves, isoWeek, isoWeekRange, packFrame } from "../src/vault-pack-frame.js";
 import { FORMULA, axisTicks, formatSvb, gaugeFraction, readout, spotVolTip } from "../src/vault-svb.js";
 import { closedPnl, formatPx, formatUsd, isOpen, isPending, resultLabel } from "../src/vault-portfolio.js";
 
@@ -939,14 +940,15 @@ for (const file of [...deskPages, "404.html", "index.html"]) {
   assert(!readFileSync(join(root, file), "utf8").includes("soft-crowded"), `${file} links into the Vault pack`);
 }
 for (const name of readdirSync(join(root, "src"))) {
-  if (extname(name) !== ".js" || name === "vault-pack.js") continue;
+  if (extname(name) !== ".js" || name.startsWith("vault-")) continue;
   assert(!readFileSync(join(root, "src", name), "utf8").includes("soft-crowded"), `src/${name} links into the Vault pack`);
 }
 
 const packDir = join(root, "public/data/vault/soft-crowded");
 const packSchema = JSON.parse(readFileSync(join(packDir, "schema.json"), "utf8"));
 const packIndex = JSON.parse(readFileSync(join(packDir, "index.json"), "utf8"));
-const packWeek = JSON.parse(readFileSync(join(packDir, `${packIndex.latest}.json`), "utf8"));
+const packWeeks = (packIndex.weeks ?? []).map((row) => ({ row, doc: JSON.parse(readFileSync(join(packDir, row.file), "utf8")) }));
+const packWeek = packWeeks.find(({ row }) => row.week === packIndex.latest)?.doc ?? JSON.parse(readFileSync(join(packDir, `${packIndex.latest}.json`), "utf8"));
 assert(packSchema.$schema === "https://json-schema.org/draft/2020-12/schema", "pack schema is draft 2020-12");
 for (const key of ["read", "buckets", "charts"]) assert(packSchema.properties[key], `pack schema defines ${key}`);
 assert(packSchema.$defs.read.description?.includes("One-page read"), "schema names the one-page read");
@@ -968,6 +970,17 @@ function validatePack(rootSchema, schema, data, path) {
   const node = derefSchema(rootSchema, schema);
   if (!node) {
     assert(false, `${path} missing schema`);
+    return;
+  }
+  if (Array.isArray(node.type)) {
+    if (data === null && node.type.includes("null")) return;
+    const types = node.type.filter((type) => type !== "null");
+    assert(types.length === 1, `${path} schema type ${node.type}`);
+    validatePack(rootSchema, { ...node, type: types[0] }, data, path);
+    return;
+  }
+  if (node.type === "null") {
+    assert(data === null, `${path} should be null`);
     return;
   }
   if (Object.prototype.hasOwnProperty.call(node, "const")) {
@@ -1028,7 +1041,6 @@ function validatePack(rootSchema, schema, data, path) {
   if (node.type === "boolean") assert(typeof data === "boolean", `${path} should be a boolean`);
 }
 
-validatePack(packSchema, packSchema, packWeek, "week");
 assert(bannedSource("a Hawk chart") === "hawk", "banned-source scan rejects Hawk");
 assert(bannedSource("Volland levels") === "volland", "banned-source scan rejects Volland");
 assert(bannedSource("Darkroom note") === "darkroom", "banned-source scan rejects Darkroom");
@@ -1060,55 +1072,6 @@ assert(packIndex.title === "Soft ↔ Crowded", `pack index title ${packIndex.tit
 assert(packIndex.latest === WEEKS[WEEKS.length - 1], `pack latest ${packIndex.latest} should be the Desk's current week`);
 assert(packWeek.$schema === "./schema.json", "week document points at the schema");
 
-const packAt = WEEKS.length - 1;
-const packReading = buildReading("jpm", packAt, 4);
-const packChart = sectorChart("jpm", packAt);
-const packFacts = chartFacts(packAt);
-assert(packWeek.week === packReading.weekIso && packWeek.weekLabel === packReading.weekLabel, "pack week label matches the Desk");
-assert(packWeek.house === "jpm" && packWeek.houseLabel === "JPM" && packWeek.windowWeeks === 4, "pack is the JPM 4-week read");
-assert(packWeek.basis === packChart.basis, `pack basis ${packWeek.basis}`);
-assert(packWeek.sectorSource === packReading.sectorSource, `pack sector source ${packWeek.sectorSource}`);
-assert(
-  JSON.stringify(packWeek.buckets.map((bucket) => [bucket.level, bucket.title, bucket.range, bucket.tone])) ===
-    JSON.stringify(SECTOR_BUCKETS.map((bucket) => [bucket.level, bucket.title, bucket.range, bucket.tone])),
-  "pack buckets follow the Desk Soft ↔ Crowded columns",
-);
-const seenTickers = [];
-for (const bucket of packWeek.buckets) {
-  const want = CANON.filter((ticker) => packReading.sectors[ticker].available && packReading.sectors[ticker].level === bucket.level)
-    .map((ticker) => packReading.sectors[ticker])
-    .sort((a, b) => a.points - b.points || a.ticker.localeCompare(b.ticker));
-  assert(bucket.sectors.length === want.length, `${bucket.level} has ${bucket.sectors.length} sectors, Desk has ${want.length}`);
-  bucket.sectors.forEach((sector, index) => {
-    const desk = want[index];
-    seenTickers.push(sector.ticker);
-    for (const key of ["ticker", "short", "name", "points", "display", "ile", "pill", "caption", "wowText", "regime", "level"]) {
-      assert(sector[key] === desk[key], `${sector.ticker} ${key} ${sector[key]} !== ${desk[key]}`);
-    }
-  });
-}
-const missing = CANON.filter((ticker) => !packReading.sectors[ticker].available);
-assert(
-  JSON.stringify(packWeek.unprinted) ===
-    JSON.stringify(missing.map((ticker) => {
-      const sector = packReading.sectors[ticker];
-      return { ticker, short: sector.short, name: sector.name, note: sector.unavailable };
-    })),
-  `pack unprinted ${JSON.stringify(packWeek.unprinted)}`,
-);
-assert(new Set(seenTickers).size === seenTickers.length, "a sector appears in two buckets");
-assert(JSON.stringify([...seenTickers].sort()) === JSON.stringify(CANON.filter((ticker) => !missing.includes(ticker)).sort()), "pack covers every printed sector");
-const prior = buildReading("jpm", packAt - 1, 4);
-for (const ticker of CANON) {
-  const now = packReading.sectors[ticker];
-  const then = prior.sectors[ticker];
-  if (!now.available || !then.available) continue;
-  assert(now.level === then.level, `${ticker} changed columns since last week (${then.level} → ${now.level})`);
-}
-assert(/No sector changed columns versus last week/.test(packWeek.read.stance), "one-page read records that columns were unchanged");
-for (const phrase of ["0.18", "0.75", "0.69", "0.66", "−1.2", "351", "3.9", "53%"]) {
-  assert(JSON.stringify(packWeek.read).includes(phrase), `one-page read names ${phrase}`);
-}
 const articleSchema = packSchema.$defs.article;
 assert(articleSchema?.description?.includes("week read stays the overview"), "per-chart articles leave the week read as the overview");
 assert(articleSchema?.description?.includes("article"), "pack schema defines a per-chart article");
@@ -1125,41 +1088,147 @@ assert(articleSchema?.properties?.bodyMarkdown?.minWords === 120 && articleSchem
 for (const key of ["headline", "bodyMarkdown", "dumbMoney", "smartMoney", "invalidation"]) {
   assert(articleSchema?.properties?.[key]?.["x-banned-sources"] === true, `article ${key} rejects banned source names`);
 }
-assert(packSchema.$defs.chartRef.required.includes("article"), "each chart ref requires an article");
+assert(packSchema.$defs.chartRef.required.includes("article") && packSchema.$defs.chartRef.required.includes("snapshot"), "each chart ref requires an article and a frozen snapshot");
 assert(packSchema.$defs.read.description?.includes("One-page read"), "one-page read stays the week overview");
-assert(packWeek.charts.batch === 1, "chart refs are batch 1");
-assert(
-  JSON.stringify(packWeek.charts.refs.map((ref) => ref.id)) === JSON.stringify(CHART_IDS),
-  `pack chart refs ${packWeek.charts.refs.map((ref) => ref.id)}`,
-);
-packWeek.charts.refs.forEach((ref, index) => {
-  const chart = CHARTS[index];
-  assert(ref.id === chart.id && ref.nav === chart.nav && ref.title === chart.title, `chart ref ${ref.id} drifted from batch 1`);
-  assert(ref.house === chart.house && ref.houseLabel === HOUSES[chart.house] && ref.deskSection === chart.deskSection, `chart ref ${ref.id} house or section`);
-  assert(ref.fact === packFacts[ref.id], `chart ref ${ref.id} fact ${ref.fact} !== ${packFacts[ref.id]}`);
-  const article = ref.article;
-  const body = article.bodyMarkdown;
-  for (const [label, pattern] of [
-    ["hedge funds", /hedge funds?/i],
-    ["macro funds", /macro funds?/i],
-    ["mutual funds", /mutual funds?/i],
-    ["CTAs", /\bCTAs?\b/],
-    ["dealers", /dealers?/i],
-    ["sharpies", /sharpies?/i],
-    ["commercials", /commercials?/i],
-  ]) {
-    assert(pattern.test(body), `${ref.id} article names ${label}`);
-  }
-  assert(/smart money is positioned against/i.test(body), `${ref.id} article sets smart money against the crowded book`);
+for (const key of ["isoWeek", "title", "asOf", "asOfLabel"]) assert(packSchema.required.includes(key), `pack schema requires ${key}`);
+for (const key of ["softened", "crowded", "backdrop", "nextWeek"]) assert(packSchema.$defs.read.required.includes(key), `one-page read requires ${key}`);
+
+assert(isoWeek("2026-10-23") === "2026-W43" && isoWeek("2026-10-30") === "2026-W44" && isoWeek("2027-01-01") === "2026-W53", "ISO week labels");
+assert(JSON.stringify(isoWeekRange("2026-W44")) === '{"start":"2026-10-26","end":"2026-11-01"}', "ISO week range");
+
+function wordCount(value) {
+  if (typeof value === "string") return value.trim().split(/\s+/).filter(Boolean).length;
+  if (Array.isArray(value)) return value.reduce((sum, item) => sum + wordCount(item), 0);
+  if (value && typeof value === "object") return Object.values(value).reduce((sum, item) => sum + wordCount(item), 0);
+  return 0;
+}
+
+function stripWritten(doc) {
+  const { $schema, read, charts, ...rest } = doc;
+  return { ...rest, charts: { ...charts, refs: charts.refs.map(({ article, ...ref }) => ref) } };
+}
+
+function checkPackWeek(row, doc) {
+  const where = `pack ${row.week}`;
+  validatePack(packSchema, packSchema, doc, where);
+  assert(doc.$schema === "./schema.json", `${where} points at the schema`);
+  assert(row.file === `${row.week}.json` && doc.week === row.week, `${where} index row names its file`);
+  assert(row.isoWeek === doc.isoWeek && row.title === doc.title && row.weekLabel === doc.weekLabel && row.headline === doc.read.headline, `${where} index row matches the week`);
   assert(
-    /hedge funds?/i.test(article.dumbMoney) && /macro funds?/i.test(article.dumbMoney) && /mutual funds?/i.test(article.dumbMoney) && /\bCTAs?\b/.test(article.dumbMoney),
-    `${ref.id} dumbMoney names the dumb-money cohort`,
+    JSON.stringify(row.counts) === JSON.stringify(Object.fromEntries(doc.buckets.map((bucket) => [bucket.level, bucket.sectors.length]))),
+    `${where} index counts ${JSON.stringify(row.counts)}`,
   );
-  assert(/(dealers?|sharpies?)/i.test(article.smartMoney) && /commercials?/i.test(article.smartMoney), `${ref.id} smartMoney names the smart-money cohort`);
-  if (article.bias === "fade-long" || article.bias === "fade-short") {
-    assert(/\b(fade|pullback|bounce|cover)\b/i.test(body), `${ref.id} fade bias is written into the article`);
+  assert(doc.isoWeek === isoWeek(doc.week) && doc.title === `${doc.isoWeek} Soft ↔ Crowded`, `${where} title ${doc.title}`);
+  assert(new Date(`${doc.week}T12:00:00Z`).getUTCDay() === 5, `${where} is a Friday desk day`);
+  assert(/T05:00:00-0[56]:00$/.test(doc.asOf) && doc.asOf.startsWith(doc.week), `${where} as-of is the 5:00 AM CT open, got ${doc.asOf}`);
+  assert(doc.asOfLabel.includes("5:00 AM CT open"), `${where} as-of label ${doc.asOfLabel}`);
+  const words = wordCount(doc.read);
+  assert(words >= 400 && words <= 600, `${where} one-page read is ${words} words, want 400 to 600`);
+
+  const at = WEEKS.indexOf(doc.week);
+  assert(at >= 0 || doc.week !== packIndex.latest, `${where} latest pack must be a Desk week`);
+  if (at < 0) return;
+  const frame = packFrame(doc.week);
+  if (doc.week === WEEKS[WEEKS.length - 1]) {
+    assert(JSON.stringify(stripWritten(doc)) === JSON.stringify(frame), `${where} drifted from the Desk series; rerun npm run pack:build -- ${doc.week}`);
+  } else {
+    assert(JSON.stringify(doc.buckets) === JSON.stringify(frame.buckets), `${where} buckets drifted from the Desk`);
   }
-});
+
+  const reading = buildReading("jpm", at, 4);
+  const facts = chartFacts(at);
+  assert(doc.weekLabel === reading.weekLabel, `${where} week label matches the Desk`);
+  assert(doc.house === "jpm" && doc.houseLabel === "JPM" && doc.windowWeeks === 4, `${where} is the JPM 4-week read`);
+  assert(doc.basis === sectorChart("jpm", at).basis, `${where} basis ${doc.basis}`);
+  assert(doc.sectorSource === reading.sectorSource, `${where} sector source ${doc.sectorSource}`);
+  assert(
+    JSON.stringify(doc.buckets.map((bucket) => [bucket.level, bucket.title, bucket.range, bucket.tone])) ===
+      JSON.stringify(SECTOR_BUCKETS.map((bucket) => [bucket.level, bucket.title, bucket.range, bucket.tone])),
+    `${where} buckets follow the Desk Soft ↔ Crowded columns`,
+  );
+  const seen = [];
+  for (const bucket of doc.buckets) {
+    const want = CANON.filter((ticker) => reading.sectors[ticker].available && reading.sectors[ticker].level === bucket.level)
+      .map((ticker) => reading.sectors[ticker])
+      .sort((a, b) => a.points - b.points || a.ticker.localeCompare(b.ticker));
+    assert(bucket.sectors.length === want.length, `${where} ${bucket.level} has ${bucket.sectors.length} sectors, Desk has ${want.length}`);
+    bucket.sectors.forEach((sector, index) => {
+      const desk = want[index];
+      seen.push(sector.ticker);
+      for (const key of ["ticker", "short", "name", "points", "display", "ile", "pill", "caption", "wowText", "regime", "level"]) {
+        assert(sector[key] === desk?.[key], `${where} ${sector.ticker} ${key} ${sector[key]} !== ${desk?.[key]}`);
+      }
+    });
+  }
+  const missing = CANON.filter((ticker) => !reading.sectors[ticker].available);
+  assert(new Set(seen).size === seen.length, `${where} a sector appears in two buckets`);
+  assert(JSON.stringify([...seen].sort()) === JSON.stringify(CANON.filter((ticker) => !missing.includes(ticker)).sort()), `${where} covers every printed sector`);
+
+  const moves = columnMoves(at);
+  if (moves.length === 0) {
+    assert(/No sector changed columns versus last week/.test(doc.read.stance), `${where} read records that columns were unchanged`);
+  } else {
+    const told = `${doc.read.stance} ${doc.read.moved.join(" ")}`;
+    for (const move of moves) {
+      const named = told.includes(move.ticker) || told.includes(reading.sectors[move.ticker].short);
+      assert(named && told.includes(move.to), `${where} read names ${move.ticker} moving ${move.from} → ${move.to}`);
+    }
+  }
+
+  assert(doc.charts.batch === 1, `${where} chart refs are batch 1`);
+  assert(JSON.stringify(doc.charts.refs.map((ref) => ref.id)) === JSON.stringify(CHART_IDS), `${where} chart refs ${doc.charts.refs.map((ref) => ref.id)}`);
+  doc.charts.refs.forEach((ref, index) => {
+    const chart = CHARTS[index];
+    assert(ref.id === chart.id && ref.nav === chart.nav && ref.title === chart.title, `${where} chart ref ${ref.id} drifted from batch 1`);
+    assert(ref.house === chart.house && ref.houseLabel === HOUSES[chart.house] && ref.deskSection === chart.deskSection, `${where} chart ref ${ref.id} house or section`);
+    assert(ref.fact === facts[ref.id], `${where} chart ref ${ref.id} fact ${ref.fact} !== ${facts[ref.id]}`);
+    const snap = ref.snapshot;
+    assert(snap.weeks.at(-1) === doc.week, `${where} ${ref.id} snapshot stops at the pack week`);
+    const lengths = [snap.values?.length, ...(snap.panels ?? []).flatMap((panel) => panel.series.map((series) => series.values.length))].filter((n) => n !== undefined);
+    assert(lengths.every((n) => n === snap.weeks.length), `${where} ${ref.id} snapshot series run ${lengths} points over ${snap.weeks.length} weeks`);
+    const article = ref.article;
+    const body = article.bodyMarkdown;
+    for (const [label, pattern] of [
+      ["hedge funds", /hedge funds?/i],
+      ["macro funds", /macro funds?/i],
+      ["mutual funds", /mutual funds?/i],
+      ["CTAs", /\bCTAs?\b/],
+      ["dealers", /dealers?/i],
+      ["sharpies", /sharpies?/i],
+      ["commercials", /commercials?/i],
+    ]) {
+      assert(pattern.test(body), `${where} ${ref.id} article names ${label}`);
+    }
+    assert(/smart money is positioned against/i.test(body), `${where} ${ref.id} article sets smart money against the crowded book`);
+    assert(
+      /hedge funds?/i.test(article.dumbMoney) && /macro funds?/i.test(article.dumbMoney) && /mutual funds?/i.test(article.dumbMoney) && /\bCTAs?\b/.test(article.dumbMoney),
+      `${where} ${ref.id} dumbMoney names the dumb-money cohort`,
+    );
+    assert(/(dealers?|sharpies?)/i.test(article.smartMoney) && /commercials?/i.test(article.smartMoney), `${where} ${ref.id} smartMoney names the smart-money cohort`);
+    if (article.bias === "fade-long" || article.bias === "fade-short") {
+      assert(/\b(fade|pullback|bounce|cover)\b/i.test(body), `${where} ${ref.id} fade bias is written into the article`);
+    }
+  });
+}
+
+assert(packWeeks.length >= 2, "pack index lists the latest week and at least one archived week");
+assert(
+  JSON.stringify(packWeeks.map(({ row }) => row.week)) === JSON.stringify(packWeeks.map(({ row }) => row.week).sort().reverse()),
+  "pack index lists weeks newest first",
+);
+assert(packWeeks[0]?.row.week === packIndex.latest, "pack index latest is the first row");
+assert(new Set(packWeeks.map(({ row }) => row.isoWeek)).size === packWeeks.length, "one pack per ISO week");
+for (const { row, doc } of packWeeks) checkPackWeek(row, doc);
+
+if (packWeek.week === "2026-10-23") {
+  for (const phrase of ["0.18", "0.75", "0.69", "0.66", "−1.2", "351", "3.9", "53%"]) {
+    assert(JSON.stringify(packWeek.read).includes(phrase), `one-page read names ${phrase}`);
+  }
+}
+const packW42 = packWeeks.find(({ row }) => row.week === "2026-10-16")?.doc;
+if (packW42) {
+  assert(JSON.stringify(columnMoves(WEEKS.indexOf("2026-10-16"))) === '[{"ticker":"XLF","from":"soft","to":"extreme soft"},{"ticker":"XLE","from":"mid","to":"crowded"}]', "W42 column moves");
+}
 const packJs = readFileSync(join(root, "src/vault-pack.js"), "utf8");
 assert(packJs.includes("data/vault/soft-crowded/"), "pack page loads the week document");
 for (const piece of ["bodyMarkdown", "dumbMoney", "smartMoney", "invalidation", "article.headline", "fade-long", "pack-article"]) {

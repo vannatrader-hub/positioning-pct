@@ -4,29 +4,15 @@
   "product": "SKU1",
   "week": "2026-10-23",
   "weekLabel": "Oct 23, 2026",
+  "isoWeek": "2026-W43",
+  "title": "2026-W43 Soft ↔ Crowded",
+  "asOf": "2026-10-23T05:00:00-05:00",
+  "asOfLabel": "Fri Oct 23, 2026 desk day · from the 5:00 AM CT open",
   "house": "jpm",
   "houseLabel": "JPM",
   "windowWeeks": 4,
   "basis": "Ref chart 06-Oct-26 (JPM)",
   "sectorSource": "the JPM Cross Asset Positioning Monitor (ref chart 06-Oct-26)",
-  "read": {
-    "kicker": "Week of Oct 23, 2026",
-    "headline": "Financials and staples are the soft end. Technology and energy are crowded.",
-    "lede": "Ten JPM sector prints fall into four columns for the week of Oct 23. Two sit under 0.25, three more are soft, three are mid, and two are at 0.67 or higher. Real Estate is not on this monitor.",
-    "stance": "No sector changed columns versus last week. The soft side kept easing, led by Financials at 0.18. Technology at 0.75 is the fullest print and is still building. Energy at 0.69 is the other crowded print and is still building too.",
-    "moved": [
-      "Financials fell 4 points to 0.18, the softest print, and call skew stays soft.",
-      "Energy rose 2 points to 0.69 and is still building inside the crowded column.",
-      "Utilities rose 1 point to 0.33 and are catching up from the soft column.",
-      "Communication Services firmed 1 point to 0.49 and remains mid."
-    ],
-    "watch": [
-      "Broad equities read 0.66 on the monitor, easing from a September peak near 0.80.",
-      "Desk Soft Vol is −1.2 points, so the VIX is cheap against what the S&P 500 implies.",
-      "Credit stress sits at the 79th percentile: CDX 351 bp, BBB−AAA 0.63.",
-      "The fund-manager survey names long global semis at 53%, with cash at 3.9%. GS risk appetite is +0.9 z and equity sentiment is +1.6, above the stretched line."
-    ]
-  },
   "buckets": [
     {
       "level": "extreme soft",
@@ -210,6 +196,39 @@
         "houseLabel": "Desk",
         "deskSection": "vol",
         "fact": "Desk · Soft Vol −1.2 pts",
+        "snapshot": {
+          "kind": "residual",
+          "weeks": [
+            "2026-09-04",
+            "2026-09-11",
+            "2026-09-18",
+            "2026-09-25",
+            "2026-10-02",
+            "2026-10-09",
+            "2026-10-16",
+            "2026-10-23"
+          ],
+          "figures": [
+            {
+              "label": "Desk Soft Vol residual",
+              "value": "−1.2",
+              "unit": "pts",
+              "pill": "Soft Vol",
+              "tone": "soft"
+            }
+          ],
+          "values": [
+            0,
+            -0.2,
+            -0.4,
+            -0.6,
+            -0.8,
+            -0.9,
+            -1,
+            -1.2
+          ],
+          "note": "▼ 0.6 pts vs 4 wks ago"
+        },
         "article": {
           "headline": "Soft Vol at −1.2 leaves the long under-hedged",
           "bodyMarkdown": "Desk Soft Vol prints −1.2 points for the week of Oct 23. The residual is the VIX against what the S&P 500 implies. Below zero the VIX is cheap, and −1.2 is a Soft Vol print, not fair. The week read flags the same gap.\n\nThat cheapness is the crowding tell. Hedge funds, macro funds, mutual funds, and CTAs are dumb money on this desk, and a residual this negative says that complex is long without paying for insurance. Crowded long plus offered vol is a pullback setup. Dealers and sharpies are the other side of the short-vol long: they warehouse the cheap VIX rather than chase the unhedged book. Commercials are not bidding protection either. Smart money is positioned against the complacent long.\n\nFade the long. The plan is a pullback while the residual holds at −1.2, not a new index long. The reader places any trade.",
@@ -227,6 +246,151 @@
         "houseLabel": "JPM",
         "deskSection": "sectors",
         "fact": "JPM · 5 soft · 3 mid · 2 crowded",
+        "snapshot": {
+          "kind": "sectors",
+          "weeks": [
+            "2026-09-04",
+            "2026-09-11",
+            "2026-09-18",
+            "2026-09-25",
+            "2026-10-02",
+            "2026-10-09",
+            "2026-10-16",
+            "2026-10-23"
+          ],
+          "figures": [
+            {
+              "label": "Extreme soft",
+              "value": "2",
+              "unit": "",
+              "pill": "under 0.25",
+              "tone": "xsoft"
+            },
+            {
+              "label": "Soft",
+              "value": "3",
+              "unit": "",
+              "pill": "0.25 – 0.39",
+              "tone": "soft"
+            },
+            {
+              "label": "Mid",
+              "value": "3",
+              "unit": "",
+              "pill": "0.40 – 0.66",
+              "tone": "mid"
+            },
+            {
+              "label": "Crowded",
+              "value": "2",
+              "unit": "",
+              "pill": "0.67 and up",
+              "tone": "crowded"
+            }
+          ],
+          "bars": [
+            {
+              "ticker": "XLF",
+              "short": "Financials",
+              "points": 18,
+              "display": "0.18",
+              "tone": "xsoft",
+              "bucket": "extreme soft",
+              "note": "18th %ile · extreme soft → easing · WoW −4 pts"
+            },
+            {
+              "ticker": "XLK",
+              "short": "Technology",
+              "points": 75,
+              "display": "0.75",
+              "tone": "crowded",
+              "bucket": "crowded",
+              "note": "75th %ile · crowded → still building · WoW +1 pts"
+            },
+            {
+              "ticker": "XLE",
+              "short": "Energy",
+              "points": 69,
+              "display": "0.69",
+              "tone": "crowded",
+              "bucket": "crowded",
+              "note": "69th %ile · crowded → still building · WoW +2 pts"
+            },
+            {
+              "ticker": "XLV",
+              "short": "Health Care",
+              "points": 34,
+              "display": "0.34",
+              "tone": "soft",
+              "bucket": "soft",
+              "note": "34th %ile · soft → easing · WoW −1 pts"
+            },
+            {
+              "ticker": "XLI",
+              "short": "Industrials",
+              "points": 35,
+              "display": "0.35",
+              "tone": "soft",
+              "bucket": "soft",
+              "note": "35th %ile · soft → easing · WoW −1 pts"
+            },
+            {
+              "ticker": "XLY",
+              "short": "Consumer Discretionary",
+              "points": 48,
+              "display": "0.48",
+              "tone": "mid",
+              "bucket": "mid",
+              "note": "48th %ile · mid → easing · WoW −1 pts"
+            },
+            {
+              "ticker": "XLP",
+              "short": "Consumer Staples",
+              "points": 21,
+              "display": "0.21",
+              "tone": "xsoft",
+              "bucket": "extreme soft",
+              "note": "21st %ile · extreme soft → easing · WoW −1 pts"
+            },
+            {
+              "ticker": "XLU",
+              "short": "Utilities",
+              "points": 33,
+              "display": "0.33",
+              "tone": "soft",
+              "bucket": "soft",
+              "note": "33rd %ile · soft → catching up · WoW +1 pts"
+            },
+            {
+              "ticker": "XLB",
+              "short": "Materials",
+              "points": 46,
+              "display": "0.46",
+              "tone": "mid",
+              "bucket": "mid",
+              "note": "46th %ile · mid → easing · WoW −1 pts"
+            },
+            {
+              "ticker": "XLRE",
+              "short": "Real Estate",
+              "points": null,
+              "display": "—",
+              "tone": null,
+              "bucket": null,
+              "note": "Not in JPM monitor"
+            },
+            {
+              "ticker": "XLC",
+              "short": "Communication Services",
+              "points": 49,
+              "display": "0.49",
+              "tone": "mid",
+              "bucket": "mid",
+              "note": "49th %ile · mid → firming · WoW +1 pts"
+            }
+          ],
+          "note": "10 of 11 funds printed · Ref chart 06-Oct-26 (JPM)"
+        },
         "article": {
           "headline": "Technology and energy are the crowded longs",
           "bodyMarkdown": "Ten JPM sector prints for Oct 23 sit in four columns: two extreme soft, three soft, three mid, and two crowded. Financials are the soft extreme at 0.18 after falling 4 points, with staples at 0.21. Utilities sit at 0.33, health care at 0.34, and industrials at 0.35. Materials 0.46, discretionary 0.48, and communication services 0.49 are mid. Energy rose 2 points to 0.69 and technology rose 1 point to 0.75. Both are crowded and still building. No sector changed columns. Real Estate has no print on this monitor.\n\nThe stretch sits at the crowded end. Hedge funds, macro funds, mutual funds, and CTAs are the dumb money that fills a sector past 0.67, and they are still adding technology and energy. That is a crowded long. Financials at 0.18 are where that same complex has already left. Sharpies and dealers fade the two crowded prints rather than fund them. Commercials are not lined up with technology at 0.75. Smart money is positioned against those longs.\n\nFade the crowded longs. The plan is a pullback in technology and energy while both are still building. Financials are the uncrowded side of the same map, not a reason to call the whole tape soft. The reader places any trade.",
@@ -244,6 +408,55 @@
         "houseLabel": "JPM",
         "deskSection": "broad",
         "fact": "JPM · Equities 0.66 · 66th %ile",
+        "snapshot": {
+          "kind": "lines",
+          "weeks": [
+            "2026-09-04",
+            "2026-09-11",
+            "2026-09-18",
+            "2026-09-25",
+            "2026-10-02",
+            "2026-10-09",
+            "2026-10-16",
+            "2026-10-23"
+          ],
+          "figures": [
+            {
+              "label": "Equities percentile",
+              "value": "0.66",
+              "unit": "",
+              "pill": "crowded → easing",
+              "tone": "crowded"
+            }
+          ],
+          "panels": [
+            {
+              "label": "Equities line of the cross-asset monitor, percentile",
+              "format": "pct",
+              "domain": [
+                0,
+                100
+              ],
+              "guides": [],
+              "series": [
+                {
+                  "label": "Equities",
+                  "values": [
+                    72,
+                    79,
+                    78,
+                    70,
+                    63,
+                    68,
+                    67,
+                    66
+                  ]
+                }
+              ]
+            }
+          ],
+          "note": "▼ 4 pts vs 4 wks ago"
+        },
         "article": {
           "headline": "Equities at 0.66 have eased, not cleared",
           "bodyMarkdown": "Broad equities read 0.66 on the JPM monitor for Oct 23, the 66th percentile. The line has eased from a September peak near 0.80. On the Soft ↔ Crowded scale, 0.66 is the top of mid and just under the crowded cut at 0.67. The book is still long. It is no longer the extreme that printed in September.\n\nDumb money still owns that long. Hedge funds, macro funds, mutual funds, and CTAs are the cohorts this monitor records, and they have trimmed rather than flipped. A hard fade fits an extreme. At 0.66 the extreme has already bled from 0.80. Respect the long that remains. It is not a full short. Dealers and sharpies are not adding index length into what is left. Commercials fade the residual long; they do not fund a fresh chase. Smart money is positioned against that leftover long, not against a washout.\n\nTreat it as a light fade of leftover length. Pullbacks fit an easing long better than new longs do, and a full short waits for a return toward 0.80. The reader places any trade.",
@@ -261,6 +474,95 @@
         "houseLabel": "Desk",
         "deskSection": "credit",
         "fact": "Desk · CDX 351 bp · BBB−AAA 0.63",
+        "snapshot": {
+          "kind": "lines",
+          "weeks": [
+            "2026-09-04",
+            "2026-09-11",
+            "2026-09-18",
+            "2026-09-25",
+            "2026-10-02",
+            "2026-10-09",
+            "2026-10-16",
+            "2026-10-23"
+          ],
+          "figures": [
+            {
+              "label": "CDX",
+              "value": "351",
+              "unit": "bp",
+              "pill": "crowded → easing",
+              "tone": "crowded"
+            },
+            {
+              "label": "BBB minus AAA",
+              "value": "0.63",
+              "unit": "pts",
+              "pill": "crowded → easing",
+              "tone": "crowded"
+            },
+            {
+              "label": "Both panels",
+              "value": "79",
+              "unit": "%ile",
+              "pill": "79th %ile · CDX and BBB−AAA",
+              "tone": "crowded"
+            }
+          ],
+          "panels": [
+            {
+              "label": "CDX, bp",
+              "format": "whole",
+              "guides": [],
+              "series": [
+                {
+                  "label": "CDX",
+                  "values": [
+                    296,
+                    300,
+                    302,
+                    298,
+                    305,
+                    322,
+                    340,
+                    351.1
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "BBB minus AAA, pts",
+              "format": "fixed2",
+              "guides": [],
+              "series": [
+                {
+                  "label": "BBB−AAA",
+                  "values": [
+                    0.49,
+                    0.5,
+                    0.49,
+                    0.52,
+                    0.55,
+                    0.58,
+                    0.61,
+                    0.63
+                  ]
+                }
+              ]
+            }
+          ],
+          "rows": [
+            {
+              "label": "High yield vs Treasuries",
+              "text": "0.851 · holding"
+            },
+            {
+              "label": "Investment grade vs Treasuries",
+              "text": "1.15 · rolling over"
+            }
+          ],
+          "note": "▼ 16 pts vs 4 wks ago"
+        },
         "article": {
           "headline": "Credit stress at the 79th challenges the long",
           "bodyMarkdown": "Credit stress sits at the 79th percentile for the week of Oct 23. The panel prints CDX at 351 bp and the BBB−AAA spread at 0.63. Stress is elevated. The cost of insuring corporate credit is the number an equity long has to respect.\n\nThe stretch is the complacent long, not a fresh short. Hedge funds, macro funds, mutual funds, and CTAs are dumb money when they stay long risk while credit charges this much for it. A 79th-percentile print, CDX at 351 bp and BBB−AAA at 0.63, says that crowded long is fighting the credit tape. Dealers and commercials are on the side of the wider spread. Sharpies fade the equity long that treats this panel as background. Smart money is positioned against the dumb-money long.\n\nFade that long. The plan is a pullback while stress holds at the 79th, not an add of credit risk and not a chase of index length. The reader places any trade.",
@@ -278,6 +580,97 @@
         "houseLabel": "BoA",
         "deskSection": "retail",
         "fact": "BoA · Long global semis 53% · cash 3.9%",
+        "snapshot": {
+          "kind": "lines",
+          "weeks": [
+            "2026-09-04",
+            "2026-09-11",
+            "2026-09-18",
+            "2026-09-25",
+            "2026-10-02",
+            "2026-10-09",
+            "2026-10-16",
+            "2026-10-23"
+          ],
+          "figures": [
+            {
+              "label": "Most crowded trade",
+              "value": "53",
+              "unit": "%",
+              "pill": "very crowded → building",
+              "tone": "crowded"
+            },
+            {
+              "label": "Fund manager cash",
+              "value": "3.9",
+              "unit": "%",
+              "pill": "very crowded → building",
+              "tone": "crowded"
+            }
+          ],
+          "panels": [
+            {
+              "label": "Crowded-trade share · Aug 2026 survey",
+              "format": "percent0",
+              "guides": [],
+              "series": [
+                {
+                  "label": "Crowded share",
+                  "values": [
+                    47,
+                    47,
+                    47,
+                    47,
+                    53,
+                    53,
+                    53,
+                    53
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "Fund manager cash",
+              "format": "percent1",
+              "guides": [
+                {
+                  "value": 4,
+                  "label": "4% line"
+                }
+              ],
+              "series": [
+                {
+                  "label": "Cash",
+                  "values": [
+                    4.2,
+                    4.2,
+                    4.1,
+                    4,
+                    4,
+                    3.9,
+                    3.9,
+                    3.9
+                  ]
+                }
+              ]
+            }
+          ],
+          "rows": [
+            {
+              "label": "Long global semis",
+              "text": "53%"
+            },
+            {
+              "label": "Short Japanese yen",
+              "text": "12%"
+            },
+            {
+              "label": "Long Magnificent 7",
+              "text": "11%"
+            }
+          ],
+          "note": "▲ 7 pts vs 4 wks ago"
+        },
         "article": {
           "headline": "Cash at 3.9% with semis the crowded long",
           "bodyMarkdown": "The BoA fund-manager survey names long global semis as the crowded trade at 53%, with cash at 3.9%. Cash under 4% is the line this chart uses to mark a crowded market, and 3.9% is through it. One answer holds a majority. The graph is a single crowded long with cash already spent.\n\nFund managers are the dumb-money print. Hedge funds, macro funds, mutual funds, and CTAs crowd the same way when a trade gets this consensual, and 53% in one answer plus cash at 3.9% is an extreme long. When dumb money is this crowded long, the read is to fade it. Sharpies and dealers are the other side of a 53% semi consensus. Commercials do not add length into a survey this one-sided. Smart money is positioned against that crowded long.\n\nFade the long. A pullback in the semi complex is the plan that matches cash at 3.9% and a 53% answer. The reader places any trade.",
@@ -295,6 +688,102 @@
         "houseLabel": "GS",
         "deskSection": "broad",
         "fact": "GS · risk appetite +0.9 z · 73rd %ile",
+        "snapshot": {
+          "kind": "lines",
+          "weeks": [
+            "2026-09-04",
+            "2026-09-11",
+            "2026-09-18",
+            "2026-09-25",
+            "2026-10-02",
+            "2026-10-09",
+            "2026-10-16",
+            "2026-10-23"
+          ],
+          "figures": [
+            {
+              "label": "GS · Risk appetite",
+              "value": "+0.9",
+              "unit": "z",
+              "pill": "crowded → steady",
+              "tone": "crowded"
+            },
+            {
+              "label": "GS · US equity sentiment indicator",
+              "value": "+1.6",
+              "unit": "z",
+              "pill": "very crowded → steady",
+              "tone": "crowded"
+            },
+            {
+              "label": "GS · Risky vs safe assets",
+              "value": "74",
+              "unit": "%ile",
+              "pill": "crowded → steady",
+              "tone": "crowded"
+            },
+            {
+              "label": "Desk · Short-term composite sentiment",
+              "value": "51.7",
+              "unit": "",
+              "pill": "crowded → building",
+              "tone": "crowded"
+            }
+          ],
+          "panels": [
+            {
+              "label": "Risk appetite · GS",
+              "format": "z",
+              "guides": [
+                {
+                  "value": 0,
+                  "label": "Neutral"
+                }
+              ],
+              "series": [
+                {
+                  "label": "Risk appetite",
+                  "values": [
+                    0.4,
+                    0.6,
+                    0.7,
+                    0.9,
+                    1,
+                    0.9,
+                    0.8,
+                    0.9
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "US equity sentiment indicator · GS",
+              "format": "z",
+              "guides": [
+                {
+                  "value": 1,
+                  "label": "+1.0 stretched"
+                }
+              ],
+              "series": [
+                {
+                  "label": "US equity sentiment indicator",
+                  "values": [
+                    1.1,
+                    1.3,
+                    1.5,
+                    1.7,
+                    1.9,
+                    1.8,
+                    1.7,
+                    1.6
+                  ]
+                }
+              ]
+            }
+          ],
+          "note": "Unchanged vs 4 wks ago"
+        },
         "article": {
           "headline": "Equity sentiment at +1.6 is past stretched",
           "bodyMarkdown": "GS risk appetite prints +0.9 z for Oct 23, the 73rd percentile. Equity sentiment, named in the week read, is +1.6 and above the stretched line. Risk appetite is firm rather than washed out, and sentiment is the print that has already crossed the line this chart treats as stretched. The book is long and extended.\n\nDumb money is the stretched side. Hedge funds, macro funds, mutual funds, and CTAs sit inside a sentiment reading, and +1.6 above the stretched line means that complex is crowded long. A +0.9 z risk-appetite print at the 73rd percentile confirms the long. It does not clear it. Dealers and sharpies fade a sentiment print that far through the stretched line. Commercials are not adding risk at +0.9 z to keep up. Smart money is positioned against the dumb-money long.\n\nFade the long. The plan is a pullback while equity sentiment holds at +1.6 and risk appetite holds at +0.9 z, not a new long above the stretched line. The reader places any trade.",
@@ -304,6 +793,32 @@
           "invalidation": "Invalid if equity sentiment drops back through the stretched line and risk appetite falls from the 73rd percentile."
         }
       }
+    ]
+  },
+  "read": {
+    "kicker": "2026-W43 · week of Oct 23, 2026",
+    "headline": "Financials and staples are the soft end. Technology and energy are crowded.",
+    "lede": "Ten JPM sector prints fall into four columns for the week of Oct 23. Two sit under 0.25, three more are soft, three are mid, and two are at 0.67 or higher. Real Estate is not on this monitor.",
+    "stance": "No sector changed columns versus last week. The soft side kept easing, led by Financials at 0.18. Technology at 0.75 is the fullest print and is still building. Energy at 0.69 is the other crowded print and is still building too.",
+    "softened": "Financials did the softening. XLF fell 4 points to 0.18, its seventh straight weekly drop from 0.36 in early September, and call skew on the name stays soft. Staples eased 1 point to 0.21, health care 1 to 0.34, and industrials 1 to 0.35. Materials and discretionary each gave up a point inside mid. The soft side is getting softer slowly; it is not washing out.",
+    "crowded": "Technology and energy are the crowded column, and both are still building. XLK added 1 point to 0.75, the fullest print on the monitor and up from 0.64 in early September. XLE added 2 points to 0.69 in its second week above the 0.67 line. Utilities and communication services, each up 1 point, are the only other sectors gaining.",
+    "backdrop": "Credit and vol do not agree with the crowded end. CDX has widened from 296 bp in early September to 351 bp, and BBB−AAA from 0.49 to 0.63. The combined credit read sits at the 79th percentile, down 16 points in four weeks, with high yield holding while investment grade rolls over. Desk Soft Vol at −1.2 points says the VIX is still cheap against the S&P 500. Wider credit with cheap vol is the mix that leaves a crowded long under-hedged.",
+    "moved": [
+      "Financials fell 4 points to 0.18, the softest print, and call skew stays soft.",
+      "Energy rose 2 points to 0.69 and is still building inside the crowded column.",
+      "Utilities rose 1 point to 0.33 and are catching up from the soft column.",
+      "Communication Services firmed 1 point to 0.49 and remains mid."
+    ],
+    "watch": [
+      "Broad equities read 0.66 on the monitor, easing from a September peak near 0.80.",
+      "Desk Soft Vol is −1.2 points, so the VIX is cheap against what the S&P 500 implies.",
+      "Credit stress sits at the 79th percentile: CDX 351 bp, BBB−AAA 0.63.",
+      "The fund-manager survey names long global semis at 53%, with cash at 3.9%. GS risk appetite is +0.9 z and equity sentiment is +1.6, above the stretched line."
+    ],
+    "nextWeek": [
+      "Technology at 0.75: a print under 0.67 is the first column change among the leaders, and a print at 0.80 or higher is the extreme.",
+      "CDX above 351 bp with Soft Vol still under −1.0 keeps the fade-the-long frame. Soft Vol back through zero retires it.",
+      "Financials: an eighth weekly drop keeps the soft end easing, while a 2-point rise is the first catch-up print since August."
     ]
   }
 }

@@ -9,7 +9,9 @@
     "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
     "check": "node scripts/check-site.mjs",
     "pull:breadth": "node scripts/pull-breadth.mjs",
-    "data:csr": "node scripts/fetch-csr.mjs"
+    "data:csr": "node scripts/fetch-csr.mjs",
+    "pack:build": "node scripts/vault-pack-build.mjs",
+    "svb:close": "node scripts/svb-close.mjs"
   },
   "engines": {
     "node": ">=20"
