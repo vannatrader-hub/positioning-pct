@@ -180,6 +180,89 @@ export function spotVolTip(point, level = SIGNAL) {
   return lines;
 }
 
+export const ORIGIN_LABEL = {
+  seed: "Seeded",
+  "close-routine": "Close routine",
+};
+
+function round2(value) {
+  return Math.round(value * 100) / 100;
+}
+
+/** SPX percent of a close versus the close before it, rounded to 2 places. */
+export function closeSpxPct(point, previous) {
+  if (!previous || !Number.isFinite(previous.spx) || previous.spx === 0) return null;
+  return round2((point.spx / previous.spx - 1) * 100);
+}
+
+/** Close-based read: the ≥ 2 band on the gauge close, and a formal vol event only on a VIX close move of 2 points or more. */
+export function closeEvent(point, level = SIGNAL) {
+  const band = signalOn(point.svb, level);
+  const formal = Number.isFinite(point.vixCloseMove) && point.vixCloseMove >= 2;
+  if (band && formal) return { tone: "signal", label: "Formal vol event" };
+  if (band) return { tone: "signal", label: "≥ 2 · no formal event" };
+  if (formal) return { tone: "mid", label: "VIX close +2 · gauge under 2" };
+  return { tone: "mid", label: "Below 2" };
+}
+
+/**
+ * The next close for series.json, built the way the weekday close routine
+ * writes it. Throws when the input would rewrite history or skip a check.
+ */
+export function buildClose(previous, input, beta = DESK_BETA) {
+  const { date, svb, spx, uvDelta, vixCloseMove, recordedAt } = input;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date ?? "")) throw new Error("date must be YYYY-MM-DD");
+  const [year, month, day] = date.split("-").map(Number);
+  const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+  if (weekday === 0 || weekday === 6) throw new Error(`${date} is not a weekday session`);
+  if (previous && date <= previous.date) throw new Error(`${date} is not after the last close ${previous.date}`);
+  if (!Number.isFinite(svb) || svb < -8 || svb > 12) throw new Error("svb must be the gauge close, -8 to 12");
+  if (!Number.isFinite(spx) || spx < 100 || spx > 20000) throw new Error("spx must be the SPX close");
+  if (recordedAt !== undefined && !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/.test(recordedAt)) throw new Error("recordedAt must carry a UTC offset");
+  const point = { date, svb: round2(svb), spx: round2(spx) };
+  if (vixCloseMove !== undefined) {
+    if (!Number.isFinite(vixCloseMove) || Math.abs(vixCloseMove) > 30) throw new Error("vixCloseMove must be the VIX close-to-close move in points");
+    point.vixCloseMove = round2(vixCloseMove);
+  }
+  point.origin = "close-routine";
+  if (recordedAt) point.recordedAt = recordedAt;
+  if (uvDelta !== undefined) {
+    if (!Number.isFinite(uvDelta) || Math.abs(uvDelta) > 20) throw new Error("uvDelta must be in vol points");
+    const spxPct = closeSpxPct(point, previous);
+    if (spxPct === null) throw new Error("the desk estimate needs a prior SPX close");
+    point.estimate = { uvDelta: round2(uvDelta), spxPct, value: deskEstimate(uvDelta, spxPct, beta) };
+  }
+  return point;
+}
+
+/** The newest closes first, each with its SPX percent and close-based read. */
+export function closeRows(series, count = 10) {
+  const level = series.signal ?? SIGNAL;
+  const points = series.points;
+  return points
+    .slice(-count)
+    .map((point) => {
+      const previous = points[points.indexOf(point) - 1];
+      const spxPct = point.estimate?.spxPct ?? closeSpxPct(point, previous);
+      const event = closeEvent(point, level);
+      return {
+        date: point.date,
+        dateLabel: formatSession(point.date, { weekday: true }),
+        gauge: formatSvb(point.svb),
+        gaugeOn: signalOn(point.svb, level),
+        estimate: point.estimate ? formatSvb(point.estimate.value) : "—",
+        estimateOn: point.estimate ? signalOn(point.estimate.value, level) : false,
+        spx: formatSpx(point.spx),
+        spxPct: spxPct === null ? "—" : formatPct(spxPct),
+        vix: Number.isFinite(point.vixCloseMove) ? formatPts(point.vixCloseMove) : "—",
+        event,
+        origin: ORIGIN_LABEL[point.origin] ?? "—",
+        seeded: point.origin !== "close-routine",
+      };
+    })
+    .reverse();
+}
+
 export function readout(latest, series) {
   const level = series.signal ?? SIGNAL;
   const estimate = deskEstimate(latest.uvDelta, latest.spxPct, series.deskBeta ?? DESK_BETA);
@@ -268,8 +351,81 @@ function svbBody(series, view) {
   for (const point of signals) list.append(el("li", "", spotVolTip(point, series.signal).join(", ")));
   if (!signals.length) list.append(el("li", "", "No close at or above 2 in this series."));
 
-  body.append(plate, list, el("p", "svb-note", series.note), el("p", "svb-close", view.closeNote));
+  body.append(plate, list, closesBlock(series), el("p", "svb-note", series.note), el("p", "svb-close", view.closeNote));
   return { body, host };
+}
+
+function closeFigure(label, value, on, note) {
+  const box = el("div", on ? "svb-close-figure is-signal" : "svb-close-figure");
+  box.append(el("p", "svb-close-label", label), el("p", "svb-close-value", value));
+  if (note) box.append(el("p", "svb-close-sub", note));
+  return box;
+}
+
+function closesBlock(series) {
+  const rows = closeRows(series, 10);
+  const wrap = el("section", "svb-closes");
+  wrap.setAttribute("aria-label", "Spot Vol Beta session closes");
+  const head = el("div", "svb-closes-head");
+  head.append(el("h3", "", "Session closes"), el("p", "svb-closes-hint", "One close per session, written after the cash close. The gauge above can move through the day; only closes land here."));
+  wrap.append(head);
+  if (!rows.length) {
+    wrap.append(el("p", "svb-closes-empty", "No session close is recorded yet."));
+    return wrap;
+  }
+  const last = rows[0];
+  const latest = el("div", "svb-close-latest");
+  latest.append(
+    closeFigure("Spot Vol Beta · gauge close", last.gauge, last.gaugeOn, "Primary gauge"),
+    closeFigure(`${series.formulaLabel ?? FORMULA_LABEL} close`, last.estimate, last.estimateOn, last.estimate === "—" ? "Inputs not recorded for this close" : series.formula),
+  );
+  const stamp = el("div", "svb-close-stamp");
+  stamp.append(
+    el("p", "svb-close-date", `${last.dateLabel} close`),
+    el("p", "svb-close-sub", `SPX ${last.spx} · ${last.spxPct} · VIX close move ${last.vix}`),
+    statusPill(last.event.label, last.event.tone),
+  );
+  const tag = el("span", last.seeded ? "svb-origin is-seed" : "svb-origin", last.origin);
+  stamp.append(tag);
+  latest.append(stamp);
+  wrap.append(latest);
+
+  const scroller = el("div", "svb-close-scroll");
+  const table = el("table", "svb-close-table");
+  const thead = el("thead");
+  const headRow = el("tr");
+  for (const label of ["Session", "Gauge close", "Desk estimate close", "SPX", "SPX %", "VIX move", "Close read", "Entered by"]) headRow.append(el("th", "", label));
+  thead.append(headRow);
+  const tbody = el("tbody");
+  for (const row of rows) {
+    const tr = el("tr");
+    tr.dataset.session = row.date;
+    tr.append(
+      el("td", "", row.dateLabel),
+      el("td", row.gaugeOn ? "is-num is-signal" : "is-num", row.gauge),
+      el("td", row.estimateOn ? "is-num is-signal" : "is-num", row.estimate),
+      el("td", "is-num", row.spx),
+      el("td", "is-num", row.spxPct),
+      el("td", "is-num", row.vix),
+      el("td", row.event.tone === "signal" ? "is-signal" : "", row.event.label),
+      el("td", row.seeded ? "is-seed" : "", row.origin),
+    );
+    tbody.append(tr);
+  }
+  table.append(thead, tbody);
+  scroller.append(table);
+  wrap.append(scroller);
+  const seeded = rows.filter((row) => row.seeded).length;
+  wrap.append(
+    el(
+      "p",
+      "svb-closes-hint",
+      seeded
+        ? `${seeded} of the last ${rows.length} closes are seeded: committed with the wall before the close routine wrote a session. Closes from the routine land on top and earlier points are never rewritten. Desk estimate is ${series.formula}; ≥ 2 on the gauge close is the band, and a formal vol event needs a VIX close move of 2 points or more.`
+        : `Desk estimate is ${series.formula}; ≥ 2 on the gauge close is the band, and a formal vol event needs a VIX close move of 2 points or more.`,
+    ),
+  );
+  return wrap;
 }
 
 function chartSpec(series) {

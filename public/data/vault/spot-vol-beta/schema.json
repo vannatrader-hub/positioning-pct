@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://vannatrader-hub.github.io/positioning-pct/data/vault/spot-vol-beta/schema.json",
   "title": "Spot Vol Beta daily closes",
-  "description": "Append one object to points at each session close. One point per cash session, dates ascending. The intraday gauge is a separate document (latest) and is not a close until it is appended. Card labels stay desk and bank names.",
+  "description": "Append one object to points at each session close. One point per cash session, dates ascending. Each close carries the primary gauge close (svb) and, when its inputs were recorded, the desk estimate close. The intraday gauge is a separate document (latest) and is not a close until it is appended. Card labels stay desk and bank names.",
   "type": "object",
   "additionalProperties": false,
   "required": ["sku", "cadence", "signal", "deskBeta", "formula", "formulaLabel", "note", "points"],
@@ -14,30 +14,46 @@
     "deskBeta": { "const": -0.7, "description": "Coefficient in the desk estimate: UV delta minus (deskBeta times SPX percent)." },
     "formula": { "const": "UV_Δ − (−0.70 × SPX%)", "x-banned-sources": true },
     "formulaLabel": { "const": "desk estimate", "x-banned-sources": true },
-    "note": {
-      "type": "string",
-      "minLength": 40,
-      "x-banned-sources": true,
-      "description": "House read shown under the chart."
-    },
-    "points": {
-      "type": "array",
-      "minItems": 20,
-      "description": "Append one close per session. Do not rewrite earlier points.",
-      "items": { "$ref": "#/$defs/close" }
-    }
+    "note": { "type": "string", "minLength": 40, "x-banned-sources": true, "description": "House read shown under the chart." },
+    "points": { "type": "array", "minItems": 20, "description": "Append one close per session. Do not rewrite earlier points.", "items": { "$ref": "#/$defs/close" } }
   },
   "$defs": {
     "close": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["date", "svb", "spx"],
+      "required": ["date", "svb", "spx", "origin"],
       "properties": {
         "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
-        "svb": { "type": "number", "minimum": -8, "maximum": 12, "description": "Spot Vol Beta at the session close." },
+        "svb": { "type": "number", "minimum": -8, "maximum": 12, "description": "Spot Vol Beta gauge at the session close. The primary reading." },
         "spx": { "type": "number", "minimum": 100, "maximum": 20000, "description": "SPX level at that same close, for the overlay." },
-        "vixCloseMove": { "type": "number", "minimum": -30, "maximum": 30, "description": "VIX close-to-close change in points. A move of 2 or more is a formal vol event." }
-      }
+        "vixCloseMove": {
+          "type": "number",
+          "minimum": -30,
+          "maximum": 30,
+          "description": "VIX close-to-close change in points. A move of 2 or more is a formal vol event. Close-based only; an intraday VIX move does not count."
+        },
+        "estimate": {
+          "description": "Desk estimate at the same close. value is uvDelta − (−0.70 × spxPct), rounded to 2 places. Leave the key out when the inputs were not recorded; never fill it from the gauge.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["uvDelta", "spxPct", "value"],
+          "properties": {
+            "uvDelta": { "type": "number", "minimum": -20, "maximum": 20, "description": "Underlying vol change at the close, in vol points." },
+            "spxPct": { "type": "number", "minimum": -25, "maximum": 25, "description": "SPX percent versus the prior close, rounded to 2 places. Down 1.20 is -1.2." },
+            "value": { "type": "number", "minimum": -20, "maximum": 20, "description": "The desk estimate close." }
+          }
+        },
+        "origin": {
+          "enum": ["seed", "close-routine"],
+          "description": "seed: committed with the wall before the close routine wrote this session. close-routine: appended by the weekday close routine after the cash close. The card labels seeded closes."
+        },
+        "recordedAt": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}[+-]\\d{2}:\\d{2}$",
+          "description": "When the close routine wrote the point, Central time with offset. Required in practice for close-routine points."
+        }
+      },
+      "description": "One session close. svb is the primary gauge at the close. estimate is the desk estimate at the same close, UV_Δ − (−0.70 × SPX%), with the inputs it was computed from. origin says how the close entered the file."
     },
     "latest": {
       "title": "Spot Vol Beta gauge",

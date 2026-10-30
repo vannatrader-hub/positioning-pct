@@ -11,7 +11,7 @@ Public sources are bank labels only: JPM, Morgan Stanley, BoA, GS, and a desk co
 Two surfaces, switched from the `Desk | Vault` control in every topbar:
 
 - Desk. Everything live today: home, the Positioning hub and its desk, Options Flow and its subpages, SPX Levels. URLs stay where they are; Desk is the surface name, not a path.
-- Vault (`/vault/`). Behind a sign-in wall. Signed out, the page shows one centered card ("Sign in to open Vault", email and password fields, a disabled "Create account · Coming soon", and a link back to the Desk) and nothing else. Signed in, it shows the private desk: a Soft ↔ Crowded weekly pack (`/vault/soft-crowded/`), the Vol · Credit · Momentum wall (`/vault/vol-credit-momentum/`, with the NY and Nasdaq Summation breadth cards), a Portfolio journal (`/vault/portfolio/`), three `Soon` preview tiles that do not link, and a panel pointing back to the Desk pages. The pack, the wall, and the journal are linked only from the Vault. It has its own darker theme scoped under `body.is-vault`. Sign-in is email and password for allowlisted emails only, and there is no checkout. See [Vault sign-in](#vault-sign-in).
+- Vault (`/vault/`). Behind a sign-in wall. Signed out, the page shows one centered card ("Sign in to open Vault", email and password fields, a disabled "Create account · Coming soon", and a link back to the Desk) and nothing else. Signed in, it shows the private desk: a Soft ↔ Crowded weekly pack (`/vault/soft-crowded/`), the Vol · Credit · Momentum wall (`/vault/vol-credit-momentum/`, with the NY and Nasdaq Summation breadth cards), a Portfolio journal (`/vault/portfolio/`), a desk-day archive (`/vault/archive/`), three `Soon` preview tiles that do not link, and a panel pointing back to the Desk pages. A short dashboard nav under the hero links the four pages, and each of them ends with the same `More in the Vault` row. The pack, the wall, the journal, and the archive are linked only from the Vault. It has its own darker theme scoped under `body.is-vault`. Sign-in is email and password for allowlisted emails only, and there is no checkout. See [Vault sign-in](#vault-sign-in).
 
 Surface chrome (home, hubs, Vault, 404, and every topbar and footer) never carries monetization words or `$` outside the `$$$` flow mark; `npm run check` enforces this along with the switcher on every page.
 
@@ -85,11 +85,49 @@ Each sector card shows the percentile, a status, and a Soft to Crowded bar; one 
 
 The Vault Portfolio journal (`/vault/portfolio/`) reads `public/data/vault/portfolio/journal.json` (`ahead-portfolio-journal-v1`). It is the locked personal book: category, structure, entry and exit, and the result. A line with status `open` (or outcome `open`) is still held and stays out of the closed total. A line with status `exit_pending_fill` stays pending and out of the closed total until it fills. The Desk does not link to it.
 
-The Vault Soft ↔ Crowded pack (`/vault/soft-crowded/`) reads `public/data/vault/soft-crowded/`. `schema.json` is the week document: sector buckets on the Soft ↔ Crowded scale, batch-1 chart refs, the one-page read, and a short article under each chart (`headline`, `bodyMarkdown`, `bias`, `dumbMoney`, `smartMoney`, `invalidation`). `index.json` names the latest week. `2026-10-23.json` is that week, seeded from the Desk’s JPM sector read for the same date. The chart cards link out to the public Positioning charts. The Desk does not link back.
+The journal copy is shown through `deskCopy` in `src/vault-portfolio.js`, which turns source names in the locked file into ticket wording and drops any line that would still name one. The board reads, top to bottom:
+
+- A week strip for the journal's own ISO week (from `summary.as_of_ct`, not the browser clock): closed PnL, wins and losses, and the tickers closed that week, plus the open count.
+- Open lines (`Still held`) with entry, stop, and target from the journal (`stop_stock`, else the ticket stop; the same for target).
+- The full table.
+
+Marks are optional per trade: `mtm_price`, `mtm_pnl_usd`, and `mtm_as_of_ct`, each a value or `null` (`public/data/vault/portfolio/schema.json`). Until a line carries them the mark reads `—` and the line stays `Open`. The week strip only totals open marks when every open line is marked. Nothing on the page computes a mark from a quote.
+
+The Vault Soft ↔ Crowded pack (`/vault/soft-crowded/`) reads `public/data/vault/soft-crowded/`. `schema.json` is the week document: sector buckets on the Soft ↔ Crowded scale, batch-1 chart refs, the one-page read, and a short article under each chart (`headline`, `bodyMarkdown`, `bias`, `dumbMoney`, `smartMoney`, `invalidation`). `index.json` lists the weeks newest first and names the latest; each week is titled by ISO week (`2026-W43 Soft ↔ Crowded`) and stamped as of that Friday's open (`asOf` is `05:00` Central on the Friday). `2026-10-23.json` (W43) and `2026-10-16.json` (W42) are seeded from the Desk’s JPM sector read for those Fridays. Each document freezes the six batch-1 charts as they stood that week (`snapshot`), so an older pack never redraws with later prints. Once a Friday is on the Desk, `npm run pack:build -- 2026-10-30` writes that week's frame (buckets, moves, snapshot) and its `index.json` row. The read and the articles are written by hand and kept on a rebuild; `npm run check` fails until they are filled in, and it rebuilds the frame and compares it.
+
+The page opens on the latest week; `?week=2026-W42` (or `?week=2026-10-16`) opens an older one, and the week bar switches between them. `Print / Save as PDF` prints the read on page one and one chart with its article per page after that. The Vault home lists the packs, latest first. The chart cards link out to the public Positioning charts. The Desk does not link back.
+
+The desk-day archive (`/vault/archive/`, `src/vault-archive.js`) is an index over data already in the build: one Soft ↔ Crowded entry per committed Desk Friday (linking to the pack when the week has one, else to that week on the Desk) and one entry per New Today desk day from `public/data/new-today.json`, grouped by ISO week, newest first. Search takes a date (`2026-10-28`, `Oct 28`, `10/28`), an ISO week (`W44`, `2026-W44`), or words (all must match; a desk day is cut to its matching lines), and the filter narrows to packs or New Today. A week past the last committed Friday says its print is not committed yet. The query stays in the URL (`?q=W44&kind=day`). The Desk keeps showing only the current day.
 
 The Vault Vol · Credit · Momentum wall (`/vault/vol-credit-momentum/`) carries five cards in order: Spot Vol Beta and Credit Spread Regime side by side (stacked under 1360px), then the MAG7 Oscillator, NY Summation, and Nasdaq Summation, each across the full width.
 
 Spot Vol Beta (`src/vault-svb.js`) reads `public/data/vault/spot-vol-beta/`. `latest.json` is the gauge and the inputs for the desk estimate `UV_Δ − (−0.70 × SPX%)`; the card shows the gauge first and the estimate second. `series.json` is the daily close line, one point per session, appended at the close. SPX sits behind that line, and a band marks closes at or above 2. The committed gauge is not a live feed.
+
+Under the plate, `Session closes` shows the latest close of both numbers, labeled `Spot Vol Beta · gauge close` and `desk estimate close`, and a table of the last ten sessions with SPX, SPX %, the VIX close move, the close read, and who entered it (`Seeded` or `Close routine`). The vol event rule is the same as the gauge band: a gauge close at 2 or more is in the band, and a formal vol event is close-based (VIX up 2 points or more close to close). The ten closes through Oct 29, 2026 are seeded with their desk estimate inputs.
+
+A weekday routine (about 3:55 PM CT, after the cash and VIX closes) appends one close:
+
+```bash
+npm run svb:close -- --date 2026-11-02 --svb 1.92 --spx 6801.25 --uv-delta 2.10 --vix-move 1.4
+```
+
+`scripts/svb-close.mjs` computes SPX % from the previous point and the estimate from `uvDelta`, appends to `series.json`, rewrites `latest.json` as that close (`closed: true`), and refuses a date that is not after the last point. `--dry-run` prints without writing. Each appended point looks like this (`estimate` is left out when UV_Δ was not recorded):
+
+```json
+{
+  "date": "2026-11-02",
+  "svb": 1.92,
+  "spx": 6801.25,
+  "vixCloseMove": 1.4,
+  "origin": "close-routine",
+  "recordedAt": "2026-11-02T15:55:00-06:00",
+  "estimate": { "uvDelta": 2.1, "spxPct": 0.14, "value": 2.2 }
+}
+```
+
+`schema.json` is the shape, and `index.json` carries the same routine notes.
+
+Above the cards, a `Data as of` strip names each card's last committed session and how many sessions behind the desk day it is. It reads the committed files only and never stands in a quote for a missing one.
 
 Credit Spread Regime (`src/vault-csr.js`) reads `public/data/vault/credit-spread-regime/csr.json`: FRED ICE BofA US High Yield OAS (`BAMLH0A0HYM2`) and US Corporate OAS (`BAMLC0A0CM`) in bps, the S&P 500 close (`SP500`), and the Cboe VIX close (`VIXCLS`), one column each, on S&P 500 sessions with OAS and VIX carried forward over gaps. `src/csr.js` scores the HY−IG excess spread (or HY alone): EMA 5, then Z against the trailing 252 sessions, percentile rank, 5-session momentum, and regimes Low (Z under −1), Normal, Elevated (1 and up), Stress (2 and up). `src/csr-chart.js` draws the pane on a canvas: per-session regime tint, zone fills, threshold lines, the glowing Z line, roll-over markers (red: Z 2 and up with the spread narrowing; green: Z −2 and down with it widening), and the SPX overlay with its own scale. The statistics panel is the last session. FRED serves the last three years of ICE BofA history, so Z starts one 252-session window after the first print. Refresh with `npm run data:csr`, then `npm run check`; the check recomputes the snapshot from the series and pins the Oct 29, 2026 panel (HY 326 / IG 89 / excess 237 / Z 1.85 Elevated, 95.2%, Risk-off).
 
@@ -134,7 +172,7 @@ Preview serves the production build at http://127.0.0.1:4173/positioning-pct/
 
 `vault/index.html` renders the wall by default and keeps the Vault content in an inert `<template id="vault-content">`. `src/vault-gate.js` decides what happens next, based on `VITE_CLERK_PUBLISHABLE_KEY` at build time:
 
-- Key set. Allowlisted emails sign in with email and password through Clerk (`@clerk/clerk-js`, loaded on demand). Everything happens on this page with no redirect, and the wall swaps for the Vault with a quiet "Signed in as … / Sign out" line. `/vault/`, `/vault/soft-crowded/`, `/vault/vol-credit-momentum/`, and `/vault/portfolio/` share the same gate.
+- Key set. Allowlisted emails sign in with email and password through Clerk (`@clerk/clerk-js`, loaded on demand). Everything happens on this page with no redirect, and the wall swaps for the Vault with a quiet "Signed in as … / Sign out" line. `/vault/`, `/vault/soft-crowded/`, `/vault/vol-credit-momentum/`, `/vault/portfolio/`, and `/vault/archive/` share the same gate.
 - Key empty. Same card, but sign-in is switched off and the card says so. Clerk is left out of the build entirely.
 
 Rules the wall follows:
@@ -151,7 +189,7 @@ To set this up with Clerk's Hobby plan (no cost, up to 50,000 monthly retained u
 3. Create each Vault user under **Users → Create user** (email and password), or set a password on an existing user from that user's page.
 4. Copy the publishable key from **API keys**. Locally: `cp .env.example .env.local`, paste it into `VITE_CLERK_PUBLISHABLE_KEY`, and restart `npm run dev`. `.env.local` is git-ignored.
 5. For GitHub Pages: **Settings → Secrets and variables → Actions → Variables → New repository variable**, name `VITE_CLERK_PUBLISHABLE_KEY`. The Pages workflow passes it to the build. Re-run **Deploy to GitHub Pages**.
-6. Keep `https://vannatrader-hub.github.io/positioning-pct/vault/`, `https://vannatrader-hub.github.io/positioning-pct/vault/soft-crowded/`, `https://vannatrader-hub.github.io/positioning-pct/vault/vol-credit-momentum/`, and `https://vannatrader-hub.github.io/positioning-pct/vault/portfolio/` in the Clerk allowed origins and redirect URLs. Password sign-in does not redirect, but sign-out and any later SSO do.
+6. Keep `https://vannatrader-hub.github.io/positioning-pct/vault/`, `https://vannatrader-hub.github.io/positioning-pct/vault/soft-crowded/`, `https://vannatrader-hub.github.io/positioning-pct/vault/vol-credit-momentum/`, `https://vannatrader-hub.github.io/positioning-pct/vault/portfolio/`, and `https://vannatrader-hub.github.io/positioning-pct/vault/archive/` in the Clerk allowed origins and redirect URLs. Password sign-in does not redirect, but sign-out and any later SSO do.
 
 Password sign-in replaced the magic link because a link has to come back through a redirect. On `github.io` the development instance keeps the session in the dev-browser token (`__clerk_db_jwt`), and links opened in another browser, or a new email that Clerk turned into a sign-up transfer, left Vault on the signed-out wall.
 

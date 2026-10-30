@@ -12,6 +12,7 @@
     <link rel="icon" href="%BASE_URL%favicon.svg" />
     <link rel="stylesheet" href="/src/styles.css" />
     <script type="module" src="/src/vault-gate.js"></script>
+    <script type="module" src="/src/vault-home.js"></script>
   </head>
   <body class="is-vault">
     <a class="skip" href="#content">Skip to content</a>
@@ -101,13 +102,20 @@
             </svg>
           </section>
 
+          <nav class="vault-dash" aria-label="Vault pages">
+            <a href="soft-crowded/"><span class="vault-dash-num">01</span><strong>This week's pack</strong><span>Soft ↔ Crowded</span></a>
+            <a href="vol-credit-momentum/"><span class="vault-dash-num">02</span><strong>Desk wall</strong><span>Vol · Credit · Momentum</span></a>
+            <a href="portfolio/"><span class="vault-dash-num">03</span><strong>Portfolio</strong><span>Closed this week · still held</span></a>
+            <a href="archive/"><span class="vault-dash-num">04</span><strong>Desk-day archive</strong><span>Packs and New Today, by date</span></a>
+          </nav>
+
           <section class="vault-section" aria-labelledby="vault-packs-title">
             <div class="section-head">
               <div class="section-title-row">
                 <h2 id="vault-packs-title">Weekly packs</h2>
                 <span class="section-count">Soft ↔ Crowded</span>
               </div>
-              <p class="hint">One week, one page: sector columns, the read, and the six Positioning charts.</p>
+              <p class="hint">One week per pack, filed on the Friday desk day from the 5:00 AM CT open: frozen sector columns, the one-page read, and the six Positioning charts with an article under each.</p>
             </div>
             <div class="tile-grid vault-grid">
               <a class="tile vault-pack" href="soft-crowded/">
@@ -126,14 +134,17 @@
                 <h2>Soft ↔ Crowded</h2>
                 <p>
                   The weekly pack for sector positioning. Eleven Select Sector funds in the four Soft ↔ Crowded columns,
-                  a one-page read of the week, and references to the six Positioning charts.
+                  a one-page read of the week, and the six Positioning charts frozen at the pack Friday. Prints to a clean PDF.
                 </p>
                 <ul class="hub-facts">
-                  <li>Week of Oct 23, 2026 · JPM</li>
-                  <li>Sector buckets · one-page read · chart refs</li>
+                  <li id="vault-pack-latest">2026-W43 Soft ↔ Crowded · Week of Oct 23, 2026</li>
+                  <li>Frozen buckets · one-page read · six charts · six articles</li>
                 </ul>
-                <span class="open">Open Soft ↔ Crowded <span class="arrow" aria-hidden="true">→</span></span>
+                <span class="open">Open this week <span class="arrow" aria-hidden="true">→</span></span>
               </a>
+              <div class="vault-pack-weeks" id="vault-pack-weeks" aria-label="Pack weeks, latest first">
+                <p class="hint">Loading the pack list…</p>
+              </div>
             </div>
           </section>
 
@@ -143,7 +154,7 @@
                 <h2 id="vault-walls-title">Desk walls</h2>
                 <span class="section-count">Vol · Credit · Momentum · Breadth</span>
               </div>
-              <p class="hint">Live reads on one wall, redrawn from committed data.</p>
+              <p class="hint">Daily reads on one wall, redrawn from committed closes and prints. Nothing here is a live quote.</p>
             </div>
             <div class="tile-grid vault-grid">
               <a class="tile vault-pack" href="vol-credit-momentum/">
@@ -210,6 +221,41 @@
                   <li>Spotlight · Earnings Snapshot · Weekly Radar</li>
                 </ul>
                 <span class="open">Open Portfolio <span class="arrow" aria-hidden="true">→</span></span>
+              </a>
+            </div>
+          </section>
+
+          <section class="vault-section" aria-labelledby="vault-archive-title">
+            <div class="section-head">
+              <div class="section-title-row">
+                <h2 id="vault-archive-title">Archive</h2>
+                <span class="section-count">Desk days</span>
+              </div>
+              <p class="hint">Past Soft ↔ Crowded weeks and New Today desk days, searchable by date or ISO week.</p>
+            </div>
+            <div class="tile-grid vault-grid">
+              <a class="tile vault-pack" href="archive/">
+                <div class="tile-kicker">
+                  <span class="tile-num">04</span>
+                  <span class="badge is-journal">Archive</span>
+                </div>
+                <span class="tile-icon" aria-hidden="true">
+                  <svg viewBox="0 0 28 28" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="5" width="22" height="6" rx="2" stroke="#e5e7eb" stroke-width="1.6" />
+                    <rect x="5" y="11" width="18" height="12" rx="2" stroke="#8b919c" stroke-width="1.6" />
+                    <path d="M11 16 H17" stroke="#f5c451" stroke-width="2" />
+                  </svg>
+                </span>
+                <h2>Desk-day archive</h2>
+                <p>
+                  Every Desk week on the Soft ↔ Crowded scale, with the pack for the weeks that have one, and every New Today desk day.
+                  Search by date, by ISO week, or by a word in the line.
+                </p>
+                <ul class="hub-facts">
+                  <li>Soft ↔ Crowded weeks · New Today desk days</li>
+                  <li>Search 2026-10-28 · Oct 28 · W44</li>
+                </ul>
+                <span class="open">Open the archive <span class="arrow" aria-hidden="true">→</span></span>
               </a>
             </div>
           </section>

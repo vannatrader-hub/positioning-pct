@@ -27,8 +27,10 @@ import {
   sectorChart,
   softVolChart,
 } from "../src/pct-charts.js";
-import { FORMULA, axisTicks, formatSvb, gaugeFraction, readout, spotVolTip } from "../src/vault-svb.js";
-import { closedPnl, formatPx, formatUsd, isOpen, isPending, resultLabel } from "../src/vault-portfolio.js";
+import { columnMoves, isoWeek, isoWeekRange, packFrame } from "../src/vault-pack-frame.js";
+import { FORMULA, axisTicks, buildClose, closeEvent, closeRows, closeSpxPct, deskEstimate, formatSvb, gaugeFraction, readout, spotVolTip } from "../src/vault-svb.js";
+import { archiveGroups, deskWeekEntries, displaySource, filterEntries, newTodayDays, parseDateQuery } from "../src/vault-archive.js";
+import { closedPnl, deskCopy, formatPx, formatUsd, isOpen, isPending, markOf, resultLabel, stopOf, targetOf, weekStrip } from "../src/vault-portfolio.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
@@ -765,6 +767,7 @@ const vaultSurface = {
   "vault/soft-crowded/index.html": { desk: "../../", vault: "../" },
   "vault/vol-credit-momentum/index.html": { desk: "../../", vault: "../" },
   "vault/portfolio/index.html": { desk: "../../", vault: "../" },
+  "vault/archive/index.html": { desk: "../../", vault: "../" },
 };
 const publicPages = [...deskPages, ...Object.keys(vaultSurface)];
 for (const file of publicPages) {
@@ -820,7 +823,7 @@ assert(!/opening later/i.test(vaultTopbar + vaultFooter), "Vault chrome no longe
 
 const monetization = /\b(free|paid|premium|subscri\w*|paywall\w*|upgrad\w*|trials?|pric(e|es|ed|ing)|members?hips?|unlock\w*)\b/i;
 const chromeCopy = [
-  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "vault/portfolio/index.html", "404.html"].map((file) => [
+  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "vault/portfolio/index.html", "vault/archive/index.html", "404.html"].map((file) => [
     file,
     readFileSync(join(root, file), "utf8"),
   ]),
@@ -939,14 +942,15 @@ for (const file of [...deskPages, "404.html", "index.html"]) {
   assert(!readFileSync(join(root, file), "utf8").includes("soft-crowded"), `${file} links into the Vault pack`);
 }
 for (const name of readdirSync(join(root, "src"))) {
-  if (extname(name) !== ".js" || name === "vault-pack.js") continue;
+  if (extname(name) !== ".js" || name.startsWith("vault-")) continue;
   assert(!readFileSync(join(root, "src", name), "utf8").includes("soft-crowded"), `src/${name} links into the Vault pack`);
 }
 
 const packDir = join(root, "public/data/vault/soft-crowded");
 const packSchema = JSON.parse(readFileSync(join(packDir, "schema.json"), "utf8"));
 const packIndex = JSON.parse(readFileSync(join(packDir, "index.json"), "utf8"));
-const packWeek = JSON.parse(readFileSync(join(packDir, `${packIndex.latest}.json`), "utf8"));
+const packWeeks = (packIndex.weeks ?? []).map((row) => ({ row, doc: JSON.parse(readFileSync(join(packDir, row.file), "utf8")) }));
+const packWeek = packWeeks.find(({ row }) => row.week === packIndex.latest)?.doc ?? JSON.parse(readFileSync(join(packDir, `${packIndex.latest}.json`), "utf8"));
 assert(packSchema.$schema === "https://json-schema.org/draft/2020-12/schema", "pack schema is draft 2020-12");
 for (const key of ["read", "buckets", "charts"]) assert(packSchema.properties[key], `pack schema defines ${key}`);
 assert(packSchema.$defs.read.description?.includes("One-page read"), "schema names the one-page read");
@@ -968,6 +972,17 @@ function validatePack(rootSchema, schema, data, path) {
   const node = derefSchema(rootSchema, schema);
   if (!node) {
     assert(false, `${path} missing schema`);
+    return;
+  }
+  if (Array.isArray(node.type)) {
+    if (data === null && node.type.includes("null")) return;
+    const types = node.type.filter((type) => type !== "null");
+    assert(types.length === 1, `${path} schema type ${node.type}`);
+    validatePack(rootSchema, { ...node, type: types[0] }, data, path);
+    return;
+  }
+  if (node.type === "null") {
+    assert(data === null, `${path} should be null`);
     return;
   }
   if (Object.prototype.hasOwnProperty.call(node, "const")) {
@@ -1028,7 +1043,6 @@ function validatePack(rootSchema, schema, data, path) {
   if (node.type === "boolean") assert(typeof data === "boolean", `${path} should be a boolean`);
 }
 
-validatePack(packSchema, packSchema, packWeek, "week");
 assert(bannedSource("a Hawk chart") === "hawk", "banned-source scan rejects Hawk");
 assert(bannedSource("Volland levels") === "volland", "banned-source scan rejects Volland");
 assert(bannedSource("Darkroom note") === "darkroom", "banned-source scan rejects Darkroom");
@@ -1060,55 +1074,6 @@ assert(packIndex.title === "Soft ↔ Crowded", `pack index title ${packIndex.tit
 assert(packIndex.latest === WEEKS[WEEKS.length - 1], `pack latest ${packIndex.latest} should be the Desk's current week`);
 assert(packWeek.$schema === "./schema.json", "week document points at the schema");
 
-const packAt = WEEKS.length - 1;
-const packReading = buildReading("jpm", packAt, 4);
-const packChart = sectorChart("jpm", packAt);
-const packFacts = chartFacts(packAt);
-assert(packWeek.week === packReading.weekIso && packWeek.weekLabel === packReading.weekLabel, "pack week label matches the Desk");
-assert(packWeek.house === "jpm" && packWeek.houseLabel === "JPM" && packWeek.windowWeeks === 4, "pack is the JPM 4-week read");
-assert(packWeek.basis === packChart.basis, `pack basis ${packWeek.basis}`);
-assert(packWeek.sectorSource === packReading.sectorSource, `pack sector source ${packWeek.sectorSource}`);
-assert(
-  JSON.stringify(packWeek.buckets.map((bucket) => [bucket.level, bucket.title, bucket.range, bucket.tone])) ===
-    JSON.stringify(SECTOR_BUCKETS.map((bucket) => [bucket.level, bucket.title, bucket.range, bucket.tone])),
-  "pack buckets follow the Desk Soft ↔ Crowded columns",
-);
-const seenTickers = [];
-for (const bucket of packWeek.buckets) {
-  const want = CANON.filter((ticker) => packReading.sectors[ticker].available && packReading.sectors[ticker].level === bucket.level)
-    .map((ticker) => packReading.sectors[ticker])
-    .sort((a, b) => a.points - b.points || a.ticker.localeCompare(b.ticker));
-  assert(bucket.sectors.length === want.length, `${bucket.level} has ${bucket.sectors.length} sectors, Desk has ${want.length}`);
-  bucket.sectors.forEach((sector, index) => {
-    const desk = want[index];
-    seenTickers.push(sector.ticker);
-    for (const key of ["ticker", "short", "name", "points", "display", "ile", "pill", "caption", "wowText", "regime", "level"]) {
-      assert(sector[key] === desk[key], `${sector.ticker} ${key} ${sector[key]} !== ${desk[key]}`);
-    }
-  });
-}
-const missing = CANON.filter((ticker) => !packReading.sectors[ticker].available);
-assert(
-  JSON.stringify(packWeek.unprinted) ===
-    JSON.stringify(missing.map((ticker) => {
-      const sector = packReading.sectors[ticker];
-      return { ticker, short: sector.short, name: sector.name, note: sector.unavailable };
-    })),
-  `pack unprinted ${JSON.stringify(packWeek.unprinted)}`,
-);
-assert(new Set(seenTickers).size === seenTickers.length, "a sector appears in two buckets");
-assert(JSON.stringify([...seenTickers].sort()) === JSON.stringify(CANON.filter((ticker) => !missing.includes(ticker)).sort()), "pack covers every printed sector");
-const prior = buildReading("jpm", packAt - 1, 4);
-for (const ticker of CANON) {
-  const now = packReading.sectors[ticker];
-  const then = prior.sectors[ticker];
-  if (!now.available || !then.available) continue;
-  assert(now.level === then.level, `${ticker} changed columns since last week (${then.level} → ${now.level})`);
-}
-assert(/No sector changed columns versus last week/.test(packWeek.read.stance), "one-page read records that columns were unchanged");
-for (const phrase of ["0.18", "0.75", "0.69", "0.66", "−1.2", "351", "3.9", "53%"]) {
-  assert(JSON.stringify(packWeek.read).includes(phrase), `one-page read names ${phrase}`);
-}
 const articleSchema = packSchema.$defs.article;
 assert(articleSchema?.description?.includes("week read stays the overview"), "per-chart articles leave the week read as the overview");
 assert(articleSchema?.description?.includes("article"), "pack schema defines a per-chart article");
@@ -1125,41 +1090,147 @@ assert(articleSchema?.properties?.bodyMarkdown?.minWords === 120 && articleSchem
 for (const key of ["headline", "bodyMarkdown", "dumbMoney", "smartMoney", "invalidation"]) {
   assert(articleSchema?.properties?.[key]?.["x-banned-sources"] === true, `article ${key} rejects banned source names`);
 }
-assert(packSchema.$defs.chartRef.required.includes("article"), "each chart ref requires an article");
+assert(packSchema.$defs.chartRef.required.includes("article") && packSchema.$defs.chartRef.required.includes("snapshot"), "each chart ref requires an article and a frozen snapshot");
 assert(packSchema.$defs.read.description?.includes("One-page read"), "one-page read stays the week overview");
-assert(packWeek.charts.batch === 1, "chart refs are batch 1");
-assert(
-  JSON.stringify(packWeek.charts.refs.map((ref) => ref.id)) === JSON.stringify(CHART_IDS),
-  `pack chart refs ${packWeek.charts.refs.map((ref) => ref.id)}`,
-);
-packWeek.charts.refs.forEach((ref, index) => {
-  const chart = CHARTS[index];
-  assert(ref.id === chart.id && ref.nav === chart.nav && ref.title === chart.title, `chart ref ${ref.id} drifted from batch 1`);
-  assert(ref.house === chart.house && ref.houseLabel === HOUSES[chart.house] && ref.deskSection === chart.deskSection, `chart ref ${ref.id} house or section`);
-  assert(ref.fact === packFacts[ref.id], `chart ref ${ref.id} fact ${ref.fact} !== ${packFacts[ref.id]}`);
-  const article = ref.article;
-  const body = article.bodyMarkdown;
-  for (const [label, pattern] of [
-    ["hedge funds", /hedge funds?/i],
-    ["macro funds", /macro funds?/i],
-    ["mutual funds", /mutual funds?/i],
-    ["CTAs", /\bCTAs?\b/],
-    ["dealers", /dealers?/i],
-    ["sharpies", /sharpies?/i],
-    ["commercials", /commercials?/i],
-  ]) {
-    assert(pattern.test(body), `${ref.id} article names ${label}`);
-  }
-  assert(/smart money is positioned against/i.test(body), `${ref.id} article sets smart money against the crowded book`);
+for (const key of ["isoWeek", "title", "asOf", "asOfLabel"]) assert(packSchema.required.includes(key), `pack schema requires ${key}`);
+for (const key of ["softened", "crowded", "backdrop", "nextWeek"]) assert(packSchema.$defs.read.required.includes(key), `one-page read requires ${key}`);
+
+assert(isoWeek("2026-10-23") === "2026-W43" && isoWeek("2026-10-30") === "2026-W44" && isoWeek("2027-01-01") === "2026-W53", "ISO week labels");
+assert(JSON.stringify(isoWeekRange("2026-W44")) === '{"start":"2026-10-26","end":"2026-11-01"}', "ISO week range");
+
+function wordCount(value) {
+  if (typeof value === "string") return value.trim().split(/\s+/).filter(Boolean).length;
+  if (Array.isArray(value)) return value.reduce((sum, item) => sum + wordCount(item), 0);
+  if (value && typeof value === "object") return Object.values(value).reduce((sum, item) => sum + wordCount(item), 0);
+  return 0;
+}
+
+function stripWritten(doc) {
+  const { $schema, read, charts, ...rest } = doc;
+  return { ...rest, charts: { ...charts, refs: charts.refs.map(({ article, ...ref }) => ref) } };
+}
+
+function checkPackWeek(row, doc) {
+  const where = `pack ${row.week}`;
+  validatePack(packSchema, packSchema, doc, where);
+  assert(doc.$schema === "./schema.json", `${where} points at the schema`);
+  assert(row.file === `${row.week}.json` && doc.week === row.week, `${where} index row names its file`);
+  assert(row.isoWeek === doc.isoWeek && row.title === doc.title && row.weekLabel === doc.weekLabel && row.headline === doc.read.headline, `${where} index row matches the week`);
   assert(
-    /hedge funds?/i.test(article.dumbMoney) && /macro funds?/i.test(article.dumbMoney) && /mutual funds?/i.test(article.dumbMoney) && /\bCTAs?\b/.test(article.dumbMoney),
-    `${ref.id} dumbMoney names the dumb-money cohort`,
+    JSON.stringify(row.counts) === JSON.stringify(Object.fromEntries(doc.buckets.map((bucket) => [bucket.level, bucket.sectors.length]))),
+    `${where} index counts ${JSON.stringify(row.counts)}`,
   );
-  assert(/(dealers?|sharpies?)/i.test(article.smartMoney) && /commercials?/i.test(article.smartMoney), `${ref.id} smartMoney names the smart-money cohort`);
-  if (article.bias === "fade-long" || article.bias === "fade-short") {
-    assert(/\b(fade|pullback|bounce|cover)\b/i.test(body), `${ref.id} fade bias is written into the article`);
+  assert(doc.isoWeek === isoWeek(doc.week) && doc.title === `${doc.isoWeek} Soft ↔ Crowded`, `${where} title ${doc.title}`);
+  assert(new Date(`${doc.week}T12:00:00Z`).getUTCDay() === 5, `${where} is a Friday desk day`);
+  assert(/T05:00:00-0[56]:00$/.test(doc.asOf) && doc.asOf.startsWith(doc.week), `${where} as-of is the 5:00 AM CT open, got ${doc.asOf}`);
+  assert(doc.asOfLabel.includes("5:00 AM CT open"), `${where} as-of label ${doc.asOfLabel}`);
+  const words = wordCount(doc.read);
+  assert(words >= 400 && words <= 600, `${where} one-page read is ${words} words, want 400 to 600`);
+
+  const at = WEEKS.indexOf(doc.week);
+  assert(at >= 0 || doc.week !== packIndex.latest, `${where} latest pack must be a Desk week`);
+  if (at < 0) return;
+  const frame = packFrame(doc.week);
+  if (doc.week === WEEKS[WEEKS.length - 1]) {
+    assert(JSON.stringify(stripWritten(doc)) === JSON.stringify(frame), `${where} drifted from the Desk series; rerun npm run pack:build -- ${doc.week}`);
+  } else {
+    assert(JSON.stringify(doc.buckets) === JSON.stringify(frame.buckets), `${where} buckets drifted from the Desk`);
   }
-});
+
+  const reading = buildReading("jpm", at, 4);
+  const facts = chartFacts(at);
+  assert(doc.weekLabel === reading.weekLabel, `${where} week label matches the Desk`);
+  assert(doc.house === "jpm" && doc.houseLabel === "JPM" && doc.windowWeeks === 4, `${where} is the JPM 4-week read`);
+  assert(doc.basis === sectorChart("jpm", at).basis, `${where} basis ${doc.basis}`);
+  assert(doc.sectorSource === reading.sectorSource, `${where} sector source ${doc.sectorSource}`);
+  assert(
+    JSON.stringify(doc.buckets.map((bucket) => [bucket.level, bucket.title, bucket.range, bucket.tone])) ===
+      JSON.stringify(SECTOR_BUCKETS.map((bucket) => [bucket.level, bucket.title, bucket.range, bucket.tone])),
+    `${where} buckets follow the Desk Soft ↔ Crowded columns`,
+  );
+  const seen = [];
+  for (const bucket of doc.buckets) {
+    const want = CANON.filter((ticker) => reading.sectors[ticker].available && reading.sectors[ticker].level === bucket.level)
+      .map((ticker) => reading.sectors[ticker])
+      .sort((a, b) => a.points - b.points || a.ticker.localeCompare(b.ticker));
+    assert(bucket.sectors.length === want.length, `${where} ${bucket.level} has ${bucket.sectors.length} sectors, Desk has ${want.length}`);
+    bucket.sectors.forEach((sector, index) => {
+      const desk = want[index];
+      seen.push(sector.ticker);
+      for (const key of ["ticker", "short", "name", "points", "display", "ile", "pill", "caption", "wowText", "regime", "level"]) {
+        assert(sector[key] === desk?.[key], `${where} ${sector.ticker} ${key} ${sector[key]} !== ${desk?.[key]}`);
+      }
+    });
+  }
+  const missing = CANON.filter((ticker) => !reading.sectors[ticker].available);
+  assert(new Set(seen).size === seen.length, `${where} a sector appears in two buckets`);
+  assert(JSON.stringify([...seen].sort()) === JSON.stringify(CANON.filter((ticker) => !missing.includes(ticker)).sort()), `${where} covers every printed sector`);
+
+  const moves = columnMoves(at);
+  if (moves.length === 0) {
+    assert(/No sector changed columns versus last week/.test(doc.read.stance), `${where} read records that columns were unchanged`);
+  } else {
+    const told = `${doc.read.stance} ${doc.read.moved.join(" ")}`;
+    for (const move of moves) {
+      const named = told.includes(move.ticker) || told.includes(reading.sectors[move.ticker].short);
+      assert(named && told.includes(move.to), `${where} read names ${move.ticker} moving ${move.from} → ${move.to}`);
+    }
+  }
+
+  assert(doc.charts.batch === 1, `${where} chart refs are batch 1`);
+  assert(JSON.stringify(doc.charts.refs.map((ref) => ref.id)) === JSON.stringify(CHART_IDS), `${where} chart refs ${doc.charts.refs.map((ref) => ref.id)}`);
+  doc.charts.refs.forEach((ref, index) => {
+    const chart = CHARTS[index];
+    assert(ref.id === chart.id && ref.nav === chart.nav && ref.title === chart.title, `${where} chart ref ${ref.id} drifted from batch 1`);
+    assert(ref.house === chart.house && ref.houseLabel === HOUSES[chart.house] && ref.deskSection === chart.deskSection, `${where} chart ref ${ref.id} house or section`);
+    assert(ref.fact === facts[ref.id], `${where} chart ref ${ref.id} fact ${ref.fact} !== ${facts[ref.id]}`);
+    const snap = ref.snapshot;
+    assert(snap.weeks.at(-1) === doc.week, `${where} ${ref.id} snapshot stops at the pack week`);
+    const lengths = [snap.values?.length, ...(snap.panels ?? []).flatMap((panel) => panel.series.map((series) => series.values.length))].filter((n) => n !== undefined);
+    assert(lengths.every((n) => n === snap.weeks.length), `${where} ${ref.id} snapshot series run ${lengths} points over ${snap.weeks.length} weeks`);
+    const article = ref.article;
+    const body = article.bodyMarkdown;
+    for (const [label, pattern] of [
+      ["hedge funds", /hedge funds?/i],
+      ["macro funds", /macro funds?/i],
+      ["mutual funds", /mutual funds?/i],
+      ["CTAs", /\bCTAs?\b/],
+      ["dealers", /dealers?/i],
+      ["sharpies", /sharpies?/i],
+      ["commercials", /commercials?/i],
+    ]) {
+      assert(pattern.test(body), `${where} ${ref.id} article names ${label}`);
+    }
+    assert(/smart money is positioned against/i.test(body), `${where} ${ref.id} article sets smart money against the crowded book`);
+    assert(
+      /hedge funds?/i.test(article.dumbMoney) && /macro funds?/i.test(article.dumbMoney) && /mutual funds?/i.test(article.dumbMoney) && /\bCTAs?\b/.test(article.dumbMoney),
+      `${where} ${ref.id} dumbMoney names the dumb-money cohort`,
+    );
+    assert(/(dealers?|sharpies?)/i.test(article.smartMoney) && /commercials?/i.test(article.smartMoney), `${where} ${ref.id} smartMoney names the smart-money cohort`);
+    if (article.bias === "fade-long" || article.bias === "fade-short") {
+      assert(/\b(fade|pullback|bounce|cover)\b/i.test(body), `${where} ${ref.id} fade bias is written into the article`);
+    }
+  });
+}
+
+assert(packWeeks.length >= 2, "pack index lists the latest week and at least one archived week");
+assert(
+  JSON.stringify(packWeeks.map(({ row }) => row.week)) === JSON.stringify(packWeeks.map(({ row }) => row.week).sort().reverse()),
+  "pack index lists weeks newest first",
+);
+assert(packWeeks[0]?.row.week === packIndex.latest, "pack index latest is the first row");
+assert(new Set(packWeeks.map(({ row }) => row.isoWeek)).size === packWeeks.length, "one pack per ISO week");
+for (const { row, doc } of packWeeks) checkPackWeek(row, doc);
+
+if (packWeek.week === "2026-10-23") {
+  for (const phrase of ["0.18", "0.75", "0.69", "0.66", "−1.2", "351", "3.9", "53%"]) {
+    assert(JSON.stringify(packWeek.read).includes(phrase), `one-page read names ${phrase}`);
+  }
+}
+const packW42 = packWeeks.find(({ row }) => row.week === "2026-10-16")?.doc;
+if (packW42) {
+  assert(JSON.stringify(columnMoves(WEEKS.indexOf("2026-10-16"))) === '[{"ticker":"XLF","from":"soft","to":"extreme soft"},{"ticker":"XLE","from":"mid","to":"crowded"}]', "W42 column moves");
+}
 const packJs = readFileSync(join(root, "src/vault-pack.js"), "utf8");
 assert(packJs.includes("data/vault/soft-crowded/"), "pack page loads the week document");
 for (const piece of ["bodyMarkdown", "dumbMoney", "smartMoney", "invalidation", "article.headline", "fade-long", "pack-article"]) {
@@ -1378,32 +1449,96 @@ for (const date of svbDates) {
   assert(weekday !== 0 && weekday !== 6, `${date} is not a weekday session`);
 }
 assert(!svbDates.includes("2026-09-07"), "Labor Day is not a session");
-assert(svbLatest.asOf === "2026-10-30T12:18:00-05:00" && svbLatest.asOfLabel === "Fri Oct 30, 2026 · 12:18 CT", "gauge stamp is the calibration print");
-assert(svbLatest.gauge === 2.98 && svbLatest.live === false && svbLatest.closed === false, "gauge is the committed 2.98 print, not a close");
-assert(svbLatest.feedLabel.includes("not wired"), "the card says the live feed is not wired");
-assert(svbSeries.points.at(-1).date < svbLatest.session && !svbDates.includes(svbLatest.session), "an open session is not appended to the close line");
-const impliedSpot = Math.round(svbSeries.points.at(-1).spx * (1 + svbLatest.spxPct / 100) * 100) / 100;
-assert(Math.abs(impliedSpot - svbLatest.spx) < 0.02, `session SPX ${svbLatest.spx} should match the prior close and SPX percent`);
+const svbLast = svbSeries.points.at(-1);
+const svbCalibration = svbLatest.session === "2026-10-30" && !svbLatest.closed;
+assert(svbLatest.feedLabel.includes("not wired") || svbLatest.live, "the card says the live feed is not wired");
+if (svbLatest.closed) {
+  assert(svbLast.date === svbLatest.session && svbLast.svb === svbLatest.gauge && svbLast.spx === svbLatest.spx, "a closed gauge is the last close on the line");
+  assert(svbLast.origin === "close-routine" && svbLast.estimate?.value === readout(svbLatest, svbSeries).estimateValue, "a closed gauge carries the routine's desk estimate close");
+} else {
+  assert(svbLast.date < svbLatest.session && !svbDates.includes(svbLatest.session), "an open session is not appended to the close line");
+  const impliedSpot = Math.round(svbLast.spx * (1 + svbLatest.spxPct / 100) * 100) / 100;
+  assert(Math.abs(impliedSpot - svbLatest.spx) < 0.02, `session SPX ${svbLatest.spx} should match the prior close and SPX percent`);
+}
 const svbView = readout(svbLatest, svbSeries);
-assert(svbView.gauge === "2.98" && svbView.estimate === "2.57", `readout ${svbView.gauge} / ${svbView.estimate}`);
-assert(formatSvb(svbView.estimateValue) === "2.57", "desk estimate rounds to 2.57");
-assert(Math.abs(svbLatest.gauge - svbView.estimateValue - 0.41) < 0.001, "gauge and desk estimate keep the calibration gap");
-assert(svbView.inputs === "UV Δ 3.41 · SPX −1.20%" && svbView.formula === FORMULA, "desk estimate shows its inputs");
-assert(svbView.agreement === "Gauge and desk estimate are both at or above 2.", svbView.agreement);
-assert(svbView.formalWait.includes("VIX close"), "an intraday print at or above 2 waits on the VIX close");
-assert(svbView.session.includes("6,791.91") && svbView.session.includes("−1.20%"), `session line ${svbView.session}`);
+if (svbCalibration) {
+  assert(svbLatest.asOf === "2026-10-30T12:18:00-05:00" && svbLatest.asOfLabel === "Fri Oct 30, 2026 · 12:18 CT", "gauge stamp is the calibration print");
+  assert(svbLatest.gauge === 2.98 && svbLatest.live === false && svbLatest.closed === false, "gauge is the committed 2.98 print, not a close");
+  assert(svbView.gauge === "2.98" && svbView.estimate === "2.57", `readout ${svbView.gauge} / ${svbView.estimate}`);
+  assert(formatSvb(svbView.estimateValue) === "2.57", "desk estimate rounds to 2.57");
+  assert(Math.abs(svbLatest.gauge - svbView.estimateValue - 0.41) < 0.001, "gauge and desk estimate keep the calibration gap");
+  assert(svbView.inputs === "UV Δ 3.41 · SPX −1.20%" && svbView.formula === FORMULA, "desk estimate shows its inputs");
+  assert(svbView.agreement === "Gauge and desk estimate are both at or above 2.", svbView.agreement);
+  assert(svbView.formalWait.includes("VIX close"), "an intraday print at or above 2 waits on the VIX close");
+  assert(svbView.session.includes("6,791.91") && svbView.session.includes("−1.20%"), `session line ${svbView.session}`);
+}
 const formal = svbSeries.points.find((point) => point.date === "2026-09-03");
 const marked = svbSeries.points.find((point) => point.date === "2026-10-12");
 const quiet = svbSeries.points.find((point) => point.date === "2026-10-29");
 assert(formal.svb >= 2 && formal.vixCloseMove >= 2, "September close is a formal vol event");
 assert(marked.svb >= 2 && marked.vixCloseMove < 2, "October close is the band without a formal vol event");
-assert(quiet.svb < 2 && quiet.date === "2026-10-29", "the last close sits under the band");
+assert(quiet.svb === 1.84 && quiet.svb < 2, "the Oct 29 close sits under the band");
 assert(spotVolTip(formal).includes("Possible bottom") && spotVolTip(formal).some((line) => line.startsWith("Formal vol event")), "hover names the band and a formal vol event");
 assert(spotVolTip(marked).includes("Possible bottom") && !spotVolTip(marked).some((line) => line.startsWith("Formal")), "hover marks the band without calling a short VIX move formal");
 assert(!spotVolTip(quiet).includes("Possible bottom") && spotVolTip(quiet)[1] === "Spot Vol Beta 1.84" && spotVolTip(quiet)[2].startsWith("SPX "), "hover on a quiet close is the date, the beta, and SPX");
 assert(svbSeries.points.some((point) => point.svb >= svbSeries.signal) && svbSeries.note.includes("possible-bottom") && svbSeries.note.includes("prior SPX close"), "the series can paint the band and carries the house read");
 const ticks = axisTicks(svbSeries.points).filter(Boolean);
-assert(ticks[0] === "Aug 3" && ticks.at(-1) === "Oct 29" && ticks.length <= 6, `axis ticks ${ticks}`);
+const lastTick = `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][Number(svbLast.date.slice(5, 7)) - 1]} ${Number(svbLast.date.slice(8))}`;
+assert(ticks[0] === "Aug 3" && ticks.at(-1).startsWith(lastTick) && ticks.length <= 8, `axis ticks ${ticks}`);
+
+/* Spot Vol Beta session closes: the gauge close and the desk estimate close, appended by the weekday close routine. */
+const svbCloseDef = svbSchema.$defs.close;
+assert(JSON.stringify(svbCloseDef.required) === '["date","svb","spx","origin"]', `close requires ${svbCloseDef.required}`);
+assert(JSON.stringify(svbCloseDef.properties.origin.enum) === '["seed","close-routine"]', "close origin is seed or close-routine");
+assert(JSON.stringify(svbCloseDef.properties.estimate.required) === '["uvDelta","spxPct","value"]', "desk estimate close keeps its inputs");
+assert(svbCloseDef.properties.vixCloseMove.description.includes("Close-based"), "formal vol event is close-based");
+svbSeries.points.forEach((point, index) => {
+  const where = `svb close ${point.date}`;
+  if (point.estimate) {
+    assert(point.estimate.value === deskEstimate(point.estimate.uvDelta, point.estimate.spxPct, svbSeries.deskBeta), `${where} desk estimate ${point.estimate.value} is not ${FORMULA}`);
+    assert(index > 0 && point.estimate.spxPct === closeSpxPct(point, svbSeries.points[index - 1]), `${where} SPX % ${point.estimate.spxPct} does not match the prior close`);
+  }
+  if (point.origin === "close-routine") {
+    assert(point.estimate && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/.test(point.recordedAt ?? ""), `${where} routine close carries the desk estimate and recordedAt`);
+    assert(svbSeries.points.slice(index + 1).every((later) => later.origin === "close-routine"), `${where} seeded closes are never appended after routine closes`);
+  }
+});
+assert(svbSeries.points.filter((point) => point.estimate).length >= 10, "the card has at least ten desk estimate closes to list");
+const svbRows = closeRows(svbSeries, 10);
+assert(svbRows.length === 10 && svbRows[0].date === svbLast.date && svbRows.at(-1).date < svbRows[0].date, "close history lists the last ten sessions, newest first");
+const oct29 = svbRows.find((row) => row.date === "2026-10-29");
+assert(oct29 && oct29.gauge === "1.84" && oct29.estimate === "1.47" && oct29.spxPct === "+0.27%" && oct29.event.label === "Below 2", `Oct 29 close row ${JSON.stringify(oct29)}`);
+assert(oct29.origin === "Seeded" && oct29.seeded, "seeded closes are labelled Seeded");
+assert(closeEvent(formal).label === "Formal vol event" && closeEvent(marked).label === "≥ 2 · no formal event" && closeEvent(quiet).label === "Below 2", "close read follows the ≥ 2 band and the VIX close rule");
+assert(closeEvent({ svb: 1.2, vixCloseMove: 2.5 }).label === "VIX close +2 · gauge under 2", "a VIX close move without the band is not a formal vol event");
+const builtClose = buildClose({ date: "2026-10-30", svb: 2.71, spx: 6801.2 }, { date: "2026-11-02", svb: 1.92, spx: 6801.25, uvDelta: 2.1, vixCloseMove: 1.4, recordedAt: "2026-11-02T15:55:00-06:00" });
+assert(
+  JSON.stringify(builtClose) ===
+    '{"date":"2026-11-02","svb":1.92,"spx":6801.25,"vixCloseMove":1.4,"origin":"close-routine","recordedAt":"2026-11-02T15:55:00-06:00","estimate":{"uvDelta":2.1,"spxPct":0,"value":2.1}}',
+  `buildClose ${JSON.stringify(builtClose)}`,
+);
+for (const [input, message] of [
+  [{ date: "2026-10-30", svb: 1, spx: 6800 }, "a close at or before the last session"],
+  [{ date: "2026-11-07", svb: 1, spx: 6800 }, "a Saturday close"],
+  [{ date: "2026-11-02", svb: Number.NaN, spx: 6800 }, "a close without a gauge"],
+  [{ date: "2026-11-02", svb: 1, spx: 6800, recordedAt: "2026-11-02 15:55" }, "a recordedAt without an offset"],
+]) {
+  let threw = false;
+  try {
+    buildClose({ date: "2026-10-30", svb: 2.71, spx: 6801.2 }, input);
+  } catch {
+    threw = true;
+  }
+  assert(threw, `buildClose refuses ${message}`);
+}
+const svbIndex = JSON.parse(readFileSync(join(svbDir, "index.json"), "utf8"));
+assert(svbIndex.routine?.cadence.includes("3:55 PM CT") && svbIndex.routine.command.startsWith("npm run svb:close"), "series index documents the weekday close routine");
+validatePack(svbSchema, svbCloseDef, svbIndex.routine.example, "svb.index.routine.example");
+assert(svbIndex.routine.example.origin === "close-routine" && svbIndex.routine.example.estimate.value === deskEstimate(svbIndex.routine.example.estimate.uvDelta, svbIndex.routine.example.estimate.spxPct), "routine example is a valid close");
+const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+assert(packageJson.scripts["svb:close"] === "node scripts/svb-close.mjs" && existsSync(join(root, "scripts/svb-close.mjs")), "npm run svb:close appends a close");
+for (const piece of ["closesBlock(series)", "Session closes", "Gauge close", "Desk estimate close", "Entered by", "svb-close-table"]) assert(svbJs.includes(piece), `Spot Vol Beta card renders ${piece}`);
+assert(css.includes(".svb-close-table") && css.includes(".svb-origin.is-seed"), "close history has a table and a seeded tag");
 
 /* Breadth cards on the same wall: NY and Nasdaq Summation, 1Y / 1D default, 10Y range, −1000 buy line. */
 assert(wallPage.includes('src="/src/vault-breadth.js"'), "wall page runs the breadth cards");
@@ -1542,6 +1677,104 @@ const working = { status: "exit_pending_fill", outcome: "loss_pending", pnl_usd:
 assert(isPending(working) && !isOpen(working) && resultLabel(working) === "Pending", "a working close stays pending");
 assert(closedPnl(book) === book.summary.closed_pnl_usd, `closed sum ${closedPnl(book)} drifted from the lock`);
 assert(css.includes(".pf-result.is-pending") && css.includes(".pf-result.is-open") && css.includes(".pf-table"), "portfolio table styles closed, pending, and open rows");
+
+/* Portfolio: the page never shows a source name from the locked journal, the week strip reads the journal's own ISO week, and marks stay blank until the journal carries them. */
+const shownFields = [book.summary.event, book.summary.journal_lock, book.summary.sources_note, book.summary.account, book.summary.as_of_ct];
+for (const trade of book.trades) shownFields.push(trade.notes, trade.ticket_lock, trade.title, trade.structure, trade.category, trade.hawk_post?.exact_ticket);
+for (const text of shownFields) {
+  const shown = deskCopy(text);
+  const hit = bannedSource(shown) || (/\bwsj\b|wall street journal/i.test(shown) ? "wsj" : "");
+  assert(!hit, `portfolio shows "${hit}" in ${shown}`);
+}
+assert(deskCopy(book.summary.event) === "October ticketed book (CEO port)", `portfolio headline ${deskCopy(book.summary.event)}`);
+assert(deskCopy(xyz.ticket_lock) === "team lead 2026-10-30" && deskCopy(byTicker["hawk-be-earnings-snapshot-2026-10-19"].notes).startsWith("Ticket: Long BE"), "journal copy reads ticket and team lead");
+assert(deskCopy(["Options", "Hawk", " ", "Vol", "land"].join("")) === "", "a line that would still name a source is dropped");
+for (const piece of ["deskCopy(summary.event)", "deskCopy(trade.notes)", "deskCopy(trade.ticket_lock)", "deskCopy(summary.journal_lock)"]) {
+  assert(bookJs.includes(piece), `portfolio scrubs ${piece}`);
+}
+assert(!/summary\.event\)\);|trade\.notes\)\);|"pf-lock", trade\.ticket_lock/.test(bookJs), "portfolio does not render raw journal copy");
+assert(stopOf(xyz) === 70 && targetOf(xyz) === 90 && stopOf(nflx) === null && targetOf(nflx) === null, "open lines read stop and target from the journal");
+assert(JSON.stringify(markOf(xyz)) === '{"price":null,"pnl":null,"asOf":"","marked":false}', "a line without mtm fields has no mark");
+assert(JSON.stringify(markOf({ mtm_price: 4.1, mtm_pnl_usd: 643, mtm_as_of_ct: "2026-10-30 3:00 PM CT" })) === '{"price":4.1,"pnl":643,"asOf":"2026-10-30 3:00 PM CT","marked":true}', "mtm fields read through");
+assert(markOf({ mtm_price: "4.1", mtm_pnl_usd: Number.NaN }).marked === false, "a malformed mark stays blank");
+const strip = weekStrip(book);
+assert(strip.week === "2026-W44" && strip.start === "2026-10-26" && strip.end === "2026-11-01", `portfolio week ${strip.week}`);
+assert(strip.closedPnl === -6516 && strip.closedCount === 5 && strip.wins === 1 && strip.losses === 4, `week closed ${strip.closedPnl} over ${strip.closedCount}`);
+assert(JSON.stringify(strip.closedTickers) === '["FCX","GLD","BE","META","TXN"]' && strip.openCount === 4 && strip.markedCount === 0 && strip.markPnl === null, "week strip closes and open count");
+const markedBook = structuredClone(book);
+markedBook.trades.filter(isOpen).forEach((trade, index) => Object.assign(trade, { mtm_price: 1, mtm_pnl_usd: index * 10, mtm_as_of_ct: "2026-10-30 3:00 PM CT" }));
+assert(weekStrip(markedBook).markPnl === 60 && weekStrip(markedBook).markedCount === 4, "open marks total only when every open line is marked");
+assert(css.includes(".pf-week-cells") && css.includes(".pf-open-grid"), "portfolio styles the week strip and open lines");
+const bookSchema = JSON.parse(readFileSync(join(root, "public/data/vault/portfolio/schema.json"), "utf8"));
+validatePack(bookSchema, bookSchema, book, "portfolio");
+for (const key of ["mtm_price", "mtm_pnl_usd", "mtm_as_of_ct"]) {
+  assert(JSON.stringify(bookSchema.$defs.trade.properties[key]?.type) === `["${key === "mtm_as_of_ct" ? "string" : "number"}","null"]` && !bookSchema.$defs.trade.required.includes(key), `portfolio schema has optional ${key}`);
+}
+validatePack(bookSchema, bookSchema, markedBook, "portfolio with marks");
+
+const printCss = css.slice(css.lastIndexOf("@media print {"));
+for (const rule of ["@page {", "#pack #read { break-after: page; }", "#pack #charts { break-before: page; }", "#pack .pack-chart { break-before: page;", "#pack .pack-article { break-inside: avoid; }", "#pack .pack-sheet { display: block;", "body.is-vault .pack-bar"]) {
+  assert(printCss.includes(rule), `pack print keeps ${rule}`);
+}
+
+/* Vault desk-day archive: an index over committed Desk weeks and New Today days, gated, grouped by ISO week. */
+const archiveFile = "vault/archive/index.html";
+assert(viteConfig.includes(`"${archiveFile}"`), `vite builds ${archiveFile}`);
+const archivePage = readFileSync(join(root, archiveFile), "utf8");
+assert(archivePage.includes('<body class="is-vault">'), "archive page carries the Vault theme");
+assert(archivePage.includes('src="/src/vault-gate.js"') && archivePage.includes('src="/src/vault-archive.js"'), "archive page runs the gate and the archive");
+const archiveMain = archivePage.match(/<main id="content">([\s\S]*?)<\/main>/)?.[1] ?? "";
+const archiveTemplate = archiveMain.match(/<template id="vault-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
+const archiveOutside = archiveMain.replace(/<template id="vault-content">[\s\S]*?<\/template>/, "");
+assert(
+  archiveOutside.match(/<section class="vault-wall"[\s\S]*?<\/section>/)?.[0].replaceAll('href="../../"', 'href="../"') ===
+    vaultOutside.match(/<section class="vault-wall"[\s\S]*?<\/section>/)?.[0],
+  "archive sign-in card is the same allowlist sign-in card as the Vault",
+);
+for (const piece of ['id="archive-search"', 'id="archive-q"', 'data-kind="all"', 'data-kind="pack"', 'data-kind="day"', 'id="archive-count"', 'id="archive"', 'aria-current="page">Desk-day archive']) {
+  assert(archiveTemplate.includes(piece), `archive template has ${piece}`);
+}
+assert(!/id="archive|archive-search/.test(archiveOutside), "archive content does not render outside the template");
+assert(vaultTemplate.includes('class="tile vault-pack" href="archive/"') && !vaultOutside.includes("archive/"), "signed-in Vault links to the archive inside the template");
+for (const file of [...deskPages, "404.html"]) {
+  assert(!readFileSync(join(root, file), "utf8").includes("vault/archive"), `${file} links into the Vault archive`);
+}
+for (const file of ["vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "vault/portfolio/index.html"]) {
+  assert(readFileSync(join(root, file), "utf8").includes('href="../archive/"'), `${file} links to the archive from the Vault nav`);
+}
+for (const file of Object.keys(vaultSurface)) {
+  const ids = [...readFileSync(join(root, file), "utf8").matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
+  const repeated = ids.filter((id, at) => ids.indexOf(id) !== at);
+  assert(!repeated.length, `${file} repeats ids across the wall and the template: ${repeated}`);
+}
+const archiveEntries = [...deskWeekEntries(packIndex), ...newTodayDays(nt.items)];
+assert(archiveEntries.filter((entry) => entry.kind === "pack").length === WEEKS.length, "archive lists every committed Desk Friday");
+assert(
+  JSON.stringify(archiveEntries.filter((entry) => entry.hasPack).map((entry) => [entry.isoWeek, entry.href])) ===
+    JSON.stringify(packIndex.weeks.map((row) => [isoWeek(row.week), `../soft-crowded/?week=${isoWeek(row.week)}`])),
+  "archive links pack weeks to the pack",
+);
+assert(archiveEntries.filter((entry) => entry.kind === "pack" && !entry.hasPack).every((entry) => entry.href.startsWith("../../positioning/desk/?source=jpm&week=")), "weeks without a pack open on the Desk");
+assert(JSON.stringify(parseDateQuery("W44")) === '{"week":"2026-W44"}' && JSON.stringify(parseDateQuery("2026-w43")) === '{"week":"2026-W43"}', "archive reads ISO weeks");
+for (const query of ["2026-10-28", "10/28", "Oct 28", "October 28, 2026", "Wed Oct 28"]) {
+  assert(parseDateQuery(query)?.day === "2026-10-28", `archive reads ${query} as Oct 28`);
+}
+assert(parseDateQuery("XLE") === null, "a ticker is a word search");
+const oct28 = archiveGroups(filterEntries(archiveEntries, "2026-10-28"));
+assert(oct28.length === 1 && oct28[0].entries.length === 1 && oct28[0].entries[0].items.length === 8, "archive date search lists the eight Oct 28 items");
+const w44 = archiveGroups(filterEntries(archiveEntries, "W44"));
+assert(w44.length === 1 && w44[0].week === "2026-W44" && w44[0].gap === "No Soft ↔ Crowded print is committed for Fri Oct 30, 2026 yet.", "W44 says its Friday print is not committed");
+assert(w44[0].entries.every((entry) => entry.kind === "day"), "the archive does not invent a W44 pack");
+const w43 = archiveGroups(filterEntries(archiveEntries, "2026-W43"));
+assert(w43[0]?.entries[0]?.kind === "pack" && w43[0].entries[0].title === "2026-W43 Soft ↔ Crowded" && w43[0].gap === "", "W43 leads with its pack");
+const archivePacks = archiveGroups(filterEntries(archiveEntries, "", "pack"));
+assert(archivePacks.every((group) => group.entries.every((entry) => entry.kind === "pack")) && archivePacks[0].week === "2026-W43", "Soft ↔ Crowded filter lists packs newest first");
+const wordHit = filterEntries(archiveEntries, "goldman", "day");
+assert(wordHit.length > 0 && wordHit.every((entry) => entry.items.every((item) => item.text.includes("goldman"))), "a word search cuts a desk day to its matching lines");
+assert(displaySource(["W", "SJ"].join("")) === "Press note" && displaySource("GS") === "GS" && displaySource("") === "Desk", "archive press labels read as a press note");
+const archiveShown = archiveEntries.flatMap((entry) => [entry.title, entry.label, entry.summary, entry.headline ?? "", ...(entry.items ?? []).flatMap((item) => [item.title, item.summary, item.source])]).join("\n");
+assert(!bannedSource(archiveShown) && !/\bwsj\b/i.test(archiveShown), "archive shows no source names");
+assert(css.includes(".archive-entry") && css.includes(".archive-gap") && css.includes(".archive-items"), "archive styles entries, gaps, and items");
 
 assert(breadthSpx.bars.find((bar) => bar.t === "2026-10-29")?.c === 7720.39, "wall SPX Oct 29 close 7720.39");
 const breadthJs = readFileSync(join(root, "src/vault-breadth.js"), "utf8");

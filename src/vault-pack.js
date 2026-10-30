@@ -1,17 +1,33 @@
 /**
  * Soft ↔ Crowded weekly pack. Renders only after the Vault gate opens the
- * page, from the committed week document in public/data/vault/soft-crowded/.
- * Sector columns use the same cards as the Desk. Chart cards are references
- * to the public batch-1 charts, not a second drawing of them.
+ * page, from the committed week documents in public/data/vault/soft-crowded/.
+ * `?week=` takes a pack Friday (2026-10-16) or an ISO week (2026-W42); with
+ * none, the latest week opens. Charts redraw from the frozen snapshot stored
+ * in the week document, so an archived week never shows a later print.
  */
 
+import { drawLines, drawResidual, drawSectors, mountPlot } from "./chart-svg.js";
+
 const DATA = `${import.meta.env.BASE_URL}data/vault/soft-crowded/`;
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const SECTOR_BANDS = [
+  { tone: "xsoft", title: "Extreme soft", from: 0, to: 25 },
+  { tone: "soft", title: "Soft", from: 25, to: 40 },
+  { tone: "mid", title: "Mid", from: 40, to: 67 },
+  { tone: "crowded", title: "Crowded", from: 67, to: 100 },
+];
+const LINE_COLORS = ["#2f5fd6", "#d97706", "#0e9384"];
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
   if (text !== undefined) node.textContent = text;
   return node;
+}
+
+function shortDate(iso) {
+  const [, month, day] = iso.split("-").map(Number);
+  return `${MONTHS[month - 1]} ${day}`;
 }
 
 function pinLeft(points) {
@@ -32,7 +48,7 @@ function zones() {
 }
 
 function statusPill(text, tone) {
-  const status = el("p", `status lv-${tone}`);
+  const status = el("p", `status lv-${tone === "xsoft" ? "soft" : tone}`);
   const dot = el("i");
   dot.setAttribute("aria-hidden", "true");
   status.append(dot, document.createTextNode(text));
@@ -110,10 +126,16 @@ function missingRow(sector) {
   return row;
 }
 
-function points(items) {
-  const list = el("ul", "pack-points");
+function points(items, tag = "ul") {
+  const list = el(tag, tag === "ol" ? "pack-points is-numbered" : "pack-points");
   for (const item of items) list.append(el("li", "", item));
   return list;
+}
+
+function readBlock(title, text) {
+  const block = el("div", "pack-read-block");
+  block.append(el("h3", "", title), el("p", "", text));
+  return block;
 }
 
 function readSection(week) {
@@ -125,13 +147,21 @@ function readSection(week) {
   head.append(row, el("p", "overview-headline", week.read.headline));
   const sheet = el("div", "pack-sheet");
   sheet.append(el("p", "pack-stance", week.read.stance));
-  const cols = el("div", "pack-cols");
+  const prose = el("div", "pack-read-grid");
+  prose.append(
+    readBlock("What softened", week.read.softened),
+    readBlock("What crowded", week.read.crowded),
+    readBlock("Credit and vol backdrop", week.read.backdrop),
+  );
+  const cols = el("div", "pack-cols is-three");
   const moved = el("div");
   moved.append(el("h3", "", "What moved"), points(week.read.moved));
   const watch = el("div");
   watch.append(el("h3", "", "Keep in view"), points(week.read.watch));
-  cols.append(moved, watch);
-  sheet.append(cols);
+  const next = el("div");
+  next.append(el("h3", "", "Watch next week"), points(week.read.nextWeek, "ol"));
+  cols.append(moved, watch, next);
+  sheet.append(prose, cols);
   section.append(head, sheet);
   return section;
 }
@@ -144,7 +174,7 @@ function sectorSection(week) {
   const row = el("div", "section-title-row");
   row.append(
     el("h2", "", "Sector Soft ↔ Crowded"),
-    el("span", "section-count", `${printed} sectors · ${week.houseLabel}`),
+    el("span", "section-count", `${printed} sectors · ${week.houseLabel} · frozen ${shortDate(week.week)}`),
   );
   const desk = el("a", "section-link", "Open this week on the Desk →");
   desk.href = `../../positioning/desk/?source=${week.house}&week=${week.week}#sectors`;
@@ -154,7 +184,7 @@ function sectorSection(week) {
     el(
       "p",
       "hint",
-      `Sector columns read from ${week.sectorSource}, grouped on the Soft ↔ Crowded scale. Direction uses the ${week.windowWeeks}-week window. The large number is the positioning percentile.`,
+      `Sector columns read from ${week.sectorSource}, grouped on the Soft ↔ Crowded scale as of the pack Friday. Direction uses the ${week.windowWeeks}-week window. The large number is the positioning percentile.`,
     ),
   );
   const grid = el("div", "bucket-grid");
@@ -177,16 +207,98 @@ const BIAS_LABEL = {
   "fade-short": "Fade short",
 };
 
-function chartTile(ref, index) {
-  const tile = el("a", "tile chart-tile");
-  tile.href = `../../positioning/charts/#${ref.id}`;
-  const kicker = el("div", "tile-kicker");
-  kicker.append(el("span", "tile-num", String(index + 1).padStart(2, "0")), el("span", `house h-${ref.house}`, ref.houseLabel));
-  tile.append(kicker, el("h3", "", ref.title), el("p", "chart-tile-fact", ref.fact));
-  const open = el("span", "open", "Open chart ");
-  open.append(el("span", "arrow", "→"));
-  tile.append(open);
-  return tile;
+const FORMATS = {
+  pct: (value) => String(Math.round(value)),
+  whole: (value) => String(Math.round(value)),
+  fixed2: (value) => value.toFixed(2),
+  percent0: (value) => `${Math.round(value)}%`,
+  percent1: (value) => `${value.toFixed(1)}%`,
+  z: (value) => (Math.abs(value) < 0.005 ? "0.0" : `${value > 0 ? "+" : "−"}${Math.abs(value).toFixed(1)}`),
+};
+
+function signed(value) {
+  return Math.abs(value) < 0.05 ? "0.0" : `${value > 0 ? "+" : "−"}${Math.abs(value).toFixed(1)}`;
+}
+
+function residualTone(value) {
+  if (value >= 0.4) return "crowded";
+  if (value <= -0.4) return "soft";
+  return "mid";
+}
+
+function plotHost(className, label) {
+  const wrap = el("div", "pack-plot-panel");
+  if (label) wrap.append(el("p", "pc-plot-label", label));
+  const host = el("div", `pc-plot ${className}`);
+  wrap.append(host);
+  return { wrap, host };
+}
+
+function frozenPlot(snapshot, title) {
+  const plate = el("div", "pack-plot");
+  const labels = snapshot.weeks.map(shortDate);
+  const last = snapshot.weeks.length - 1;
+  const paints = [];
+  if (snapshot.kind === "residual") {
+    const { wrap, host } = plotHost("is-pack", "Residual by week, in vol points");
+    plate.append(wrap);
+    paints.push(() =>
+      mountPlot(host, drawResidual)({
+        label: `${title}, frozen at ${labels[last]}.`,
+        labels,
+        values: snapshot.values,
+        week: last,
+        tone: residualTone,
+        tip: (index) => [`Week of ${labels[index]}`, `${signed(snapshot.values[index])} pts`],
+      }),
+    );
+  } else if (snapshot.kind === "sectors") {
+    const { wrap, host } = plotHost("is-pack is-sectors", `Sector percentiles · week of ${labels[last]}`);
+    plate.append(wrap);
+    paints.push(() =>
+      mountPlot(host, drawSectors)({
+        label: `${title}, frozen at ${labels[last]}.`,
+        bars: snapshot.bars.map((bar) => ({ ...bar, available: bar.points !== null })),
+        buckets: SECTOR_BANDS,
+        selected: null,
+        focus: null,
+        tip: (bar) => [`${bar.ticker} · ${bar.short}`, bar.points === null ? bar.note : `${bar.display} · ${bar.note}`],
+        onPick: () => {},
+      }),
+    );
+  } else {
+    plate.classList.toggle("is-pair", snapshot.panels.length > 1);
+    for (const panel of snapshot.panels) {
+      const { wrap, host } = plotHost("is-pack", panel.label);
+      plate.append(wrap);
+      const fmt = FORMATS[panel.format] ?? String;
+      paints.push(() =>
+        mountPlot(host, drawLines)({
+          label: `${panel.label}, frozen at ${labels[last]}.`,
+          labels,
+          week: last,
+          domain: panel.domain,
+          yFormat: fmt,
+          guides: panel.guides,
+          series: panel.series.map((series, index) => ({ values: series.values, color: LINE_COLORS[index % LINE_COLORS.length], label: series.label })),
+          tip: (index) => [`Week of ${labels[index]}`, ...panel.series.map((series) => `${series.label} ${fmt(series.values[index])}`)],
+        }),
+      );
+    }
+  }
+  return { plate, paint: () => paints.forEach((paint) => paint()) };
+}
+
+function figureRow(figures) {
+  const row = el("div", "pack-figures");
+  for (const figure of figures) {
+    const box = el("div", "pack-figure");
+    const value = el("p", "pack-figure-value", figure.value);
+    if (figure.unit) value.append(el("span", "pack-figure-unit", ` ${figure.unit}`));
+    box.append(el("p", "pack-figure-label", figure.label), value, statusPill(figure.pill, figure.tone));
+    row.append(box);
+  }
+  return row;
 }
 
 function appendInline(parent, text) {
@@ -225,59 +337,137 @@ function chartArticle(ref) {
   return block;
 }
 
-function chartSection(week) {
+function chartBlock(ref, index, paints) {
+  const block = el("article", "pack-chart");
+  block.id = `chart-${ref.id}`;
+  const head = el("header", "pack-chart-head");
+  const kicker = el("div", "tile-kicker");
+  kicker.append(el("span", "tile-num", String(index + 1).padStart(2, "0")), el("span", `house h-${ref.house}`, ref.houseLabel), el("span", "pack-chart-nav", ref.nav));
+  const open = el("a", "section-link", "Open on the Desk →");
+  open.href = `../../positioning/charts/#${ref.id}`;
+  head.append(kicker, el("h3", "", ref.title), el("p", "chart-tile-fact", ref.fact), open);
+  const snap = ref.snapshot;
+  const { plate, paint } = frozenPlot(snap, ref.title);
+  paints.push(paint);
+  const foot = el("div", "pack-chart-foot");
+  if (snap.rows?.length) {
+    const rows = el("dl", "pack-rows");
+    for (const item of snap.rows) rows.append(moneyLine(item.label, item.text));
+    foot.append(rows);
+  }
+  foot.append(el("p", "pack-chart-note", `${snap.note} · frozen at the week of ${shortDate(snap.weeks.at(-1))}`));
+  block.append(head, figureRow(snap.figures), plate, foot, chartArticle(ref));
+  return block;
+}
+
+function chartSection(week, paints) {
   const section = el("section", "desk-section");
   section.id = "charts";
   const head = el("div", "section-head");
   const row = el("div", "section-title-row");
   const all = el("a", "section-link", "Open all six on the Desk →");
   all.href = "../../positioning/charts/";
-  row.append(el("h2", "", "Charts"), el("span", "section-count", `Batch ${week.charts.batch} · six refs`), all);
+  row.append(el("h2", "", "Charts"), el("span", "section-count", `Batch ${week.charts.batch} · six charts`), all);
   head.append(
     row,
     el(
       "p",
       "hint",
-      "The six Positioning charts for this week. The article under each card is the week's framing. Each card opens that chart on the Desk.",
+      `The six Positioning charts, frozen at the week of ${shortDate(week.week)}. The article under each chart is the week's framing: who is crowded, who is leaning the other way, and what breaks the read.`,
     ),
   );
-  const tiles = el("div", "chart-tiles");
-  week.charts.refs.forEach((ref, index) => {
-    const block = el("article", "pack-chart");
-    block.id = `chart-${ref.id}`;
-    block.append(chartTile(ref, index), chartArticle(ref));
-    tiles.append(block);
-  });
-  section.append(head, tiles);
+  const list = el("div", "chart-tiles");
+  week.charts.refs.forEach((ref, index) => list.append(chartBlock(ref, index, paints)));
+  section.append(head, list);
   return section;
 }
 
-function pageHead(week) {
+function weekBar(index, week) {
+  const bar = el("div", "pack-bar");
+  const nav = el("nav", "pack-weeks");
+  nav.setAttribute("aria-label", "Pack weeks");
+  for (const row of index.weeks) {
+    const link = el("a", "pack-week");
+    link.href = `?week=${row.isoWeek}`;
+    link.append(el("strong", "", row.isoWeek), el("span", "", row.week === index.latest ? "Latest" : shortDate(row.week)));
+    if (row.week === week.week) {
+      link.classList.add("is-current");
+      link.setAttribute("aria-current", "page");
+    }
+    nav.append(link);
+  }
+  const print = el("button", "pack-print", "Print / Save as PDF");
+  print.type = "button";
+  print.addEventListener("click", () => window.print());
+  bar.append(nav, print);
+  return bar;
+}
+
+function pageHead(index, week) {
   const head = el("section", "page-head");
-  head.append(el("span", "pill", week.read.kicker), el("h1", "", "Soft ↔ Crowded"), el("p", "lede", week.read.lede));
+  head.append(el("span", "pill", week.read.kicker), el("h1", "", week.title), el("p", "lede", week.read.lede));
   const asof = el("p", "asof-line pill");
-  asof.append(el("span", `house h-${week.house}`, week.houseLabel), document.createTextNode(` · ${week.basis}`));
+  asof.append(el("span", `house h-${week.house}`, week.houseLabel), document.createTextNode(` · ${week.asOfLabel} · ${week.basis}`));
   head.append(asof);
+  if (week.week !== index.latest) {
+    const latest = index.weeks.find((row) => row.week === index.latest);
+    const note = el("p", "pack-archived");
+    note.append(document.createTextNode(`Archived week. Every figure is frozen as of ${shortDate(week.week)}. `));
+    const link = el("a", "", `Open ${latest?.title ?? "the latest week"} →`);
+    link.href = "./";
+    note.append(link);
+    head.append(note);
+  }
   return head;
+}
+
+function pickWeek(index, wanted) {
+  if (!wanted) return index.weeks.find((row) => row.week === index.latest);
+  const key = wanted.trim().toUpperCase();
+  return index.weeks.find((row) => row.week === wanted.trim() || row.isoWeek === key);
+}
+
+function missingWeek(index, wanted) {
+  const box = el("section", "page-head");
+  box.append(el("h1", "", "No pack for that week"));
+  box.append(el("p", "lede", `Nothing is filed under ${wanted}. Packs are filed on the Friday desk day, from the 5:00 AM CT open.`));
+  const list = el("ul", "pack-points");
+  for (const row of index.weeks) {
+    const item = el("li");
+    const link = el("a", "", row.title);
+    link.href = `?week=${row.isoWeek}`;
+    item.append(link, document.createTextNode(` · ${row.weekLabel}`));
+    list.append(item);
+  }
+  box.append(list);
+  return box;
 }
 
 async function load(root) {
   const indexRes = await fetch(`${DATA}index.json`);
   if (!indexRes.ok) throw new Error(`index ${indexRes.status}`);
   const index = await indexRes.json();
-  const weekRes = await fetch(`${DATA}${index.latest}.json`);
+  const wanted = new URLSearchParams(window.location.search).get("week");
+  const row = pickWeek(index, wanted);
+  if (!row) {
+    root.replaceChildren(missingWeek(index, wanted));
+    return;
+  }
+  const weekRes = await fetch(`${DATA}${row.file}`);
   if (!weekRes.ok) throw new Error(`week ${weekRes.status}`);
   const week = await weekRes.json();
   if (
     week.sku !== index.sku ||
     !week.read ||
     !Array.isArray(week.buckets) ||
-    !week.charts?.refs?.every((ref) => ref.article?.headline && ref.article?.bodyMarkdown && ref.article?.bias)
+    !week.charts?.refs?.every((ref) => ref.snapshot && ref.article?.headline && ref.article?.bodyMarkdown && ref.article?.bias)
   ) {
     throw new Error("week document is missing pack fields");
   }
-  root.replaceChildren(pageHead(week), readSection(week), sectorSection(week), chartSection(week));
-  document.title = `Soft ↔ Crowded · ${week.weekLabel} · Vault · Positioning %.`;
+  const paints = [];
+  root.replaceChildren(weekBar(index, week), pageHead(index, week), readSection(week), sectorSection(week), chartSection(week, paints));
+  paints.forEach((paint) => paint());
+  document.title = `${week.title} · Vault · Positioning %.`;
 }
 
 document.addEventListener("vault-open", () => {
