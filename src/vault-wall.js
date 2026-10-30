@@ -1,28 +1,16 @@
 /**
- * Vault Vol / Credit wall. Renders after the Vault gate opens the page.
- * Credit Spread Regime reads the committed FRED series in
- * public/data/vault/vol-credit/csr.json.
+ * Vol · Credit · Momentum wall. Renders only after the Vault gate opens the
+ * page. The MAG7 card reads the committed closes in public/data/vault/mag7/
+ * and computes the oscillator in the browser with src/mag7-osc.js. Credit
+ * Spread Regime mounts from src/vault-csr.js.
  */
-import { CSR_COLORS, csrPanel, csrSeries, panelText, panelTones, zColor } from "./csr.js";
-import { createCsrChart } from "./csr-chart.js";
 
-const DATA = `${import.meta.env.BASE_URL}data/vault/vol-credit/`;
-const RANGES = { "3m": 63, "6m": 126, "1y": 252, all: 0 };
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+import "./vault-csr.js";
+import { mountPlot } from "./chart-svg.js";
+import { drawOscillator } from "./mag7-chart.js";
+import { MODES, RANGES, TYPES, buildOscillator, fmtAxis, fmtPct, panelAt, rangeStart } from "./mag7-osc.js";
 
-const PANEL_ROWS = [
-  ["hy", "HY OAS"],
-  ["ig", "IG OAS"],
-  ["excess", "HY-IG Excess"],
-  ["z", "Spread Z"],
-  ["regime", "Regime"],
-  ["percentile", "Percentile"],
-  ["momentum", "Momentum"],
-  ["vix", "VIX"],
-  ["status", "Status"],
-  ["cycle", "Credit Cycle"],
-  ["bias", "Bias"],
-];
+const DATA = `${import.meta.env.BASE_URL}data/vault/mag7/oscillator.json`;
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -31,151 +19,204 @@ function el(tag, className, text) {
   return node;
 }
 
-function rgb(color, alpha = 1) {
-  return `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`;
+function longDate(iso) {
+  return new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 }
 
-function dayLabel(iso) {
-  const [y, m, d] = iso.split("-").map(Number);
-  return `${MONTHS[m - 1]} ${d}, ${y}`;
+function asOfLabel(doc) {
+  const day = longDate(doc.asOf.slice(0, 10));
+  if (doc.lastBar !== "intraday") return `${day} close`;
+  const time = new Date(doc.asOf).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/Chicago" });
+  return `${day} · ${time} CT intraday`;
 }
 
-function toneColor(tone) {
-  if (tone === "bear") return rgb(CSR_COLORS.bear);
-  if (tone === "bear-soft") return rgb(CSR_COLORS.bear, 0.6);
-  if (tone === "bull") return rgb(CSR_COLORS.bull);
-  return rgb(CSR_COLORS.neutral);
-}
-
-function renderPanel(table, panel) {
-  const text = panelText(panel);
-  const tones = panelTones(panel);
-  const head = el("tr", "csr-panel-head");
-  head.append(el("th", "", "Credit Spread Regime"), el("th", ""));
-  head.firstChild.scope = "col";
-  const body = el("tbody");
-  for (const [key, label] of PANEL_ROWS) {
-    const row = el("tr");
-    const name = el("th", "", label);
-    name.scope = "row";
-    const value = el("td", "", text[key]);
-    value.dataset.key = key;
-    value.style.color = key === "z" ? rgb(zColor(panel.z)) : toneColor(tones[key]);
-    row.append(name, value);
-    body.append(row);
-  }
-  const thead = el("thead");
-  thead.append(head);
-  table.replaceChildren(thead, body);
-}
-
-function renderLegend(legend, series, at, hovering) {
-  const panel = csrPanel(series, at);
-  const text = panelText(panel);
-  const name = el("span", "csr-legend-name", "CSR");
-  const value = el("span", "csr-legend-val", text.z);
-  value.style.color = rgb(zColor(panel.z));
-  const regime = el("span", "csr-legend-regime", panel.regime ?? "");
-  regime.style.color = toneColor(panelTones(panel).regime);
-  const parts = [name, value, regime];
-  if (hovering) {
-    parts.push(el("span", "csr-legend-meta", `${dayLabel(panel.date)} · HY ${text.hy} · IG ${text.ig} · excess ${text.excess}`));
-  }
-  const spx = el("span", "csr-legend-spx");
-  spx.append(el("i", "", ""), document.createTextNode(`SPX ${panel.spx.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`));
-  parts.push(spx);
-  legend.replaceChildren(...parts);
-}
-
-function summary(series, doc) {
-  const panel = csrPanel(series);
-  const text = panelText(panel);
-  const metric = series.metric === "hy" ? "HY OAS" : "HY−IG excess";
-  return `Credit Spread Regime, ${metric} Z-score, through ${dayLabel(doc.asOf)}: Z ${text.z}, ${panel.regime}, ${text.percentile} percentile, momentum ${text.momentum}, bias ${panel.bias}. HY ${text.hy}, IG ${text.ig}, excess ${text.excess}.`;
-}
-
-function mountCsr(card, doc) {
-  const frame = card.querySelector("#csr-frame");
-  const legend = card.querySelector("#csr-legend");
-  const table = card.querySelector("#csr-panel");
-  const asof = card.querySelector("#csr-asof");
-  const live = card.querySelector("#csr-live");
-  let series = csrSeries(doc);
-
-  const chart = createCsrChart(frame, {
-    onHover(at) {
-      renderLegend(legend, series, at ?? series.t.length - 1, at !== null);
-    },
-  });
-
-  function paint() {
-    renderPanel(table, csrPanel(series));
-    renderLegend(legend, series, series.t.length - 1, false);
-    const label = summary(series, doc);
-    frame.querySelector("canvas").setAttribute("aria-label", label);
-    live.textContent = label;
-  }
-
-  chart.setSeries(series);
-  paint();
-
-  /* The panel floats in the pane's right margin, so the last session stays clear of it. */
-  const stage = card.querySelector(".csr-stage");
-  const fitGutter = () => {
-    if (getComputedStyle(table).position !== "absolute") return chart.setGutter(null);
-    const right = stage.getBoundingClientRect().right - table.getBoundingClientRect().right;
-    chart.setGutter(table.offsetWidth + right - 66 + 16);
-  };
-  new ResizeObserver(fitGutter).observe(stage);
-  fitGutter();
-  asof.textContent = `Through ${dayLabel(doc.asOf)} · ${doc.series.t.length - series.first} sessions of Z`;
-
-  for (const group of card.querySelectorAll("[data-seg]")) {
-    group.addEventListener("click", (event) => {
-      const button = event.target.closest("button");
-      if (!button) return;
-      for (const other of group.querySelectorAll("button")) {
+function seg(label, items, current, onPick) {
+  const control = el("div", "pchart-control");
+  const id = `mo-${label.toLowerCase()}`;
+  const name = el("span", "pchart-control-label", label);
+  name.id = id;
+  const group = el("div", "seg");
+  group.setAttribute("role", "group");
+  group.setAttribute("aria-labelledby", id);
+  for (const item of items) {
+    const button = el("button", item.id === current ? "is-on" : "", item.label);
+    button.type = "button";
+    button.setAttribute("aria-pressed", String(item.id === current));
+    button.addEventListener("click", () => {
+      for (const other of group.children) {
         const on = other === button;
         other.classList.toggle("is-on", on);
         other.setAttribute("aria-pressed", String(on));
       }
-      if (group.dataset.seg === "range") chart.setRange(RANGES[button.dataset.range] ?? 0);
-      if (group.dataset.seg === "metric") {
-        series = csrSeries(doc, { metric: button.dataset.metric });
-        chart.setSeries(series, { keepView: true });
-        paint();
-      }
+      onPick(item.id);
     });
+    group.append(button);
   }
-
-  const spx = card.querySelector("#csr-spx");
-  spx.addEventListener("click", () => {
-    const on = spx.getAttribute("aria-pressed") !== "true";
-    spx.setAttribute("aria-pressed", String(on));
-    frame.classList.toggle("no-spx", !on);
-    chart.setSpx(on);
-  });
+  control.append(name, group);
+  return control;
 }
 
-async function load(card) {
-  const res = await fetch(`${DATA}csr.json`);
-  if (!res.ok) throw new Error(`csr ${res.status}`);
-  const doc = await res.json();
-  const { t, hy, ig, spx } = doc.series ?? {};
-  if (!t?.length || hy?.length !== t.length || ig?.length !== t.length || spx?.length !== t.length) {
-    throw new Error("csr series is missing columns");
+function row(label, text, tone, extra) {
+  const tr = el("tr");
+  const value = el("td", tone ? `is-${tone}` : "", text);
+  if (extra) value.classList.add(extra);
+  tr.append(el("th", "", label), value);
+  tr.firstChild.scope = "row";
+  return tr;
+}
+
+function renderTable(table, panel) {
+  const head = el("thead");
+  const top = el("tr");
+  for (const text of ["MAG7 Oscillator", "Values"]) {
+    const th = el("th", "", text);
+    th.scope = "col";
+    top.append(th);
   }
-  card.querySelector("#csr-status")?.remove();
-  mountCsr(card, doc);
+  head.append(top);
+  const body = el("tbody");
+  body.append(
+    row("Value", panel.valueText, panel.tone),
+    row("Mode", panel.mode, "neutral"),
+    row("Signal", panel.signal, panel.tone, "is-signal"),
+    row("Type", panel.type),
+    ...panel.legs.map((leg) => row(leg.label, leg.text, leg.tone)),
+    row("Breadth", `${panel.breadth}%`, panel.breadthTone),
+    row("Threshold", panel.threshold),
+  );
+  table.replaceChildren(head, body);
+}
+
+function renderLegend(legend, result, index) {
+  const panel = panelAt(result, index);
+  const parts = [el("span", "mo-legend-name", panel.mode), el("span", "mo-legend-args", `${result.type} ${result.params.momentumLength} ${result.params.smoothingLength}`)];
+  const value = el("span", `mo-legend-value is-${panel.tone}`, fmtAxis(panel.value));
+  parts.push(value);
+  if (index !== result.values.length - 1) parts.push(el("span", "mo-legend-date", longDate(panel.date)));
+  legend.replaceChildren(...parts);
+}
+
+function nowLine(result) {
+  const last = result.values.length - 1;
+  const panel = panelAt(result, last);
+  const lead = `Now ${panel.signal} at ${panel.valueText} with ${panel.breadthUp} of ${result.names.length} names up over ${result.params.momentumLength} sessions.`;
+  if (!result.pivots) return lead;
+  const { caution, stretched } = result.pivots;
+  if (panel.value <= stretched) return `${lead} Through the stretched line at ${fmtPct(stretched)}.`;
+  if (panel.value >= caution) return `${lead} Through the caution line at +${fmtPct(caution)}.`;
+  const gap = panel.value < 0 ? panel.value - stretched : caution - panel.value;
+  const line = panel.value < 0 ? `stretched line at ${fmtPct(stretched)}` : `caution line at +${fmtPct(caution)}`;
+  return `${lead} ${fmtPct(Math.abs(gap))} from the ${line}.`;
+}
+
+function renderKey(key, result) {
+  const { upper, lower } = result.thresholds;
+  const relative = result.mode === "relative";
+  key.querySelector('[data-key="bull"]').textContent = `${relative ? "Outperform" : "Bullish"} above +${fmtPct(upper)}`;
+  key.querySelector('[data-key="bear"]').textContent = `${relative ? "Underperform" : "Bearish"} below ${fmtPct(lower)}`;
+  for (const name of ["caution", "stretched"]) key.querySelector(`[data-key="${name}"]`).hidden = !result.pivots;
+}
+
+function mountCard(doc) {
+  const state = { mode: "mag7", type: "Momentum", range: "desk", cursor: null };
+  const controls = document.getElementById("mo-controls");
+  const plot = document.getElementById("mo-plot");
+  const legend = document.getElementById("mo-legend");
+  const table = document.getElementById("mo-table");
+  const now = document.getElementById("mo-now");
+  const basis = document.getElementById("mo-basis");
+  const key = document.getElementById("mo-key");
+  const status = document.getElementById("mo-status");
+  status.remove();
+
+  const update = mountPlot(plot, drawOscillator);
+  const svgRoot = plot.querySelector("svg");
+  svgRoot.setAttribute("tabindex", "0");
+  let result;
+  let from;
+
+  const paint = () => {
+    const to = result.values.length - 1;
+    const last = to;
+    update({
+      result,
+      from,
+      to,
+      cursor: state.cursor,
+      label: `MAG7 Oscillator, ${result.type}, ${longDate(result.dates[from])} to ${longDate(result.dates[to])}. ${nowLine(result)}`,
+      onHover: (index) => renderLegend(legend, result, index ?? state.cursor ?? last),
+    });
+    renderLegend(legend, result, state.cursor ?? last);
+  };
+
+  const rebuild = () => {
+    result = buildOscillator(doc, { mode: state.mode, type: state.type });
+    from = rangeStart(result, state.range, doc.defaultFrom);
+    state.cursor = null;
+    renderTable(table, panelAt(result, result.values.length - 1));
+    renderKey(key, result);
+    now.textContent = nowLine(result);
+    paint();
+  };
+
+  controls.append(
+    seg("Mode", MODES, state.mode, (id) => {
+      state.mode = id;
+      rebuild();
+    }),
+    seg("Type", TYPES.map((type) => ({ id: type, label: type })), state.type, (id) => {
+      state.type = id;
+      rebuild();
+    }),
+    seg("Range", RANGES, state.range, (id) => {
+      state.range = id;
+      from = rangeStart(result, state.range, doc.defaultFrom);
+      state.cursor = null;
+      paint();
+    }),
+  );
+
+  svgRoot.addEventListener("keydown", (event) => {
+    const to = result.values.length - 1;
+    const at = state.cursor ?? to;
+    let next = null;
+    if (event.key === "ArrowLeft") next = Math.max(from, at - 1);
+    else if (event.key === "ArrowRight") next = Math.min(to, at + 1);
+    else if (event.key === "Home") next = from;
+    else if (event.key === "End") next = to;
+    else if (event.key === "Escape") next = null;
+    else return;
+    event.preventDefault();
+    state.cursor = next;
+    paint();
+  });
+  svgRoot.addEventListener("blur", () => {
+    if (state.cursor === null) return;
+    state.cursor = null;
+    paint();
+  });
+
+  basis.textContent = `Desk · ${asOfLabel(doc)} · ${doc.basis} S&P EW leg reads the equal-weight S&P 500 fund.`;
+  rebuild();
+}
+
+async function load() {
+  const res = await fetch(DATA);
+  if (!res.ok) throw new Error(`oscillator ${res.status}`);
+  const doc = await res.json();
+  if (doc.sku !== "mag7-oscillator" || !Array.isArray(doc.dates) || !doc.names?.every((ticker) => doc.closes?.[ticker]?.length === doc.dates.length)) {
+    throw new Error("oscillator document is missing fields");
+  }
+  mountCard(doc);
 }
 
 document.addEventListener("vault-open", () => {
-  const card = document.getElementById("csr");
+  const card = document.getElementById("mag7");
   if (!card || card.dataset.ready === "1") return;
   card.dataset.ready = "1";
-  load(card).catch((error) => {
+  load().catch((error) => {
     console.error(error);
-    const status = card.querySelector("#csr-status");
-    if (status) status.textContent = "The credit series did not load. Refresh to try again.";
+    const status = document.getElementById("mo-status");
+    if (status) status.textContent = "The oscillator did not load. Refresh to try again.";
   });
 });

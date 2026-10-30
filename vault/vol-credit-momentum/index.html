@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Vol / Credit wall · Vault · Positioning %.</title>
+    <title>Vol · Credit · Momentum · Vault · Positioning %.</title>
     <meta
       name="description"
-      content="Vault Vol / Credit wall: Credit Spread Regime, the HY−IG excess OAS Z-score with regime zones and an SPX overlay, beside Spot Vol Beta. Behind the Vault sign-in wall."
+      content="Vault wall for vol, credit, and mega-cap momentum: the MAG7 Oscillator beside Spot Vol Beta and Credit Spread Regime. Behind the Vault sign-in wall."
     />
     <meta name="theme-color" content="#0a0c10" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
@@ -66,55 +66,44 @@
         <template id="vault-content">
           <nav class="subnav" aria-label="Vault">
             <a class="subnav-back" href="../"><span aria-hidden="true">←</span> Vault</a>
-            <a class="is-current" href="./" aria-current="page">Vol / Credit wall</a>
-            <a href="#svb">Spot Vol Beta</a>
-            <a href="#csr">Credit Spread Regime</a>
+            <a class="is-current" href="./" aria-current="page">Vol · Credit · Momentum</a>
+            <a href="#spot-vol-beta">Spot Vol Beta</a>
+            <a href="#credit-spread-regime">Credit Spread Regime</a>
+            <a href="#mag7">MAG7 Oscillator</a>
           </nav>
 
-          <section class="page-head vc-head-page">
-            <span class="pill vault-pill">
-              <svg class="surface-dial" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.75" /><circle cx="6" cy="6" r="1.5" /></svg>
-              Desk wall
-            </span>
-            <h1>Vol / Credit</h1>
+          <section class="page-head">
+            <span class="pill vault-pill">Desk wall</span>
+            <h1>Vol · Credit · Momentum</h1>
             <p class="lede">
-              Two washout tapes side by side, each with SPX underneath. Spot Vol Beta at 2 or more and credit spreads in Elevated or Stress
-              are the desk's possible-bottom confluence. One alone is not a buy.
+              Three reads on one wall: the vol event gauge, the credit regime, and mega-cap momentum. When all three lean
+              the same way, the tape is telling you something.
             </p>
           </section>
 
-          <div class="vc-wall" id="vc-wall">
-            <article class="vc-card is-slot" id="svb" data-card="svb" aria-labelledby="svb-title">
-              <header class="vc-head">
-                <div class="vc-kicker">
-                  <span class="vc-kicker-label">Vol · Desk</span>
-                  <span class="badge is-soon">Soon</span>
-                </div>
-                <h2 id="svb-title">Spot Vol Beta</h2>
-              </header>
-              <svg class="vc-slot-art" viewBox="0 0 120 64" aria-hidden="true">
-                <path d="M10 58 A50 50 0 0 1 110 58" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="8" stroke-linecap="round" />
-                <path d="M78 15.5 A50 50 0 0 1 110 58" fill="none" stroke="#ef4444" stroke-opacity="0.55" stroke-width="8" stroke-linecap="round" />
-                <path d="M60 58 L84 26" stroke="#f5c451" stroke-width="2.5" stroke-linecap="round" />
-                <circle cx="60" cy="58" r="4" fill="#e0322b" />
-              </svg>
-              <p class="vc-slot-copy">
-                The Spot Vol Beta gauge and its daily-close line with SPX, the 2.0 Vol Event band marked, land in this column beside
-                Credit Spread Regime.
-              </p>
+          <div class="wall-grid" id="wall">
+            <article class="wall-slot" id="spot-vol-beta" aria-labelledby="svb-title">
+              <div class="tile-kicker">
+                <span class="tile-num">01</span>
+                <span class="badge is-soon">Soon</span>
+              </div>
+              <h2 id="svb-title">Spot Vol Beta</h2>
+              <p>Vol event read with an SPX overlay. The 2.0 line marks a possible bottom path.</p>
               <span class="vault-soon">Not open yet</span>
             </article>
 
-            <article class="vc-card" id="csr" data-card="csr" aria-labelledby="csr-title">
-              <header class="vc-head">
-                <div class="vc-kicker">
-                  <span class="vc-kicker-label">Credit · Desk</span>
-                  <span class="vc-asof" id="csr-asof">FRED ICE BofA OAS</span>
+            <article class="pchart csr-card" id="credit-spread-regime" aria-labelledby="csr-title">
+              <header class="pchart-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">02</span>
+                  <span class="house h-desk">Desk</span>
+                  <span class="csr-asof" id="csr-asof">FRED ICE BofA OAS</span>
                 </div>
                 <h2 id="csr-title">Credit Spread Regime</h2>
+                <p class="csr-sub">High yield minus investment grade excess spread as a Z score, with Low, Normal, Elevated, and Stress zones and SPX behind it.</p>
               </header>
 
-              <div class="vc-controls">
+              <div class="csr-controls">
                 <div class="seg" data-seg="range" role="group" aria-label="Window">
                   <button type="button" data-range="3m" aria-pressed="false">3M</button>
                   <button type="button" data-range="6m" aria-pressed="false">6M</button>
@@ -125,7 +114,7 @@
                   <button type="button" class="is-on" data-metric="excess" aria-pressed="true">HY−IG excess</button>
                   <button type="button" data-metric="hy" aria-pressed="false">HY only</button>
                 </div>
-                <button type="button" class="toggle vc-spx" id="csr-spx" aria-pressed="true"><i aria-hidden="true"></i>SPX overlay</button>
+                <button type="button" class="toggle csr-spx" id="csr-spx" aria-pressed="true"><i aria-hidden="true"></i>SPX overlay</button>
               </div>
 
               <div class="csr-stage">
@@ -135,11 +124,11 @@
                 <table class="csr-panel" id="csr-panel" aria-label="Credit Spread Regime statistics"></table>
                 <p class="hint" id="csr-status">Loading the credit series…</p>
               </div>
-              <p class="vc-help">Hover for a session. Click the chart, then scroll to zoom; drag to pan; double-click resets. Arrow keys step sessions.</p>
+              <p class="csr-help">Hover for a session. Click the chart, then scroll to zoom; drag to pan; double-click resets. Arrow keys step sessions.</p>
               <p class="visually-hidden" id="csr-live" aria-live="polite"></p>
 
-              <div class="vc-notes">
-                <div class="vc-key">
+              <div class="csr-notes">
+                <div class="csr-key">
                   <span><i class="k-low" aria-hidden="true"></i>Low · Z under −1</span>
                   <span><i class="k-normal" aria-hidden="true"></i>Normal · −1 to 1</span>
                   <span><i class="k-elevated" aria-hidden="true"></i>Elevated · 1 to 2</span>
@@ -147,21 +136,63 @@
                   <span><i class="k-dot" aria-hidden="true"></i>Stress rolling over</span>
                   <span><i class="k-cross" aria-hidden="true"></i>Calm turning up</span>
                 </div>
-                <div class="vc-read">
+                <div class="csr-read">
                   <h3>How the desk reads it</h3>
                   <ul class="pack-points">
                     <li>The line is the HY−IG excess spread, smoothed with a 5-session EMA, as a Z-score against its trailing 252 sessions. Widening pushes it up.</li>
                     <li>A red dot marks a session with Z at 2 or more while the spread is already narrowing. A green cross marks Z at −2 or less with the spread widening off the lows.</li>
                     <li>Elevated or Stress credit while Spot Vol Beta prints 2 or more is the possible SPX bottom the desk watches for. Credit Z alone is not a buy.</li>
                   </ul>
-                  <p class="vc-invalid"><strong>Invalidation</strong> FRED prints lag a session and holidays carry the prior close. The 252-session window can move a regime with no new event behind it.</p>
+                  <p class="csr-invalid"><strong>Invalidation</strong> FRED prints lag a session and holidays carry the prior close. The 252-session window can move a regime with no new event behind it.</p>
                 </div>
-                <p class="vc-source">
+                <p class="csr-source">
                   Desk · FRED: ICE BofA US High Yield Index OAS (BAMLH0A0HYM2) and ICE BofA US Corporate Index OAS (BAMLC0A0CM), in basis points;
                   S&amp;P 500 close (SP500); Cboe VIX close (VIXCLS). Spreads carried onto S&amp;P 500 sessions. After Collin-Dufresne, Goldstein &amp; Martin (2001)
                   and Gilchrist &amp; Zakrajšek (2012).
                 </p>
               </div>
+            </article>
+
+            <article class="pchart is-wide mo-card" id="mag7" aria-labelledby="mag7-title">
+              <header class="pchart-head mo-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">03</span>
+                  <span class="house h-desk">Desk</span>
+                </div>
+                <h2 id="mag7-title">MAG7 Oscillator</h2>
+                <p class="mo-sub">Equal-weight AAPL · MSFT · GOOGL · AMZN · NVDA · TSLA · META. 14-day momentum %, smoothed over 5 sessions.</p>
+              </header>
+
+              <div class="pchart-controls" id="mo-controls"></div>
+
+              <div class="mo-pane" id="mo-pane">
+                <div class="mo-plot" id="mo-plot"></div>
+                <p class="mo-legend" id="mo-legend" aria-live="off"><span class="mo-legend-name">MAG7</span></p>
+                <table class="mo-table" id="mo-table" aria-label="MAG7 Oscillator, latest bar"></table>
+                <p class="mo-status" id="mo-status">Loading the oscillator…</p>
+              </div>
+
+              <div class="legend mo-key" id="mo-key">
+                <span><i class="sw" style="background: #4caf50"></i><b data-key="bull">Bullish above +2</b></span>
+                <span><i class="sw" style="background: #2196f3"></i>Neutral</span>
+                <span><i class="sw" style="background: #ff5252"></i><b data-key="bear">Bearish below −2</b></span>
+                <span data-key="caution"><i class="mo-dash is-caution"></i>Caution +9</span>
+                <span data-key="stretched"><i class="mo-dash is-stretched"></i>Stretched −5</span>
+              </div>
+
+              <footer class="pchart-foot mo-foot">
+                <div class="pchart-notes">
+                  <p class="mo-now" id="mo-now"></p>
+                  <p class="mo-read">
+                    Mega-cap leadership tape. Above +2 the seven are pulling the index; below −2 they are dragging it.
+                    Breadth is how many of the seven are up over the window. Bearish with breadth under 40% is the
+                    risk-off read, strongest when Credit Spread Regime sits in Elevated and Spot Vol Beta prints 2 or
+                    more. The caution line near +9 and the stretched line near −5 have tended to mark index pivots in
+                    sideways-to-trending tape.
+                  </p>
+                  <p class="basis mo-basis" id="mo-basis"></p>
+                </div>
+              </footer>
             </article>
           </div>
         </template>
@@ -170,7 +201,7 @@
       <footer class="site-footer">
         <div>
           <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
-          <p class="foot-note">Vault · Vol / Credit wall.</p>
+          <p class="foot-note">Vault · Vol · Credit · Momentum.</p>
         </div>
         <nav class="foot-links" aria-label="Footer">
           <a href="../../">Home</a>

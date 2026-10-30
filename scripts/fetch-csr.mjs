@@ -1,5 +1,5 @@
 /**
- * Refresh public/data/vault/vol-credit/csr.json from FRED.
+ * Refresh public/data/vault/credit-spread-regime/csr.json from FRED.
  *
  * ICE BofA OAS (HY BAMLH0A0HYM2, IG BAMLC0A0CM) and the Cboe VIX close are
  * carried forward onto S&P 500 sessions (FRED SP500), so the Z window counts
@@ -13,7 +13,7 @@ import { fileURLToPath } from "node:url";
 import { CSR_PARAMS, csrPanel, csrSeries } from "../src/csr.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const out = join(root, "public/data/vault/vol-credit/csr.json");
+const out = join(root, "public/data/vault/credit-spread-regime/csr.json");
 
 const SERIES = {
   hy: { id: "BAMLH0A0HYM2", label: "ICE BofA US High Yield Index Option-Adjusted Spread", scale: 100 },
