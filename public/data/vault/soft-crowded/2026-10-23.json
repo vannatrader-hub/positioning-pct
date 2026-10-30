@@ -209,7 +209,15 @@
         "house": "desk",
         "houseLabel": "Desk",
         "deskSection": "vol",
-        "fact": "Desk · Soft Vol −1.2 pts"
+        "fact": "Desk · Soft Vol −1.2 pts",
+        "article": {
+          "headline": "Soft Vol at −1.2 leaves the long under-hedged",
+          "bodyMarkdown": "Desk Soft Vol prints −1.2 points for the week of Oct 23. The residual is the VIX against what the S&P 500 implies. Below zero the VIX is cheap, and −1.2 is a Soft Vol print, not fair. The week read flags the same gap.\n\nThat cheapness is the crowding tell. Hedge funds, macro funds, mutual funds, and CTAs are dumb money on this desk, and a residual this negative says that complex is long without paying for insurance. Crowded long plus offered vol is a pullback setup. Dealers and sharpies are the other side of the short-vol long: they warehouse the cheap VIX rather than chase the unhedged book. Commercials are not bidding protection either. Smart money is positioned against the complacent long.\n\nFade the long. The plan is a pullback while the residual holds at −1.2, not a new index long. The reader places any trade.",
+          "bias": "fade-long",
+          "dumbMoney": "Hedge funds, macro funds, mutual funds, and CTAs are long the tape while vol stays offered.",
+          "smartMoney": "Dealers and sharpies warehouse that cheap VIX; commercials are not bidding protection.",
+          "invalidation": "Invalid if the Soft Vol residual rises back through zero and the VIX is no longer cheap versus the S&P 500."
+        }
       },
       {
         "id": "sectors",
@@ -218,7 +226,15 @@
         "house": "jpm",
         "houseLabel": "JPM",
         "deskSection": "sectors",
-        "fact": "JPM · 5 soft · 3 mid · 2 crowded"
+        "fact": "JPM · 5 soft · 3 mid · 2 crowded",
+        "article": {
+          "headline": "Technology and energy are the crowded longs",
+          "bodyMarkdown": "Ten JPM sector prints for Oct 23 sit in four columns: two extreme soft, three soft, three mid, and two crowded. Financials are the soft extreme at 0.18 after falling 4 points, with staples at 0.21. Utilities sit at 0.33, health care at 0.34, and industrials at 0.35. Materials 0.46, discretionary 0.48, and communication services 0.49 are mid. Energy rose 2 points to 0.69 and technology rose 1 point to 0.75. Both are crowded and still building. No sector changed columns. Real Estate has no print on this monitor.\n\nThe stretch sits at the crowded end. Hedge funds, macro funds, mutual funds, and CTAs are the dumb money that fills a sector past 0.67, and they are still adding technology and energy. That is a crowded long. Financials at 0.18 are where that same complex has already left. Sharpies and dealers fade the two crowded prints rather than fund them. Commercials are not lined up with technology at 0.75. Smart money is positioned against those longs.\n\nFade the crowded longs. The plan is a pullback in technology and energy while both are still building. Financials are the uncrowded side of the same map, not a reason to call the whole tape soft. The reader places any trade.",
+          "bias": "fade-long",
+          "dumbMoney": "Hedge funds, macro funds, mutual funds, and CTAs are still building technology and energy.",
+          "smartMoney": "Sharpies and dealers fade those two crowded prints; commercials are not chasing 0.75 or 0.69.",
+          "invalidation": "Invalid if technology and energy both stay crowded by rising further, rather than cooling back under 0.67."
+        }
       },
       {
         "id": "broad-equity",
@@ -227,7 +243,15 @@
         "house": "jpm",
         "houseLabel": "JPM",
         "deskSection": "broad",
-        "fact": "JPM · Equities 0.66 · 66th %ile"
+        "fact": "JPM · Equities 0.66 · 66th %ile",
+        "article": {
+          "headline": "Equities at 0.66 have eased, not cleared",
+          "bodyMarkdown": "Broad equities read 0.66 on the JPM monitor for Oct 23, the 66th percentile. The line has eased from a September peak near 0.80. On the Soft ↔ Crowded scale, 0.66 is the top of mid and just under the crowded cut at 0.67. The book is still long. It is no longer the extreme that printed in September.\n\nDumb money still owns that long. Hedge funds, macro funds, mutual funds, and CTAs are the cohorts this monitor records, and they have trimmed rather than flipped. A hard fade fits an extreme. At 0.66 the extreme has already bled from 0.80. Respect the long that remains. It is not a full short. Dealers and sharpies are not adding index length into what is left. Commercials fade the residual long; they do not fund a fresh chase. Smart money is positioned against that leftover long, not against a washout.\n\nTreat it as a light fade of leftover length. Pullbacks fit an easing long better than new longs do, and a full short waits for a return toward 0.80. The reader places any trade.",
+          "bias": "fade-long",
+          "dumbMoney": "Hedge funds, macro funds, mutual funds, and CTAs are still net long equities at the 66th percentile.",
+          "smartMoney": "Dealers and sharpies are not adding length; commercials fade what is left of the long off 0.80.",
+          "invalidation": "Invalid if the Equities line reclaims 0.80 and the September crowding is back."
+        }
       },
       {
         "id": "credit-stress",
@@ -236,7 +260,15 @@
         "house": "desk",
         "houseLabel": "Desk",
         "deskSection": "credit",
-        "fact": "Desk · CDX 351 bp · BBB−AAA 0.63"
+        "fact": "Desk · CDX 351 bp · BBB−AAA 0.63",
+        "article": {
+          "headline": "Credit stress at the 79th challenges the long",
+          "bodyMarkdown": "Credit stress sits at the 79th percentile for the week of Oct 23. The panel prints CDX at 351 bp and the BBB−AAA spread at 0.63. Stress is elevated. The cost of insuring corporate credit is the number an equity long has to respect.\n\nThe stretch is the complacent long, not a fresh short. Hedge funds, macro funds, mutual funds, and CTAs are dumb money when they stay long risk while credit charges this much for it. A 79th-percentile print, CDX at 351 bp and BBB−AAA at 0.63, says that crowded long is fighting the credit tape. Dealers and commercials are on the side of the wider spread. Sharpies fade the equity long that treats this panel as background. Smart money is positioned against the dumb-money long.\n\nFade that long. The plan is a pullback while stress holds at the 79th, not an add of credit risk and not a chase of index length. The reader places any trade.",
+          "bias": "fade-long",
+          "dumbMoney": "Hedge funds, macro funds, mutual funds, and CTAs are still long risk while credit stress sits at the 79th.",
+          "smartMoney": "Dealers and commercials side with the wider spread; sharpies fade the equity long that ignores it.",
+          "invalidation": "Invalid if stress leaves the 79th percentile by tightening, with CDX under 351 bp and BBB−AAA under 0.63."
+        }
       },
       {
         "id": "fund-managers",
@@ -245,7 +277,15 @@
         "house": "boa",
         "houseLabel": "BoA",
         "deskSection": "retail",
-        "fact": "BoA · Long global semis 53% · cash 3.9%"
+        "fact": "BoA · Long global semis 53% · cash 3.9%",
+        "article": {
+          "headline": "Cash at 3.9% with semis the crowded long",
+          "bodyMarkdown": "The BoA fund-manager survey names long global semis as the crowded trade at 53%, with cash at 3.9%. Cash under 4% is the line this chart uses to mark a crowded market, and 3.9% is through it. One answer holds a majority. The graph is a single crowded long with cash already spent.\n\nFund managers are the dumb-money print. Hedge funds, macro funds, mutual funds, and CTAs crowd the same way when a trade gets this consensual, and 53% in one answer plus cash at 3.9% is an extreme long. When dumb money is this crowded long, the read is to fade it. Sharpies and dealers are the other side of a 53% semi consensus. Commercials do not add length into a survey this one-sided. Smart money is positioned against that crowded long.\n\nFade the long. A pullback in the semi complex is the plan that matches cash at 3.9% and a 53% answer. The reader places any trade.",
+          "bias": "fade-long",
+          "dumbMoney": "Mutual funds, hedge funds, macro funds, and CTAs are crowded long global semis at 53%, with cash at 3.9%.",
+          "smartMoney": "Sharpies, dealers, and commercials are against that 53% semi consensus and the sub-4% cash level.",
+          "invalidation": "Invalid if cash rises back above 4% and the long-global-semis answer drops under 53%."
+        }
       },
       {
         "id": "risk-appetite",
@@ -254,7 +294,15 @@
         "house": "gs",
         "houseLabel": "GS",
         "deskSection": "broad",
-        "fact": "GS · risk appetite +0.9 z · 73rd %ile"
+        "fact": "GS · risk appetite +0.9 z · 73rd %ile",
+        "article": {
+          "headline": "Equity sentiment at +1.6 is past stretched",
+          "bodyMarkdown": "GS risk appetite prints +0.9 z for Oct 23, the 73rd percentile. Equity sentiment, named in the week read, is +1.6 and above the stretched line. Risk appetite is firm rather than washed out, and sentiment is the print that has already crossed the line this chart treats as stretched. The book is long and extended.\n\nDumb money is the stretched side. Hedge funds, macro funds, mutual funds, and CTAs sit inside a sentiment reading, and +1.6 above the stretched line means that complex is crowded long. A +0.9 z risk-appetite print at the 73rd percentile confirms the long. It does not clear it. Dealers and sharpies fade a sentiment print that far through the stretched line. Commercials are not adding risk at +0.9 z to keep up. Smart money is positioned against the dumb-money long.\n\nFade the long. The plan is a pullback while equity sentiment holds at +1.6 and risk appetite holds at +0.9 z, not a new long above the stretched line. The reader places any trade.",
+          "bias": "fade-long",
+          "dumbMoney": "Hedge funds, macro funds, mutual funds, and CTAs are the stretched long inside equity sentiment at +1.6.",
+          "smartMoney": "Dealers and sharpies fade sentiment past the stretched line; commercials are not adding risk at +0.9 z.",
+          "invalidation": "Invalid if equity sentiment drops back through the stretched line and risk appetite falls from the 73rd percentile."
+        }
       }
     ]
   }
