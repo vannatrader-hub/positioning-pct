@@ -3172,12 +3172,12 @@ body:has(.cc[open]) { overflow: hidden; }
 
 .vault-next a:hover { border-color: rgba(245, 196, 81, 0.45); }
 
-.wall-status { margin: 0 0 22px; }
-.wall-status-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin-bottom: 10px; }
-.wall-status-head h2 { margin: 0; font-size: 15px; letter-spacing: -0.01em; }
-.wall-status-head .hint { margin: 0; }
+.wall-asof { margin: 0 0 22px; }
+.wall-asof-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin-bottom: 10px; }
+.wall-asof-head h2 { margin: 0; font-size: 15px; letter-spacing: -0.01em; }
+.wall-asof-head .hint { margin: 0; }
 
-.wall-status-list {
+.wall-asof-list {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
@@ -3186,7 +3186,7 @@ body:has(.cc[open]) { overflow: hidden; }
   list-style: none;
 }
 
-.wall-status-item {
+.wall-asof-item {
   display: grid;
   gap: 3px;
   height: 100%;
@@ -3199,12 +3199,12 @@ body:has(.cc[open]) { overflow: hidden; }
   text-decoration: none;
 }
 
-.wall-status-item.is-stale { border-left-color: var(--gold); }
-.wall-status-item.is-missing { border-left-color: var(--red); }
-.wall-status-item strong { font-size: 13px; }
-.wall-status-text { font-size: 12.5px; line-height: 1.35; color: var(--ink-2); }
-.wall-status-age { font-size: 11.5px; line-height: 1.35; color: var(--faint); }
-.wall-status-item.is-stale .wall-status-age { color: var(--gold); }
+.wall-asof-item.is-stale { border-left-color: var(--gold); }
+.wall-asof-item.is-missing { border-left-color: var(--red); }
+.wall-asof-item strong { font-size: 13px; }
+.wall-asof-text { font-size: 12.5px; line-height: 1.35; color: var(--ink-2); }
+.wall-asof-age { font-size: 11.5px; line-height: 1.35; color: var(--faint); }
+.wall-asof-item.is-stale .wall-asof-age { color: var(--gold); }
 
 .vault-pack-list {
   display: grid;
@@ -5736,7 +5736,7 @@ a.nt-row:hover .nt-arrow { background: var(--ink); color: #fff; }
   .gauge-copy { grid-template-columns: 1fr; }
   .tile, .hub-grid.is-four .hub-tile { min-height: 0; }
   .vault-pack-weeks { grid-column: auto; }
-  .wall-status-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wall-asof-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pf-open-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pf-week-cells { grid-template-columns: 1fr; }
   .vault-dash { grid-template-columns: repeat(2, minmax(0, 1fr)); }

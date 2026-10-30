@@ -117,20 +117,20 @@ async function render(host) {
   ]);
   const lines = statusLines({ svbLatest, svbSeries, csr, mag7, breadth });
   const today = centralToday();
-  const list = el("ol", "wall-status-list");
+  const list = el("ol", "wall-asof-list");
   for (const [id, name] of CARDS) {
     const line = lines.find((item) => item.id === id);
     const item = el("li");
-    const link = el("a", "wall-status-item");
+    const link = el("a", "wall-asof-item");
     link.href = `#${id}`;
     link.append(el("strong", "", name));
     if (!line) {
       link.classList.add("is-missing");
-      link.append(el("span", "wall-status-text", "Data did not load"), el("span", "wall-status-age", "No reading shown"));
+      link.append(el("span", "wall-asof-text", "Data did not load"), el("span", "wall-asof-age", "No reading shown"));
     } else {
       const age = freshness(line.date, today);
       link.classList.add(`is-${age.tone}`);
-      link.append(el("span", "wall-status-text", line.text), el("span", "wall-status-age", `${age.text} · ${line.note}`));
+      link.append(el("span", "wall-asof-text", line.text), el("span", "wall-asof-age", `${age.text} · ${line.note}`));
     }
     item.append(link);
     list.append(item);
@@ -140,7 +140,7 @@ async function render(host) {
 
 if (typeof document !== "undefined") {
   document.addEventListener("vault-open", () => {
-    const host = document.getElementById("wall-status");
+    const host = document.getElementById("wall-asof");
     if (!host || host.dataset.ready === "1") return;
     host.dataset.ready = "1";
     render(host).catch((error) => {

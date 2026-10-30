@@ -1737,6 +1737,11 @@ for (const file of [...deskPages, "404.html"]) {
 for (const file of ["vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "vault/portfolio/index.html"]) {
   assert(readFileSync(join(root, file), "utf8").includes('href="../archive/"'), `${file} links to the archive from the Vault nav`);
 }
+for (const file of Object.keys(vaultSurface)) {
+  const ids = [...readFileSync(join(root, file), "utf8").matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
+  const repeated = ids.filter((id, at) => ids.indexOf(id) !== at);
+  assert(!repeated.length, `${file} repeats ids across the wall and the template: ${repeated}`);
+}
 const archiveEntries = [...deskWeekEntries(packIndex), ...newTodayDays(nt.items)];
 assert(archiveEntries.filter((entry) => entry.kind === "pack").length === WEEKS.length, "archive lists every committed Desk Friday");
 assert(

@@ -8,7 +8,7 @@
 
 import "./vault-svb.js";
 import "./vault-csr.js";
-import "./vault-wall-status.js";
+import "./vault-wall-asof.js";
 import { mountPlot } from "./chart-svg.js";
 import { drawOscillator } from "./mag7-chart.js";
 import { MODES, RANGES, TYPES, buildOscillator, fmtAxis, fmtPct, panelAt, rangeStart } from "./mag7-osc.js";
