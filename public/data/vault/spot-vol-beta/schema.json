@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vannatrader-hub.github.io/positioning-pct/data/vault/spot-vol-beta/schema.json",
+  "title": "Spot Vol Beta daily closes",
+  "description": "Append one object to points at each session close. One point per cash session, dates ascending. The intraday gauge is a separate document (latest) and is not a close until it is appended. Card labels stay desk and bank names.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sku", "cadence", "signal", "deskBeta", "formula", "formulaLabel", "note", "points"],
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "sku": { "const": "spot-vol-beta" },
+    "cadence": { "const": "1d-close", "description": "One point per session, taken at the close." },
+    "signal": { "const": 2, "description": "House possible-bottom band. A print at or above this level is the signal." },
+    "deskBeta": { "const": -0.7, "description": "Coefficient in the desk estimate: UV delta minus (deskBeta times SPX percent)." },
+    "formula": { "const": "UV_Δ − (−0.70 × SPX%)", "x-banned-sources": true },
+    "formulaLabel": { "const": "desk estimate", "x-banned-sources": true },
+    "note": {
+      "type": "string",
+      "minLength": 40,
+      "x-banned-sources": true,
+      "description": "House read shown under the chart."
+    },
+    "points": {
+      "type": "array",
+      "minItems": 20,
+      "description": "Append one close per session. Do not rewrite earlier points.",
+      "items": { "$ref": "#/$defs/close" }
+    }
+  },
+  "$defs": {
+    "close": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date", "svb", "spx"],
+      "properties": {
+        "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "svb": { "type": "number", "minimum": -8, "maximum": 12, "description": "Spot Vol Beta at the session close." },
+        "spx": { "type": "number", "minimum": 100, "maximum": 20000, "description": "SPX level at that same close, for the overlay." },
+        "vixCloseMove": { "type": "number", "minimum": -30, "maximum": 30, "description": "VIX close-to-close change in points. A move of 2 or more is a formal vol event." }
+      }
+    },
+    "latest": {
+      "title": "Spot Vol Beta gauge",
+      "description": "Primary gauge for the wall, plus the two inputs the desk estimate is computed from. Replace this file through the session. Append the close to the series only when the session is done.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["session", "asOf", "asOfLabel", "live", "closed", "source", "feedLabel", "gauge", "uvDelta", "spxPct", "spx"],
+      "properties": {
+        "$schema": { "type": "string", "minLength": 1 },
+        "session": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "asOf": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}[+-]\\d{2}:\\d{2}$" },
+        "asOfLabel": { "type": "string", "minLength": 1, "x-banned-sources": true },
+        "live": { "type": "boolean", "description": "False while the gauge is a committed value and the live feed is not wired." },
+        "closed": { "type": "boolean", "description": "True only after this session has been appended to the close series." },
+        "source": { "const": "desk-gauge", "description": "Primary gauge field. A later feed writes the same field. The card does not name a vendor." },
+        "feedLabel": { "type": "string", "minLength": 1, "x-banned-sources": true },
+        "gauge": { "type": "number", "minimum": -8, "maximum": 12 },
+        "uvDelta": { "type": "number", "description": "Underlying vol change, in vol points, used by the desk estimate." },
+        "spxPct": { "type": "number", "description": "Session SPX percent versus the prior close. Down 1.20 is -1.2." },
+        "spx": { "type": "number", "minimum": 100, "maximum": 20000 }
+      }
+    }
+  }
+}

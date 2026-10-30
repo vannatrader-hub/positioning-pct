@@ -6,7 +6,7 @@
     <title>Vol · Credit · Momentum · Vault · Positioning %.</title>
     <meta
       name="description"
-      content="Vault wall for vol, credit, and mega-cap momentum: the MAG7 Oscillator beside Spot Vol Beta and Credit Spread Regime. Behind the Vault sign-in wall."
+      content="Vault wall for vol, credit, and mega-cap momentum: Spot Vol Beta, Credit Spread Regime, and the MAG7 Oscillator. Behind the Vault sign-in wall."
     />
     <meta name="theme-color" content="#0a0c10" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
@@ -82,25 +82,30 @@
           </section>
 
           <div class="wall-grid" id="wall">
-            <article class="wall-slot" id="spot-vol-beta" aria-labelledby="svb-title">
-              <div class="tile-kicker">
-                <span class="tile-num">01</span>
-                <span class="badge is-soon">Soon</span>
+            <article class="pchart svb-card" id="spot-vol-beta" aria-labelledby="svb-title">
+              <header class="pchart-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">01</span>
+                  <span class="basis svb-asof" id="svb-asof"></span>
+                  <span class="house h-desk">Desk</span>
+                </div>
+                <h2 id="svb-title">Spot Vol Beta</h2>
+                <p class="wall-sub">The gauge and the desk estimate, on one close per session with SPX behind the line. The band is the house possible-bottom signal at 2.</p>
+              </header>
+              <div id="svb-body">
+                <p class="hint" id="svb-status">Loading Spot Vol Beta…</p>
               </div>
-              <h2 id="svb-title">Spot Vol Beta</h2>
-              <p>Vol event read with an SPX overlay. The 2.0 line marks a possible bottom path.</p>
-              <span class="vault-soon">Not open yet</span>
             </article>
 
             <article class="pchart csr-card" id="credit-spread-regime" aria-labelledby="csr-title">
               <header class="pchart-head">
                 <div class="tile-kicker">
                   <span class="tile-num">02</span>
-                  <span class="house h-desk">Desk</span>
                   <span class="csr-asof" id="csr-asof">FRED ICE BofA OAS</span>
+                  <span class="house h-desk">Desk</span>
                 </div>
                 <h2 id="csr-title">Credit Spread Regime</h2>
-                <p class="csr-sub">High yield minus investment grade excess spread as a Z score, with Low, Normal, Elevated, and Stress zones and SPX behind it.</p>
+                <p class="wall-sub">High yield minus investment grade excess spread as a Z score, with Low, Normal, Elevated, and Stress zones and SPX behind it.</p>
               </header>
 
               <div class="csr-controls">

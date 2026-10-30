@@ -1,10 +1,12 @@
 /**
  * Vol · Credit · Momentum wall. Renders only after the Vault gate opens the
  * page. The MAG7 card reads the committed closes in public/data/vault/mag7/
- * and computes the oscillator in the browser with src/mag7-osc.js. Credit
- * Spread Regime mounts from src/vault-csr.js.
+ * and computes the oscillator in the browser with src/mag7-osc.js. Spot Vol
+ * Beta mounts from src/vault-svb.js and Credit Spread Regime from
+ * src/vault-csr.js.
  */
 
+import "./vault-svb.js";
 import "./vault-csr.js";
 import { mountPlot } from "./chart-svg.js";
 import { drawOscillator } from "./mag7-chart.js";
