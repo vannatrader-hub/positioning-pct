@@ -6,11 +6,17 @@
  * point at the close and leave earlier points alone.
  */
 
-import { TONE, drawDualLine, mountPlot } from "./chart-svg.js";
+import { TONE, drawDualLine, mountPlot, svg } from "./chart-svg.js";
 
 const DATA = `${import.meta.env?.BASE_URL ?? "/"}data/vault/spot-vol-beta/`;
 
 export const SIGNAL = 2;
+export const DIAL_MIN = 0;
+export const DIAL_MAX = 4;
+const DIAL_GOLD = "#f5c451";
+const DIAL_TRACK = "rgba(255, 255, 255, 0.16)";
+const DIAL_NEEDLE = "#e7eaef";
+const DIAL_HUB = "#161b23";
 export const DESK_BETA = -0.7;
 export const FORMULA = "UV_Δ − (−0.70 × SPX%)";
 export const FORMULA_LABEL = "desk estimate";
@@ -25,6 +31,89 @@ export function deskEstimate(uvDelta, spxPct, beta = DESK_BETA) {
 
 export function signalOn(value, level = SIGNAL) {
   return Number.isFinite(value) && value >= level;
+}
+
+/** Needle position on the 0–4 house dial. The possible-bottom band starts at 2, straight up. */
+export function gaugeFraction(value, min = DIAL_MIN, max = DIAL_MAX) {
+  if (!Number.isFinite(value) || max <= min) return 0;
+  return Math.min(1, Math.max(0, (value - min) / (max - min)));
+}
+
+function polar(cx, cy, r, deg) {
+  const rad = (deg * Math.PI) / 180;
+  return [cx + r * Math.cos(rad), cy - r * Math.sin(rad)];
+}
+
+function arcPath(cx, cy, r, fromDeg, toDeg) {
+  const [x1, y1] = polar(cx, cy, r, fromDeg);
+  const [x2, y2] = polar(cx, cy, r, toDeg);
+  return `M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`;
+}
+
+function svbDial(value, level) {
+  const cx = 120;
+  const cy = 108;
+  const r = 74;
+  const angle = (fraction) => 180 - fraction * 180;
+  const on = signalOn(value, level);
+  const root = svg("svg", { viewBox: "0 0 240 142", class: "svb-dial", "aria-hidden": "true" });
+  const band = gaugeFraction(level);
+  root.append(
+    svg("path", {
+      d: arcPath(cx, cy, r, angle(0), angle(1)),
+      fill: "none",
+      stroke: DIAL_TRACK,
+      "stroke-width": 14,
+      "stroke-linecap": "butt",
+    }),
+    svg("path", {
+      class: "svb-dial-band",
+      d: arcPath(cx, cy, r, angle(band), angle(1)),
+      fill: "none",
+      stroke: DIAL_GOLD,
+      "stroke-width": 14,
+      "stroke-linecap": "butt",
+    }),
+  );
+  for (let step = 0; step <= 8; step += 1) {
+    const a = angle(step / 8);
+    const major = step % 2 === 0;
+    const [x1, y1] = polar(cx, cy, r - 12, a);
+    const [x2, y2] = polar(cx, cy, r - (major ? 22 : 18), a);
+    root.append(
+      svg("line", {
+        x1: x1.toFixed(2),
+        y1: y1.toFixed(2),
+        x2: x2.toFixed(2),
+        y2: y2.toFixed(2),
+        stroke: major ? "rgba(255, 255, 255, 0.55)" : "rgba(255, 255, 255, 0.28)",
+        "stroke-width": major ? 1.6 : 1,
+      }),
+    );
+  }
+  root.append(
+    svg("text", { x: cx - r, y: cy + 22, "text-anchor": "middle", class: "svb-dial-tick", "font-size": 12, "font-weight": 650 }, "0"),
+    svg("text", { x: cx, y: cy - r - 16, "text-anchor": "middle", class: "svb-dial-mark", "font-size": 12, "font-weight": 700 }, "≥ 2"),
+    svg("text", { x: cx + r, y: cy + 22, "text-anchor": "middle", class: "svb-dial-tick", "font-size": 12, "font-weight": 650 }, String(DIAL_MAX)),
+  );
+  const a = angle(gaugeFraction(value));
+  const rad = (a * Math.PI) / 180;
+  const nx = Math.cos(rad);
+  const ny = -Math.sin(rad);
+  const px = -ny;
+  const py = nx;
+  const tip = r - 20;
+  const base = 6.5;
+  root.append(
+    svg("path", {
+      class: "svb-needle",
+      d: `M ${(cx + px * base).toFixed(2)} ${(cy + py * base).toFixed(2)} L ${(cx + nx * tip).toFixed(2)} ${(cy + ny * tip).toFixed(2)} L ${(cx - px * base).toFixed(2)} ${(cy - py * base).toFixed(2)} Z`,
+      fill: on ? DIAL_GOLD : DIAL_NEEDLE,
+    }),
+    svg("circle", { cx, cy, r: 9, fill: DIAL_HUB, stroke: on ? DIAL_GOLD : "rgba(255, 255, 255, 0.4)", "stroke-width": 2 }),
+    svg("circle", { cx, cy, r: 3.2, fill: on ? DIAL_GOLD : "#f3f4f6" }),
+  );
+  return root;
 }
 
 export function formatSvb(value) {
@@ -139,11 +228,14 @@ function swatch(className) {
 
 function svbBody(series, view) {
   const read = el("div", "svb-read");
-  const primary = el("div");
+  const primary = el("div", "svb-hero");
+  const instrument = el("div", "svb-instrument");
+  instrument.append(svbDial(Number(view.gauge), series.signal ?? SIGNAL));
   const gauge = el("p", view.gaugeOn ? "pct svb-gauge is-signal" : "pct svb-gauge", view.gauge);
   gauge.dataset.svbGauge = view.gauge;
   gauge.setAttribute("aria-label", `Spot Vol Beta ${view.gauge}`);
-  primary.append(gauge, el("p", "pct-kicker", "Spot Vol Beta"), statusPill(view.gaugeOn ? "Possible bottom" : "Below 2", view.gaugeOn ? "signal" : "mid"), el("p", "svb-session", view.session));
+  instrument.append(gauge);
+  primary.append(instrument, el("p", "pct-kicker", "Spot Vol Beta"), statusPill(view.gaugeOn ? "Possible bottom" : "Below 2", view.gaugeOn ? "signal" : "mid"), el("p", "svb-session", view.session));
 
   const desk = el("div", "svb-desk");
   const est = el("p", view.estimateOn ? "svb-est is-signal" : "svb-est", view.estimate);
