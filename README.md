@@ -106,7 +106,7 @@ Preview serves the production build at http://127.0.0.1:4173/positioning-pct/
 
 `vault/index.html` renders the wall by default and keeps the Vault content in an inert `<template id="vault-content">`. `src/vault-gate.js` decides what happens next, based on `VITE_CLERK_PUBLISHABLE_KEY` at build time:
 
-- Key set. Clerk (`@clerk/clerk-js`, loaded on demand) sends a magic link to the email entered. Opening the link signs the visitor in and the wall swaps for the Vault, with a quiet "Signed in as … / Sign out" line. Known emails sign in; new emails sign up through the same link, or join the Clerk waitlist when sign-up is restricted.
+- Key set. Clerk (`@clerk/clerk-js`, loaded on demand) sends a magic link to the email entered. The browser that opens the link signs in on this page when the session belongs to it, and the wall swaps for the Vault, with a quiet "Signed in as … / Sign out" line. If the link was confirmed in a different tab, that tab opens Vault and this one says so. Known emails sign in; new emails sign up through the same link, or join the Clerk waitlist when sign-up is restricted.
 - Key empty. Same card, but the button reads "Request access". The email is kept in this browser's `localStorage` (`positioning-pct-vault-requests`) and nothing is sent anywhere. Clerk is left out of the build entirely.
 
 To turn on magic links with Clerk's Hobby plan (no cost, up to 50,000 monthly retained users):
@@ -116,6 +116,10 @@ To turn on magic links with Clerk's Hobby plan (no cost, up to 50,000 monthly re
 3. Optional: under **Restrictions**, set sign-up to Restricted or Waitlist (or add an allowlist) so only invited emails open Vault.
 4. Copy the publishable key from **API keys**. Locally: `cp .env.example .env.local`, paste it into `VITE_CLERK_PUBLISHABLE_KEY`, and restart `npm run dev`. `.env.local` is git-ignored.
 5. For GitHub Pages: **Settings → Secrets and variables → Actions → Variables → New repository variable**, name `VITE_CLERK_PUBLISHABLE_KEY`. The Pages workflow passes it to the build. Re-run **Deploy to GitHub Pages**.
+6. In the Clerk Dashboard, add the Vault URL to **Allowed redirect URLs** (Configure → Developers → Paths, or the redirect allowlist next to the email-link setting). The live entry is `https://vannatrader-hub.github.io/positioning-pct/vault/`. For local dev, also add `http://localhost:5173/positioning-pct/vault/`. The link in the email returns to that URL. If it is missing, Clerk verifies and then cannot hand the session back to this page.
+7. **Require the same device and browser** sits on the email-link setting and defaults to on. On: the browser that clicks the link signs in only when it is the same browser that asked. A different browser shows a short note, and the tab that asked opens Vault. Off: a click on another device can finish there too. Leave it on unless mail is read on a phone while the Desk is open on a computer.
+
+The return stays on this page. Vault does not send the browser through a second redirect after verify. On `github.io` the development instance keeps the session in the dev-browser token (`__clerk_db_jwt`), and a second navigation (including Clerk's `/client/touch` hop) comes back to the signed-out wall.
 
 A publishable key is meant to ship in browser code, but it still lives only in env and repo settings, never in a committed file. Clerk secret keys (`sk_…`) are never needed by this site. Clerk production instances need a domain you own; on `github.io`, use the development instance key until the site moves to its own domain.
 

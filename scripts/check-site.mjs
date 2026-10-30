@@ -8,6 +8,7 @@ import { breakeven, chartLevels, resolveExpiry } from "../src/flow-chart.js";
 import { SIDES, alertLabel, sortPlays } from "../src/options-flow.js";
 import { SECTION_ORDER, STATUS, allPlays, levelKind, outcomeLabel, sortCards, spotlightLevels, spotlightLines } from "../src/spotlights.js";
 import { activeSpotlights, earningsBoxes, spotlightStar, tradeDates } from "../src/scorecard.js";
+import { emailLinkAttemptPlan, emailLinkReturnPlan, readClerkLinkCallback, withoutClerkQuery } from "../src/vault-link.js";
 import { NT_SECTIONS, SOURCE_LABELS, deskDay, deskDayStart, deskWindow, itemsForDay, windowLabel } from "../src/new-today-window.js";
 import {
   CHARTS,
@@ -842,6 +843,27 @@ assert(!/vault-hero|vault-tile|vault-desk|vault-pack/.test(vaultOutside), "no Va
 const gateSource = readFileSync(join(root, "src/vault-gate.js"), "utf8");
 assert(gateSource.includes("import.meta.env.VITE_CLERK_PUBLISHABLE_KEY"), "Vault gate reads VITE_CLERK_PUBLISHABLE_KEY");
 assert(gateSource.includes('import("@clerk/clerk-js")'), "Vault gate loads Clerk only on demand");
+assert(gateSource.indexOf("const linkCallback = readClerkLinkCallback") < gateSource.indexOf("await clerk.load()"), "email-link callback is captured before Clerk load rewrites the URL");
+assert(!gateSource.includes("redirectUrlComplete"), "email-link completion does not pass redirectUrlComplete");
+assert(!gateSource.includes("clerk.handleEmailLinkVerification"), "email-link completion does not use the redirecting helper");
+assert(!/setActive\(\{[^}]*redirectUrl/.test(gateSource), "setActive stays on this page");
+assert(gateSource.includes("redirectUrl: vaultUrl()"), "magic link still returns to the Vault");
+
+const liveReturn = "https://vannatrader-hub.github.io/positioning-pct/vault/?__clerk_status=verified&__clerk_created_session=sess_1&__clerk_db_jwt=dvb_token";
+const callback = readClerkLinkCallback(new URL(liveReturn).search);
+assert(callback?.status === "verified" && callback.createdSessionId === "sess_1", "return URL keeps status and the created session");
+assert(withoutClerkQuery(liveReturn) === "/positioning-pct/vault/", "cleaning the return URL stays on Vault and does not navigate");
+assert(withoutClerkQuery("https://vannatrader-hub.github.io/positioning-pct/vault/soft-crowded/?__clerk_status=verified") === "/positioning-pct/vault/soft-crowded/", "cleaning a pack return keeps the pack path");
+const activate = emailLinkReturnPlan({ status: "verified", createdSessionId: "sess_1", sessionIds: ["sess_1"] });
+assert(activate.action === "activate" && activate.sessionId === "sess_1" && !("redirectUrl" in activate), "same-browser verify activates in place");
+assert(emailLinkReturnPlan({ status: "verified", createdSessionId: "sess_1", sessionIds: [] }).action === "elsewhere", "a verified session that is not on this client stays with the asking tab");
+assert(emailLinkReturnPlan({ status: "transferable", createdSessionId: null, sessionIds: [] }).action === "elsewhere", "a transferable link is not consumed on the return tab");
+assert(emailLinkReturnPlan({ status: "client_mismatch" }).code === "client_mismatch", "a different browser is reported on the return tab");
+assert(emailLinkReturnPlan({ status: "verified", createdSessionId: "sess_1", sessionIds: [], signUpStatus: "missing_requirements" }).code === "needs_more", "a half-finished sign-up is not treated as signed in");
+assert(emailLinkAttemptPlan({ status: "complete", createdSessionId: "sess_9" }).sessionId === "sess_9", "the asking tab activates a completed link");
+assert(emailLinkAttemptPlan({ status: "needs_first_factor", firstFactorVerification: { status: "transferable" } }).action === "transfer", "the asking tab transfers a new email");
+assert(emailLinkAttemptPlan({ status: "needs_first_factor", firstFactorVerification: { status: "expired" } }).code === "expired", "an expired link fails on the asking tab");
+assert(emailLinkAttemptPlan({ status: "needs_first_factor", firstFactorVerification: { status: "verified" } }).code === "incomplete", "verified without a session does not pretend to finish");
 const gateHit = (gateSource.match(/(["'`])(?:(?!\1)[^\\]|\\.)*\1/g) ?? []).find((text) => monetization.test(text));
 assert(!gateHit, `src/vault-gate.js UI copy says ${gateHit}`);
 const envExample = readFileSync(join(root, ".env.example"), "utf8");
