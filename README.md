@@ -11,7 +11,7 @@ Public sources are bank labels only: JPM, Morgan Stanley, BoA, GS, and a desk co
 Two surfaces, switched from the `Desk | Vault` control in every topbar:
 
 - Desk. Everything live today: home, the Positioning hub and its desk, Options Flow and its subpages, SPX Levels. URLs stay where they are; Desk is the surface name, not a path.
-- Vault (`/vault/`). Behind a sign-in wall. Signed out, the page shows one centered card ("Sign in to open Vault", an email field, and a link back to the Desk) and nothing else. Signed in, it shows the private desk: a Soft ↔ Crowded weekly pack (`/vault/soft-crowded/`), three `Soon` preview tiles that do not link, and a panel pointing back to the Desk pages. The pack is linked only from the Vault. It has its own darker theme scoped under `body.is-vault`. No password field and no checkout. See [Vault sign-in](#vault-sign-in).
+- Vault (`/vault/`). Behind a sign-in wall. Signed out, the page shows one centered card ("Sign in to open Vault", an email field, and a link back to the Desk) and nothing else. Signed in, it shows the private desk: a Soft ↔ Crowded weekly pack (`/vault/soft-crowded/`), the daily vol / breadth wall (`/vault/wall/`), three `Soon` preview tiles that do not link, and a panel pointing back to the Desk pages. The pack is linked only from the Vault. It has its own darker theme scoped under `body.is-vault`. No password field and no checkout. See [Vault sign-in](#vault-sign-in).
 
 Surface chrome (home, hubs, Vault, 404, and every topbar and footer) never carries monetization words or `$` outside the `$$$` flow mark; `npm run check` enforces this along with the switcher on every page.
 
@@ -84,6 +84,19 @@ Options Flow data lives in `public/data/flow/`: `plays.json` is the Shopping Lis
 Each sector card shows the percentile, a status, and a Soft to Crowded bar; one timeframe select drives every card. Green is the soft end. Dark is crowded. The triangle marks that week’s print.
 
 The Vault Soft ↔ Crowded pack (`/vault/soft-crowded/`) reads `public/data/vault/soft-crowded/`. `schema.json` is the week document: sector buckets on the Soft ↔ Crowded scale, batch-1 chart refs, the one-page read, and a short article under each chart (`headline`, `bodyMarkdown`, `bias`, `dumbMoney`, `smartMoney`, `invalidation`). `index.json` names the latest week. `2026-10-23.json` is that week, seeded from the Desk’s JPM sector read for the same date. The chart cards link out to the public Positioning charts. The Desk does not link back.
+
+## Vault breadth wall
+
+`/vault/wall/` sits behind the same sign-in wall and is linked only from the Vault. It carries two end-of-day breadth charts, NY Summation (NYSI) and Nasdaq Summation (NASI), the ratio-adjusted McClellan Summation Index for each exchange. Each chart frame follows the familiar EOD layout: symbol and name header with Open / High / Low / Close / Chg for the hovered session, an SPX pane on top for context, the summation line drawn black on rising sessions and red on falling ones, MA(8), right-axis value tags, and a horizontal **buy line at −1000** marked `BUY`. Defaults are daily bars (1D) over one year; presets (3M to 10Y) and a range slider run the window out to ten years, and the SPX pane can be hidden. `src/breadth.js` holds the math (MA, windows, ticks) and `src/vault-wall.js` draws the SVG. Cards use desk labels only; no chart-vendor branding.
+
+Data lives in `public/data/vault/breadth/`: `index.json` (as-of date, `period`, `defaultRangeMonths`, `maxRangeMonths`, chart list), `nysi.json` and `nasi.json` (label, title, `ma`, `buyLine`, and daily `bars` as `{t, c}`), and `spx.json` (SPX daily closes on the same sessions). The seed runs eleven years through Oct 29, 2026 so the ten-year window has its MA lead-in. To refresh after the close:
+
+```bash
+BREADTH_FEED="<desk EOD text feed>" npm run pull:breadth
+npm run check
+```
+
+The feed address is kept in env, never in a committed file. `npm run check` pins the Oct 29, 2026 prints (NYSI −504.41, NASI −699.51 with MA(8) −769.33, SPX 7720.39), the 1Y / 10Y defaults, and the −1000 buy line.
 
 ## Develop
 
