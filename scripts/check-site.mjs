@@ -10,6 +10,7 @@ import { SECTION_ORDER, STATUS, allPlays, levelKind, outcomeLabel, sortCards, sp
 import { activeSpotlights, earningsBoxes, spotlightStar, tradeDates } from "../src/scorecard.js";
 import { emailLinkAttemptPlan, emailLinkReturnPlan, readClerkLinkCallback, withoutClerkQuery } from "../src/vault-link.js";
 import { NT_SECTIONS, SOURCE_LABELS, deskDay, deskDayStart, deskWindow, itemsForDay, windowLabel } from "../src/new-today-window.js";
+import { BUY_LINE, DEFAULT_MONTHS, MAX_MONTHS, RANGES, breadthRead, dayChange, monthsBack, sma as breadthSma, windowStart as breadthWindowStart } from "../src/breadth.js";
 import { CSR_PARAMS, biasOf, csrPanel, csrSeries, cycleOf, panelText, regimeOf as csrRegimeOf, zColor } from "../src/csr.js";
 import { DEFAULTS as MAG7_DEFAULTS, MAG7, TYPES as MAG7_TYPES, buildOscillator, fmtPct, momentum, panelAt, rangeStart, regimeOf, sma } from "../src/mag7-osc.js";
 import {
@@ -632,6 +633,7 @@ const banned = [
   "robinhood",
   "edgetools",
   "tradingview",
+  "stockcharts",
 ];
 const scanExt = new Set([".html", ".js", ".css", ".md", ".yml", ".svg", ".json"]);
 
@@ -1155,7 +1157,7 @@ assert(/<section class="vault-wall" id="vault-wall" data-state="checking"/.test(
 assert(/<h1 id="vault-wall-title">Sign in to open Vault<\/h1>/.test(wallOutside), "wall page reads Sign in to open Vault");
 assert(!/id="mag7"|mo-pane|wall-grid|wall-slot/.test(wallOutside), "wall content does not render outside the template");
 const wallOrder = [...wallTemplate.matchAll(/<article class="[^"]*" id="([^"]+)"/g)].map((match) => match[1]);
-assert(JSON.stringify(wallOrder) === '["spot-vol-beta","credit-spread-regime","mag7"]', `wall order ${wallOrder}`);
+assert(JSON.stringify(wallOrder) === '["spot-vol-beta","credit-spread-regime","mag7","nysi","nasi"]', `wall order ${wallOrder}`);
 for (const id of ["mo-controls", "mo-pane", "mo-plot", "mo-legend", "mo-table", "mo-now", "mo-basis"]) assert(wallTemplate.includes(`id="${id}"`), `MAG7 card keeps #${id}`);
 assert(wallTemplate.includes("Caution +9") && wallTemplate.includes("Stretched −5"), "MAG7 key names the caution and stretched lines");
 assert(wallTemplate.includes("Bullish above +2") && wallTemplate.includes("Bearish below −2"), "MAG7 key names the ±2 signal thresholds");
@@ -1365,6 +1367,60 @@ assert(!spotVolTip(quiet).includes("Possible bottom") && spotVolTip(quiet)[1] ==
 assert(svbSeries.points.some((point) => point.svb >= svbSeries.signal) && svbSeries.note.includes("possible-bottom") && svbSeries.note.includes("prior SPX close"), "the series can paint the band and carries the house read");
 const ticks = axisTicks(svbSeries.points).filter(Boolean);
 assert(ticks[0] === "Aug 3" && ticks.at(-1) === "Oct 29" && ticks.length <= 6, `axis ticks ${ticks}`);
+
+/* Breadth cards on the same wall: NY and Nasdaq Summation, 1Y / 1D default, 10Y range, −1000 buy line. */
+assert(wallPage.includes('src="/src/vault-breadth.js"'), "wall page runs the breadth cards");
+for (const [id, label] of [["nysi", "NY Summation"], ["nasi", "Nasdaq Summation"]]) {
+  assert(wallTemplate.includes(`<article class="pchart is-wide bw-card" id="${id}" data-breadth="${id}"`), `wall carries the ${label} card`);
+  assert(wallTemplate.includes(`>${label}</h2>`) && wallTemplate.includes(`<a href="#${id}">${label}</a>`), `wall names ${label} and links it from the subnav`);
+}
+assert(!/data-breadth|bw-card/.test(wallOutside), "breadth cards do not render outside the template");
+assert(!statSync(join(root, "vault/wall"), { throwIfNoEntry: false }) && !viteConfig.includes("vault/wall/"), "breadth lives on the one Vault wall, not a second /vault/wall/ page");
+assert(vaultTemplate.includes("NY · Nasdaq Summation"), "Vault home wall tile names the breadth cards");
+assert(DEFAULT_MONTHS === 12 && MAX_MONTHS === 120 && BUY_LINE === -1000, "wall defaults: 1Y window, 10Y range, −1000 buy line");
+assert(JSON.stringify(RANGES.map((range) => range.label)) === '["3M","6M","1Y","2Y","3Y","5Y","10Y"]', `wall range presets ${RANGES.map((range) => range.label)}`);
+assert(monthsBack("2026-10-29", 12) === "2025-10-29" && monthsBack("2026-03-31", 1) === "2026-02-28", "monthsBack keeps the calendar day");
+const breadthDir = join(root, "public/data/vault/breadth");
+const breadthIndex = JSON.parse(readFileSync(join(breadthDir, "index.json"), "utf8"));
+assert(breadthIndex.period === "1D" && breadthIndex.defaultRangeMonths === 12 && breadthIndex.maxRangeMonths === 120, "wall index: daily, 1Y default, 10Y range");
+assert(JSON.stringify(breadthIndex.charts.map((chart) => chart.id)) === '["nysi","nasi"]' && breadthIndex.overlay.id === "spx", "wall charts are NYSI and NASI over SPX");
+const breadthSpx = JSON.parse(readFileSync(join(breadthDir, breadthIndex.overlay.file), "utf8"));
+const breadthDocs = Object.fromEntries(breadthIndex.charts.map((chart) => [chart.id, JSON.parse(readFileSync(join(breadthDir, chart.file), "utf8"))]));
+const breadthWant = {
+  nysi: { label: "NY Summation", symbol: "NYSI", close: -504.41, ma: -605.79, chg: 43.36, pct: 7.92 },
+  nasi: { label: "Nasdaq Summation", symbol: "NASI", close: -699.51, ma: -769.33, chg: 33.01, pct: 4.51 },
+};
+for (const doc of [...Object.values(breadthDocs), breadthSpx]) {
+  const where = `wall ${doc.id}`;
+  const bars = doc.bars;
+  assert(doc.asOf === breadthIndex.asOf && bars[bars.length - 1].t === breadthIndex.asOf, `${where} runs to ${breadthIndex.asOf}`);
+  assert(bars.every((bar, i) => /^\d{4}-\d{2}-\d{2}$/.test(bar.t) && Number.isFinite(bar.c) && (i === 0 || bar.t > bars[i - 1].t)), `${where} bars are dated closes in order`);
+  assert(breadthWindowStart(bars, MAX_MONTHS) >= 7, `${where} covers ten years plus the MA(8) lead-in`);
+  assert(JSON.stringify(bars.map((bar) => bar.t)) === JSON.stringify(breadthDocs.nysi.bars.map((bar) => bar.t)), `${where} sessions line up with NYSI`);
+}
+for (const [id, want] of Object.entries(breadthWant)) {
+  const doc = breadthDocs[id];
+  assert(doc.label === want.label && doc.symbol === want.symbol, `wall ${id} label ${doc.label}`);
+  assert(doc.buyLine === -1000 && doc.ma === 8, `wall ${id} buy line ${doc.buyLine} and MA(${doc.ma})`);
+  const at = doc.bars.findIndex((bar) => bar.t === "2026-10-29");
+  assert(at >= 0 && doc.bars[at].c === want.close, `wall ${id} Oct 29 close ${doc.bars[at]?.c}`);
+  assert(breadthSma(doc.bars, 8)[at] === want.ma, `wall ${id} Oct 29 MA(8) ${breadthSma(doc.bars, 8)[at]}`);
+  const change = dayChange(doc.bars, at);
+  assert(change.chg === want.chg && change.pct === want.pct, `wall ${id} Oct 29 change ${change.chg} (${change.pct}%)`);
+  const firstOfYear = doc.bars[breadthWindowStart(doc.bars, DEFAULT_MONTHS)].t;
+  assert(firstOfYear >= monthsBack(breadthIndex.asOf, 12) && firstOfYear <= "2025-11-03", `wall ${id} 1Y window opens ${firstOfYear}`);
+  const read = breadthRead(doc);
+  assert(read.buy === -1000 && read.touches > 0 && read.lastTouch, `wall ${id} finds closes through the buy line in ten years`);
+}
+assert(breadthSpx.bars.find((bar) => bar.t === "2026-10-29")?.c === 7720.39, "wall SPX Oct 29 close 7720.39");
+const breadthJs = readFileSync(join(root, "src/vault-breadth.js"), "utf8");
+for (const piece of ["data/vault/breadth/", 'input.type = "range"', "MAX_MONTHS", "BUY ", "buyLine", "$SPX", "MA(", "directionRuns", "[data-breadth]", '"vault-open"']) {
+  assert(breadthJs.includes(piece), `breadth cards render ${piece}`);
+}
+for (const file of ["src/vault-breadth.js", "src/breadth.js", "scripts/pull-breadth.mjs"]) {
+  const text = readFileSync(join(root, file), "utf8");
+  assert(!/stockcharts|<img\b|<iframe|©/i.test(text), `${file} carries chart-vendor branding or an embed`);
+}
 
 if (failed) {
   console.error(`${failed} check(s) failed`);

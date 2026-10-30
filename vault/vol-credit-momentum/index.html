@@ -6,13 +6,14 @@
     <title>Vol · Credit · Momentum · Vault · Positioning %.</title>
     <meta
       name="description"
-      content="Vault wall for vol, credit, and mega-cap momentum: Spot Vol Beta, Credit Spread Regime, and the MAG7 Oscillator. Behind the Vault sign-in wall."
+      content="Vault wall for vol, credit, mega-cap momentum, and breadth: Spot Vol Beta, Credit Spread Regime, the MAG7 Oscillator, and NY and Nasdaq Summation. Behind the Vault sign-in wall."
     />
     <meta name="theme-color" content="#0a0c10" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
     <link rel="stylesheet" href="/src/styles.css" />
     <script type="module" src="/src/vault-gate.js"></script>
     <script type="module" src="/src/vault-wall.js"></script>
+    <script type="module" src="/src/vault-breadth.js"></script>
   </head>
   <body class="is-vault">
     <a class="skip" href="#content">Skip to content</a>
@@ -70,6 +71,8 @@
             <a href="#spot-vol-beta">Spot Vol Beta</a>
             <a href="#credit-spread-regime">Credit Spread Regime</a>
             <a href="#mag7">MAG7 Oscillator</a>
+            <a href="#nysi">NY Summation</a>
+            <a href="#nasi">Nasdaq Summation</a>
           </nav>
 
           <section class="page-head">
@@ -77,7 +80,7 @@
             <h1>Vol · Credit · Momentum</h1>
             <p class="lede">
               Three reads on one wall: the vol event gauge, the credit regime, and mega-cap momentum. When all three lean
-              the same way, the tape is telling you something.
+              the same way, the tape is telling you something. NY and Nasdaq Summation sit underneath as the breadth check.
             </p>
           </section>
 
@@ -198,6 +201,28 @@
                   <p class="basis mo-basis" id="mo-basis"></p>
                 </div>
               </footer>
+            </article>
+
+            <article class="pchart is-wide bw-card" id="nysi" data-breadth="nysi" aria-labelledby="nysi-title">
+              <header class="pchart-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">04</span>
+                  <span class="badge is-live"><i aria-hidden="true"></i>Daily close</span>
+                </div>
+                <h2 id="nysi-title">NY Summation</h2>
+              </header>
+              <p class="hint bw-load">Loading NY Summation…</p>
+            </article>
+
+            <article class="pchart is-wide bw-card" id="nasi" data-breadth="nasi" aria-labelledby="nasi-title">
+              <header class="pchart-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">05</span>
+                  <span class="badge is-live"><i aria-hidden="true"></i>Daily close</span>
+                </div>
+                <h2 id="nasi-title">Nasdaq Summation</h2>
+              </header>
+              <p class="hint bw-load">Loading Nasdaq Summation…</p>
             </article>
           </div>
         </template>
