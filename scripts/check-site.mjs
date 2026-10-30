@@ -1712,6 +1712,11 @@ for (const key of ["mtm_price", "mtm_pnl_usd", "mtm_as_of_ct"]) {
 }
 validatePack(bookSchema, bookSchema, markedBook, "portfolio with marks");
 
+const printCss = css.slice(css.lastIndexOf("@media print {"));
+for (const rule of ["@page {", "#pack #read { break-after: page; }", "#pack #charts { break-before: page; }", "#pack .pack-chart { break-before: page;", "#pack .pack-article { break-inside: avoid; }", "#pack .pack-sheet { display: block;", "body.is-vault .pack-bar"]) {
+  assert(printCss.includes(rule), `pack print keeps ${rule}`);
+}
+
 /* Vault desk-day archive: an index over committed Desk weeks and New Today days, gated, grouped by ISO week. */
 const archiveFile = "vault/archive/index.html";
 assert(viteConfig.includes(`"${archiveFile}"`), `vite builds ${archiveFile}`);

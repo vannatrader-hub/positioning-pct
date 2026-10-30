@@ -5933,7 +5933,22 @@ a.nt-row:hover .nt-arrow { background: var(--ink); color: #fff; }
   #pack .pack-figure,
   #pack .pack-plot,
   #pack .pack-article { break-inside: avoid; }
-  #pack .pack-read-grid { grid-template-columns: 1fr; }
+  #pack { zoom: 0.78; }
+  #pack .pack-sheet { display: block; break-inside: auto; page-break-inside: auto; }
+  #pack .pack-sheet > * + * { margin-top: 18px; }
+  #pack .pack-plot.is-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #pack .pack-read-grid,
+  #pack .pack-cols.is-three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  #pack .bucket-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #pack .page-head { padding: 0 0 4px; }
+  #pack #read { padding-top: 10px; }
+  #pack #read .pack-sheet { padding: 16px 20px; }
+  #pack #charts { break-before: page; }
+  #pack .pack-chart { break-before: page; break-inside: auto; page-break-inside: auto; }
+  #pack .pack-chart:first-child { break-before: avoid; }
+  #pack .pack-money { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #pack .pack-plot .pc-plot.is-pack { height: 190px; }
+  #pack .pack-plot .pc-plot.is-pack.is-sectors { height: 260px; }
   #pack .pack-week.is-current,
   #pack .pack-bias { color: #8a5a00; background: #f8efd4; }
 
