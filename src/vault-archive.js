@@ -40,38 +40,48 @@ export function displaySource(label) {
   return label === PRESS ? "Press note" : label;
 }
 
-/** Soft ↔ Crowded on the Desk for every committed Friday, newest first. */
+/**
+ * Soft ↔ Crowded on the Desk for every committed Friday, newest first, plus any
+ * pack that carries a Desk freeze forward to a Friday with no fresh print.
+ */
 export function deskWeekEntries(packIndex = null, house = "jpm") {
-  const packs = new Map((packIndex?.weeks ?? []).map((row) => [row.week, row]));
-  return WEEKS.map((week, at) => {
-    const reading = buildReading(house, at, 4);
-    const printed = CANON.map((ticker) => reading.sectors[ticker]).filter((sector) => sector.available);
-    const counts = Object.fromEntries(LEVELS.map(([level]) => [level, printed.filter((sector) => sector.level === level).length]));
-    const crowded = printed.filter((sector) => sector.level === "crowded").sort((a, b) => b.points - a.points);
-    const softest = [...printed].sort((a, b) => a.points - b.points)[0];
-    const pack = packs.get(week);
-    const summary = [
-      LEVELS.map(([level, label]) => `${counts[level]} ${label}`).join(" · "),
-      crowded.length ? `crowded ${crowded.map((sector) => `${sector.ticker} ${sector.display}`).join(", ")}` : "nothing crowded",
-      softest ? `softest ${softest.ticker} ${softest.display}` : "",
-    ]
-      .filter(Boolean)
-      .join(" · ");
-    const iso = isoWeek(week);
-    return {
-      kind: "pack",
-      date: week,
-      isoWeek: iso,
-      title: `${iso} Soft ↔ Crowded`,
-      label: `${longDay(week)} · Desk Friday`,
-      headline: pack?.headline ?? "",
-      summary,
-      hasPack: Boolean(pack),
-      href: pack ? `../soft-crowded/?week=${iso}` : `../../positioning/desk/?source=${house}&week=${week}#sectors`,
-      linkLabel: pack ? "Open the pack" : "Open this week on the Desk",
-      text: [iso, pack?.headline ?? "", summary, ...printed.map((sector) => `${sector.ticker} ${sector.short} ${sector.level}`)].join(" ").toLowerCase(),
-    };
-  }).reverse();
+  const rows = packIndex?.weeks ?? [];
+  const packs = new Map(rows.map((row) => [row.week, row]));
+  const carried = rows
+    .filter((row) => row.carryForward && WEEKS.includes(row.carryForward) && !WEEKS.includes(row.week))
+    .map((row) => weekEntry(row.week, WEEKS.indexOf(row.carryForward), row, house));
+  const desk = WEEKS.map((week, at) => weekEntry(week, at, packs.get(week), house));
+  return [...carried, ...desk].sort((a, b) => b.date.localeCompare(a.date));
+}
+
+/** One Soft ↔ Crowded week card; `at` is the Desk week whose columns it shows. */
+function weekEntry(week, at, pack, house) {
+  const reading = buildReading(house, at, 4);
+  const printed = CANON.map((ticker) => reading.sectors[ticker]).filter((sector) => sector.available);
+  const counts = Object.fromEntries(LEVELS.map(([level]) => [level, printed.filter((sector) => sector.level === level).length]));
+  const crowded = printed.filter((sector) => sector.level === "crowded").sort((a, b) => b.points - a.points);
+  const softest = [...printed].sort((a, b) => a.points - b.points)[0];
+  const summary = [
+    LEVELS.map(([level, label]) => `${counts[level]} ${label}`).join(" · "),
+    crowded.length ? `crowded ${crowded.map((sector) => `${sector.ticker} ${sector.display}`).join(", ")}` : "nothing crowded",
+    softest ? `softest ${softest.ticker} ${softest.display}` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const iso = isoWeek(week);
+  return {
+    kind: "pack",
+    date: week,
+    isoWeek: iso,
+    title: `${iso} Soft ↔ Crowded`,
+    label: pack?.carryForward ? `${longDay(week)} · Carry-forward of the ${longDay(pack.carryForward)} Desk freeze` : `${longDay(week)} · Desk Friday`,
+    headline: pack?.headline ?? "",
+    summary,
+    hasPack: Boolean(pack),
+    href: pack ? `../soft-crowded/?week=${iso}` : `../../positioning/desk/?source=${house}&week=${week}#sectors`,
+    linkLabel: pack ? "Open the pack" : "Open this week on the Desk",
+    text: [iso, pack?.headline ?? "", summary, ...printed.map((sector) => `${sector.ticker} ${sector.short} ${sector.level}`)].join(" ").toLowerCase(),
+  };
 }
 
 /** New Today grouped into desk days, newest first. */

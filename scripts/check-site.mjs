@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { HOUSES, INDICATORS, SECTIONS, readIndicator } from "../src/desk.js";
-import { CANON, WEEKS, buildReading, ordinal } from "../src/readings.js";
+import { CANON, JPM_MONITOR_REF, WEEKS, buildReading, formatWeek, ordinal } from "../src/readings.js";
 import { STRUCTURES, creditSpreadMath, leapMath, price } from "../src/study.js";
 import { breakeven, chartLevels, resolveExpiry } from "../src/flow-chart.js";
 import { SIDES, alertLabel, sortPlays } from "../src/options-flow.js";
@@ -27,11 +27,12 @@ import {
   fundManagerChart,
   riskChart,
   sectorChart,
+  shortWeek,
   softVolChart,
 } from "../src/pct-charts.js";
 import { columnMoves, isoWeek, isoWeekRange, packFrame } from "../src/vault-pack-frame.js";
 import { FORMULA, axisTicks, buildClose, closeEvent, closeRows, closeSpxPct, deskEstimate, formatSvb, gaugeFraction, readout, spotVolTip } from "../src/vault-svb.js";
-import { archiveGroups, deskWeekEntries, displaySource, filterEntries, newTodayDays, parseDateQuery } from "../src/vault-archive.js";
+import { archiveGroups, deskWeekEntries, displaySource, filterEntries, longDay, newTodayDays, parseDateQuery } from "../src/vault-archive.js";
 import { bookSide, closedPnl, deskCopy, equityPath, formatBook, formatPx, formatUsd, isOpen, isPending, markOf, resultLabel, stopOf, targetOf, weekStrip } from "../src/vault-portfolio.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -1185,8 +1186,17 @@ expectPackReject((probe) => {
 }, "schema validation rejects a headline over 12 words");
 assert(packIndex.sku === "soft-crowded" && packIndex.product === "SKU1" && packIndex.schema === "schema.json", "pack index names the schema");
 assert(packIndex.title === "Soft ↔ Crowded", `pack index title ${packIndex.title}`);
-assert(packIndex.latest === WEEKS[WEEKS.length - 1], `pack latest ${packIndex.latest} should be the Desk's current week`);
-assert(packWeek.$schema === "./schema.json", "week document points at the schema");
+function nextFriday(iso) {
+  const day = new Date(`${iso}T12:00:00Z`);
+  day.setUTCDate(day.getUTCDate() + 7);
+  return day.toISOString().slice(0, 10);
+}
+const packByWeek = new Map(packWeeks.map(({ row, doc }) => [row.week, doc]));
+const lastDeskWeek = WEEKS[WEEKS.length - 1];
+assert(
+  packIndex.latest === lastDeskWeek || (packWeek.carryForward?.from === lastDeskWeek && packIndex.latest === nextFriday(lastDeskWeek)),
+  `pack latest ${packIndex.latest} should be the Desk's current week, or a disclosed carry-forward of it on the next Friday`,
+);assert(packWeek.$schema === "./schema.json", "week document points at the schema");
 
 const articleSchema = packSchema.$defs.article;
 assert(articleSchema?.description?.includes("week read stays the overview"), "per-chart articles leave the week read as the overview");
@@ -1241,11 +1251,37 @@ function checkPackWeek(row, doc) {
   const words = wordCount(doc.read);
   assert(words >= 400 && words <= 600, `${where} one-page read is ${words} words, want 400 to 600`);
 
-  const at = WEEKS.indexOf(doc.week);
-  assert(at >= 0 || doc.week !== packIndex.latest, `${where} latest pack must be a Desk week`);
+  const carried = doc.carryForward?.from ?? null;
+  assert((row.carryForward ?? null) === carried, `${where} index row names its carry-forward week`);
+  if (carried) {
+    const source = packByWeek.get(carried);
+    assert(WEEKS.includes(carried) && !WEEKS.includes(doc.week), `${where} carries a Desk week forward and is not a Desk week itself`);
+    assert(nextFriday(carried) === doc.week, `${where} carries forward the Friday before, got ${carried}`);
+    assert(Boolean(source) && !source?.carryForward, `${where} carries forward a filed Desk pack`);
+    if (source) {
+      for (const key of ["house", "houseLabel", "windowWeeks", "buckets", "unprinted"]) {
+        assert(JSON.stringify(doc[key]) === JSON.stringify(source[key]), `${where} ${key} is the ${carried} freeze verbatim`);
+      }
+      assert(JSON.stringify(stripWritten(doc).charts) === JSON.stringify(stripWritten(source).charts), `${where} chart snapshots are the ${carried} freeze verbatim`);
+    }
+    assert(doc.weekLabel === formatWeek(doc.week), `${where} week label ${doc.weekLabel}`);
+    assert(
+      doc.basis.startsWith("Carry-forward") && doc.basis.includes(JPM_MONITOR_REF) && doc.basis.includes(`last Desk freeze ${shortWeek(carried)}`),
+      `${where} basis discloses the carry-forward, got ${doc.basis}`,
+    );
+    assert(doc.sectorSource.includes(JPM_MONITOR_REF) && doc.sectorSource.includes("carried forward"), `${where} sector source discloses the carry-forward`);
+    assert(/carried forward/i.test(`${doc.read.lede} ${doc.read.stance}`), `${where} read says the columns are carried forward`);
+    assert(!/No sector changed columns/.test(doc.read.stance), `${where} read does not claim a column check it has no print for`);
+  }
+
+  const deskWeek = carried ?? doc.week;
+  const at = WEEKS.indexOf(deskWeek);
+  assert(at >= 0 || doc.week !== packIndex.latest, `${where} latest pack must be a Desk week or a disclosed carry-forward of one`);
   if (at < 0) return;
-  const frame = packFrame(doc.week);
-  if (doc.week === WEEKS[WEEKS.length - 1]) {
+  const frame = packFrame(deskWeek);
+  if (carried) {
+    assert(JSON.stringify(doc.buckets) === JSON.stringify(frame.buckets), `${where} carried buckets drifted from the Desk`);
+  } else if (doc.week === WEEKS[WEEKS.length - 1]) {
     assert(JSON.stringify(stripWritten(doc)) === JSON.stringify(frame), `${where} drifted from the Desk series; rerun npm run pack:build -- ${doc.week}`);
   } else {
     assert(JSON.stringify(doc.buckets) === JSON.stringify(frame.buckets), `${where} buckets drifted from the Desk`);
@@ -1253,10 +1289,12 @@ function checkPackWeek(row, doc) {
 
   const reading = buildReading("jpm", at, 4);
   const facts = chartFacts(at);
-  assert(doc.weekLabel === reading.weekLabel, `${where} week label matches the Desk`);
   assert(doc.house === "jpm" && doc.houseLabel === "JPM" && doc.windowWeeks === 4, `${where} is the JPM 4-week read`);
-  assert(doc.basis === sectorChart("jpm", at).basis, `${where} basis ${doc.basis}`);
-  assert(doc.sectorSource === reading.sectorSource, `${where} sector source ${doc.sectorSource}`);
+  if (!carried) {
+    assert(doc.weekLabel === reading.weekLabel, `${where} week label matches the Desk`);
+    assert(doc.basis === sectorChart("jpm", at).basis, `${where} basis ${doc.basis}`);
+    assert(doc.sectorSource === reading.sectorSource, `${where} sector source ${doc.sectorSource}`);
+  }
   assert(
     JSON.stringify(doc.buckets.map((bucket) => [bucket.level, bucket.title, bucket.range, bucket.tone])) ===
       JSON.stringify(SECTOR_BUCKETS.map((bucket) => [bucket.level, bucket.title, bucket.range, bucket.tone])),
@@ -1280,10 +1318,10 @@ function checkPackWeek(row, doc) {
   assert(new Set(seen).size === seen.length, `${where} a sector appears in two buckets`);
   assert(JSON.stringify([...seen].sort()) === JSON.stringify(CANON.filter((ticker) => !missing.includes(ticker)).sort()), `${where} covers every printed sector`);
 
-  const moves = columnMoves(at);
-  if (moves.length === 0) {
+  const moves = carried ? null : columnMoves(at);
+  if (moves?.length === 0) {
     assert(/No sector changed columns versus last week/.test(doc.read.stance), `${where} read records that columns were unchanged`);
-  } else {
+  } else if (moves) {
     const told = `${doc.read.stance} ${doc.read.moved.join(" ")}`;
     for (const move of moves) {
       const named = told.includes(move.ticker) || told.includes(reading.sectors[move.ticker].short);
@@ -1299,7 +1337,7 @@ function checkPackWeek(row, doc) {
     assert(ref.house === chart.house && ref.houseLabel === HOUSES[chart.house] && ref.deskSection === chart.deskSection, `${where} chart ref ${ref.id} house or section`);
     assert(ref.fact === facts[ref.id], `${where} chart ref ${ref.id} fact ${ref.fact} !== ${facts[ref.id]}`);
     const snap = ref.snapshot;
-    assert(snap.weeks.at(-1) === doc.week, `${where} ${ref.id} snapshot stops at the pack week`);
+    assert(snap.weeks.at(-1) === deskWeek, `${where} ${ref.id} snapshot stops at the pack week, or the freeze it carries`);
     const lengths = [snap.values?.length, ...(snap.panels ?? []).flatMap((panel) => panel.series.map((series) => series.values.length))].filter((n) => n !== undefined);
     assert(lengths.every((n) => n === snap.weeks.length), `${where} ${ref.id} snapshot series run ${lengths} points over ${snap.weeks.length} weeks`);
     const article = ref.article;
@@ -1336,9 +1374,17 @@ assert(packWeeks[0]?.row.week === packIndex.latest, "pack index latest is the fi
 assert(new Set(packWeeks.map(({ row }) => row.isoWeek)).size === packWeeks.length, "one pack per ISO week");
 for (const { row, doc } of packWeeks) checkPackWeek(row, doc);
 
-if (packWeek.week === "2026-10-23") {
+const packW43 = packByWeek.get("2026-10-23");
+if (packW43) {
   for (const phrase of ["0.18", "0.75", "0.69", "0.66", "−1.2", "351", "3.9", "53%"]) {
-    assert(JSON.stringify(packWeek.read).includes(phrase), `one-page read names ${phrase}`);
+    assert(JSON.stringify(packW43.read).includes(phrase), `W43 one-page read names ${phrase}`);
+  }
+}
+const packW44 = packByWeek.get("2026-10-30");
+if (packW44) {
+  assert(packW44.carryForward?.from === "2026-10-23", "W44 carries the Oct 23 Desk freeze forward");
+  for (const phrase of ["−4.58", "2.98", "22.5%", "$165M", "06-Oct-26", "0.75", "0.18"]) {
+    assert(JSON.stringify(packW44.read).includes(phrase), `W44 one-page read names ${phrase}`);
   }
 }
 const packW42 = packWeeks.find(({ row }) => row.week === "2026-10-16")?.doc;
@@ -1899,7 +1945,12 @@ for (const file of Object.keys(vaultSurface)) {
   assert(!repeated.length, `${file} repeats ids across the wall and the template: ${repeated}`);
 }
 const archiveEntries = [...deskWeekEntries(packIndex), ...newTodayDays(nt.items)];
-assert(archiveEntries.filter((entry) => entry.kind === "pack").length === WEEKS.length, "archive lists every committed Desk Friday");
+const carriedRows = packIndex.weeks.filter((row) => row.carryForward);
+assert(archiveEntries.filter((entry) => entry.kind === "pack").length === WEEKS.length + carriedRows.length, "archive lists every committed Desk Friday and every carry-forward pack");
+assert(
+  carriedRows.every((row) => archiveEntries.find((entry) => entry.kind === "pack" && entry.date === row.week)?.label.includes(`Carry-forward of the ${longDay(row.carryForward)} Desk freeze`)),
+  "archive labels a carry-forward pack with the freeze it carries",
+);
 assert(
   JSON.stringify(archiveEntries.filter((entry) => entry.hasPack).map((entry) => [entry.isoWeek, entry.href])) ===
     JSON.stringify(packIndex.weeks.map((row) => [isoWeek(row.week), `../soft-crowded/?week=${isoWeek(row.week)}`])),
@@ -1912,14 +1963,20 @@ for (const query of ["2026-10-28", "10/28", "Oct 28", "October 28, 2026", "Wed O
 }
 assert(parseDateQuery("XLE") === null, "a ticker is a word search");
 const oct28 = archiveGroups(filterEntries(archiveEntries, "2026-10-28"));
-assert(oct28.length === 1 && oct28[0].entries.length === 1 && oct28[0].entries[0].items.length === 8, "archive date search lists the eight Oct 28 items");
+const oct28Days = oct28[0]?.entries.filter((entry) => entry.kind === "day") ?? [];
+assert(oct28.length === 1 && oct28Days.length === 1 && oct28Days[0].items.length === 8, "archive date search lists the eight Oct 28 items");
+assert(oct28[0]?.entries.filter((entry) => entry.kind === "pack").every((entry) => entry.date === "2026-10-30"), "an Oct 28 search also shows that week's Friday pack");
 const w44 = archiveGroups(filterEntries(archiveEntries, "W44"));
-assert(w44.length === 1 && w44[0].week === "2026-W44" && w44[0].gap === "No Soft ↔ Crowded print is committed for Fri Oct 30, 2026 yet.", "W44 says its Friday print is not committed");
-assert(w44[0].entries.every((entry) => entry.kind === "day"), "the archive does not invent a W44 pack");
+assert(
+  w44.length === 1 && w44[0].week === "2026-W44" && w44[0].entries[0]?.kind === "pack" && w44[0].entries[0].hasPack && w44[0].entries[0].title === "2026-W44 Soft ↔ Crowded" && w44[0].gap === "",
+  "W44 leads with its carry-forward pack",
+);
+const w45Day = { kind: "day", date: "2026-11-04", isoWeek: "2026-W45", items: [] };
+assert(archiveGroups([w45Day])[0].gap === "No Soft ↔ Crowded print is committed for Fri Nov 6, 2026 yet.", "a week past the last pack says its Friday print is not committed");
 const w43 = archiveGroups(filterEntries(archiveEntries, "2026-W43"));
 assert(w43[0]?.entries[0]?.kind === "pack" && w43[0].entries[0].title === "2026-W43 Soft ↔ Crowded" && w43[0].gap === "", "W43 leads with its pack");
 const archivePacks = archiveGroups(filterEntries(archiveEntries, "", "pack"));
-assert(archivePacks.every((group) => group.entries.every((entry) => entry.kind === "pack")) && archivePacks[0].week === "2026-W43", "Soft ↔ Crowded filter lists packs newest first");
+assert(archivePacks.every((group) => group.entries.every((entry) => entry.kind === "pack")) && archivePacks[0].week === "2026-W44", "Soft ↔ Crowded filter lists packs newest first");
 const wordHit = filterEntries(archiveEntries, "goldman", "day");
 assert(wordHit.length > 0 && wordHit.every((entry) => entry.items.every((item) => item.text.includes("goldman"))), "a word search cuts a desk day to its matching lines");
 assert(displaySource(["W", "SJ"].join("")) === "Press note" && displaySource("GS") === "GS" && displaySource("") === "Desk", "archive press labels read as a press note");
