@@ -723,9 +723,13 @@ for (const indicator of INDICATORS) {
   indicator.values = [...indicator.pcts];
 }
 
+export function isSoftCrowded(ends) {
+  return ends[0] === "Soft" && ends[1] === "Crowded";
+}
+
 function zoneWord(pct, ends) {
   const [low, high] = ends.map((end) => end.toLowerCase());
-  const scaled = ends[0] === "Soft" && ends[1] === "Crowded";
+  const scaled = isSoftCrowded(ends);
   if (pct < 20) return { word: scaled ? `very ${low}` : low, tone: "soft" };
   if (pct < 40) return { word: low, tone: "soft" };
   if (pct < 60) return { word: "mid", tone: "mid" };
@@ -740,13 +744,21 @@ export function drift(pct, past) {
   return delta * (pct - 50) > 0 ? "stretching" : "unwinding";
 }
 
+/**
+ * Stretching / Unwinding is Soft ↔ Crowded vocabulary. A custom-scale card names
+ * its own level only, so a bar end like Unwinding never meets a direction word.
+ */
+function chipOf(word, pct, past, ends) {
+  return isSoftCrowded(ends) ? `${word} → ${drift(pct, past)}` : word;
+}
+
 /** Keep in step with --sc-glow-soft-max / --sc-glow-crowded-min in styles.css. */
 export const GLOW_SOFT_MAX = 25;
 export const GLOW_CROWDED_MIN = 90;
 
 /** Level-only extreme for cards on the Soft ↔ Crowded scale; direction never feeds it. */
 export function extremeOf(pct, ends = ["Soft", "Crowded"]) {
-  if (ends[0] !== "Soft" || ends[1] !== "Crowded") return null;
+  if (!isSoftCrowded(ends)) return null;
   if (pct <= GLOW_SOFT_MAX) return "soft";
   if (pct >= GLOW_CROWDED_MIN) return "crowded";
   return null;
@@ -784,7 +796,7 @@ export function readIndicator(indicator, weekIndex, lookback = 4) {
     value: indicator.show(indicator.values[week]),
     tone: zone.tone,
     extreme: extremeOf(pct, ends),
-    pill: `${zone.word} → ${drift(pct, past)}`,
+    pill: chipOf(zone.word, pct, past, ends),
     caption: `${ordinal(pct)} %ile`,
     change: changeText(pct - past, lookback),
     latestNote: isLatest ? indicator.latest ?? "" : "",

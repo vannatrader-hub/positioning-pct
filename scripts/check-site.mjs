@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { GLOW_CROWDED_MIN, GLOW_SOFT_MAX, HOUSES, INDICATORS, SECTIONS, drift, extremeOf, readIndicator } from "../src/desk.js";
+import { GLOW_CROWDED_MIN, GLOW_SOFT_MAX, HOUSES, INDICATORS, SECTIONS, drift, extremeOf, isSoftCrowded, readIndicator } from "../src/desk.js";
 import { CANON, JPM_MONITOR_REF, WEEKS, buildReading, formatWeek, ordinal } from "../src/readings.js";
 import { STRUCTURES, creditSpreadMath, leapMath, price } from "../src/study.js";
 import { breakeven, chartLevels, resolveExpiry } from "../src/flow-chart.js";
@@ -111,7 +111,14 @@ for (const indicator of INDICATORS) {
   for (let week = 0; week < WEEKS.length; week += 1) {
     const read = readIndicator(indicator, week);
     assert(typeof read.value === "string" && read.value.length > 0, `${indicator.id} week ${week} value`);
-    assert(/→ (stretching|unwinding|steady)$/.test(read.pill), `${indicator.id} pill "${read.pill}"`);
+    if (isSoftCrowded(read.ends)) {
+      assert(/^(very )?(soft|crowded) → (stretching|unwinding|steady)$|^mid → (stretching|unwinding|steady)$/.test(read.pill), `${indicator.id} pill "${read.pill}"`);
+    } else {
+      const scale = [read.ends[0].toLowerCase(), "mid", read.ends[1].toLowerCase()];
+      assert(scale.includes(read.pill), `${indicator.id} week ${week} custom-scale chip "${read.pill}" must be a ${read.ends.join(" ↔ ")} level word`);
+      const doublespeak = read.pill.replace(read.ends[0].toLowerCase(), "");
+      assert(!/stretching|unwinding|steady|→/.test(doublespeak), `${indicator.id} week ${week} custom-scale chip "${read.pill}" uses Stretching / Unwinding drift`);
+    }
     assert(read.extreme === extremeOf(read.pct, read.ends), `${indicator.id} week ${week} extreme follows the level`);
   }
   const early = readIndicator(indicator, 0);
@@ -168,6 +175,21 @@ assert(readById("gs-mag7").extreme === "crowded" && readById("gs-mag7").pill ===
 assert(readById("jpm-smh-retail").extreme === "crowded", "SMH retail at the 98th glows crowded");
 assert(readById("gs-semis-software").extreme === null && readById("gs-semis-software").pill === "crowded → unwinding", "Semis vs software stays quiet");
 assert(readById("gs-global-ai").extreme === null, "Global AI at the 77th stays quiet");
+
+/* Custom-scale chips (CEO 2026-10-31): scale-native level word only, never Stretching / Unwinding drift. */
+const customReads = latestReads.filter((read) => !isSoftCrowded(read.ends));
+assert(customReads.length >= 7, `expected at least 7 custom-scale cards, got ${customReads.length}`);
+assert(readById("desk-ai-pair").pill === "unwinding" && readById("desk-ai-pair").extreme === null, `AI enablers vs hyperscalers chip "${readById("desk-ai-pair").pill}"`);
+assert(readById("ms-momentum").pill === "unwinding" && readById("ms-momentum").extreme === null, `Momentum chip "${readById("ms-momentum").pill}"`);
+assert(readById("gs-region-flow").pill === "net sold", `Prime region flow chip "${readById("gs-region-flow").pill}"`);
+assert(readById("desk-cta").pill === "de-risking", `CTA chip "${readById("desk-cta").pill}"`);
+assert(readById("desk-cb-tightening").pill === "tightening", `CB tightening chip "${readById("desk-cb-tightening").pill}"`);
+assert(readById("desk-breadth").pill === "mid" && readById("boa-hikes-cuts").pill === "mid", "Narrow ↔ Broad and Easing ↔ Tightening mid chips");
+for (const read of customReads) {
+  assert(!/stretching|unwinding → |→ unwinding|steady/.test(read.pill), `${read.id} custom-scale chip "${read.pill}" is Stretching / Unwinding doublespeak`);
+}
+assert(readById("jpm-retail-impulse").pill === "very soft → stretching", `Soft ↔ Crowded soft side keeps its direction: ${readById("jpm-retail-impulse").pill}`);
+assert(readById("jpm-broad").pill === "crowded → unwinding", `Soft ↔ Crowded unwinding stays: ${readById("jpm-broad").pill}`);
 const glowing = latestReads.filter((read) => read.extreme);
 assert(glowing.length > 0 && glowing.length <= latestReads.length / 3, `${glowing.length} of ${latestReads.length} cards glow; tighten the thresholds`);
 const glowCss = readFileSync(join(root, "src/styles.css"), "utf8");
