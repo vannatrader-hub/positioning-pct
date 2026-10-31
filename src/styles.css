@@ -3863,6 +3863,54 @@ a.archive-item-title:hover { text-decoration: underline; }
 
 .insight-account button:hover { background: rgba(255, 255, 255, 0.07); color: var(--ink); }
 
+/* Family content gate: Coming soon wall for Shopping List and Spotlights until family sign-in. */
+.family-wall {
+  display: grid;
+  place-items: center;
+  min-height: min(480px, 50vh);
+  padding: 40px 0 8px;
+}
+
+.family-wall[data-state="checking"] .soon-card { visibility: hidden; }
+.family-wall[data-state="coming-soon"] .soon-card { visibility: visible; }
+
+.family-wall .soon-card { margin-top: 0; }
+
+.back.is-secondary {
+  background: transparent;
+  color: var(--ink-2);
+  border: 1px solid var(--line);
+  margin-left: 8px;
+}
+
+.back.is-secondary:hover { background: var(--surface); color: var(--ink); }
+
+.family-account {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  padding-top: 20px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.family-account[hidden] { display: none; }
+
+.family-account button {
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: none;
+  color: var(--ink-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.family-account button:hover { background: var(--surface); color: var(--ink); }
+
 /* Vault pack: Desk cards and chart refs, in the Vault room. */
 .is-vault .vault-pack .tile-icon { background: #f1f3f6; }
 
