@@ -1386,7 +1386,10 @@ if (packW44) {
   for (const phrase of ["−4.58", "2.98", "22.5%", "$165M", "06-Oct-26", "0.75", "0.18"]) {
     assert(JSON.stringify(packW44.read).includes(phrase), `W44 one-page read names ${phrase}`);
   }
+  assert(JSON.stringify(packW44.read).includes("Vol Stress"), "W44 read names the overlay as Vol Stress");
 }
+const latestPackCopy = JSON.stringify([packWeek.read, packWeek.charts.refs.map((ref) => ref.article)]);
+assert(!/Spot Vol Beta|UV_|desk estimate|svb-dial|gauge/i.test(latestPackCopy), "the latest pack renders on public Trade ideas, so its copy uses Vol Stress and hides the gauge");
 const packW42 = packWeeks.find(({ row }) => row.week === "2026-10-16")?.doc;
 if (packW42) {
   assert(JSON.stringify(columnMoves(WEEKS.indexOf("2026-10-16"))) === '[{"ticker":"XLF","from":"soft","to":"extreme soft"},{"ticker":"XLE","from":"mid","to":"crowded"}]', "W42 column moves");
