@@ -393,6 +393,14 @@ for (const id of ["flow-list", "calling-card", "cc-buy-block", "cc-oi-block", "c
 }
 assert(!dollarOutside.includes('id="flow-list"'), "$$$ Shopping List content stays inside the Vault template");
 const viteConfig = readFileSync(join(root, "vite.config.js"), "utf8");
+const viteInputs = [...viteConfig.matchAll(/resolve\(root, "([^"]+)"\)/g)].map((match) => match[1]);
+assert(viteInputs.length > 0, "vite config lists HTML inputs");
+for (const page of viteInputs) {
+  const path = join(root, page);
+  assert(page.endsWith(".html"), `vite input ${page} is an HTML file path`);
+  assert(statSync(path).isFile(), `vite input ${page} is a file, not a directory`);
+  assert(!/<link\b[^>]*href="(?:\.\.\/)+"/i.test(readFileSync(path, "utf8")), `${page} does not point a link tag at a directory`);
+}
 for (const page of ["options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html"]) {
   assert(viteConfig.includes(`"${page}"`), `vite builds ${page}`);
   const html = readFileSync(join(root, page), "utf8");
@@ -949,8 +957,9 @@ assert(!gateHit, `Vault gate UI copy says ${gateHit}`);
 /* Insight is not a tab. The old URL returns to the public Dashboard and does not name the private entry. */
 const insightPage = readFileSync(join(root, "insight/index.html"), "utf8");
 assert(viteConfig.includes('"insight/index.html"'), "vite builds insight/index.html");
-assert(insightPage.includes('http-equiv="refresh"') && insightPage.includes("url=../"), "Insight refreshes to the Dashboard");
-assert(insightPage.includes("location.replace") && insightPage.includes('href="../"'), "Insight link returns to the Dashboard");
+assert(insightPage.includes('http-equiv="refresh"') && insightPage.includes("url=%BASE_URL%"), "Insight refreshes to the Dashboard");
+assert(insightPage.includes('location.replace("%BASE_URL%")') && insightPage.includes('href="%BASE_URL%"'), "Insight link returns to the Dashboard");
+assert(!/<link[^>]+href="\.\.\/"/.test(insightPage), "Insight canonical link is not a directory path");
 assert(!insightPage.includes(FAMILY_ENTRY) && !insightPage.includes("hub/"), "Insight does not reveal the private entry");
 assert(!insightPage.includes('aria-label="Surface"'), "Insight redirect does not carry the Positioning % switcher");
 assert(!existsSync(join(root, "src/insight-gate.js")) && !existsSync(join(root, "src/family-content-gate.js")), "the old Insight gate is gone");

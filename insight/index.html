@@ -4,17 +4,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Page not found · Positioning %.</title>
-    <meta http-equiv="refresh" content="0; url=../" />
-    <link rel="canonical" href="../" />
+    <meta http-equiv="refresh" content="0; url=%BASE_URL%" />
+    <link rel="canonical" href="%BASE_URL%" />
     <meta name="robots" content="noindex" />
     <script>
-      location.replace(new URL("../", location.href).href);
+      location.replace("%BASE_URL%");
     </script>
   </head>
   <body>
     <main>
       <h1>Page not found</h1>
-      <p><a href="../">Back</a></p>
+      <p><a href="%BASE_URL%">Back</a></p>
     </main>
   </body>
 </html>
