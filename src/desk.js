@@ -733,10 +733,23 @@ function zoneWord(pct, ends) {
   return { word: scaled ? `very ${high}` : high, tone: "crowded" };
 }
 
-function drift(delta) {
-  if (delta >= 3) return "building";
-  if (delta <= -3) return "easing";
-  return "steady";
+/** Direction is read against the middle of the bar, not the sign of the move. */
+export function drift(pct, past) {
+  const delta = pct - past;
+  if (Math.abs(delta) < 3) return "steady";
+  return delta * (pct - 50) > 0 ? "stretching" : "unwinding";
+}
+
+/** Keep in step with --sc-glow-soft-max / --sc-glow-crowded-min in styles.css. */
+export const GLOW_SOFT_MAX = 25;
+export const GLOW_CROWDED_MIN = 90;
+
+/** Level-only extreme for cards on the Soft ↔ Crowded scale; direction never feeds it. */
+export function extremeOf(pct, ends = ["Soft", "Crowded"]) {
+  if (ends[0] !== "Soft" || ends[1] !== "Crowded") return null;
+  if (pct <= GLOW_SOFT_MAX) return "soft";
+  if (pct >= GLOW_CROWDED_MIN) return "crowded";
+  return null;
 }
 
 export function changeText(delta, weeks) {
@@ -770,7 +783,8 @@ export function readIndicator(indicator, weekIndex, lookback = 4) {
     pct,
     value: indicator.show(indicator.values[week]),
     tone: zone.tone,
-    pill: `${zone.word} → ${drift(pct - past)}`,
+    extreme: extremeOf(pct, ends),
+    pill: `${zone.word} → ${drift(pct, past)}`,
     caption: `${ordinal(pct)} %ile`,
     change: changeText(pct - past, lookback),
     latestNote: isLatest ? indicator.latest ?? "" : "",

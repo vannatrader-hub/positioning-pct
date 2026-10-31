@@ -35,6 +35,16 @@
   --radius: 22px;
   --shadow: 0 1px 2px rgba(15, 20, 30, 0.04), 0 8px 24px rgba(15, 20, 30, 0.06);
   --shadow-lift: 0 2px 4px rgba(15, 20, 30, 0.05), 0 18px 40px rgba(15, 20, 30, 0.1);
+  /* Soft ↔ Crowded extreme card glow (CEO 2026-10-31). Thresholds mirror GLOW_* in src/desk.js. */
+  --sc-glow-soft-max: 25;
+  --sc-glow-crowded-min: 90;
+  --sc-glow-blur: 18px;
+  --sc-glow-spread: 2px;
+  --sc-glow-alpha: 0.45;
+  --sc-shadow-y: 10px;
+  --sc-shadow-blur: 28px;
+  --sc-glow-soft-rgb: 45, 125, 70;
+  --sc-glow-crowded-rgb: 233, 30, 99;
   --wordmark: "Bodoni Moda", Didot, "Bodoni MT", serif;
   --sans: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
   color-scheme: light;
@@ -1367,6 +1377,19 @@ input[type="range"]::-moz-range-thumb {
 .icard:hover {
   box-shadow: var(--shadow-lift);
   border-color: var(--line-strong);
+}
+
+/* Extremes glow by level only; never a hard outline. Mid cards keep the quiet shadow above. */
+.sc-card[data-extreme] { --sc-glow-rgb: var(--sc-glow-crowded-rgb); }
+.sc-card[data-extreme="soft"] { --sc-glow-rgb: var(--sc-glow-soft-rgb); }
+
+.sc-card[data-extreme],
+.sc-card[data-extreme]:hover {
+  border-color: transparent;
+  box-shadow:
+    0 0 var(--sc-glow-blur) var(--sc-glow-spread) rgba(var(--sc-glow-rgb), var(--sc-glow-alpha)),
+    0 var(--sc-shadow-y) var(--sc-shadow-blur) rgba(var(--sc-glow-rgb), 0.22),
+    0 4px 14px rgba(0, 0, 0, 0.06);
 }
 
 .icard-top {

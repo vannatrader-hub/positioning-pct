@@ -429,7 +429,7 @@
               "label": "Equities percentile",
               "value": "0.66",
               "unit": "",
-              "pill": "crowded → easing",
+              "pill": "crowded → unwinding",
               "tone": "crowded"
             }
           ],
@@ -495,14 +495,14 @@
               "label": "CDX",
               "value": "351",
               "unit": "bp",
-              "pill": "crowded → easing",
+              "pill": "crowded → unwinding",
               "tone": "crowded"
             },
             {
               "label": "BBB minus AAA",
               "value": "0.63",
               "unit": "pts",
-              "pill": "crowded → easing",
+              "pill": "crowded → unwinding",
               "tone": "crowded"
             },
             {
@@ -601,14 +601,14 @@
               "label": "Most crowded trade",
               "value": "53",
               "unit": "%",
-              "pill": "very crowded → building",
+              "pill": "very crowded → stretching",
               "tone": "crowded"
             },
             {
               "label": "Fund manager cash",
               "value": "3.9",
               "unit": "%",
-              "pill": "very crowded → building",
+              "pill": "very crowded → stretching",
               "tone": "crowded"
             }
           ],
@@ -730,7 +730,7 @@
               "label": "Desk · Short-term composite sentiment",
               "value": "51.7",
               "unit": "",
-              "pill": "crowded → building",
+              "pill": "crowded → stretching",
               "tone": "crowded"
             }
           ],
