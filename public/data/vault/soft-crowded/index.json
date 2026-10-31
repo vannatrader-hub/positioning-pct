@@ -3,8 +3,23 @@
   "product": "SKU1",
   "title": "Soft ↔ Crowded",
   "schema": "schema.json",
-  "latest": "2026-10-23",
+  "latest": "2026-10-30",
   "weeks": [
+    {
+      "week": "2026-10-30",
+      "isoWeek": "2026-W44",
+      "title": "2026-W44 Soft ↔ Crowded",
+      "weekLabel": "Oct 30, 2026",
+      "file": "2026-10-30.json",
+      "headline": "Record Mag 7 crowding starts to unwind as vol stress prints 2.98.",
+      "counts": {
+        "extreme soft": 2,
+        "soft": 3,
+        "mid": 3,
+        "crowded": 2
+      },
+      "carryForward": "2026-10-23"
+    },
     {
       "week": "2026-10-23",
       "isoWeek": "2026-W43",

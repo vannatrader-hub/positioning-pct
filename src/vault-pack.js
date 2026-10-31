@@ -178,14 +178,15 @@ function sectorSection(week, pub = false) {
   const section = el("section", "desk-section");
   section.id = "sectors";
   const printed = week.buckets.reduce((sum, bucket) => sum + bucket.sectors.length, 0);
+  const frozen = week.carryForward?.from ?? week.week;
   const head = el("div", "section-head");
   const row = el("div", "section-title-row");
   row.append(
     el("h2", "", "Sector Soft ↔ Crowded"),
-    el("span", "section-count", `${printed} sectors · ${week.houseLabel} · frozen ${shortDate(week.week)}`),
+    el("span", "section-count", `${printed} sectors · ${week.houseLabel} · frozen ${shortDate(frozen)}`),
   );
-  const desk = el("a", "section-link", "Open this week on the Desk →");
-  desk.href = `${deskRoot(pub)}/desk/?source=${week.house}&week=${week.week}#sectors`;
+  const desk = el("a", "section-link", week.carryForward ? "Open the carried week on the Desk →" : "Open this week on the Desk →");
+  desk.href = `${deskRoot(pub)}/desk/?source=${week.house}&week=${frozen}#sectors`;
   row.append(desk);
   head.append(
     row,
