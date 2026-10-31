@@ -376,10 +376,17 @@ assert(JSON.stringify(hubLinks) === JSON.stringify(["scorecard/"]), `Dashboard h
 assert(hub.includes('<article class="tile hub-tile">'), "Dashboard hub shows Shopping List and Spotlights as Coming soon articles");
 assert(!hub.includes('id="flow-list"'), "hub shows calling cards, not the $$$ table");
 const dollarPage = readFileSync(join(root, "options-flow/dollar/index.html"), "utf8");
+const dollarTemplate = dollarPage.match(/<template id="family-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
+const dollarOutside = dollarPage.replace(/<template id="family-content">[\s\S]*?<\/template>/, "");
+assert(dollarPage.includes('src="/src/family-content-gate.js"'), "$$$ Shopping List page runs family-content-gate.js");
+assert(/<section class="family-wall" id="family-wall" data-state="checking"/.test(dollarOutside), "$$$ Shopping List shows Coming soon wall by default");
+assert(dollarOutside.includes('<span class="badge">Coming soon</span>'), "$$$ Shopping List wall shows Coming soon badge");
+assert(dollarOutside.includes('Sign in for Insight'), "$$$ Shopping List wall links to Insight sign-in");
 for (const id of ["flow-list", "calling-card", "cc-buy-block", "cc-oi-block", "cc-rec", "tl-tiles", "cc-chart"]) {
-  assert(dollarPage.includes(`id="${id}"`), `$$$ watchlist page keeps #${id}`);
+  assert(dollarTemplate.includes(`id="${id}"`), `$$$ Shopping List template keeps #${id}`);
 }
-assert(dollarPage.includes('src="/src/options-flow.js"'), "$$$ watchlist page runs options-flow.js");
+assert(dollarTemplate.includes('src="/src/options-flow.js"'), "$$$ Shopping List template runs options-flow.js");
+assert(!dollarOutside.includes('id="flow-list"'), "$$$ Shopping List content stays inside the family template");
 const viteConfig = readFileSync(join(root, "vite.config.js"), "utf8");
 for (const page of ["options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html"]) {
   assert(viteConfig.includes(`"${page}"`), `vite builds ${page}`);
@@ -579,11 +586,18 @@ assert(JSON.stringify(spotlightLines(spotBy.FCX).map((line) => line.value)) === 
 assert(JSON.stringify(spotlightLines(spotBy.XYZ).map((line) => line.value)) === "[90,85,78.5,75,70]", "XYZ chart lines run target $90, short $85, B/E, long $75, stop $70");
 assert(JSON.stringify(spotlightLines(spotBy.V).map((line) => line.kind)) === '["target","breakeven","strike","stop"]', "V draws short/target, B/E, long strike, stop");
 const spotPage = readFileSync(join(root, "options-flow/spotlights/index.html"), "utf8");
+const spotTemplate = spotPage.match(/<template id="family-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
+const spotOutside = spotPage.replace(/<template id="family-content">[\s\S]*?<\/template>/, "");
+assert(spotPage.includes('src="/src/family-content-gate.js"'), "Spotlight page runs family-content-gate.js");
+assert(/<section class="family-wall" id="family-wall" data-state="checking"/.test(spotOutside), "Spotlight page shows Coming soon wall by default");
+assert(spotOutside.includes('<span class="badge">Coming soon</span>'), "Spotlight wall shows Coming soon badge");
+assert(spotOutside.includes('Sign in for Insight'), "Spotlight wall links to Insight sign-in");
 for (const id of ["spot-rows", "spot-card", "sc-rec", "sc-close-note", "sl-tiles", "sl-chart", "sl-legend"]) {
-  assert(spotPage.includes(`id="${id}"`), `Spotlight page keeps #${id}`);
+  assert(spotTemplate.includes(`id="${id}"`), `Spotlight template keeps #${id}`);
 }
-assert(spotPage.includes("Recommendation") && spotPage.includes("Trade levels"), "Spotlight card labels");
+assert(spotTemplate.includes("Recommendation") && spotTemplate.includes("Trade levels"), "Spotlight card labels");
 assert(!/is-sample/.test(spotPage), "Spotlight page is not labeled Sample");
+assert(!spotOutside.includes('id="spot-rows"'), "Spotlight content stays inside the family template");
 
 const board = JSON.parse(readFileSync(join(root, "public/data/flow/scorecard.json"), "utf8"));
 assert(board.names.length >= 5, `scorecard ranks ${board.names.length} names`);

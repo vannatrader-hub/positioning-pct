@@ -11,6 +11,7 @@
     <meta name="theme-color" content="#f4f5f7" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
     <link rel="stylesheet" href="/src/styles.css" />
+    <script type="module" src="/src/family-content-gate.js"></script>
   </head>
   <body>
     <a class="skip" href="#content">Skip to content</a>
@@ -33,91 +34,109 @@
     </header>
     <div class="wrap">
       <main id="content">
-        <nav class="subnav" aria-label="Options Flow">
-          <a class="subnav-back" href="../"><span aria-hidden="true">←</span> Options Flow</a>
-          <a href="../dollar/"><span class="conf">$$$</span> Shopping List</a>
-          <a class="is-current" href="./" aria-current="page">Spotlight trades</a>
-          <a href="../scorecard/">Weekly scorecard</a>
-        </nav>
-        <section class="page-head">
-          <span class="pill">Spotlight trades <span class="badge is-live"><i aria-hidden="true"></i>Live</span></span>
-          <h1>Spotlight trades</h1>
-          <p class="lede">
-            Trade tickets built around one idea each, in three rows: Active, Open, and Closed. Open a card for the idea,
-            the structure, a Recommendation, and the trade levels it names.
-          </p>
-          <p class="asof-line pill" id="spot-asof">Loading Spotlight trades…</p>
+        <section class="family-wall" id="family-wall" data-state="checking">
+          <article class="soon-card">
+            <span class="badge">Coming soon</span>
+            <h1>Spotlight trades</h1>
+            <p>Spotlight trades open in Insight for family. Sign in through Insight to access the full trades.</p>
+            <a class="back" href="../../insight/"><span aria-hidden="true">←</span> Sign in for Insight</a>
+            <a class="back is-secondary" href="../">← Back to Options Flow</a>
+          </article>
         </section>
 
-        <section class="desk-section" aria-labelledby="spot-title">
-          <div class="section-head">
-            <div class="section-title-row">
-              <h2 id="spot-title">Spotlight trades</h2>
-              <span class="section-count" id="spot-count"></span>
-            </div>
-            <p class="hint">
-              Active is open by default; tap Open or Closed to expand. Newest first in each row. Trade levels are drawn
-              only from the levels a Spotlight names — nothing is filled in from elsewhere.
-            </p>
-          </div>
-          <div class="spot-rows" id="spot-rows" aria-labelledby="spot-title"></div>
-        </section>
-      </main>
-
-      <dialog class="cc spot-cc" id="spot-card" aria-labelledby="sc-ticker" aria-describedby="sc-title">
-        <div class="cc-frame">
-          <header class="cc-head">
-            <div class="cc-ident">
-              <h2 class="cc-ticker" id="sc-ticker"></h2>
-              <span id="sc-badge"></span>
-              <span class="cc-name" id="sc-name"></span>
-            </div>
-            <button class="cc-close" type="button" id="sc-close" aria-label="Close Spotlight card">
-              <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
-                <path d="M5 5 L15 15 M15 5 L5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-              </svg>
-            </button>
-          </header>
-          <div class="cc-body">
-            <section class="cc-left" aria-label="Idea">
-              <p class="cc-meta">
-                <time class="cc-alert" id="sc-date"></time>
-                <span class="spot-status" id="sc-status"></span>
-              </p>
-              <h3 class="cc-title" id="sc-title"></h3>
-              <div class="cc-block">
-                <h4 class="cc-label">The idea</h4>
-                <div class="cc-flow" id="sc-idea"></div>
-              </div>
-              <div class="cc-block">
-                <h4 class="cc-label">Structure</h4>
-                <dl class="cc-oi" id="sc-structure"></dl>
-              </div>
-              <div id="sc-close-note"></div>
-              <div class="cc-rec">
-                <h4 class="cc-label">Recommendation</h4>
-                <p id="sc-rec"></p>
-              </div>
-            </section>
-            <section class="cc-right" aria-labelledby="sl-kicker">
-              <div class="tl-top">
-                <span class="tl-kicker" id="sl-kicker">Trade levels</span>
-                <span class="tl-contract" id="sl-contract"></span>
-              </div>
-              <dl class="tl-tiles" id="sl-tiles"></dl>
-              <div class="tl-panel">
-                <p class="tl-chart-head" id="sl-head"></p>
-                <div class="cc-chart" id="sl-chart"></div>
-                <div class="tl-foot">
-                  <span class="tl-legend" id="sl-legend"></span>
-                  <span class="tl-move" id="sl-move"></span>
-                </div>
-              </div>
-              <p class="cc-chart-note" id="sl-note"></p>
-            </section>
-          </div>
+        <div class="family-account" id="family-account" hidden>
+          <span id="family-account-email"></span>
+          <button type="button" id="family-signout">Sign out</button>
         </div>
-      </dialog>
+
+        <template id="family-content">
+          <nav class="subnav" aria-label="Options Flow">
+            <a class="subnav-back" href="../"><span aria-hidden="true">←</span> Options Flow</a>
+            <a href="../dollar/"><span class="conf">$$$</span> Shopping List</a>
+            <a class="is-current" href="./" aria-current="page">Spotlight trades</a>
+            <a href="../scorecard/">Weekly scorecard</a>
+          </nav>
+          <section class="page-head">
+            <span class="pill">Spotlight trades <span class="badge is-live"><i aria-hidden="true"></i>Live</span></span>
+            <h1>Spotlight trades</h1>
+            <p class="lede">
+              Trade tickets built around one idea each, in three rows: Active, Open, and Closed. Open a card for the idea,
+              the structure, a Recommendation, and the trade levels it names.
+            </p>
+            <p class="asof-line pill" id="spot-asof">Loading Spotlight trades…</p>
+          </section>
+
+          <section class="desk-section" aria-labelledby="spot-title">
+            <div class="section-head">
+              <div class="section-title-row">
+                <h2 id="spot-title">Spotlight trades</h2>
+                <span class="section-count" id="spot-count"></span>
+              </div>
+              <p class="hint">
+                Active is open by default; tap Open or Closed to expand. Newest first in each row. Trade levels are drawn
+                only from the levels a Spotlight names — nothing is filled in from elsewhere.
+              </p>
+            </div>
+            <div class="spot-rows" id="spot-rows" aria-labelledby="spot-title"></div>
+          </section>
+
+          <dialog class="cc spot-cc" id="spot-card" aria-labelledby="sc-ticker" aria-describedby="sc-title">
+            <div class="cc-frame">
+              <header class="cc-head">
+                <div class="cc-ident">
+                  <h2 class="cc-ticker" id="sc-ticker"></h2>
+                  <span id="sc-badge"></span>
+                  <span class="cc-name" id="sc-name"></span>
+                </div>
+                <button class="cc-close" type="button" id="sc-close" aria-label="Close Spotlight card">
+                  <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+                    <path d="M5 5 L15 15 M15 5 L5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                  </svg>
+                </button>
+              </header>
+              <div class="cc-body">
+                <section class="cc-left" aria-label="Idea">
+                  <p class="cc-meta">
+                    <time class="cc-alert" id="sc-date"></time>
+                    <span class="spot-status" id="sc-status"></span>
+                  </p>
+                  <h3 class="cc-title" id="sc-title"></h3>
+                  <div class="cc-block">
+                    <h4 class="cc-label">The idea</h4>
+                    <div class="cc-flow" id="sc-idea"></div>
+                  </div>
+                  <div class="cc-block">
+                    <h4 class="cc-label">Structure</h4>
+                    <dl class="cc-oi" id="sc-structure"></dl>
+                  </div>
+                  <div id="sc-close-note"></div>
+                  <div class="cc-rec">
+                    <h4 class="cc-label">Recommendation</h4>
+                    <p id="sc-rec"></p>
+                  </div>
+                </section>
+                <section class="cc-right" aria-labelledby="sl-kicker">
+                  <div class="tl-top">
+                    <span class="tl-kicker" id="sl-kicker">Trade levels</span>
+                    <span class="tl-contract" id="sl-contract"></span>
+                  </div>
+                  <dl class="tl-tiles" id="sl-tiles"></dl>
+                  <div class="tl-panel">
+                    <p class="tl-chart-head" id="sl-head"></p>
+                    <div class="cc-chart" id="sl-chart"></div>
+                    <div class="tl-foot">
+                      <span class="tl-legend" id="sl-legend"></span>
+                      <span class="tl-move" id="sl-move"></span>
+                    </div>
+                  </div>
+                  <p class="cc-chart-note" id="sl-note"></p>
+                </section>
+              </div>
+            </div>
+          </dialog>
+          <script type="module" src="/src/spotlights.js"></script>
+        </template>
+      </main>
 
       <footer class="site-footer">
         <div>
@@ -133,6 +152,5 @@
       </footer>
     </div>
     <noscript>Spotlight trades need JavaScript to draw.</noscript>
-    <script type="module" src="/src/spotlights.js"></script>
   </body>
 </html>
