@@ -1,11 +1,13 @@
 import {
   NT_SECTIONS,
+  PUBLIC_NT_SECTIONS,
   ctTime,
   dayLabel,
   deskDay,
   itemsForDay,
   nextDeskDay,
   prevDeskDay,
+  publicDeskItems,
   resolveHref,
   windowLabel,
 } from "./new-today-window.js";
@@ -85,9 +87,30 @@ function list(items, options) {
   return ol;
 }
 
-function render(state, items) {
-  const todays = itemsForDay(items, state.day);
+function freshLine(updatedAt, quiet) {
+  if (!updatedAt) return quiet ? "Feed time is not stamped. Nothing new on this desk day." : "Feed time is not stamped.";
+  const stamp = `Feed updated ${dayLabel(deskDay(updatedAt))} · ${ctTime(updatedAt)}`;
+  return quiet ? `${stamp} · nothing new on this desk day` : stamp;
+}
+
+function withFlowBase(items) {
+  const flowBase = document.body?.dataset.flowBase;
+  if (!flowBase) return items;
+  return items.map((item) => {
+    if (typeof item.href !== "string" || !item.href.startsWith("options-flow/")) return item;
+    return { ...item, href: `${flowBase}${item.href.slice("options-flow/".length)}` };
+  });
+}
+
+function render(state, items, updatedAt) {
+  const routed = withFlowBase(items);
+  const publicOnly = document.body?.dataset.surface === "public";
+  const feed = publicOnly ? publicDeskItems(routed) : routed;
+  const sections = publicOnly ? PUBLIC_NT_SECTIONS : NT_SECTIONS;
+  const todays = itemsForDay(feed, state.day);
   const isToday = state.day === state.today;
+  const fresh = document.querySelector("#nt-fresh");
+  if (fresh) fresh.textContent = freshLine(updatedAt, todays.length === 0);
 
   const pill = $("#nt-pill");
   pill.replaceChildren(document.createTextNode(isToday ? "New Today " : `Desk day ${dayLabel(state.day)} `));
@@ -126,7 +149,7 @@ function render(state, items) {
     return;
   }
 
-  for (const meta of NT_SECTIONS) {
+  for (const meta of sections) {
     const rows = todays.filter((item) => item.section === meta.id);
     const section = el("section", "desk-section nt-section");
     section.id = `nt-${meta.id}`;
@@ -144,20 +167,23 @@ function render(state, items) {
 async function main() {
   let state = readState();
   let items = [];
+  let updatedAt = "";
   try {
     const response = await fetch(`${base}data/new-today.json`, { cache: "no-cache" });
     if (!response.ok) throw new Error(String(response.status));
-    items = (await response.json()).items ?? [];
+    const feed = await response.json();
+    items = feed.items ?? [];
+    updatedAt = feed.updatedAt ?? "";
   } catch {
     items = [];
   }
-  render(state, items);
+  render(state, items, updatedAt);
 
   for (const button of document.querySelectorAll("[data-view]")) {
     button.addEventListener("click", () => {
       state = { ...state, view: button.dataset.view };
       history.replaceState(null, "", stateUrl(state));
-      render(state, items);
+      render(state, items, updatedAt);
     });
   }
 

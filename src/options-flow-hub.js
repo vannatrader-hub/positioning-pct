@@ -15,18 +15,23 @@ function fact(key, text) {
   if (item) item.textContent = text;
 }
 
-load("plays.json")
-  .then((seed) => fact("dollar", `${seed.plays.length} names · ${seed.window}`))
-  .catch(() => {});
+function paintHub() {
+  if (!document.querySelector("[data-hub]")) return;
+  load("plays.json")
+    .then((seed) => fact("dollar", `${seed.plays.length} names · ${seed.window}`))
+    .catch(() => {});
 
-load("spotlights.json")
-  .then((seed) => {
-    const plays = seed.sections.flatMap((section) => section.plays);
-    const counts = seed.sections.map((section) => `${section.plays.length} ${section.title.toLowerCase()}`);
-    fact("spotlights", `${plays.length} Spotlights · ${counts.join(" · ")}`);
-  })
-  .catch(() => {});
+  load("spotlights.json")
+    .then((seed) => {
+      const plays = seed.sections.flatMap((section) => section.plays);
+      const counts = seed.sections.map((section) => `${section.plays.length} ${section.title.toLowerCase()}`);
+      fact("spotlights", `${plays.length} Spotlights · ${counts.join(" · ")}`);
+    })
+    .catch(() => {});
 
-load("scorecard.json")
-  .then((board) => fact("scorecard", `${board.names.length} ranked names · ${board.iso_week} · composite / flow / tech`))
-  .catch(() => {});
+  load("scorecard.json")
+    .then((board) => fact("scorecard", `${board.names.length} ranked names · ${board.iso_week} · composite / flow / tech`))
+    .catch(() => {});
+}
+
+document.addEventListener("vault-open", paintHub);

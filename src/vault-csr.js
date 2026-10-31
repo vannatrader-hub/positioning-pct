@@ -5,6 +5,7 @@
  */
 import { CSR_COLORS, csrPanel, csrSeries, panelText, panelTones, zColor } from "./csr.js";
 import { createCsrChart } from "./csr-chart.js";
+import { onDeskReady } from "./when-mounted.js";
 
 const DATA = `${import.meta.env.BASE_URL}data/vault/credit-spread-regime/`;
 const RANGES = { "3m": 63, "6m": 126, "1y": 252, all: 0 };
@@ -169,7 +170,7 @@ async function load(card) {
   mountCsr(card, doc);
 }
 
-document.addEventListener("vault-open", () => {
+onDeskReady(() => {
   const card = document.getElementById("credit-spread-regime");
   if (!card || card.dataset.ready === "1") return;
   card.dataset.ready = "1";

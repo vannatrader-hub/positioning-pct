@@ -4,6 +4,8 @@
  * names the last close or stamp in them.
  */
 
+import { onDeskReady } from "./when-mounted.js";
+
 const BASE = `${import.meta.env?.BASE_URL ?? "/"}data/vault/`;
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -139,7 +141,7 @@ async function render(host) {
 }
 
 if (typeof document !== "undefined") {
-  document.addEventListener("vault-open", () => {
+  onDeskReady(() => {
     const host = document.getElementById("wall-asof");
     if (!host || host.dataset.ready === "1") return;
     host.dataset.ready = "1";

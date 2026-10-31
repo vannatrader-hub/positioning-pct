@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Coming soon · Positioning %.</title>
+    <meta name="description" content="Nothing on this page yet." />
+    <meta name="theme-color" content="#0a0c10" />
+    <link rel="icon" href="%BASE_URL%favicon.svg" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/scorecard.css" />
+      <script type="module" src="/src/hub-gate.js"></script>
+  </head>
+  <body class="is-hub is-insight">
+    <a class="skip" href="#content">Skip to content</a>
+    
+    <div class="wrap">
+      <main id="content">
+        <section class="vault-wall" id="vault-wall" data-state="checking" aria-labelledby="vault-wall-title">
+          <div class="wall-card">
+            <svg class="wall-dial" viewBox="0 0 48 48" aria-hidden="true">
+              <circle class="vd-ring" cx="24" cy="24" r="22" />
+              <circle class="vd-knob" cx="24" cy="24" r="14" />
+              <path class="vd-pointer" d="M24 12.5 V17" />
+              <circle class="vd-core" cx="24" cy="24" r="2.5" />
+            </svg>
+            <h1 id="vault-wall-title">Coming soon</h1>
+            <p class="wall-lede" id="wall-lede">Nothing on this page yet.</p>
+            <form class="wall-form" id="wall-form" novalidate>
+              <div class="wall-field">
+                <label class="wall-label" for="wall-email">Email</label>
+                <input id="wall-email" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="you@example.com" required />
+              </div>
+              <div class="wall-field" id="wall-code-field" hidden>
+                <label class="wall-label" id="wall-code-label" for="wall-code">Code from your email</label>
+                <input id="wall-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit code" />
+              </div>
+              <div class="wall-field" id="wall-password-field">
+                <label class="wall-label" id="wall-password-label" for="wall-password">Password</label>
+                <input id="wall-password" name="password" type="password" autocomplete="current-password" required />
+              </div>
+              <button class="wall-submit" id="wall-submit" type="submit">Sign in</button>
+            </form>
+            <p class="wall-status" id="wall-status" role="status" aria-live="polite"></p>
+            <div class="wall-links">
+              <button class="wall-reset" id="wall-forgot" type="button">Set or reset password</button>
+              <button class="wall-reset" id="wall-reset" type="button" hidden>Start over</button>
+            </div>
+            <div class="wall-create">
+              <span>New here?</span>
+              <button class="wall-create-button" id="wall-create" type="button" disabled aria-disabled="true">Create account <span class="badge is-soon">Coming soon</span></button>
+            </div>
+            <a class="wall-back" href="../../"><span aria-hidden="true">←</span> Back</a>
+          </div>
+        </section>
+
+        <div class="vault-account" id="vault-account" hidden>
+          <span id="vault-account-email"></span>
+          <button type="button" id="vault-signout">Sign out</button>
+        </div>
+
+        <template id="vault-content">
+<header class="topbar">
+      <div class="wrap topbar-in">
+        <div class="topbar-start">
+          <a class="lockup" href="../../">Desk<span class="mark">.</span></a>
+          <nav class="nav" aria-label="Departments">
+          <a href="../../">Desk</a>
+          <a class="is-current" aria-current="page" href="../">Options Flow</a>
+          <a href="../../new-today/">New Today</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+<nav class="subnav" aria-label="Options Flow">
+          <a class="subnav-back" href="../"><span aria-hidden="true">←</span> Options Flow</a>
+          <a href="../dollar/"><span class="conf">$$$</span> Shopping List</a>
+          <a href="../spotlights/">Spotlight trades</a>
+          <a class="is-current" href="./" aria-current="page">Weekly scorecard</a>
+        </nav>
+        <section class="page-head">
+          <span class="pill">Weekly scorecard <span id="sb-badge"></span></span>
+          <h1>Weekly scorecard</h1>
+          <p class="lede">
+            The week's flow names ranked by a composite of flow and technicals. Open a name for its trade card: the desk
+            analysis, scores, a six-month chart, and the flow intelligence panels.
+          </p>
+          <p class="asof-line pill" id="sb-asof">Loading the board…</p>
+        </section>
+
+        <section class="sb-week" aria-label="This week's board">
+          <dl class="sb-meta" id="sb-meta">
+            <div class="sb-meta-item"><dt>Week of</dt><dd id="week-of">—</dd><dd class="sb-meta-sub" id="iso-week"></dd></div>
+            <div class="sb-meta-item"><dt>Updated</dt><dd id="last-updated">—</dd><dd class="sb-meta-sub" id="last-updated-et"></dd></div>
+            <div class="sb-meta-item is-blend"><dt>Composite blend</dt><dd id="blend-note">0.65 flow / 0.35 tech</dd><dd class="sb-meta-sub">Composite = 0.65 × flow + 0.35 × tech</dd></div>
+          </dl>
+          <p class="sb-lookback" id="lookback"></p>
+        </section>
+
+        <section class="desk-section sb-section" aria-labelledby="board-title">
+          <div class="section-head">
+            <div class="section-title-row">
+              <h2 id="board-title">Ranked board</h2>
+              <span class="section-count" id="board-count"></span>
+            </div>
+            <p class="hint">
+              Ranked by composite, highest first. Each row shows the why, the composite with its flow (F) and tech (T)
+              scores, and the last 30 sessions. Open a name for the trade card and flow intelligence panels.
+            </p>
+          </div>
+          <div class="sb-head" aria-hidden="true">
+            <span>Rank</span>
+            <span>Name</span>
+            <span>Why</span>
+            <span>Composite · F / T</span>
+            <span>30 sessions</span>
+          </div>
+          <ol class="sb-list" id="sb-list" aria-labelledby="board-title">
+            <li class="sb-empty">Loading the board…</li>
+          </ol>
+        </section>
+
+        <details class="sb-gaps" id="gaps" hidden>
+          <summary>Data gaps (this board)</summary>
+          <ul></ul>
+        </details>
+
+      
+<dialog class="cc sb-cc" id="board-card" aria-labelledby="bc-ticker" aria-describedby="bc-analysis">
+        <div class="cc-frame">
+          <header class="cc-head sb-cc-head">
+            <div class="sb-brand">
+              <span class="sb-brand-mark">Trade card</span>
+              <span class="sb-brand-sub">Flow alert · <span id="bc-rank"></span></span>
+            </div>
+            <div class="sb-head-right">
+              <span class="sb-chips" id="bc-chips"></span>
+              <button class="cc-close" type="button" id="bc-close" aria-label="Close trade card">
+                <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+                  <path d="M5 5 L15 15 M15 5 L5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+              </button>
+            </div>
+          </header>
+          <div class="cc-body">
+            <section class="cc-left sb-card" aria-label="Trade card" id="trade-card">
+              <div class="sb-id-row">
+                <div class="sb-id-main">
+                  <h2 class="sb-big-ticker"><span id="bc-ticker"></span><span id="bc-star"></span><span class="sb-big-spot" id="bc-spot"></span></h2>
+                  <p class="sb-contract" id="bc-contract"></p>
+                  <p class="sb-stamp-row"><time class="sb-stamp" id="bc-stamp"></time><span class="sb-pills" id="bc-pills"></span></p>
+                </div>
+                <div class="sb-prem">
+                  <span class="sb-prem-k">Net premium</span>
+                  <strong class="sb-prem-v" id="bc-premium"></strong>
+                  <span class="sb-prem-sub" id="bc-premium-sub"></span>
+                </div>
+              </div>
+              <div class="sb-analysis">
+                <h3 class="sb-analysis-k">Desk analysis</h3>
+                <p id="bc-analysis"></p>
+              </div>
+              <dl class="sb-metrics" id="bc-tiles"></dl>
+              <dl class="sb-metrics is-five" id="bc-tiles-2"></dl>
+              <div class="tl-panel sb-chart-panel">
+                <p class="tl-chart-head" id="bc-head"></p>
+                <div class="cc-chart" id="bc-chart"></div>
+                <div class="tl-foot">
+                  <span class="tl-legend" id="bc-legend"></span>
+                  <span class="tl-move" id="bc-range"></span>
+                </div>
+              </div>
+              <dl class="sb-metrics is-foot" id="bc-foot"></dl>
+            </section>
+            <section class="sb-intel" aria-labelledby="fi-title">
+              <header class="fi-head">
+                <h3 class="fi-title" id="fi-title">Flow intelligence</h3>
+                <span class="fi-count" id="fi-count"></span>
+              </header>
+              <div class="fi" id="flow-intel"></div>
+            </section>
+          </div>
+        </div>
+      </dialog>
+        
+<footer class="site-footer">
+        <div>
+          <a class="lockup" href="../../">Desk<span class="mark">.</span></a>
+          <p class="foot-note">Desk.</p>
+        </div>
+        <nav class="foot-links" aria-label="Footer">
+          <a href="../../">Desk</a>
+          <a class="is-current" aria-current="page" href="../">Options Flow</a>
+          <a href="../../new-today/">New Today</a>
+        </nav>
+      </footer>
+        </template>
+      </main>
+
+      
+
+      
+    </div>
+    <noscript>The scorecard needs JavaScript to draw.</noscript>
+    <script type="module" src="/src/scorecard.js"></script>
+  </body>
+</html>

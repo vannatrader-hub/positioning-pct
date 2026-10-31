@@ -517,4 +517,14 @@ async function main() {
   openFromHash();
 }
 
-if (typeof document !== "undefined") main();
+function bootScorecard() {
+  if (!document.body || document.body.dataset.boardBoot === "1" || !document.querySelector("#sb-list")) return;
+  document.body.dataset.boardBoot = "1";
+  main();
+}
+
+if (typeof document !== "undefined") {
+  document.addEventListener("vault-open", bootScorecard);
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootScorecard);
+  else bootScorecard();
+}

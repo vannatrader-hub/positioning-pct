@@ -6,13 +6,13 @@
     <title>New Today · Positioning %.</title>
     <meta
       name="description"
-      content="New Today: everything that landed on the Desk this desk day, 12:00 AM to 11:59 PM Central, across Positioning, Options Flow, SPX Levels, and the Research desk."
+      content="New Today: public desk-day rows for Positioning and the Research desk, with the time the feed was updated."
     />
     <meta name="theme-color" content="#f4f5f7" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
-  <body>
+  <body data-surface="public">
     <a class="skip" href="#content">Skip to content</a>
     <header class="topbar">
       <div class="wrap topbar-in">
@@ -21,13 +21,12 @@
           <nav class="surface" aria-label="Surface">
             <a class="is-current" href="../" aria-current="true"><i class="surface-dot" aria-hidden="true"></i>Dashboard</a>
             <a href="../vault/"><svg class="surface-dial" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.75" /><circle cx="6" cy="6" r="1.5" /></svg>Vault</a>
-            <a href="../insight/"><svg class="surface-eye" viewBox="0 0 14 10" aria-hidden="true"><ellipse cx="7" cy="5" rx="6" ry="4.25" /><circle cx="7" cy="5" r="2" /></svg>Insight</a>
           </nav>
         </div>
         <nav class="nav" aria-label="Pages">
           <a href="../positioning/">Positioning</a>
-          <a href="../options-flow/">Options Flow</a>
-          <a href="../spx-levels/">SPX Levels</a>
+          <a href="../#wall">Desk wall</a>
+          <a class="is-current" aria-current="page" href="../new-today/">New Today</a>
         </nav>
       </div>
     </header>
@@ -36,7 +35,6 @@
         <nav class="subnav" aria-label="New Today">
           <a class="subnav-back" href="../"><span aria-hidden="true">←</span> Desk</a>
           <a href="#nt-positioning">Positioning</a>
-          <a href="#nt-options-flow">Options Flow</a>
           <a href="#nt-spx">SPX Levels</a>
           <a href="#nt-research">Research desk</a>
         </nav>
@@ -48,6 +46,7 @@
             time, 12:00 AM through 11:59 PM.
           </p>
           <p class="asof-line pill" id="nt-window">Loading New Today…</p>
+          <p class="asof-line pill" id="nt-fresh">Checking the feed…</p>
         </section>
 
         <div class="nt-controls">
@@ -73,8 +72,8 @@
         <nav class="foot-links" aria-label="Footer">
           <a href="../">Dashboard</a>
           <a href="../positioning/">Positioning</a>
-          <a href="../options-flow/">Options Flow</a>
-          <a href="../spx-levels/">SPX Levels</a>
+          <a href="../#wall">Desk wall</a>
+          <a class="is-current" aria-current="page" href="../new-today/">New Today</a>
         </nav>
       </footer>
     </div>

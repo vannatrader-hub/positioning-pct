@@ -9,6 +9,14 @@ export const NT_SECTIONS = [
   { id: "research", title: "Research desk", empty: "No research charts or bank notes this desk day." },
 ];
 
+/** Sections safe to list on the public Dashboard. Options Flow stays in the Vault. */
+export const PUBLIC_NT_SECTIONS = NT_SECTIONS.filter((section) => section.id !== "options-flow");
+
+export function publicDeskItems(items) {
+  const allowed = new Set(PUBLIC_NT_SECTIONS.map((section) => section.id));
+  return (items ?? []).filter((item) => allowed.has(item.section));
+}
+
 /** Public source labels. Research rows carry a bank label or one of the generic desk labels. */
 export const SOURCE_LABELS = ["Desk", "X", "Bank note", "JPM", "MS", "GS", "BoA", "Citi", "UBS", "Barclays", "BNP", "Nomura", "Citadel", "WSJ", "Goldman Sachs", "Bloomberg"];
 

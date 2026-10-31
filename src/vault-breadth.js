@@ -1,8 +1,8 @@
 /**
  * Breadth cards on the Vault Vol · Credit · Momentum wall: NY and Nasdaq
  * Summation drawn as end-of-day line charts with the SPX pane on top, MA(8),
- * and the −1000 buy line. Fills the [data-breadth] cards once the Vault gate
- * opens the page, from public/data/vault/breadth/.
+ * and the −1000 buy line. Fills the [data-breadth] cards on the public
+ * Dashboard, or after the Vault gate opens a template, from public/data/vault/breadth/.
  */
 import {
   BUY_LINE,
@@ -25,6 +25,8 @@ import {
   utc,
   windowStart,
 } from "./breadth.js";
+
+import { onDeskReady } from "./when-mounted.js";
 
 const DATA = `${import.meta.env.BASE_URL}data/vault/breadth/`;
 const NS = "http://www.w3.org/2000/svg";
@@ -461,7 +463,7 @@ async function load(cards) {
   if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();
 }
 
-document.addEventListener("vault-open", () => {
+onDeskReady(() => {
   const cards = [...document.querySelectorAll("[data-breadth]")].filter((card) => card.dataset.ready !== "1");
   if (!cards.length) return;
   for (const card of cards) card.dataset.ready = "1";

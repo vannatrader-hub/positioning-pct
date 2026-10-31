@@ -432,4 +432,14 @@ async function main() {
   openFromHash();
 }
 
-if (typeof document !== "undefined") main();
+function bootSpotlights() {
+  if (!document.body || document.body.dataset.spotBoot === "1" || !document.querySelector("#spot-rows")) return;
+  document.body.dataset.spotBoot = "1";
+  main();
+}
+
+if (typeof document !== "undefined") {
+  document.addEventListener("vault-open", bootSpotlights);
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootSpotlights);
+  else bootSpotlights();
+}

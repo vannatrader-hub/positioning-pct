@@ -8,48 +8,77 @@
       name="description"
       content="Spotlight trades: Active, Open, and Closed trade tickets with the idea, the structure, a Recommendation, and the trade levels."
     />
-    <meta name="theme-color" content="#f4f5f7" />
+    <meta name="theme-color" content="#0a0c10" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
     <link rel="stylesheet" href="/src/styles.css" />
-    <script type="module" src="/src/family-content-gate.js"></script>
+    <script type="module" src="/src/vault-gate.js"></script>
+      <script type="module" src="/src/spotlights.js"></script>
   </head>
-  <body>
+  <body class="is-vault">
     <a class="skip" href="#content">Skip to content</a>
     <header class="topbar">
       <div class="wrap topbar-in">
         <div class="topbar-start">
           <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
           <nav class="surface" aria-label="Surface">
-            <a class="is-current" href="../../" aria-current="true"><i class="surface-dot" aria-hidden="true"></i>Dashboard</a>
-            <a href="../../vault/"><svg class="surface-dial" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.75" /><circle cx="6" cy="6" r="1.5" /></svg>Vault</a>
-            <a href="../../insight/"><svg class="surface-eye" viewBox="0 0 14 10" aria-hidden="true"><ellipse cx="7" cy="5" rx="6" ry="4.25" /><circle cx="7" cy="5" r="2" /></svg>Insight</a>
+            <a href="../../"><i class="surface-dot" aria-hidden="true"></i>Dashboard</a>
+            <a class="is-current" href="../../vault/" aria-current="page"><svg class="surface-dial" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.75" /><circle cx="6" cy="6" r="1.5" /></svg>Vault</a>
           </nav>
         </div>
         <nav class="nav" aria-label="Pages">
           <a href="../../positioning/">Positioning</a>
-          <a class="is-current" href="../" aria-current="true">Options Flow</a>
-          <a href="../../spx-levels/">SPX Levels</a>
+          <a class="is-current" aria-current="page" href="../">Options Flow</a>
+          <a href="../../vault/portfolio/">Portfolio</a>
+          <a href="../../vault/vol-credit-momentum/">Desk wall</a>
         </nav>
       </div>
     </header>
     <div class="wrap">
       <main id="content">
-        <section class="family-wall" id="family-wall" data-state="checking">
-          <article class="soon-card">
-            <span class="badge">Coming soon</span>
-            <h1>Spotlight trades</h1>
-            <p>Spotlight trades open in Insight for family. Sign in through Insight to access the full trades.</p>
-            <a class="back" href="../../insight/"><span aria-hidden="true">←</span> Sign in for Insight</a>
-            <a class="back is-secondary" href="../">← Back to Options Flow</a>
-          </article>
+        <section class="vault-wall" id="vault-wall" data-state="checking" aria-labelledby="vault-wall-title">
+          <div class="wall-card">
+            <svg class="wall-dial" viewBox="0 0 48 48" aria-hidden="true">
+              <circle class="vd-ring" cx="24" cy="24" r="22" />
+              <circle class="vd-knob" cx="24" cy="24" r="14" />
+              <path class="vd-pointer" d="M24 12.5 V17" />
+              <circle class="vd-core" cx="24" cy="24" r="2.5" />
+            </svg>
+            <h1 id="vault-wall-title">Sign in to open Vault</h1>
+            <p class="wall-lede" id="wall-lede">Vault opens by invitation. Sign in with your email and password.</p>
+            <form class="wall-form" id="wall-form" novalidate>
+              <div class="wall-field">
+                <label class="wall-label" for="wall-email">Email</label>
+                <input id="wall-email" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="you@example.com" required />
+              </div>
+              <div class="wall-field" id="wall-code-field" hidden>
+                <label class="wall-label" id="wall-code-label" for="wall-code">Code from your email</label>
+                <input id="wall-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit code" />
+              </div>
+              <div class="wall-field" id="wall-password-field">
+                <label class="wall-label" id="wall-password-label" for="wall-password">Password</label>
+                <input id="wall-password" name="password" type="password" autocomplete="current-password" required />
+              </div>
+              <button class="wall-submit" id="wall-submit" type="submit">Sign in</button>
+            </form>
+            <p class="wall-status" id="wall-status" role="status" aria-live="polite"></p>
+            <div class="wall-links">
+              <button class="wall-reset" id="wall-forgot" type="button">Set or reset password</button>
+              <button class="wall-reset" id="wall-reset" type="button" hidden>Start over</button>
+            </div>
+            <div class="wall-create">
+              <span>New to Vault?</span>
+              <button class="wall-create-button" id="wall-create" type="button" disabled aria-disabled="true">Create account <span class="badge is-soon">Coming soon</span></button>
+            </div>
+            <a class="wall-back" href="../../"><span aria-hidden="true">←</span> Back to Dashboard</a>
+          </div>
         </section>
 
-        <div class="family-account" id="family-account" hidden>
-          <span id="family-account-email"></span>
-          <button type="button" id="family-signout">Sign out</button>
+        <div class="vault-account" id="vault-account" hidden>
+          <span id="vault-account-email"></span>
+          <button type="button" id="vault-signout">Sign out</button>
         </div>
 
-        <template id="family-content">
+        <template id="vault-content">
           <nav class="subnav" aria-label="Options Flow">
             <a class="subnav-back" href="../"><span aria-hidden="true">←</span> Options Flow</a>
             <a href="../dollar/"><span class="conf">$$$</span> Shopping List</a>
@@ -134,20 +163,21 @@
               </div>
             </div>
           </dialog>
-          <script type="module" src="/src/spotlights.js"></script>
         </template>
       </main>
 
       <footer class="site-footer">
         <div>
           <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
-          <p class="foot-note">Dashboard · public reading.</p>
+          <p class="foot-note">Vault · Options Flow.</p>
         </div>
         <nav class="foot-links" aria-label="Footer">
           <a href="../../">Dashboard</a>
           <a href="../../positioning/">Positioning</a>
-          <a class="is-current" href="../" aria-current="true">Options Flow</a>
-          <a href="../../spx-levels/">SPX Levels</a>
+          <a href="../">Options Flow</a>
+          <a href="../../vault/portfolio/">Portfolio</a>
+          <a href="../../vault/vol-credit-momentum/">Desk wall</a>
+          <a class="is-current" aria-current="page" href="../../vault/">Vault</a>
         </nav>
       </footer>
     </div>

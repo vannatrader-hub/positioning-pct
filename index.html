@@ -6,40 +6,43 @@
     <title>Positioning %.</title>
     <meta
       name="description"
-      content="The Desk: a public reading of where positioning sits."
+      content="The Dashboard: positioning reads, the Soft to Crowded desk, charts, New Today, and the vol, credit, and momentum wall."
     />
     <meta name="theme-color" content="#f4f5f7" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
-  <body>
+  <body data-surface="public">
     <a class="skip" href="#content">Skip to content</a>
     <header class="topbar">
-      <div class="wrap topbar-in">
+      <div class="wrap is-wide topbar-in">
         <div class="topbar-start">
           <nav class="surface" aria-label="Surface">
             <a class="is-current" href="./" aria-current="page"><i class="surface-dot" aria-hidden="true"></i>Dashboard</a>
             <a href="vault/"><svg class="surface-dial" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.75" /><circle cx="6" cy="6" r="1.5" /></svg>Vault</a>
-            <a href="insight/"><svg class="surface-eye" viewBox="0 0 14 10" aria-hidden="true"><ellipse cx="7" cy="5" rx="6" ry="4.25" /><circle cx="7" cy="5" r="2" /></svg>Insight</a>
           </nav>
         </div>
         <nav class="nav" aria-label="Pages">
           <a href="positioning/">Positioning</a>
-          <a href="options-flow/">Options Flow</a>
-          <a href="spx-levels/">SPX Levels</a>
+          <a href="#wall">Desk wall</a>
+          <a href="new-today/">New Today</a>
         </nav>
       </div>
     </header>
 
-    <div class="wrap">
+    <div class="wrap is-wide">
       <main id="content">
         <section class="hero">
           <span class="pill"><i class="surface-dot" aria-hidden="true"></i>Dashboard</span>
           <div class="hero-row">
             <h1><a class="lockup" href="./">Positioning<span class="mark">%.</span></a></h1>
+            <a class="nt-chip" data-new-today data-public="1" href="new-today/">
+              <span class="nt-chip-top"><i class="nt-dot" aria-hidden="true"></i>New Today</span>
+              <span class="nt-chip-sub" data-nt="sub">Checking the desk day…</span>
+            </a>
           </div>
           <p class="tagline">Where positioning sits — soft, crowded, or somewhere between.</p>
-          <p class="tagline-sub">Pick a page. It opens on its own.</p>
+          <p class="tagline-sub">Public reads, the desk, the charts, and the vol wall. One surface, open as you land.</p>
         </section>
 
         <div class="tile-grid">
@@ -57,41 +60,208 @@
               </svg>
             </span>
             <h2>Positioning</h2>
-            <p>Four calling cards: sector Soft ↔ Crowded bars, Credit, Options &amp; Soft Vol, and the full ten-category desk. Each opens the Soft ↔ Crowded desk at its section. Six interactive charts sit underneath.</p>
+            <p>Four calling cards into the Soft ↔ Crowded desk: sectors, credit, options and soft vol, and the full ten-category desk. Six charts sit under the cards.</p>
             <span class="open">Open <span class="arrow" aria-hidden="true">→</span></span>
           </a>
-          <a class="tile" href="options-flow/">
+          <a class="tile" href="positioning/desk/">
             <div class="tile-kicker">
               <span class="tile-num">02</span>
               <span class="badge is-live"><i aria-hidden="true"></i>Live</span>
             </div>
             <span class="tile-icon" aria-hidden="true">
-              <svg viewBox="0 0 28 28" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 9 H19 M15 5 L19 9 L15 13" stroke="#464b54" stroke-width="2" />
-                <path d="M24 19 H9 M13 15 L9 19 L13 23" stroke="#8b919c" stroke-width="2" />
+              <svg viewBox="0 0 28 28" fill="none" stroke-linecap="round">
+                <path d="M4 20 C8 20 8 8 14 8 C20 8 20 20 24 20" stroke="#2f8a55" stroke-width="2" />
+                <path d="M4 22 H24" stroke="#464b54" stroke-width="2" />
               </svg>
             </span>
-            <h2>Options Flow</h2>
-            <p>The weekly flow scorecard: names ranked by composite, with trade details and a chart on every row.</p>
-            <span class="open">Open <span class="arrow" aria-hidden="true">→</span></span>
+            <h2>Soft ↔ Crowded desk</h2>
+            <p>Eleven sector cards on the scale, credit, vol, and the study desk. One week slider moves the whole read.</p>
+            <span class="open">Open the desk <span class="arrow" aria-hidden="true">→</span></span>
           </a>
-          <a class="tile" href="spx-levels/">
+          <a class="tile" href="positioning/charts/">
             <div class="tile-kicker">
               <span class="tile-num">03</span>
-              <span class="badge">Soon</span>
+              <span class="badge is-live"><i aria-hidden="true"></i>Live</span>
             </div>
             <span class="tile-icon" aria-hidden="true">
-              <svg viewBox="0 0 28 28" fill="none" stroke-linecap="round">
-                <path d="M4 8 H24" stroke="#464b54" stroke-width="2" />
-                <path d="M4 14 H24" stroke="#8b919c" stroke-width="2" stroke-dasharray="2 3" />
-                <path d="M4 20 H24" stroke="#464b54" stroke-width="2" />
+              <svg viewBox="0 0 28 28" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 20 L10 12 L16 15 L24 6" stroke="#0b0d12" stroke-width="2" />
+                <path d="M4 23 H24" stroke="#8b919c" stroke-width="1.6" />
               </svg>
             </span>
-            <h2>SPX Levels</h2>
-            <p>Index reference levels, written in plain language. A placeholder on the Desk for now.</p>
-            <span class="open">Open <span class="arrow" aria-hidden="true">→</span></span>
+            <h2>Charts</h2>
+            <p>Six Soft ↔ Crowded charts on one history slider. Tap a week on any chart and the rest follow.</p>
+            <span class="open">Open charts <span class="arrow" aria-hidden="true">→</span></span>
           </a>
         </div>
+
+        <section class="home-wall" id="wall" aria-labelledby="wall-title">
+          <div class="section-head">
+            <div class="section-title-row">
+              <h2 id="wall-title">Vol · Credit · Momentum</h2>
+              <span class="section-count">Public wall</span>
+            </div>
+            <p class="hint">Spot Vol Beta, credit regime, the MAG7 oscillator, and NY and Nasdaq summation. Committed closes, redrawn here. Nothing on this wall is a live quote.</p>
+          </div>
+          <nav class="subnav" aria-label="Desk wall">
+            <a href="#spot-vol-beta">Spot Vol Beta</a>
+            <a href="#credit-spread-regime">Credit Spread Regime</a>
+            <a href="#mag7">MAG7 Oscillator</a>
+            <a href="#nysi">NY Summation</a>
+            <a href="#nasi">Nasdaq Summation</a>
+          </nav>
+<section class="wall-asof" aria-labelledby="wall-asof-title">
+            <div class="wall-asof-head">
+              <h2 id="wall-asof-title">Data as of</h2>
+              <p class="hint">Every reading on this wall is read from committed files. None is a live quote; each line says how old its data is.</p>
+            </div>
+            <div id="wall-asof">
+              <p class="hint">Checking data dates…</p>
+            </div>
+          </section>
+
+          <div class="wall-grid">
+            <article class="pchart svb-card" id="spot-vol-beta" aria-labelledby="svb-title">
+              <header class="pchart-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">01</span>
+                  <span class="basis svb-asof" id="svb-asof"></span>
+                  <span class="house h-desk">Desk</span>
+                </div>
+                <h2 id="svb-title">Spot Vol Beta</h2>
+                <p class="wall-sub">The gauge and the desk estimate, on one close per session with SPX behind the line. The band is the house possible-bottom signal at 2.</p>
+              </header>
+              <div id="svb-body">
+                <p class="hint" id="svb-status">Loading Spot Vol Beta…</p>
+              </div>
+            </article>
+
+            <article class="pchart csr-card" id="credit-spread-regime" aria-labelledby="csr-title">
+              <header class="pchart-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">02</span>
+                  <span class="csr-asof" id="csr-asof">FRED ICE BofA OAS</span>
+                  <span class="house h-desk">Desk</span>
+                </div>
+                <h2 id="csr-title">Credit Spread Regime</h2>
+                <p class="wall-sub">High yield minus investment grade excess spread as a Z score, with Low, Normal, Elevated, and Stress zones and SPX behind it.</p>
+              </header>
+
+              <div class="csr-controls">
+                <div class="seg" data-seg="range" role="group" aria-label="Window">
+                  <button type="button" data-range="3m" aria-pressed="false">3M</button>
+                  <button type="button" data-range="6m" aria-pressed="false">6M</button>
+                  <button type="button" data-range="1y" aria-pressed="false">1Y</button>
+                  <button type="button" class="is-on" data-range="all" aria-pressed="true">All</button>
+                </div>
+                <div class="seg" data-seg="metric" role="group" aria-label="Spread">
+                  <button type="button" class="is-on" data-metric="excess" aria-pressed="true">HY−IG excess</button>
+                  <button type="button" data-metric="hy" aria-pressed="false">HY only</button>
+                </div>
+                <button type="button" class="toggle csr-spx" id="csr-spx" aria-pressed="true"><i aria-hidden="true"></i>SPX overlay</button>
+              </div>
+
+              <div class="csr-stage">
+                <div class="csr-frame" id="csr-frame">
+                  <div class="csr-legend" id="csr-legend" aria-hidden="true"></div>
+                </div>
+                <table class="csr-panel" id="csr-panel" aria-label="Credit Spread Regime statistics"></table>
+                <p class="hint" id="csr-status">Loading the credit series…</p>
+              </div>
+              <p class="csr-help">Hover for a session. Click the chart, then scroll to zoom; drag to pan; double-click resets. Arrow keys step sessions.</p>
+              <p class="visually-hidden" id="csr-live" aria-live="polite"></p>
+
+              <div class="csr-notes">
+                <div class="csr-key">
+                  <span><i class="k-low" aria-hidden="true"></i>Low · Z under −1</span>
+                  <span><i class="k-normal" aria-hidden="true"></i>Normal · −1 to 1</span>
+                  <span><i class="k-elevated" aria-hidden="true"></i>Elevated · 1 to 2</span>
+                  <span><i class="k-stress" aria-hidden="true"></i>Stress · 2 and up</span>
+                  <span><i class="k-dot" aria-hidden="true"></i>Stress rolling over</span>
+                  <span><i class="k-cross" aria-hidden="true"></i>Calm turning up</span>
+                </div>
+                <div class="csr-read">
+                  <h3>How the desk reads it</h3>
+                  <ul class="pack-points">
+                    <li>The line is the HY−IG excess spread, smoothed with a 5-session EMA, as a Z-score against its trailing 252 sessions. Widening pushes it up.</li>
+                    <li>A red dot marks a session with Z at 2 or more while the spread is already narrowing. A green cross marks Z at −2 or less with the spread widening off the lows.</li>
+                    <li>Elevated or Stress credit while Spot Vol Beta prints 2 or more is the possible SPX bottom the desk watches for. Credit Z alone is not a buy.</li>
+                  </ul>
+                  <p class="csr-invalid"><strong>Invalidation</strong> FRED prints lag a session and holidays carry the prior close. The 252-session window can move a regime with no new event behind it.</p>
+                </div>
+                <p class="csr-source">
+                  Desk · FRED: ICE BofA US High Yield Index OAS (BAMLH0A0HYM2) and ICE BofA US Corporate Index OAS (BAMLC0A0CM), in basis points;
+                  S&amp;P 500 close (SP500); Cboe VIX close (VIXCLS). Spreads carried onto S&amp;P 500 sessions. After Collin-Dufresne, Goldstein &amp; Martin (2001)
+                  and Gilchrist &amp; Zakrajšek (2012).
+                </p>
+              </div>
+            </article>
+
+            <article class="pchart is-wide mo-card" id="mag7" aria-labelledby="mag7-title">
+              <header class="pchart-head mo-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">03</span>
+                  <span class="house h-desk">Desk</span>
+                </div>
+                <h2 id="mag7-title">MAG7 Oscillator</h2>
+                <p class="mo-sub">Equal-weight AAPL · MSFT · GOOGL · AMZN · NVDA · TSLA · META. 14-day momentum %, smoothed over 5 sessions.</p>
+              </header>
+
+              <div class="pchart-controls" id="mo-controls"></div>
+
+              <div class="mo-pane" id="mo-pane">
+                <div class="mo-plot" id="mo-plot"></div>
+                <p class="mo-legend" id="mo-legend" aria-live="off"><span class="mo-legend-name">MAG7</span></p>
+                <table class="mo-table" id="mo-table" aria-label="MAG7 Oscillator, latest bar"></table>
+                <p class="mo-status" id="mo-status">Loading the oscillator…</p>
+              </div>
+
+              <div class="legend mo-key" id="mo-key">
+                <span><i class="sw" style="background: #4caf50"></i><b data-key="bull">Bullish above +2</b></span>
+                <span><i class="sw" style="background: #2196f3"></i>Neutral</span>
+                <span><i class="sw" style="background: #ff5252"></i><b data-key="bear">Bearish below −2</b></span>
+                <span data-key="caution"><i class="mo-dash is-caution"></i>Caution +9</span>
+                <span data-key="stretched"><i class="mo-dash is-stretched"></i>Stretched −5</span>
+              </div>
+
+              <footer class="pchart-foot mo-foot">
+                <div class="pchart-notes">
+                  <p class="mo-now" id="mo-now"></p>
+                  <p class="mo-read">
+                    Mega-cap leadership tape. Above +2 the seven are pulling the index; below −2 they are dragging it.
+                    Breadth is how many of the seven are up over the window. Bearish with breadth under 40% is the
+                    risk-off read, strongest when Credit Spread Regime sits in Elevated and Spot Vol Beta prints 2 or
+                    more. The caution line near +9 and the stretched line near −5 have tended to mark index pivots in
+                    sideways-to-trending tape.
+                  </p>
+                  <p class="basis mo-basis" id="mo-basis"></p>
+                </div>
+              </footer>
+            </article>
+
+            <article class="pchart is-wide bw-card" id="nysi" data-breadth="nysi" aria-labelledby="nysi-title">
+              <header class="pchart-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">04</span>
+                  <span class="badge is-live"><i aria-hidden="true"></i>Daily close</span>
+                </div>
+                <h2 id="nysi-title">NY Summation</h2>
+              </header>
+              <p class="hint bw-load">Loading NY Summation…</p>
+            </article>
+
+            <article class="pchart is-wide bw-card" id="nasi" data-breadth="nasi" aria-labelledby="nasi-title">
+              <header class="pchart-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">05</span>
+                  <span class="badge is-live"><i aria-hidden="true"></i>Daily close</span>
+                </div>
+                <h2 id="nasi-title">Nasdaq Summation</h2>
+              </header>
+              <p class="hint bw-load">Loading Nasdaq Summation…</p>
+            </article>
+          </div>
+        </section>
       </main>
 
       <footer class="site-footer">
@@ -102,10 +272,13 @@
         <nav class="foot-links" aria-label="Footer">
           <a class="is-current" href="./" aria-current="page">Dashboard</a>
           <a href="positioning/">Positioning</a>
-          <a href="options-flow/">Options Flow</a>
-          <a href="spx-levels/">SPX Levels</a>
+          <a href="#wall">Desk wall</a>
+          <a href="new-today/">New Today</a>
         </nav>
       </footer>
     </div>
+    <script type="module" src="/src/vault-wall.js"></script>
+    <script type="module" src="/src/vault-breadth.js"></script>
+    <script type="module" src="/src/new-today-chip.js"></script>
   </body>
 </html>

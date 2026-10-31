@@ -23,13 +23,13 @@
           <nav class="surface" aria-label="Surface">
             <a href="../"><i class="surface-dot" aria-hidden="true"></i>Dashboard</a>
             <a class="is-current" href="./" aria-current="page"><svg class="surface-dial" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.75" /><circle cx="6" cy="6" r="1.5" /></svg>Vault</a>
-            <a href="../insight/"><svg class="surface-eye" viewBox="0 0 14 10" aria-hidden="true"><ellipse cx="7" cy="5" rx="6" ry="4.25" /><circle cx="7" cy="5" r="2" /></svg>Insight</a>
           </nav>
         </div>
         <nav class="nav" aria-label="Pages">
           <a href="../positioning/">Positioning</a>
           <a href="../options-flow/">Options Flow</a>
-          <a href="../spx-levels/">SPX Levels</a>
+          <a href="portfolio/">Portfolio</a>
+          <a href="vol-credit-momentum/">Desk wall</a>
         </nav>
       </div>
     </header>
@@ -88,9 +88,9 @@
               </span>
               <h1>Vault<span class="mark">.</span></h1>
               <p class="lede">
-                A private desk surface for deeper reads and the tools behind them. The weekly pack, the vol wall, and the personal book sit inside.
+                Everything on the Dashboard, plus Options Flow and the mock book. The weekly pack and the archive stay here.
               </p>
-              <p class="vault-note">The Desk keeps reading in public while the Vault is built.</p>
+              <p class="vault-note">The desk wall is on the Dashboard. This room keeps the book and the flow.</p>
             </div>
             <svg class="vault-dial" viewBox="0 0 240 240" aria-hidden="true">
               <circle class="vd-ring" cx="120" cy="120" r="112" />
@@ -104,10 +104,11 @@
           </section>
 
           <nav class="vault-dash" aria-label="Vault pages">
-            <a href="soft-crowded/"><span class="vault-dash-num">01</span><strong>This week's pack</strong><span>Soft ↔ Crowded</span></a>
-            <a href="vol-credit-momentum/"><span class="vault-dash-num">02</span><strong>Desk wall</strong><span>Vol · Credit · Momentum</span></a>
-            <a href="portfolio/"><span class="vault-dash-num">03</span><strong>Portfolio</strong><span>Closed this week · still held</span></a>
+            <a href="../options-flow/"><span class="vault-dash-num">01</span><strong>Options Flow</strong><span>Shopping List · Spotlights · Scorecard</span></a>
+            <a href="portfolio/"><span class="vault-dash-num">02</span><strong>Mock book</strong><span>50,000 book · 4,000 tickets</span></a>
+            <a href="soft-crowded/"><span class="vault-dash-num">03</span><strong>This week's pack</strong><span>Soft ↔ Crowded</span></a>
             <a href="archive/"><span class="vault-dash-num">04</span><strong>Desk-day archive</strong><span>Packs and New Today, by date</span></a>
+            <a href="vol-credit-momentum/"><span class="vault-dash-num">05</span><strong>Desk wall</strong><span>Same gauges as the Dashboard</span></a>
           </nav>
 
           <section class="vault-section" aria-labelledby="vault-packs-title">
@@ -196,7 +197,7 @@
                 <h2 id="vault-book-title">Performance</h2>
                 <span class="section-count">Portfolio</span>
               </div>
-              <p class="hint">The personal book: filled closes, and positions still held.</p>
+              <p class="hint">Desk mock book. A 50,000 start. Every line is a 4,000 ticket. Open and closed follow the line status.</p>
             </div>
             <div class="tile-grid vault-grid">
               <a class="tile vault-pack" href="portfolio/">
@@ -214,8 +215,8 @@
                 </span>
                 <h2>Portfolio</h2>
                 <p>
-                  The trade journal for the personal book. Each line keeps its category, structure, entry and exit, and the result.
-                  Open lines are still held. A working close stays pending until it fills.
+                  Trade names, structures, stops, and targets, sized as one ticket on the mock book.
+                  An open line lands on the Open tab. A filled line lands on the Closed tab.
                 </p>
                 <ul class="hub-facts">
                   <li>8 closed · 4 still held</li>
@@ -261,17 +262,43 @@
             </div>
           </section>
 
+          <section class="vault-section" aria-labelledby="vault-flow-title">
+            <div class="section-head">
+              <div class="section-title-row">
+                <h2 id="vault-flow-title">Options Flow</h2>
+                <span class="section-count">Shopping · Spotlights · Scorecard</span>
+              </div>
+              <p class="hint">The flow desk lives here, behind the same sign-in as the rest of the Vault.</p>
+            </div>
+            <div class="tile-grid vault-grid">
+              <a class="tile vault-pack" href="../options-flow/">
+                <div class="tile-kicker">
+                  <span class="tile-num">01</span>
+                  <span class="badge is-live"><i aria-hidden="true"></i>Live</span>
+                </div>
+                <span class="tile-icon hub-icon" aria-hidden="true"><span class="conf">$$$</span></span>
+                <h2>Options Flow</h2>
+                <p>Shopping List, Spotlight trades, and the weekly scorecard. Each card opens its page.</p>
+                <ul class="hub-facts">
+                  <li>Shopping List · Spotlights · Scorecard</li>
+                  <li>Calling cards and trade levels</li>
+                </ul>
+                <span class="open">Open Options Flow <span class="arrow" aria-hidden="true">→</span></span>
+              </a>
+            </div>
+          </section>
+
           <section class="vault-section" aria-labelledby="vault-preview-title">
             <div class="section-head">
               <div class="section-title-row">
                 <h2 id="vault-preview-title">Inside the Vault</h2>
                 <span class="section-count">Three tools in the works</span>
               </div>
-              <p class="hint">A look at what the private desk will carry. None of these open yet.</p>
+              <p class="hint">Each card opens a short note. Nothing here is a dead tile.</p>
             </div>
 
             <div class="tile-grid vault-grid">
-              <article class="tile vault-tile">
+              <a class="tile vault-tile" href="../coming-soon/#live-pulls">
                 <div class="tile-kicker">
                   <span class="tile-num">01</span>
                   <span class="badge is-soon">Soon</span>
@@ -290,10 +317,10 @@
                   <li>Dealer walls · reference levels</li>
                   <li>On request, time-stamped</li>
                 </ul>
-                <span class="vault-soon">Not open yet</span>
-              </article>
+                <span class="open">Open the note <span class="arrow" aria-hidden="true">→</span></span>
+              </a>
 
-              <article class="tile vault-tile">
+              <a class="tile vault-tile" href="../coming-soon/#alerts">
                 <div class="tile-kicker">
                   <span class="tile-num">02</span>
                   <span class="badge is-soon">Soon</span>
@@ -311,10 +338,10 @@
                   <li>Your names · your thresholds</li>
                   <li>Flow and positioning triggers</li>
                 </ul>
-                <span class="vault-soon">Not open yet</span>
-              </article>
+                <span class="open">Open the note <span class="arrow" aria-hidden="true">→</span></span>
+              </a>
 
-              <article class="tile vault-tile">
+              <a class="tile vault-tile" href="../coming-soon/#sizing">
                 <div class="tile-kicker">
                   <span class="tile-num">03</span>
                   <span class="badge is-soon">Soon</span>
@@ -332,20 +359,21 @@
                   <li>Account size · risk per idea</li>
                   <li>Written as notes, not orders</li>
                 </ul>
-                <span class="vault-soon">Not open yet</span>
-              </article>
+                <span class="open">Open the note <span class="arrow" aria-hidden="true">→</span></span>
+              </a>
             </div>
           </section>
 
           <section class="vault-desk" aria-labelledby="vault-desk-title">
             <div>
               <h2 id="vault-desk-title">Dashboard is always open</h2>
-              <p class="hint">Positioning and Options Flow stay where they are, open as always.</p>
+              <p class="hint">Positioning, the desk wall, and New Today stay on the Dashboard.</p>
             </div>
             <nav class="vault-desk-links" aria-label="Dashboard pages">
               <a class="is-primary" href="../"><span aria-hidden="true">←</span> Dashboard</a>
               <a href="../positioning/">Positioning</a>
-              <a href="../options-flow/">Options Flow</a>
+              <a href="../#wall">Desk wall</a>
+              <a href="../new-today/">New Today</a>
             </nav>
           </section>
         </template>
@@ -357,11 +385,12 @@
           <p class="foot-note">Vault · by invitation.</p>
         </div>
         <nav class="foot-links" aria-label="Footer">
-          <a href="../">Home</a>
+          <a href="../">Dashboard</a>
           <a href="../positioning/">Positioning</a>
           <a href="../options-flow/">Options Flow</a>
-          <a href="../spx-levels/">SPX Levels</a>
-          <a class="is-current" href="./" aria-current="page">Vault</a>
+          <a href="portfolio/">Portfolio</a>
+          <a href="vol-credit-momentum/">Desk wall</a>
+          <a class="is-current" aria-current="page" href="./">Vault</a>
         </nav>
       </footer>
     </div>
