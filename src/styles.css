@@ -198,6 +198,17 @@ button, select { font: inherit; color: inherit; }
 
 .surface-dial circle + circle { fill: currentColor; stroke: none; }
 
+.surface-eye {
+  flex: none;
+  width: 14px;
+  height: 10px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+}
+
+.surface-eye circle { fill: currentColor; stroke: none; }
+
 .nav {
   display: flex;
   gap: 2px;
@@ -3621,6 +3632,237 @@ a.archive-item-title:hover { text-decoration: underline; }
 
 .vault-account button:hover { background: rgba(255, 255, 255, 0.07); color: var(--ink); }
 
+/* Insight: the family desk, a darker room with a blue-purple accent. */
+.is-insight {
+  --canvas: #0a0c10;
+  --surface: #12161d;
+  --ink: #f3f4f6;
+  --ink-2: #d4d8de;
+  --muted: #9aa1ad;
+  --faint: #6b7280;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.15);
+  --accent: #5b9cff;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px rgba(0, 0, 0, 0.28);
+  color-scheme: dark;
+  background:
+    radial-gradient(1000px 520px at 10% -14%, rgba(91, 156, 255, 0.08), transparent 62%),
+    radial-gradient(900px 460px at 94% -10%, rgba(156, 91, 255, 0.08), transparent 60%),
+    var(--canvas);
+  background-repeat: no-repeat;
+}
+
+.is-insight ::selection { background: rgba(91, 156, 255, 0.28); }
+.is-insight .topbar { background: rgba(10, 12, 16, 0.72); }
+.is-insight .surface { background: rgba(255, 255, 255, 0.04); }
+
+.is-insight .surface a.is-current {
+  background: #1c222c;
+  box-shadow: inset 0 0 0 1px rgba(91, 156, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.is-insight .surface a.is-current .surface-eye { color: var(--accent); }
+
+.is-insight .nav {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: none;
+}
+
+.is-insight .nav a { color: var(--muted); }
+.is-insight .nav a:hover { color: var(--ink); background: rgba(255, 255, 255, 0.06); }
+
+.is-insight .pill { background: rgba(255, 255, 255, 0.04); }
+.is-insight .tile-icon { background: #0e1218; }
+.is-insight .badge { background: rgba(255, 255, 255, 0.05); }
+
+.is-insight .badge.is-soon {
+  background: rgba(91, 156, 255, 0.1);
+  border-color: rgba(91, 156, 255, 0.28);
+  color: var(--accent);
+}
+
+.insight-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 200px;
+  gap: 40px;
+  align-items: center;
+  padding: 72px 0 48px;
+}
+
+.insight-pill { color: var(--accent); }
+
+.insight-hero h1 {
+  margin: 22px 0 16px;
+  font-size: clamp(56px, 9vw, 104px);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+}
+
+.insight-hero h1 .mark { color: var(--accent); }
+
+.insight-note {
+  margin: 18px 0 0;
+  font-size: 13.5px;
+  color: var(--faint);
+}
+
+.insight-dial {
+  width: 200px;
+  height: 160px;
+  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.45));
+}
+
+.id-ring { fill: none; stroke: var(--line-strong); stroke-width: 1.5; }
+.id-iris { fill: #161b23; stroke: var(--line-strong); stroke-width: 1.5; }
+.id-pupil { fill: var(--accent); }
+
+.insight-grid { margin-top: 4px; }
+.insight-section + .insight-section { margin-top: 44px; }
+
+.is-insight .insight-tile { position: relative; }
+.is-insight .insight-tile .tile-icon { background: #f1f3f6; }
+
+.insight-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent, #5b9cff), rgba(156, 91, 255, 0.55) 55%, transparent);
+}
+
+.insight-dash {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 32px;
+  padding: 20px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--line);
+}
+
+.insight-dash a {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.insight-dash a:hover { background: rgba(255, 255, 255, 0.05); color: var(--ink); }
+.insight-dash-num { font-size: 11px; font-weight: 700; color: var(--accent); }
+.insight-dash strong { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); }
+.insight-dash span { font-size: 12.5px; color: var(--faint); }
+
+.insight-desk {
+  margin-top: 56px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px 28px;
+  align-items: center;
+  padding: 24px 26px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent), var(--surface);
+}
+
+.insight-desk h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.insight-desk-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.insight-desk-links a {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.insight-desk-links a:hover { background: rgba(255, 255, 255, 0.07); color: var(--ink); }
+
+.insight-desk-links a.is-primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #0b0d12;
+}
+
+.insight-desk-links a.is-primary:hover { background: #fff; }
+
+/* Insight wall: the only thing a signed-out visitor sees on Insight. */
+.insight-wall {
+  display: grid;
+  place-items: center;
+  min-height: min(620px, 64vh);
+  padding: 56px 0 8px;
+}
+
+.is-insight .wall-card {
+  width: min(440px, 100%);
+  padding: 34px 32px 24px;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent), var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  box-shadow: var(--shadow);
+}
+
+.wall-eye {
+  width: 60px;
+  height: 45px;
+  margin: 0 auto 18px;
+}
+
+.we-ring { fill: none; stroke: var(--line-strong); stroke-width: 1.5; }
+.we-iris { fill: #161b23; stroke: var(--line-strong); stroke-width: 1.5; }
+.we-pupil { fill: var(--accent); }
+
+.insight-wall[data-state="checking"] .wall-form,
+.insight-wall[data-state="checking"] .wall-links { visibility: hidden; }
+
+.insight-account {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  padding-top: 20px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.insight-account[hidden] { display: none; }
+
+.insight-account button {
+  padding: 6px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: none;
+  color: var(--ink-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.insight-account button:hover { background: rgba(255, 255, 255, 0.07); color: var(--ink); }
+
 /* Vault pack: Desk cards and chart refs, in the Vault room. */
 .is-vault .vault-pack .tile-icon { background: #f1f3f6; }
 
@@ -5781,6 +6023,10 @@ a.nt-row:hover .nt-arrow { background: var(--ink); color: #fff; }
   .pf-lock { white-space: normal; }
   .vault-dial { display: none; }
   .vault-desk { grid-template-columns: 1fr; }
+  .insight-dash { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .insight-hero { grid-template-columns: 1fr; }
+  .insight-dial { display: none; }
+  .insight-desk { grid-template-columns: 1fr; }
   .spot-grid { grid-template-columns: 1fr; }
   .spot-sum {
     grid-template-columns: minmax(0, 1fr) 28px;
@@ -5844,8 +6090,11 @@ a.nt-row:hover .nt-arrow { background: var(--ink); color: #fff; }
   .wrap { width: min(1120px, calc(100% - 32px)); }
   .wrap.is-wide { width: calc(100% - 32px); }
   .hero,
-  .vault-hero { padding: 40px 0 28px; }
-  .vault-wall { padding-top: 32px; min-height: 0; }
+  .vault-hero,
+  .insight-hero { padding: 40px 0 28px; }
+  .vault-wall,
+  .insight-wall { padding-top: 32px; min-height: 0; }
+  .insight-dash { grid-template-columns: 1fr; }
   .wall-card { padding: 28px 20px 20px; }
   .tagline { font-size: 17px; }
   .bucket-grid { grid-template-columns: 1fr; }

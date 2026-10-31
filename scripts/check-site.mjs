@@ -9,6 +9,7 @@ import { SIDES, alertLabel, sortPlays } from "../src/options-flow.js";
 import { SECTION_ORDER, STATUS, allPlays, levelKind, outcomeLabel, sortCards, spotlightLevels, spotlightLines } from "../src/spotlights.js";
 import { activeSpotlights, earningsBoxes, spotlightStar, tradeDates } from "../src/scorecard.js";
 import { VAULT_ALLOWLIST, isAllowlisted } from "../src/vault-allowlist.js";
+import { FAMILY_ALLOWLIST } from "../src/family-allowlist.js";
 import { errorCopy, nextStep } from "../src/vault-signin.js";
 import { NT_SECTIONS, SOURCE_LABELS, deskDay, deskDayStart, deskWindow, itemsForDay, windowLabel } from "../src/new-today-window.js";
 import { BUY_LINE, DEFAULT_MONTHS, MAX_MONTHS, RANGES, breadthRead, dayChange, monthsBack, sma as breadthSma, windowStart as breadthWindowStart } from "../src/breadth.js";
@@ -371,7 +372,8 @@ assert(readFileSync(join(root, "src/spotlights.js"), "utf8").includes("drawLevel
 
 const hub = readFileSync(join(root, "options-flow/index.html"), "utf8");
 const hubLinks = [...hub.matchAll(/<a class="tile hub-tile[^"]*" href="([^"]+)"/g)].map((match) => match[1]);
-assert(JSON.stringify(hubLinks) === JSON.stringify(["dollar/", "spotlights/", "scorecard/"]), `hub calling cards ${hubLinks}`);
+assert(JSON.stringify(hubLinks) === JSON.stringify(["scorecard/"]), `Dashboard hub links only scorecard ${hubLinks}`);
+assert(hub.includes('<article class="tile hub-tile">'), "Dashboard hub shows Shopping List and Spotlights as Coming soon articles");
 assert(!hub.includes('id="flow-list"'), "hub shows calling cards, not the $$$ table");
 const dollarPage = readFileSync(join(root, "options-flow/dollar/index.html"), "utf8");
 for (const id of ["flow-list", "calling-card", "cc-buy-block", "cc-oi-block", "cc-rec", "tl-tiles", "cc-chart"]) {
@@ -581,7 +583,7 @@ for (const id of ["spot-rows", "spot-card", "sc-rec", "sc-close-note", "sl-tiles
   assert(spotPage.includes(`id="${id}"`), `Spotlight page keeps #${id}`);
 }
 assert(spotPage.includes("Recommendation") && spotPage.includes("Trade levels"), "Spotlight card labels");
-assert(!/is-sample/.test(spotPage) && !/is-sample/.test(hub.split('href="spotlights/"')[1].split("</a>")[0]), "Spotlight page and hub card are not labeled Sample");
+assert(!/is-sample/.test(spotPage), "Spotlight page is not labeled Sample");
 
 const board = JSON.parse(readFileSync(join(root, "public/data/flow/scorecard.json"), "utf8"));
 assert(board.names.length >= 5, `scorecard ranks ${board.names.length} names`);
@@ -713,7 +715,6 @@ assert(ntPage.includes("12:00 AM through 11:59 PM"), "New Today lede describes t
 for (const [file, text] of [
   ["new-today/index.html", ntPage],
   ["index.html", homePage],
-  ["src/new-today-chip.js", readFileSync(join(root, "src/new-today-chip.js"), "utf8")],
   ["README.md", readFileSync(join(root, "README.md"), "utf8")],
 ]) {
   assert(!/5:00 AM|4:59 AM|(^|[^0-9:])5 AM CT/.test(text), `${file} still describes the overnight desk-day cut`);
@@ -725,9 +726,8 @@ assert(
   JSON.stringify(NT_SECTIONS.map((section) => section.title)) === '["Positioning","Options Flow","SPX Levels","Research desk"]',
   "New Today sections run Positioning, Options Flow, SPX Levels, Research desk",
 );
-assert(/<section class="hero">[\s\S]*?<div class="hero-row">[\s\S]*?class="lockup"[\s\S]*?<a class="nt-chip" href="new-today\/" data-new-today/.test(homePage), "home hero carries the New Today chip beside the wordmark");
-assert(homePage.includes('src="/src/new-today-chip.js"'), "home runs new-today-chip.js");
-assert(homePage.includes("Since 12 AM CT"), "home chip counts from midnight CT");
+/* New Today is now in Insight, not in the Dashboard home */
+assert(!homePage.includes('class="nt-chip"'), "Dashboard home no longer shows New Today chip (moved to Insight)");
 
 const nt = JSON.parse(readFileSync(join(root, "public/data/new-today.json"), "utf8"));
 assert(nt.timeZone === "America/Chicago" && nt.dayStartsAt === "00:00", "new-today.json documents the Chicago midnight desk day");
@@ -761,19 +761,26 @@ assert(itemsForDay(nt.items ?? [], "2026-10-29").length === 20, "Oct 29 desk day
 assert(itemsForDay(nt.items ?? [], "2026-10-30").length === 1, "Oct 30 desk day lists the morning research note");
 
 const nav = /<nav class="nav" aria-label="Pages">[\s\S]*?<\/nav>/;
-const deskPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "positioning/charts/index.html", "spx-levels/index.html", "options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html", "new-today/index.html"];
+const dashboardPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "positioning/charts/index.html", "spx-levels/index.html", "options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html", "new-today/index.html"];
 const vaultSurface = {
-  "vault/index.html": { desk: "../", vault: "./" },
-  "vault/soft-crowded/index.html": { desk: "../../", vault: "../" },
-  "vault/vol-credit-momentum/index.html": { desk: "../../", vault: "../" },
-  "vault/portfolio/index.html": { desk: "../../", vault: "../" },
-  "vault/archive/index.html": { desk: "../../", vault: "../" },
+  "vault/index.html": { dashboard: "../", vault: "./", insight: "../insight/" },
+  "vault/soft-crowded/index.html": { dashboard: "../../", vault: "../", insight: "../../insight/" },
+  "vault/vol-credit-momentum/index.html": { dashboard: "../../", vault: "../", insight: "../../insight/" },
+  "vault/portfolio/index.html": { dashboard: "../../", vault: "../", insight: "../../insight/" },
+  "vault/archive/index.html": { dashboard: "../../", vault: "../", insight: "../../insight/" },
 };
-const publicPages = [...deskPages, ...Object.keys(vaultSurface)];
+const insightSurface = {
+  "insight/index.html": { dashboard: "../", vault: "../vault/", insight: "./" },
+};
+const publicPages = [...dashboardPages, ...Object.keys(vaultSurface), ...Object.keys(insightSurface)];
 for (const file of publicPages) {
   const html = readFileSync(join(root, file), "utf8");
-  const order = [...(html.match(nav)?.[0] ?? "").matchAll(/>(Positioning|Options Flow|SPX Levels)</g)].map((m) => m[1]);
-  assert(JSON.stringify(order) === '["Positioning","Options Flow","SPX Levels"]', `${file} nav order ${order}`);
+  const order = [...(html.match(nav)?.[0] ?? "").matchAll(/>(Positioning|Options Flow|SPX Levels|New Today)</g)].map((m) => m[1]);
+  const expectedDashboardVault = '["Positioning","Options Flow","SPX Levels"]';
+  const expectedInsight = '["Positioning","Options Flow","New Today"]';
+  const isInsightPage = Object.keys(insightSurface).includes(file);
+  const expected = isInsightPage ? expectedInsight : expectedDashboardVault;
+  assert(JSON.stringify(order) === expected, `${file} nav order ${order}, expected ${expected}`);
 }
 
 const surfaceNav = /<nav class="surface" aria-label="Surface">([\s\S]*?)<\/nav>/;
@@ -786,30 +793,37 @@ for (const file of publicPages) {
     current: /class="is-current"/.test(attrs) && /aria-current="(page|true)"/.test(attrs),
   }));
   const where = `${file} surface switcher`;
-  assert(JSON.stringify(links.map((link) => link.label)) === '["Desk","Vault"]', `${where} reads Desk | Vault, got ${links.map((link) => link.label)}`);
-  if (links.length !== 2) continue;
-  const [desk, vault] = links;
+  assert(JSON.stringify(links.map((link) => link.label)) === '["Dashboard","Vault","Insight"]', `${where} reads Dashboard | Vault | Insight, got ${links.map((link) => link.label)}`);
+  if (links.length !== 3) continue;
+  const [dashboard, vault, insight] = links;
   const vaultLinks = vaultSurface[file];
-  assert(desk.current === !vaultLinks && vault.current === Boolean(vaultLinks), `${where} marks ${vaultLinks ? "Vault" : "Desk"} as current`);
+  const insightLinks = insightSurface[file];
+  const isDashboard = !vaultLinks && !insightLinks;
+  const isVault = Boolean(vaultLinks);
+  const isInsight = Boolean(insightLinks);
+  assert(dashboard.current === isDashboard && vault.current === isVault && insight.current === isInsight, `${where} marks ${isVault ? "Vault" : isInsight ? "Insight" : "Dashboard"} as current`);
   if (vaultLinks) {
-    assert(desk.href === vaultLinks.desk && vault.href === vaultLinks.vault, `${where} Desk ${desk.href} Vault ${vault.href}`);
+    assert(dashboard.href === vaultLinks.dashboard && vault.href === vaultLinks.vault && insight.href === vaultLinks.insight, `${where} Dashboard ${dashboard.href} Vault ${vault.href} Insight ${insight.href}`);
+  } else if (insightLinks) {
+    assert(dashboard.href === insightLinks.dashboard && vault.href === insightLinks.vault && insight.href === insightLinks.insight, `${where} Dashboard ${dashboard.href} Vault ${vault.href} Insight ${insight.href}`);
   } else {
-    assert(desk.href === "./" || /^(\.\.\/)+$/.test(desk.href), `${where} Desk links home, got ${desk.href}`);
-    assert(vault.href === `${desk.href === "./" ? "" : desk.href}vault/`, `${where} Vault links to /vault/, got ${vault.href}`);
+    assert(dashboard.href === "./" || /^(\.\.\/)+$/.test(dashboard.href), `${where} Dashboard links home, got ${dashboard.href}`);
+    assert(vault.href === `${dashboard.href === "./" ? "" : dashboard.href}vault/`, `${where} Vault links to /vault/, got ${vault.href}`);
+    assert(insight.href === `${dashboard.href === "./" ? "" : dashboard.href}insight/`, `${where} Insight links to /insight/, got ${insight.href}`);
   }
 }
 const home = readFileSync(join(root, "index.html"), "utf8");
 assert(!home.includes('class="phase"'), "home topbar swaps the phase badge for the surface switcher");
-for (const file of deskPages) {
+for (const file of dashboardPages) {
   const footer = readFileSync(join(root, file), "utf8").match(/<footer class="site-footer">[\s\S]*?<\/footer>/)?.[0] ?? "";
-  assert(footer.includes('<p class="foot-note">Desk · public reading.</p>'), `${file} footer reads Desk · public reading.`);
+  assert(footer.includes('<p class="foot-note">Dashboard · public reading.</p>'), `${file} footer reads Dashboard · public reading.`);
 }
 
 const vaultPage = readFileSync(join(root, "vault/index.html"), "utf8");
 assert(viteConfig.includes('"vault/index.html"'), "vite builds vault/index.html");
 assert(vaultPage.includes('<body class="is-vault">'), "Vault page carries the Vault theme");
 assert(css.includes(".is-vault {"), "stylesheet scopes Vault theme tokens under .is-vault");
-assert(deskPages.every((file) => !readFileSync(join(root, file), "utf8").includes("is-vault")), "Desk pages stay on the light theme");
+assert(dashboardPages.every((file) => !readFileSync(join(root, file), "utf8").includes("is-vault")), "Dashboard pages stay on the light theme");
 assert(/<h1>Vault/.test(vaultPage), "Vault hero");
 assert((vaultPage.match(/class="tile vault-tile"/g) ?? []).length === 3, "Vault shows three preview tiles");
 assert(!/<a\s[^>]*class="tile vault-tile/.test(vaultPage), "Vault preview tiles do not link anywhere");
@@ -823,11 +837,11 @@ assert(!/opening later/i.test(vaultTopbar + vaultFooter), "Vault chrome no longe
 
 const monetization = /\b(free|paid|premium|subscri\w*|paywall\w*|upgrad\w*|trials?|pric(e|es|ed|ing)|members?hips?|unlock\w*)\b/i;
 const chromeCopy = [
-  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "vault/portfolio/index.html", "vault/archive/index.html", "404.html"].map((file) => [
+  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "vault/portfolio/index.html", "vault/archive/index.html", "insight/index.html", "404.html"].map((file) => [
     file,
     readFileSync(join(root, file), "utf8"),
   ]),
-  ...deskPages.flatMap((file) => {
+  ...dashboardPages.flatMap((file) => {
     const html = readFileSync(join(root, file), "utf8");
     return [
       [`${file} topbar`, html.match(/<header class="topbar">[\s\S]*?<\/header>/)?.[0] ?? ""],
@@ -876,10 +890,13 @@ const signInSource = readFileSync(join(root, "src/vault-signin.js"), "utf8");
 for (const [file, text] of [["src/vault-gate.js", gateSource], ["src/vault-signin.js", signInSource]]) {
   assert(!/signUp|sign_up|createEmailLinkFlow|email_link|transfer|joinWaitlist|redirectUrl/.test(text), `${file} reaches for sign-up, email links, or redirects`);
 }
-assert(VAULT_ALLOWLIST.includes("vannatrader@gmail.com"), "allowlist carries the CEO login");
-assert(VAULT_ALLOWLIST.every((email) => email === email.trim().toLowerCase()), "allowlist entries are lowercase");
-assert(isAllowlisted(" VannaTrader@Gmail.com "), "allowlist ignores case and spaces");
-assert(!isAllowlisted("someone@example.com") && !isAllowlisted(""), "allowlist rejects other emails");
+assert(VAULT_ALLOWLIST.includes("vannatrader@gmail.com"), "vault allowlist carries the CEO login");
+assert(VAULT_ALLOWLIST.every((email) => email === email.trim().toLowerCase()), "vault allowlist entries are lowercase");
+assert(isAllowlisted(" VannaTrader@Gmail.com "), "vault allowlist ignores case and spaces");
+assert(!isAllowlisted("someone@example.com") && !isAllowlisted(""), "vault allowlist rejects other emails");
+assert(FAMILY_ALLOWLIST.includes("vannatrader@gmail.com"), "family allowlist carries the CEO login so they can test Insight");
+assert(FAMILY_ALLOWLIST.every((email) => email === email.trim().toLowerCase()), "family allowlist entries are lowercase");
+assert(isAllowlisted(" VannaTrader@Gmail.com ", FAMILY_ALLOWLIST), "family allowlist ignores case and spaces");
 
 const done = nextStep({ status: "complete", createdSessionId: "sess_1" });
 assert(done.action === "activate" && done.sessionId === "sess_1", "a complete sign-in activates its session");
@@ -897,6 +914,34 @@ const gateHit = [gateSource, signInSource, readFileSync(join(root, "src/vault-al
   .flatMap((text) => text.match(/(["'`])(?:(?!\1)[^\\]|\\.)*\1/g) ?? [])
   .find((text) => monetization.test(text));
 assert(!gateHit, `Vault gate UI copy says ${gateHit}`);
+
+/* Insight wall: family-gated surface, same pattern as Vault but with FAMILY_ALLOWLIST. */
+const insightPage = readFileSync(join(root, "insight/index.html"), "utf8");
+assert(viteConfig.includes('"insight/index.html"'), "vite builds insight/index.html");
+assert(insightPage.includes('<body class="is-insight">'), "Insight page carries the Insight theme");
+assert(css.includes(".is-insight {"), "stylesheet scopes Insight theme tokens under .is-insight");
+const insightMain = insightPage.match(/<main id="content">([\s\S]*?)<\/main>/)?.[1] ?? "";
+const insightTemplate = insightMain.match(/<template id="insight-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
+const insightOutside = insightMain.replace(/<template id="insight-content">[\s\S]*?<\/template>/, "");
+assert(insightPage.includes('src="/src/insight-gate.js"'), "Insight page runs insight-gate.js");
+assert(/<section class="insight-wall" id="insight-wall" data-state="checking"/.test(insightOutside), "Insight wall renders by default, before the gate decides");
+assert(/<h1 id="insight-wall-title">Sign in for Insight<\/h1>/.test(insightOutside), "Insight wall reads Sign in for Insight");
+assert(/<input id="wall-email"[^>]*type="email"/.test(insightOutside), "Insight wall asks for an email");
+assert(/<input id="wall-password"[^>]*type="password"/.test(insightOutside), "Insight wall asks for a password");
+assert(/<h1>Insight/.test(insightTemplate), "Insight hero lives in the template");
+assert(!insightOutside.includes("insight-hero"), "no Insight content renders outside the template");
+const insightGateSource = readFileSync(join(root, "src/insight-gate.js"), "utf8");
+assert(insightGateSource.includes("import.meta.env.VITE_CLERK_PUBLISHABLE_KEY"), "Insight gate reads VITE_CLERK_PUBLISHABLE_KEY");
+assert(insightGateSource.includes('import("@clerk/clerk-js")'), "Insight gate loads Clerk only on demand");
+assert(insightGateSource.includes('strategy: "password"'), "Insight signs in with email and password");
+assert(insightGateSource.includes("isAllowlisted(email)"), "Insight checks the allowlist before calling Clerk");
+const insightGateHit = [insightGateSource, readFileSync(join(root, "src/family-allowlist.js"), "utf8")]
+  .flatMap((text) => text.match(/(["'`])(?:(?!\1)[^\\]|\\.)*\1/g) ?? [])
+  .find((text) => monetization.test(text));
+assert(!insightGateHit, `Insight gate UI copy says ${insightGateHit}`);
+const insightFooter = insightPage.match(/<footer class="site-footer">[\s\S]*?<\/footer>/)?.[0] ?? "";
+assert(insightFooter.includes('<p class="foot-note">Insight · for family.</p>'), "Insight footer reads Insight · for family.");
+
 const envExample = readFileSync(join(root, ".env.example"), "utf8");
 assert(/^VITE_CLERK_PUBLISHABLE_KEY=$/m.test(envExample), ".env.example documents an empty VITE_CLERK_PUBLISHABLE_KEY");
 const ignored = readFileSync(join(root, ".gitignore"), "utf8");
@@ -938,7 +983,7 @@ assert(
 assert(packTemplate.includes('id="pack"') && packTemplate.includes('href="#read"') && packTemplate.includes('href="#sectors"') && packTemplate.includes('href="#charts"'), "pack shell lives in the template");
 assert(!/id="pack"|pack-sheet|bucket-grid/.test(packOutside), "pack content does not render outside the template");
 assert(readFileSync(join(root, "src/vault-gate.js"), "utf8").includes('new CustomEvent("vault-open")'), "gate tells the pack when Vault opens");
-for (const file of [...deskPages, "404.html", "index.html"]) {
+for (const file of [...dashboardPages, "404.html", "index.html"]) {
   assert(!readFileSync(join(root, file), "utf8").includes("soft-crowded"), `${file} links into the Vault pack`);
 }
 for (const name of readdirSync(join(root, "src"))) {
@@ -1263,7 +1308,7 @@ assert(wallTemplate.includes("Caution +9") && wallTemplate.includes("Stretched �
 assert(wallTemplate.includes("Bullish above +2") && wallTemplate.includes("Bearish below −2"), "MAG7 key names the ±2 signal thresholds");
 assert(vaultTemplate.includes('class="tile vault-pack" href="vol-credit-momentum/"'), "signed-in Vault links to the wall");
 assert(!vaultOutside.includes("vol-credit-momentum"), "the wall link stays inside the signed-in template");
-for (const file of [...deskPages, "404.html"]) {
+for (const file of [...dashboardPages, "404.html"]) {
   assert(!readFileSync(join(root, file), "utf8").includes("vol-credit-momentum"), `${file} links into the Vault wall`);
 }
 
@@ -1605,7 +1650,7 @@ assert(bookTemplate.includes('id="journal"') && bookTemplate.includes('aria-curr
 assert(!/id="journal"|pf-table|pf-board/.test(bookOutside), "portfolio content does not render outside the template");
 assert(vaultTemplate.includes('class="tile vault-pack" href="portfolio/"') && vaultTemplate.includes(">Portfolio</h2>"), "signed-in Vault links to Portfolio");
 assert(!vaultOutside.includes("portfolio/"), "the portfolio link stays inside the signed-in template");
-for (const file of [...deskPages, "404.html"]) {
+for (const file of [...dashboardPages, "404.html"]) {
   assert(!readFileSync(join(root, file), "utf8").includes("portfolio/"), `${file} links into the Vault portfolio`);
 }
 const bookJs = readFileSync(join(root, "src/vault-portfolio.js"), "utf8");
@@ -1736,7 +1781,7 @@ for (const piece of ['id="archive-search"', 'id="archive-q"', 'data-kind="all"',
 }
 assert(!/id="archive|archive-search/.test(archiveOutside), "archive content does not render outside the template");
 assert(vaultTemplate.includes('class="tile vault-pack" href="archive/"') && !vaultOutside.includes("archive/"), "signed-in Vault links to the archive inside the template");
-for (const file of [...deskPages, "404.html"]) {
+for (const file of [...dashboardPages, "404.html"]) {
   assert(!readFileSync(join(root, file), "utf8").includes("vault/archive"), `${file} links into the Vault archive`);
 }
 for (const file of ["vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "vault/portfolio/index.html"]) {
