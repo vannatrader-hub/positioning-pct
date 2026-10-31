@@ -15,6 +15,7 @@ import { errorCopy, nextStep } from "../src/vault-signin.js";
 import { NT_SECTIONS, PUBLIC_NT_SECTIONS, SOURCE_LABELS, deskDay, deskDayStart, deskWindow, itemsForDay, publicDeskItems, windowLabel } from "../src/new-today-window.js";
 import { BUY_LINE, DEFAULT_MONTHS, MAX_MONTHS, RANGES, averageCrosses, averageOf, breadthRead, dayChange, monthsBack, sma as breadthSma, windowStart as breadthWindowStart } from "../src/breadth.js";
 import { CSR_PARAMS, biasOf, csrPanel, csrSeries, cycleOf, panelText, regimeOf as csrRegimeOf, zColor } from "../src/csr.js";
+import { buildPulse, creditChip, cushionOf, runwayMarker } from "../src/pulse-pack.js";
 import { DEFAULTS as MAG7_DEFAULTS, MAG7, TYPES as MAG7_TYPES, buildOscillator, fmtPct, momentum, panelAt, rangeStart, regimeOf, sma } from "../src/mag7-osc.js";
 import {
   CHARTS,
@@ -199,6 +200,38 @@ const glowRules = [...glowCss.matchAll(/\.sc-card\[data-extreme[^{]*\{([^}]*)\}/
 assert(glowRules.includes("box-shadow") && !/border(-width)?\s*:|outline\s*:/.test(glowRules), "extreme cards glow with a shadow, never an outline");
 const deskJs = readFileSync(join(root, "src/positioning.js"), "utf8");
 assert(deskJs.includes("sc-card") && deskJs.includes("card.dataset.extreme = read.extreme"), "desk theme cards carry data-extreme");
+
+/* Pulse + TTWD pick-3: thesis, runway, HY/IG/excess trio, track dials, bull/bear, family brief. */
+assert(creditChip(12, 2).chip === "Widening fast" && creditChip(3, 3).chip === "Widening" && creditChip(9, -1).chip === "Widening" && creditChip(0, 0).chip === "Quiet", "credit chips follow the day and the month");
+assert(cushionOf(97) === 0 && cushionOf(77) === 13 && runwayMarker(0) === 3, "a theme inside the Crowded extreme has no cushion and sits on the trigger");
+const pulseIndex = JSON.parse(readFileSync(join(root, "public/data/vault/soft-crowded/index.json"), "utf8"));
+const pulseCsr = JSON.parse(readFileSync(join(root, "public/data/vault/credit-spread-regime/csr.json"), "utf8"));
+const pulseSvb = JSON.parse(readFileSync(join(root, "public/data/vault/spot-vol-beta/latest.json"), "utf8"));
+const pulseXlf = buildReading("jpm", WEEKS.length - 1, 4).sectors.XLF;
+const pulse = buildPulse({ csr: pulseCsr, vol: pulseSvb.gauge, asOf: pulseSvb.session, financials: { points: pulseXlf.points }, weeks: pulseIndex.weeks });
+assert(pulse.title.signal === "Mag 7 crowding is the story" && pulse.title.rest.startsWith("semis are unwinding") && pulse.title.tone === "crowded", "thesis leads with Mag 7 crowding");
+assert(pulse.runway.cushion === 0 && pulse.runway.pills.map((pill) => pill.text).join("") === "Near triggerArmed", "runway is armed on the extreme and near-trigger on credit");
+assert(pulse.runway.callout.includes("NEAR TRIGGER") && pulse.runway.callout.includes("326 bp"), `credit callout ${pulse.runway.callout}`);
+assert(JSON.stringify(pulse.credit.legs.map((leg) => leg.id)) === '["hy","ig","excess"]', "credit trio is HY, IG, and the excess — csr.json has no BBB or AA column");
+assert(pulse.credit.legs[0].bp === 326 && pulse.credit.legs[0].chip === "Widening fast" && pulse.credit.legs[1].bp === 89 && pulse.credit.legs[2].bp === 237, "credit cards use the committed Oct 29 prints");
+assert(pulse.dials[0].extreme === "crowded" && pulse.dials[1].extreme === null && pulse.dials[1].pill === "crowded → unwinding" && pulse.dials[3].extreme === "soft", "dials glow only at the Soft and Crowded extremes");
+assert(pulse.dials.every((dial) => /→ (stretching|unwinding|steady)$/.test(dial.pill)) && pulse.layers.length === 6, "layer cards stay on the Soft ↔ Crowded scale");
+assert(pulse.cases.bull.length >= 3 && pulse.cases.bull.length <= 5 && pulse.cases.bear.length >= 3 && pulse.cases.bear.length <= 5, "bull and bear each close with 3 to 5 bullets");
+assert(pulse.cases.bear.some((line) => line.includes("2.98")) && pulse.brief.paragraphs.map((paragraph) => paragraph.kw).join("") === "Soft↔Crowded.Credit.What changes the current picture.Note.", "the brief and the bear case use the W44 vol print");
+assert(!/bbb|aa\b/i.test(pulse.credit.legs.map((leg) => leg.label).join(" ")), "the credit cards do not invent a BBB or AA series");
+const pulseCss = readFileSync(join(root, "src/styles.css"), "utf8");
+assert(pulseCss.includes("--p-armed: #c43c3c") && pulseCss.includes("--p-near-trigger: #c4784a") && pulseCss.includes("--p-brief-kw: var(--p-pct)") && !pulseCss.includes("sparkline"), "pick-3 tokens use the brand red and the stylesheet has no sparkline treatment");
+assert(pulseCss.includes(".pulse-track") && pulseCss.includes(".pulse-runway") && !/\.pulse[^{]*needle|\.pulse[^{]*gauge/.test(pulseCss), "the dial pattern is a track, not a gauge");
+for (const [file, href] of [
+  ["index.html", 'data-pulse="pack"'],
+  ["positioning/desk/index.html", 'data-pulse="pack"'],
+  ["vault/soft-crowded/index.html", 'data-pulse="cases"'],
+]) {
+  const html = readFileSync(join(root, file), "utf8");
+  assert(html.includes(href) && html.includes('src="/src/pulse-render.js"'), `${file} mounts the pulse pack`);
+}
+assert(readFileSync(join(root, `${FAMILY_ENTRY}/index.html`), "utf8").includes('data-desk-brief="open"') && readFileSync(join(root, `${FAMILY_ENTRY}/index.html`), "utf8").includes('src="/src/desk-brief.js"'), "the signed-in family entry opens the desk brief");
+assert(readFileSync(join(root, "insight/vol/index.html"), "utf8").includes('data-desk-brief') && readFileSync(join(root, "insight/vol/index.html"), "utf8").includes('data-theme-set="dark"'), "the family wall keeps the brief and the theme toggle");
 
 const eight = buildReading("jpm", 7, 8);
 assert(eight.sectors.XLF.pill === "extreme soft → easing", "8-week XLF still easing");

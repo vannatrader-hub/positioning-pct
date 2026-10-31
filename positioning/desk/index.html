@@ -49,6 +49,9 @@
           <a href="../charts/">Charts</a>
           <a class="is-current" href="./" aria-current="page">Soft ↔ Crowded desk</a>
         </nav>
+        <section class="pulse" id="pulse-pack" data-pulse="pack" data-desk-href="#themes" aria-busy="true" aria-label="Soft to Crowded desk read">
+          <p class="hint">Reading the desk…</p>
+        </section>
         <section class="page-head">
           <span class="pill">Weekly reads</span>
           <h1>Positioning desk</h1>
@@ -119,6 +122,7 @@
       </footer>
     </div>
     <noscript>This desk needs JavaScript to draw the reads.</noscript>
+    <script type="module" src="/src/pulse-render.js"></script>
     <script type="module" src="/src/positioning.js"></script>
   </body>
 </html>
