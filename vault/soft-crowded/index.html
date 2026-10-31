@@ -8,9 +8,11 @@
       name="description"
       content="Vault weekly pack: sector Soft ↔ Crowded columns, a one-page read, and a short article under each batch-1 Positioning chart. Behind the Vault sign-in wall."
     />
-    <meta name="theme-color" content="#0a0c10" />
+    <meta name="theme-color" content="#f3f1ec" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
+    <script>(function(){var d=document.documentElement,t;try{t=localStorage.getItem("p-theme");if(t!=="light"&&t!=="dark"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";localStorage.setItem("p-theme",t)}}catch(e){t=t==="dark"?"dark":"light"}d.dataset.theme=t})();</script>
     <link rel="stylesheet" href="/src/styles.css" />
+    <script type="module" src="/src/theme.js"></script>
     <script type="module" src="/src/vault-gate.js"></script>
     <script type="module" src="/src/vault-pack.js"></script>
   </head>
@@ -31,6 +33,10 @@
           <a href="../portfolio/">Portfolio</a>
           <a href="../vol-credit-momentum/">Desk wall</a>
         </nav>
+        <div class="theme-toggle" role="group" aria-label="Theme">
+          <button type="button" data-theme-set="dark" aria-pressed="false" aria-label="Dark"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5" /><path d="M8 1.75a6.25 6.25 0 0 0 0 12.5Z" fill="currentColor" /></svg></button>
+          <button type="button" data-theme-set="light" aria-pressed="true" aria-label="Light"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="2.9" fill="currentColor" /><path d="M8 1.2v1.7M8 13.1v1.7M1.2 8h1.7M13.1 8h1.7M3.2 3.2l1.2 1.2M11.6 11.6l1.2 1.2M3.2 12.8l1.2-1.2M11.6 4.4l1.2-1.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" /></svg></button>
+        </div>
       </div>
     </header>
 

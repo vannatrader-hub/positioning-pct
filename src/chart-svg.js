@@ -1,6 +1,8 @@
 /**
- * SVG drawers for the Positioning % charts, on the Desk light theme.
- * Each plot redraws at its host's size, so axis text stays crisp at any width.
+ * SVG drawers for the Positioning % charts. Inks are CSS variables, so a plot follows
+ * the light / dark theme (or a light chart plate) without a redraw; the hex after each
+ * comma is the light fallback. Each plot redraws at its host's size, so axis text stays
+ * crisp at any width.
  */
 
 import { niceTicks } from "./flow-chart.js";
@@ -11,17 +13,21 @@ export const TONE = {
   xsoft: "#1f6e43",
   soft: "#2f8a55",
   softLight: "#7cb995",
-  mid: "#aeb3bc",
+  mid: "var(--chart-mid, #aeb3bc)",
   crowded: "#e91e8c",
-  ink: "#0b0d12",
-  ink2: "#2c313a",
-  muted: "#5f6672",
-  faint: "#8b919c",
-  grid: "rgba(15, 20, 30, 0.07)",
+  ink: "var(--ink, #0b0d12)",
+  ink2: "var(--ink-2, #2c313a)",
+  muted: "var(--muted, #5f6672)",
+  faint: "var(--faint, #8b919c)",
+  grid: "rgba(var(--p-shade, 15, 20, 30), 0.07)",
   bandSoft: "rgba(47, 138, 85, 0.08)",
   bandXsoft: "rgba(47, 138, 85, 0.14)",
-  bandMid: "rgba(15, 20, 30, 0.025)",
+  bandMid: "rgba(var(--p-shade, 15, 20, 30), 0.025)",
   bandCrowded: "rgba(233, 30, 140, 0.07)",
+  paper: "var(--surface, #fff)",
+  onInk: "var(--p-on-ink, #fff)",
+  softInk: "var(--soft-ink, #1f7a45)",
+  softInk2: "var(--soft-ink-2, #155f35)",
 };
 
 export const OVERLAY_COLORS = ["#4a6cf7", "#d97706", "#0e9384", "#7c3aed", "#64748b"];
@@ -77,7 +83,7 @@ function tooltip(root, bounds) {
   const layer = svg("g", { class: "pc-tip", visibility: "hidden", "pointer-events": "none" });
   const rule = svg("line", { y1: bounds.top, y2: bounds.bottom, stroke: TONE.faint, "stroke-dasharray": "2 3" });
   const box = svg("rect", { rx: 8, fill: TONE.ink, opacity: 0.94 });
-  const text = svg("text", { class: "pc-tip-text", fill: "#fff" });
+  const text = svg("text", { class: "pc-tip-text", fill: TONE.onInk });
   layer.append(rule, box, text);
   root.append(layer);
 
@@ -212,7 +218,7 @@ export function drawLines(root, spec, width, height) {
             cx: px,
             cy: py,
             r: on ? 5.5 : 3,
-            fill: on ? (line.pointColor?.(index) ?? line.color) : "#fff",
+            fill: on ? (line.pointColor?.(index) ?? line.color) : TONE.paper,
             stroke: line.pointColor?.(index) ?? line.color,
             "stroke-width": on ? 2.5 : 1.6,
           }),
@@ -459,7 +465,7 @@ export function drawDualLine(root, spec, width, height) {
     const lx = Math.max(pad.left + 4, Math.min(lastX - 8, right - labelW));
     const ly = Math.min(bottom - 6, lastY + 20);
     root.append(
-      svg("rect", { x: lx - labelW, y: ly - 12, width: labelW, height: 16, rx: 4, fill: "#ffffff", stroke: "rgba(11,13,18,0.12)" }),
+      svg("rect", { x: lx - labelW, y: ly - 12, width: labelW, height: 16, rx: 4, fill: TONE.paper, stroke: "rgba(var(--p-shade, 11, 13, 18), 0.12)" }),
       svg("text", { x: lx - 5, y: ly, "text-anchor": "end", class: "pc-axis svb-end-label" }, spec.endLabel),
     );
   }
@@ -486,7 +492,7 @@ export function drawDualLine(root, spec, width, height) {
     );
   }
 
-  const marker = svg("circle", { r: 5.5, fill: "#fff", stroke: primaryColor, "stroke-width": 2, visibility: "hidden", "pointer-events": "none" });
+  const marker = svg("circle", { r: 5.5, fill: TONE.paper, stroke: primaryColor, "stroke-width": 2, visibility: "hidden", "pointer-events": "none" });
   root.append(marker);
   const tip = tooltip(root, { top: pad.top, bottom, left: pad.left, right });
   const nearest = (px) => Math.round(Math.min(n - 1, Math.max(0, ((px - pad.left) / plotW) * (n - 1))));
@@ -502,7 +508,7 @@ export function drawDualLine(root, spec, width, height) {
       const on = primary[index] >= signal;
       marker.setAttribute("cx", x(index));
       marker.setAttribute("cy", y(primary[index]));
-      marker.setAttribute("fill", on ? "#f5c451" : "#fff");
+      marker.setAttribute("fill", on ? "#f5c451" : TONE.paper);
       marker.setAttribute("stroke", on ? signalColor : primaryColor);
       marker.setAttribute("visibility", "visible");
       tip.show(x(index), spec.tip ? spec.tip(index) : [labels[index]]);
@@ -537,7 +543,7 @@ export function drawResidual(root, spec, width, height) {
     svg("rect", { x: pad.left, y: y(0.4), width: plotW, height: y(-0.4) - y(0.4), fill: TONE.bandMid }),
     svg("rect", { x: pad.left, y: y(-0.4), width: plotW, height: y(lo) - y(-0.4), fill: TONE.bandSoft }),
     svg("text", { x: pad.left + 6, y: y(hi) + 12, class: "pc-band", fill: TONE.crowded }, "Stretched"),
-    svg("text", { x: pad.left + 6, y: y(lo) - 6, class: "pc-band", fill: "#1f7a45" }, "Soft vol"),
+    svg("text", { x: pad.left + 6, y: y(lo) - 6, class: "pc-band", fill: TONE.softInk }, "Soft vol"),
   );
 
   for (const tick of niceTicks(lo, hi, 4)) {
@@ -623,7 +629,7 @@ export function drawSectors(root, spec, width, height) {
   const right = pad.left + plotW;
   const bottom = pad.top + plotH;
   const fills = { xsoft: TONE.bandXsoft, soft: TONE.bandSoft, mid: TONE.bandMid, crowded: TONE.bandCrowded };
-  const inks = { xsoft: "#155f35", soft: "#1f7a45", mid: TONE.muted, crowded: TONE.crowded };
+  const inks = { xsoft: TONE.softInk2, soft: TONE.softInk, mid: TONE.muted, crowded: TONE.crowded };
 
   for (const bucket of buckets) {
     const top = y(bucket.to);
@@ -764,7 +770,7 @@ export function gaugeSvg({ position, cuts, ticks = ["−3", "0", "+3"], compact 
   needle.append(
     svg("path", { d: `M ${cx - 4.5} ${cy} L ${cx} ${cy - r + (compact ? 8 : 12)} L ${cx + 4.5} ${cy} Z`, fill: TONE.ink }),
   );
-  root.append(needle, svg("circle", { cx, cy, r: compact ? 9 : 8, fill: TONE.ink }), svg("circle", { cx, cy, r: 3, fill: "#fff" }));
+  root.append(needle, svg("circle", { cx, cy, r: compact ? 9 : 8, fill: TONE.ink }), svg("circle", { cx, cy, r: 3, fill: TONE.paper }));
   return root;
 }
 
@@ -826,7 +832,7 @@ export function miniBars(items, max) {
     const yy = rowH * index + rowH * 0.28;
     const h = rowH * 0.44;
     root.append(
-      svg("rect", { x: 0, y: yy, width: 240, height: h, rx: h / 2, fill: "#eef0f3" }),
+      svg("rect", { x: 0, y: yy, width: 240, height: h, rx: h / 2, fill: "var(--p-fill, #eef0f3)" }),
       svg("rect", { x: 0, y: yy, width: Math.max(h, (item.value / max) * 240), height: h, rx: h / 2, fill: index ? TONE.mid : TONE.crowded }),
     );
   });
@@ -841,7 +847,7 @@ export function miniTracks(pcts) {
     const third = (240 - 6) / 3;
     root.append(
       svg("rect", { x: 0, y: yy, width: third, height: 6, rx: 3, fill: TONE.soft }),
-      svg("rect", { x: third + 3, y: yy, width: third, height: 6, rx: 1.5, fill: "#cdd1d8" }),
+      svg("rect", { x: third + 3, y: yy, width: third, height: 6, rx: 1.5, fill: "var(--mid, #cdd1d8)" }),
       svg("rect", { x: 2 * third + 6, y: yy, width: third, height: 6, rx: 3, fill: TONE.crowded }),
     );
     const px = Math.min(234, Math.max(6, (pct / 100) * 240));

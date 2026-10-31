@@ -18,9 +18,9 @@ import { OVERLAY_COLORS, TONE, drawLines, drawResidual, drawSectors, gaugeSvg, m
 
 const STORAGE_KEY = "positioning-pct-source";
 const LATEST = WEEKS.length - 1;
-const HOUSE_COLORS = { jpm: "#2c3f9e", ms: "#4d3a8f", gs: "#1d5f86", boa: "#a32a26", desk: TONE.ink };
+const HOUSE_COLORS = { jpm: "var(--house-jpm, #2c3f9e)", ms: "var(--house-ms, #4d3a8f)", gs: "var(--house-gs, #1d5f86)", boa: "var(--house-boa, #a32a26)", desk: TONE.ink };
 const PCT_BANDS = [
-  { from: 0, to: 40, fill: TONE.bandSoft, label: "Soft", ink: "#1f7a45" },
+  { from: 0, to: 40, fill: TONE.bandSoft, label: "Soft", ink: TONE.softInk },
   { from: 67, to: 100, fill: TONE.bandCrowded, label: "Crowded", ink: TONE.crowded },
 ];
 

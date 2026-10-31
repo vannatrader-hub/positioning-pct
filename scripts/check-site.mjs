@@ -33,6 +33,7 @@ import {
 import { columnMoves, isoWeek, isoWeekRange, packFrame } from "../src/vault-pack-frame.js";
 import { FORMULA, axisTicks, buildClose, closeEvent, closeRows, closeSpxPct, deskEstimate, formatSvb, gaugeFraction, readout, spotVolTip } from "../src/vault-svb.js";
 import { archiveGroups, deskWeekEntries, displaySource, filterEntries, longDay, newTodayDays, parseDateQuery } from "../src/vault-archive.js";
+import { THEMES, THEME_KEY, THEME_PAGE, resolveTheme } from "../src/theme.js";
 import { bookSide, closedPnl, deskCopy, equityPath, formatBook, formatPx, formatUsd, isOpen, isPending, markOf, resultLabel, stopOf, targetOf, weekStrip } from "../src/vault-portfolio.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -2040,6 +2041,33 @@ for (const piece of ["data/vault/breadth/", 'input.type = "range"', "MAX_MONTHS"
 for (const file of ["src/vault-breadth.js", "src/breadth.js", "scripts/pull-breadth.mjs"]) {
   const text = readFileSync(join(root, file), "utf8");
   assert(!/stockcharts|<img\b|<iframe|©/i.test(text), `${file} carries chart-vendor branding or an embed`);
+}
+
+/* Light + dark: stored choice wins; the OS preference only seeds the first visit. */
+assert(THEME_KEY === "p-theme" && THEMES.join() === "light,dark", "theme persists under p-theme as light | dark");
+assert(resolveTheme("dark", false) === "dark" && resolveTheme("light", true) === "light", "a stored theme beats the OS preference");
+assert(resolveTheme(null, true) === "dark" && resolveTheme(null, false) === "light" && resolveTheme("sepia", true) === "dark", "first visit falls back to prefers-color-scheme");
+assert(THEME_PAGE.light === "#f3f1ec" && THEME_PAGE.dark === "#161410", "theme-color follows the page token");
+const lightBlock = css.match(/:root,\s*\[data-theme="light"\] \{([^}]*)\}/)?.[1] ?? "";
+const darkBlock = css.match(/@media screen \{\s*:root\[data-theme="dark"\] \{([^}]*)\}/)?.[1] ?? "";
+for (const token of ["--p-page: #f3f1ec;", "--p-card: #ffffff;", "--p-ink: #141414;", "--sc-glow-alpha: 0.45;"]) assert(lightBlock.includes(token), `light theme keeps ${token}`);
+for (const token of ["--p-page: #161410;", "--p-card: #1e1b16;", "--p-ink: #f0e6d6;", "--sc-glow-alpha: 0.55;"]) assert(darkBlock.includes(token), `dark theme sets ${token}`);
+assert(!/#12141a/i.test(css), "dark theme is the warm night twin, not the rejected ledger dark");
+assert(css.includes(".theme-toggle") && /@media print \{\s*\.theme-toggle \{ display: none; \}/.test(css), "toggle is styled on screen and hidden in print");
+for (const file of viteInputs) {
+  const html = readFileSync(join(root, file), "utf8");
+  if (!html.includes('href="/src/styles.css"')) continue;
+  const boot = html.indexOf('localStorage.getItem("p-theme")');
+  assert(boot > -1 && boot < html.indexOf('href="/src/styles.css"'), `${file} sets data-theme before the stylesheet paints`);
+  assert(html.includes('<script type="module" src="/src/theme.js"></script>'), `${file} loads the theme toggle`);
+  if (!html.includes('class="topbar"')) continue;
+  const toggles = html.match(/<div class="theme-toggle" role="group" aria-label="Theme">[\s\S]*?<\/div>/g) ?? [];
+  assert(toggles.length === 1 && toggles[0].includes('data-theme-set="dark"') && toggles[0].includes('data-theme-set="light"'), `${file} topbar carries one light/dark toggle`);
+}
+const familyEntry = readFileSync(join(root, "m4c8q/index.html"), "utf8");
+assert(familyEntry.replace(/<template id="vault-content">[\s\S]*?<\/template>/, "").includes("theme-toggle") === false && familyEntry.includes("theme-toggle"), "family entry toggle lives inside the gated header");
+for (const file of ["src/vault-breadth.js", "src/csr-chart.js", "src/mag7-chart.js", "src/flow-chart.js"]) {
+  assert(!/data-theme|var\(--p-/.test(readFileSync(join(root, file), "utf8")), `${file} chart embed stays as shipped`);
 }
 
 if (failed) {
