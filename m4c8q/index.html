@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Coming soon · Positioning %.</title>
+    <meta name="description" content="Nothing on this page yet." />
+    <meta name="theme-color" content="#0a0c10" />
+    <link rel="icon" href="%BASE_URL%favicon.svg" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <script type="module" src="/src/hub-gate.js"></script>
+  </head>
+  <body class="is-hub is-insight">
+    <a class="skip" href="#content">Skip to content</a>
+    
+    <div class="wrap">
+      <main id="content">
+        <section class="vault-wall" id="vault-wall" data-state="checking" aria-labelledby="vault-wall-title">
+          <div class="wall-card">
+            <svg class="wall-dial" viewBox="0 0 48 48" aria-hidden="true">
+              <circle class="vd-ring" cx="24" cy="24" r="22" />
+              <circle class="vd-knob" cx="24" cy="24" r="14" />
+              <path class="vd-pointer" d="M24 12.5 V17" />
+              <circle class="vd-core" cx="24" cy="24" r="2.5" />
+            </svg>
+            <h1 id="vault-wall-title">Coming soon</h1>
+            <p class="wall-lede" id="wall-lede">Nothing on this page yet.</p>
+            <form class="wall-form" id="wall-form" novalidate>
+              <div class="wall-field">
+                <label class="wall-label" for="wall-email">Email</label>
+                <input id="wall-email" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="you@example.com" required />
+              </div>
+              <div class="wall-field" id="wall-code-field" hidden>
+                <label class="wall-label" id="wall-code-label" for="wall-code">Code from your email</label>
+                <input id="wall-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit code" />
+              </div>
+              <div class="wall-field" id="wall-password-field">
+                <label class="wall-label" id="wall-password-label" for="wall-password">Password</label>
+                <input id="wall-password" name="password" type="password" autocomplete="current-password" required />
+              </div>
+              <button class="wall-submit" id="wall-submit" type="submit">Sign in</button>
+            </form>
+            <p class="wall-status" id="wall-status" role="status" aria-live="polite"></p>
+            <div class="wall-links">
+              <button class="wall-reset" id="wall-forgot" type="button">Set or reset password</button>
+              <button class="wall-reset" id="wall-reset" type="button" hidden>Start over</button>
+            </div>
+            <div class="wall-create">
+              <span>New here?</span>
+              <button class="wall-create-button" id="wall-create" type="button" disabled aria-disabled="true">Create account <span class="badge is-soon">Coming soon</span></button>
+            </div>
+            <a class="wall-back" href="../"><span aria-hidden="true">←</span> Back</a>
+          </div>
+        </section>
+
+        <div class="vault-account" id="vault-account" hidden>
+          <span id="vault-account-email"></span>
+          <button type="button" id="vault-signout">Sign out</button>
+        </div>
+
+        <template id="vault-content">
+<header class="topbar">
+      <div class="wrap topbar-in">
+        <div class="topbar-start">
+          <a class="lockup" href="./">Desk<span class="mark">.</span></a>
+          <nav class="nav" aria-label="Departments">
+            <a class="is-current" href="./" aria-current="page">Desk</a>
+            <a href="options-flow/">Options Flow</a>
+            <a href="new-today/">New Today</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+          <section class="page-head">
+            <span class="pill">Desk</span>
+            <h1>Desk<span class="mark">.</span></h1>
+            <p class="lede">Desk reports, Options Flow, and New Today.</p>
+          </section>
+          <div class="tile-grid">
+            <a class="tile" href="../positioning/">
+              <div class="tile-kicker"><span class="tile-num">01</span><span class="badge is-live"><i aria-hidden="true"></i>Desk</span></div>
+              <h2>Desk reports</h2>
+              <p>Positioning, the Soft ↔ Crowded desk, the charts, and the vol wall. These open on Positioning %, from the same files the public desk uses.</p>
+              <span class="open">Open Positioning % <span class="arrow" aria-hidden="true">→</span></span>
+            </a>
+            <a class="tile" href="options-flow/">
+              <div class="tile-kicker"><span class="tile-num">02</span><span class="badge is-live"><i aria-hidden="true"></i>Flow</span></div>
+              <h2>Options Flow</h2>
+              <p>Shopping List, Spotlight trades, and the weekly scorecard. This department stays on this desk.</p>
+              <span class="open">Open Options Flow <span class="arrow" aria-hidden="true">→</span></span>
+            </a>
+            <a class="tile" href="new-today/">
+              <div class="tile-kicker"><span class="tile-num">03</span><span class="badge is-live"><i aria-hidden="true"></i>Today</span></div>
+              <h2>New Today</h2>
+              <p>The desk day, including Options Flow rows. The public page leaves those rows off.</p>
+              <span class="open">Open New Today <span class="arrow" aria-hidden="true">→</span></span>
+            </a>
+          </div>
+        
+<footer class="site-footer">
+        <div>
+          <a class="lockup" href="./">Desk<span class="mark">.</span></a>
+          <p class="foot-note">Desk.</p>
+        </div>
+        <nav class="foot-links" aria-label="Footer">
+          <a class="is-current" href="./" aria-current="page">Desk</a>
+          <a href="options-flow/">Options Flow</a>
+          <a href="new-today/">New Today</a>
+        </nav>
+      </footer>
+        </template>
+      </main>
+      
+    </div>
+  </body>
+</html>

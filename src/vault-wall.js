@@ -1,14 +1,15 @@
 /**
- * Vol · Credit · Momentum wall. Renders only after the Vault gate opens the
- * page. The MAG7 card reads the committed closes in public/data/vault/mag7/
- * and computes the oscillator in the browser with src/mag7-osc.js. Spot Vol
- * Beta mounts from src/vault-svb.js and Credit Spread Regime from
- * src/vault-csr.js.
+ * Vol · Credit · Momentum wall. Mounts on the public Dashboard and, when the
+ * same cards sit inside a Vault template, again after the gate opens the page.
+ * The MAG7 card reads the committed closes in public/data/vault/mag7/ and
+ * computes the oscillator in the browser with src/mag7-osc.js. Spot Vol Beta
+ * mounts from src/vault-svb.js and Credit Spread Regime from src/vault-csr.js.
  */
 
 import "./vault-svb.js";
 import "./vault-csr.js";
 import "./vault-wall-asof.js";
+import { onDeskReady } from "./when-mounted.js";
 import { mountPlot } from "./chart-svg.js";
 import { drawOscillator } from "./mag7-chart.js";
 import { MODES, RANGES, TYPES, buildOscillator, fmtAxis, fmtPct, panelAt, rangeStart } from "./mag7-osc.js";
@@ -213,7 +214,7 @@ async function load() {
   mountCard(doc);
 }
 
-document.addEventListener("vault-open", () => {
+onDeskReady(() => {
   const card = document.getElementById("mag7");
   if (!card || card.dataset.ready === "1") return;
   card.dataset.ready = "1";

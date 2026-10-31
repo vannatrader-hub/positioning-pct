@@ -1,11 +1,16 @@
-import { isAllowlisted, normalizeEmail } from "./family-allowlist.js";
+/**
+ * Family gate for Positioning % Hub. Same sign-in card as Vault, different
+ * list and return URL. Dispatches `vault-open` so the shared department
+ * modules (flow, new today, wall) mount after the template is cloned.
+ */
+import { FAMILY_ALLOWLIST, FAMILY_ENTRY, isAllowlisted, normalizeEmail } from "./family-allowlist.js";
 import { STEP_ERRORS, clerkCode, errorCopy, nextStep } from "./vault-signin.js";
 
 const base = import.meta.env ? import.meta.env.BASE_URL : "/";
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CODE = /^\d{6}$/;
 
-const wall = document.getElementById("insight-wall");
+const wall = document.getElementById("vault-wall");
 const form = document.getElementById("wall-form");
 const input = document.getElementById("wall-email");
 const codeField = document.getElementById("wall-code-field");
@@ -19,19 +24,19 @@ const lede = document.getElementById("wall-lede");
 const status = document.getElementById("wall-status");
 const forgot = document.getElementById("wall-forgot");
 const reset = document.getElementById("wall-reset");
-const account = document.getElementById("insight-account");
-const accountEmail = document.getElementById("insight-account-email");
-const signOut = document.getElementById("insight-signout");
-const content = document.getElementById("insight-content");
+const account = document.getElementById("vault-account");
+const accountEmail = document.getElementById("vault-account-email");
+const signOut = document.getElementById("vault-signout");
+const content = document.getElementById("vault-content");
 
-const NOT_LISTED = "That email is not on the Insight list. Insight opens for family, and the Dashboard stays open to everyone.";
+const NOT_LISTED = "That email is not on the list.";
 const SUBMIT = { password: "Sign in", code: "Verify", reset: "Set password and sign in" };
 
 let opened = false;
 let step = "password";
 
-function insightUrl() {
-  return new URL(`${base}insight/`, location.origin).href;
+function vaultUrl() {
+  return new URL(`${base}${FAMILY_ENTRY}/`, location.origin).href;
 }
 
 function setState(state) {
@@ -73,7 +78,7 @@ function readEmail() {
   const email = normalizeEmail(input.value);
   input.setAttribute("aria-invalid", "false");
   if (!EMAIL.test(email)) return invalid(input, "Enter a full email address.");
-  if (!isAllowlisted(email)) return invalid(input, NOT_LISTED);
+  if (!isAllowlisted(email, FAMILY_ALLOWLIST)) return invalid(input, NOT_LISTED);
   return email;
 }
 
@@ -90,22 +95,22 @@ function readPassword() {
   return passwordInput.value;
 }
 
-function openInsight(email) {
+function openVault(email) {
   if (opened) return;
   opened = true;
   wall.remove();
   accountEmail.textContent = email ? `Signed in as ${email}` : "Signed in";
   account.hidden = false;
   account.after(content.content.cloneNode(true));
-  document.dispatchEvent(new CustomEvent("insight-open"));
+  document.dispatchEvent(new CustomEvent("vault-open"));
 }
 
 /* No publishable key at build time: the wall stays up and sign-in is off. */
 function startWithoutClerk() {
-  lede.textContent = "Insight opens for family.";
+  lede.textContent = "Nothing on this page yet.";
   setState("off");
   say("Sign-in is not set up on this build.");
-  if (import.meta.env?.DEV) console.info("Insight sign-in is off. Set VITE_CLERK_PUBLISHABLE_KEY (see README).");
+  if (import.meta.env?.DEV) console.info("Hub sign-in is off. Set VITE_CLERK_PUBLISHABLE_KEY (see README).");
 }
 
 async function startClerk(publishableKey) {
@@ -124,15 +129,15 @@ async function startClerk(publishableKey) {
   signOut.addEventListener("click", async () => {
     signOut.disabled = true;
     await clerk.signOut();
-    location.replace(insightUrl());
+    location.replace(vaultUrl());
   });
 
   clerk.addListener(({ user }) => {
-    if (user) openInsight(user.primaryEmailAddress?.emailAddress);
-    else if (opened) location.replace(insightUrl());
+    if (user) openVault(user.primaryEmailAddress?.emailAddress);
+    else if (opened) location.replace(vaultUrl());
   });
 
-  if (clerk.user) openInsight(clerk.user.primaryEmailAddress?.emailAddress);
+  if (clerk.user) openVault(clerk.user.primaryEmailAddress?.emailAddress);
   if (opened) return;
 
   let attempt = null;
@@ -151,7 +156,7 @@ async function startClerk(publishableKey) {
     const plan = nextStep(result);
     if (plan.action === "activate") {
       await clerk.setActive({ session: plan.sessionId });
-      if (clerk.user) openInsight(clerk.user.primaryEmailAddress?.emailAddress ?? email);
+      if (clerk.user) openVault(clerk.user.primaryEmailAddress?.emailAddress ?? email);
       return;
     }
     if (plan.action === "code") {

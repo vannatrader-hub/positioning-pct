@@ -1,20 +1,20 @@
 /**
- * Emails that may sign in to Insight (the family desk).
+ * Ops only. Do not name FAMILY_ENTRY in README, public nav, footers, sitemaps,
+ * or robots.txt. The public site must not link here.
  *
- * To add a family member: append their email below (lowercase), open a PR,
- * and redeploy. Then, in the Clerk Dashboard, add the same email under
- * Restrictions → Allowlist and create the user (Users → Create user, email
- * + password) so they never go through sign-up.
+ * Entry directory: FAMILY_ENTRY (one segment, no trailing slash). Share that
+ * path only with people on FAMILY_ALLOWLIST. Add their email here (lowercase),
+ * redeploy, then add the same email in Clerk Restrictions → Allowlist and
+ * create the user. Leave them off VAULT_ALLOWLIST unless they should open Vault.
  *
- * CEO (vannatrader@gmail.com) is on this list so they can test Insight.
- * Family emails go here; do NOT put them on VAULT_ALLOWLIST.
- *
- * This list only decides who the wall will try to sign in. It is not access
- * control: Clerk's restrictions (sign-up off, allowlist) are what refuse accounts.
+ * Data is not copied for this entry. Surfaces in src/product-feeds.js share
+ * public/data and src render modules. The book feed stays Vault-only.
+ * A signed-out request shows a generic Coming soon wall, not a product page.
  */
+export const FAMILY_ENTRY = "m4c8q";
+
 export const FAMILY_ALLOWLIST = [
-  "vannatrader@gmail.com", // CEO - can test both Insight and Vault
-  // Add family emails below (one per line, lowercase):
+  "vannatrader@gmail.com",
 ];
 
 export { normalizeEmail, isAllowlisted } from "./vault-allowlist.js";

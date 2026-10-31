@@ -9,9 +9,10 @@ import { SIDES, alertLabel, sortPlays } from "../src/options-flow.js";
 import { SECTION_ORDER, STATUS, allPlays, levelKind, outcomeLabel, sortCards, spotlightLevels, spotlightLines } from "../src/spotlights.js";
 import { activeSpotlights, earningsBoxes, spotlightStar, tradeDates } from "../src/scorecard.js";
 import { VAULT_ALLOWLIST, isAllowlisted } from "../src/vault-allowlist.js";
-import { FAMILY_ALLOWLIST } from "../src/family-allowlist.js";
+import { FAMILY_ALLOWLIST, FAMILY_ENTRY } from "../src/family-allowlist.js";
+import { PRODUCT_FEEDS } from "../src/product-feeds.js";
 import { errorCopy, nextStep } from "../src/vault-signin.js";
-import { NT_SECTIONS, SOURCE_LABELS, deskDay, deskDayStart, deskWindow, itemsForDay, windowLabel } from "../src/new-today-window.js";
+import { NT_SECTIONS, PUBLIC_NT_SECTIONS, SOURCE_LABELS, deskDay, deskDayStart, deskWindow, itemsForDay, publicDeskItems, windowLabel } from "../src/new-today-window.js";
 import { BUY_LINE, DEFAULT_MONTHS, MAX_MONTHS, RANGES, breadthRead, dayChange, monthsBack, sma as breadthSma, windowStart as breadthWindowStart } from "../src/breadth.js";
 import { CSR_PARAMS, biasOf, csrPanel, csrSeries, cycleOf, panelText, regimeOf as csrRegimeOf, zColor } from "../src/csr.js";
 import { DEFAULTS as MAG7_DEFAULTS, MAG7, TYPES as MAG7_TYPES, buildOscillator, fmtPct, momentum, panelAt, rangeStart, regimeOf, sma } from "../src/mag7-osc.js";
@@ -31,7 +32,7 @@ import {
 import { columnMoves, isoWeek, isoWeekRange, packFrame } from "../src/vault-pack-frame.js";
 import { FORMULA, axisTicks, buildClose, closeEvent, closeRows, closeSpxPct, deskEstimate, formatSvb, gaugeFraction, readout, spotVolTip } from "../src/vault-svb.js";
 import { archiveGroups, deskWeekEntries, displaySource, filterEntries, newTodayDays, parseDateQuery } from "../src/vault-archive.js";
-import { closedPnl, deskCopy, formatPx, formatUsd, isOpen, isPending, markOf, resultLabel, stopOf, targetOf, weekStrip } from "../src/vault-portfolio.js";
+import { bookSide, closedPnl, deskCopy, equityPath, formatBook, formatPx, formatUsd, isOpen, isPending, markOf, resultLabel, stopOf, targetOf, weekStrip } from "../src/vault-portfolio.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 let failed = 0;
@@ -371,22 +372,26 @@ for (const file of ["src/flow-chart.js", "src/spotlights.js"]) {
 assert(readFileSync(join(root, "src/spotlights.js"), "utf8").includes("drawLevelsChart"), "Spotlight cards share the $$$ line chart");
 
 const hub = readFileSync(join(root, "options-flow/index.html"), "utf8");
-const hubLinks = [...hub.matchAll(/<a class="tile hub-tile[^"]*" href="([^"]+)"/g)].map((match) => match[1]);
-assert(JSON.stringify(hubLinks) === JSON.stringify(["scorecard/"]), `Dashboard hub links only scorecard ${hubLinks}`);
-assert(hub.includes('<article class="tile hub-tile">'), "Dashboard hub shows Shopping List and Spotlights as Coming soon articles");
+const hubMain = hub.match(/<main id="content">([\s\S]*?)<\/main>/)?.[1] ?? "";
+const hubTemplate = hubMain.match(/<template id="vault-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
+const hubOutside = hubMain.replace(/<template id="vault-content">[\s\S]*?<\/template>/, "");
+const hubLinks = [...hubTemplate.matchAll(/<a class="tile hub-tile[^"]*" href="([^"]+)"/g)].map((match) => match[1]);
+assert(JSON.stringify(hubLinks) === JSON.stringify(["dollar/", "spotlights/", "scorecard/"]), `Vault Options Flow hub links ${hubLinks}`);
+assert(!hubTemplate.includes('<article class="tile hub-tile">'), "Shopping List and Spotlights are real links, not dead articles");
+assert(hub.includes('src="/src/vault-gate.js"') && hub.includes('<body class="is-vault">'), "Options Flow hub is behind the Vault gate");
+assert(!hubOutside.includes('href="dollar/"') && !hubOutside.includes('href="spotlights/"'), "Options Flow cards stay inside the Vault template");
 assert(!hub.includes('id="flow-list"'), "hub shows calling cards, not the $$$ table");
 const dollarPage = readFileSync(join(root, "options-flow/dollar/index.html"), "utf8");
-const dollarTemplate = dollarPage.match(/<template id="family-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
-const dollarOutside = dollarPage.replace(/<template id="family-content">[\s\S]*?<\/template>/, "");
-assert(dollarPage.includes('src="/src/family-content-gate.js"'), "$$$ Shopping List page runs family-content-gate.js");
-assert(/<section class="family-wall" id="family-wall" data-state="checking"/.test(dollarOutside), "$$$ Shopping List shows Coming soon wall by default");
-assert(dollarOutside.includes('<span class="badge">Coming soon</span>'), "$$$ Shopping List wall shows Coming soon badge");
-assert(dollarOutside.includes('Sign in for Insight'), "$$$ Shopping List wall links to Insight sign-in");
+const dollarTemplate = dollarPage.match(/<template id="vault-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
+const dollarOutside = dollarPage.replace(/<template id="vault-content">[\s\S]*?<\/template>/, "");
+assert(dollarPage.includes('src="/src/vault-gate.js"') && dollarPage.includes('src="/src/options-flow.js"'), "$$$ Shopping List page runs the Vault gate and options-flow.js");
+assert(dollarPage.includes('addEventListener("vault-open"') || readFileSync(join(root, "src/options-flow.js"), "utf8").includes('addEventListener("vault-open"'), "Shopping List boots after the Vault opens");
+assert(/<section class="vault-wall" id="vault-wall" data-state="checking"/.test(dollarOutside), "$$$ Shopping List shows the Vault sign-in wall by default");
+assert(!dollarOutside.includes("Sign in for Insight") && !dollarPage.includes("family-content"), "$$$ Shopping List is no longer a family Coming soon wall");
 for (const id of ["flow-list", "calling-card", "cc-buy-block", "cc-oi-block", "cc-rec", "tl-tiles", "cc-chart"]) {
   assert(dollarTemplate.includes(`id="${id}"`), `$$$ Shopping List template keeps #${id}`);
 }
-assert(dollarTemplate.includes('src="/src/options-flow.js"'), "$$$ Shopping List template runs options-flow.js");
-assert(!dollarOutside.includes('id="flow-list"'), "$$$ Shopping List content stays inside the family template");
+assert(!dollarOutside.includes('id="flow-list"'), "$$$ Shopping List content stays inside the Vault template");
 const viteConfig = readFileSync(join(root, "vite.config.js"), "utf8");
 for (const page of ["options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html"]) {
   assert(viteConfig.includes(`"${page}"`), `vite builds ${page}`);
@@ -586,12 +591,11 @@ assert(JSON.stringify(spotlightLines(spotBy.FCX).map((line) => line.value)) === 
 assert(JSON.stringify(spotlightLines(spotBy.XYZ).map((line) => line.value)) === "[90,85,78.5,75,70]", "XYZ chart lines run target $90, short $85, B/E, long $75, stop $70");
 assert(JSON.stringify(spotlightLines(spotBy.V).map((line) => line.kind)) === '["target","breakeven","strike","stop"]', "V draws short/target, B/E, long strike, stop");
 const spotPage = readFileSync(join(root, "options-flow/spotlights/index.html"), "utf8");
-const spotTemplate = spotPage.match(/<template id="family-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
-const spotOutside = spotPage.replace(/<template id="family-content">[\s\S]*?<\/template>/, "");
-assert(spotPage.includes('src="/src/family-content-gate.js"'), "Spotlight page runs family-content-gate.js");
-assert(/<section class="family-wall" id="family-wall" data-state="checking"/.test(spotOutside), "Spotlight page shows Coming soon wall by default");
-assert(spotOutside.includes('<span class="badge">Coming soon</span>'), "Spotlight wall shows Coming soon badge");
-assert(spotOutside.includes('Sign in for Insight'), "Spotlight wall links to Insight sign-in");
+const spotTemplate = spotPage.match(/<template id="vault-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
+const spotOutside = spotPage.replace(/<template id="vault-content">[\s\S]*?<\/template>/, "");
+assert(spotPage.includes('src="/src/vault-gate.js"') && spotPage.includes('src="/src/spotlights.js"'), "Spotlight page runs the Vault gate and spotlights.js");
+assert(/<section class="vault-wall" id="vault-wall" data-state="checking"/.test(spotOutside), "Spotlight page shows the Vault sign-in wall by default");
+assert(!spotOutside.includes("Sign in for Insight") && !spotPage.includes("family-content"), "Spotlight page is no longer a family Coming soon wall");
 for (const id of ["spot-rows", "spot-card", "sc-rec", "sc-close-note", "sl-tiles", "sl-chart", "sl-legend"]) {
   assert(spotTemplate.includes(`id="${id}"`), `Spotlight template keeps #${id}`);
 }
@@ -656,8 +660,8 @@ const banned = [
   "stockcharts",
 ];
 const scanExt = new Set([".html", ".js", ".css", ".md", ".yml", ".svg", ".json"]);
-/* The locked portfolio journal names its source. Page copy stays scrubbed; this file is the one exception. */
-const bannedAllow = new Set([join(root, "public/data/vault/portfolio/journal.json")]);
+/* The mock book is scrubbed. Nothing in the repo is exempt from the source-name scan. */
+const bannedAllow = new Set();
 
 function walk(dir) {
   for (const name of readdirSync(dir)) {
@@ -735,13 +739,24 @@ for (const [file, text] of [
 }
 assert(viteConfig.includes('"new-today/index.html"'), "vite builds new-today/index.html");
 assert(ntPage.includes('src="/src/new-today.js"') && ntPage.includes('id="nt-body"'), "New Today page runs new-today.js");
-for (const section of NT_SECTIONS) assert(ntPage.includes(`href="#nt-${section.id}"`), `New Today subnav jumps to ${section.title}`);
+for (const section of PUBLIC_NT_SECTIONS) assert(ntPage.includes(`href="#nt-${section.id}"`), `New Today subnav jumps to ${section.title}`);
+assert(!ntPage.includes('href="#nt-options-flow"'), "public New Today does not jump into Options Flow");
+assert(ntPage.includes('data-surface="public"') && ntPage.includes('id="nt-fresh"'), "New Today stamps the feed and stays on the public surface");
+assert(readFileSync(join(root, "src/new-today.js"), "utf8").includes("Feed updated"), "New Today copy names when the feed was updated");
 assert(
   JSON.stringify(NT_SECTIONS.map((section) => section.title)) === '["Positioning","Options Flow","SPX Levels","Research desk"]',
   "New Today sections run Positioning, Options Flow, SPX Levels, Research desk",
 );
-/* New Today is now in Insight, not in the Dashboard home */
-assert(!homePage.includes('class="nt-chip"'), "Dashboard home no longer shows New Today chip (moved to Insight)");
+assert(JSON.stringify(PUBLIC_NT_SECTIONS.map((section) => section.id)) === '["positioning","spx","research"]', "public New Today drops Options Flow");
+assert(publicDeskItems([{ section: "options-flow" }, { section: "positioning" }]).length === 1, "public desk items keep Positioning and drop Options Flow");
+assert(homePage.includes('class="nt-chip"') && homePage.includes('data-public="1"'), "Dashboard home shows the public New Today chip");
+for (const id of ["spot-vol-beta", "credit-spread-regime", "mag7", "nysi", "nasi"]) {
+  assert(homePage.includes(`id="${id}"`), `Dashboard shows the ${id} wall widget`);
+}
+assert(homePage.includes('src="/src/vault-wall.js"') && homePage.includes('src="/src/vault-breadth.js"'), "Dashboard runs the wall widgets");
+for (const banned of ["options-flow/", "portfolio/", "spx-levels/", "insight/", "vol-credit-momentum"]) {
+  assert(!homePage.includes(banned), `Dashboard home does not link ${banned}`);
+}
 
 const nt = JSON.parse(readFileSync(join(root, "public/data/new-today.json"), "utf8"));
 assert(nt.timeZone === "America/Chicago" && nt.dayStartsAt === "00:00", "new-today.json documents the Chicago midnight desk day");
@@ -775,25 +790,27 @@ assert(itemsForDay(nt.items ?? [], "2026-10-29").length === 20, "Oct 29 desk day
 assert(itemsForDay(nt.items ?? [], "2026-10-30").length === 1, "Oct 30 desk day lists the morning research note");
 
 const nav = /<nav class="nav" aria-label="Pages">[\s\S]*?<\/nav>/;
-const dashboardPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "positioning/charts/index.html", "spx-levels/index.html", "options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html", "new-today/index.html"];
+const dashboardPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "positioning/charts/index.html", "spx-levels/index.html", "new-today/index.html"];
 const vaultSurface = {
-  "vault/index.html": { dashboard: "../", vault: "./", insight: "../insight/" },
-  "vault/soft-crowded/index.html": { dashboard: "../../", vault: "../", insight: "../../insight/" },
-  "vault/vol-credit-momentum/index.html": { dashboard: "../../", vault: "../", insight: "../../insight/" },
-  "vault/portfolio/index.html": { dashboard: "../../", vault: "../", insight: "../../insight/" },
-  "vault/archive/index.html": { dashboard: "../../", vault: "../", insight: "../../insight/" },
+  "vault/index.html": { dashboard: "../", vault: "./" },
+  "vault/soft-crowded/index.html": { dashboard: "../../", vault: "../" },
+  "vault/vol-credit-momentum/index.html": { dashboard: "../../", vault: "../" },
+  "vault/portfolio/index.html": { dashboard: "../../", vault: "../" },
+  "vault/archive/index.html": { dashboard: "../../", vault: "../" },
 };
-const insightSurface = {
-  "insight/index.html": { dashboard: "../", vault: "../vault/", insight: "./" },
+const flowSurface = {
+  "options-flow/index.html": { dashboard: "../", vault: "../vault/" },
+  "options-flow/dollar/index.html": { dashboard: "../../", vault: "../../vault/" },
+  "options-flow/spotlights/index.html": { dashboard: "../../", vault: "../../vault/" },
+  "options-flow/scorecard/index.html": { dashboard: "../../", vault: "../../vault/" },
 };
-const publicPages = [...dashboardPages, ...Object.keys(vaultSurface), ...Object.keys(insightSurface)];
+const publicPages = [...dashboardPages, ...Object.keys(vaultSurface), ...Object.keys(flowSurface), "coming-soon/index.html"];
 for (const file of publicPages) {
   const html = readFileSync(join(root, file), "utf8");
-  const order = [...(html.match(nav)?.[0] ?? "").matchAll(/>(Positioning|Options Flow|SPX Levels|New Today)</g)].map((m) => m[1]);
-  const expectedDashboardVault = '["Positioning","Options Flow","SPX Levels"]';
-  const expectedInsight = '["Positioning","Options Flow","New Today"]';
-  const isInsightPage = Object.keys(insightSurface).includes(file);
-  const expected = isInsightPage ? expectedInsight : expectedDashboardVault;
+  const order = [...(html.match(nav)?.[0] ?? "").matchAll(/>(Positioning|Options Flow|Desk wall|New Today|Portfolio)</g)].map((m) => m[1]);
+  const expectedPublic = '["Positioning","Desk wall","New Today"]';
+  const expectedVault = '["Positioning","Options Flow","Portfolio","Desk wall"]';
+  const expected = file.startsWith("vault/") || file.startsWith("options-flow/") || file.startsWith("coming-soon/") ? expectedVault : expectedPublic;
   assert(JSON.stringify(order) === expected, `${file} nav order ${order}, expected ${expected}`);
 }
 
@@ -807,23 +824,18 @@ for (const file of publicPages) {
     current: /class="is-current"/.test(attrs) && /aria-current="(page|true)"/.test(attrs),
   }));
   const where = `${file} surface switcher`;
-  assert(JSON.stringify(links.map((link) => link.label)) === '["Dashboard","Vault","Insight"]', `${where} reads Dashboard | Vault | Insight, got ${links.map((link) => link.label)}`);
-  if (links.length !== 3) continue;
-  const [dashboard, vault, insight] = links;
-  const vaultLinks = vaultSurface[file];
-  const insightLinks = insightSurface[file];
-  const isDashboard = !vaultLinks && !insightLinks;
-  const isVault = Boolean(vaultLinks);
-  const isInsight = Boolean(insightLinks);
-  assert(dashboard.current === isDashboard && vault.current === isVault && insight.current === isInsight, `${where} marks ${isVault ? "Vault" : isInsight ? "Insight" : "Dashboard"} as current`);
-  if (vaultLinks) {
-    assert(dashboard.href === vaultLinks.dashboard && vault.href === vaultLinks.vault && insight.href === vaultLinks.insight, `${where} Dashboard ${dashboard.href} Vault ${vault.href} Insight ${insight.href}`);
-  } else if (insightLinks) {
-    assert(dashboard.href === insightLinks.dashboard && vault.href === insightLinks.vault && insight.href === insightLinks.insight, `${where} Dashboard ${dashboard.href} Vault ${vault.href} Insight ${insight.href}`);
+  assert(JSON.stringify(links.map((link) => link.label)) === '["Dashboard","Vault"]', `${where} reads Dashboard | Vault, got ${links.map((link) => link.label)}`);
+  assert(!/insight/i.test(links.map((link) => link.label).join(" ")), `${where} does not name Insight`);
+  if (links.length !== 2) continue;
+  const [dashboard, vault] = links;
+  const vaultLinks = vaultSurface[file] || flowSurface[file];
+  const isVault = Boolean(vaultLinks) || file.startsWith("coming-soon/");
+  assert(dashboard.current === !isVault && vault.current === isVault, `${where} marks ${isVault ? "Vault" : "Dashboard"} as current`);
+  if (vaultSurface[file] || flowSurface[file]) {
+    assert(dashboard.href === vaultLinks.dashboard && vault.href === vaultLinks.vault, `${where} Dashboard ${dashboard.href} Vault ${vault.href}`);
   } else {
     assert(dashboard.href === "./" || /^(\.\.\/)+$/.test(dashboard.href), `${where} Dashboard links home, got ${dashboard.href}`);
     assert(vault.href === `${dashboard.href === "./" ? "" : dashboard.href}vault/`, `${where} Vault links to /vault/, got ${vault.href}`);
-    assert(insight.href === `${dashboard.href === "./" ? "" : dashboard.href}insight/`, `${where} Insight links to /insight/, got ${insight.href}`);
   }
 }
 const home = readFileSync(join(root, "index.html"), "utf8");
@@ -840,7 +852,10 @@ assert(css.includes(".is-vault {"), "stylesheet scopes Vault theme tokens under 
 assert(dashboardPages.every((file) => !readFileSync(join(root, file), "utf8").includes("is-vault")), "Dashboard pages stay on the light theme");
 assert(/<h1>Vault/.test(vaultPage), "Vault hero");
 assert((vaultPage.match(/class="tile vault-tile"/g) ?? []).length === 3, "Vault shows three preview tiles");
-assert(!/<a\s[^>]*class="tile vault-tile/.test(vaultPage), "Vault preview tiles do not link anywhere");
+for (const href of ["../coming-soon/#live-pulls", "../coming-soon/#alerts", "../coming-soon/#sizing"]) {
+  assert(vaultPage.includes(`class="tile vault-tile" href="${href}"`), `Vault preview tile links to ${href}`);
+}
+assert(viteConfig.includes('"coming-soon/index.html"'), "vite builds the coming-soon notes");
 assert(!/checkout/i.test(vaultPage), "Vault has no checkout");
 const vaultTopbar = vaultPage.match(/<header class="topbar">[\s\S]*?<\/header>/)?.[0] ?? "";
 assert(!/on the desk|nav-tag/i.test(vaultTopbar), "Vault topbar drops the On the Desk label");
@@ -851,7 +866,7 @@ assert(!/opening later/i.test(vaultTopbar + vaultFooter), "Vault chrome no longe
 
 const monetization = /\b(free|paid|premium|subscri\w*|paywall\w*|upgrad\w*|trials?|pric(e|es|ed|ing)|members?hips?|unlock\w*)\b/i;
 const chromeCopy = [
-  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "vault/portfolio/index.html", "vault/archive/index.html", "insight/index.html", "404.html"].map((file) => [
+  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "vault/portfolio/index.html", "vault/archive/index.html", "insight/index.html", "404.html", `${FAMILY_ENTRY}/index.html`, `${FAMILY_ENTRY}/options-flow/index.html`, `${FAMILY_ENTRY}/new-today/index.html`].map((file) => [
     file,
     readFileSync(join(root, file), "utf8"),
   ]),
@@ -889,6 +904,7 @@ assert(
 );
 assert(!/magic link|sign-in link|email me a link/i.test(vaultOutside), "Vault wall no longer offers email links");
 assert(/<h1>Vault/.test(vaultTemplate) && (vaultTemplate.match(/class="tile vault-tile"/g) ?? []).length === 3, "Vault hero and tiles live in the template");
+assert(vaultTemplate.includes('href="../options-flow/"') && vaultTemplate.includes(">Portfolio</h2>"), "signed-in Vault links Options Flow and Portfolio");
 assert(vaultTemplate.includes('class="tile vault-pack" href="soft-crowded/"'), "signed-in Vault links to the Soft ↔ Crowded pack");
 assert(!vaultOutside.includes("soft-crowded"), "the pack link stays inside the signed-in template");
 assert(!/vault-hero|vault-tile|vault-desk|vault-pack/.test(vaultOutside), "no Vault content renders outside the template");
@@ -905,12 +921,13 @@ for (const [file, text] of [["src/vault-gate.js", gateSource], ["src/vault-signi
   assert(!/signUp|sign_up|createEmailLinkFlow|email_link|transfer|joinWaitlist|redirectUrl/.test(text), `${file} reaches for sign-up, email links, or redirects`);
 }
 assert(VAULT_ALLOWLIST.includes("vannatrader@gmail.com"), "vault allowlist carries the CEO login");
+assert(FAMILY_ALLOWLIST.includes("vannatrader@gmail.com"), "family allowlist carries the CEO login so the Hub can be opened");
+assert(FAMILY_ALLOWLIST.every((email) => email === email.trim().toLowerCase()), "family allowlist entries are lowercase");
+assert(isAllowlisted(" VannaTrader@Gmail.com ", FAMILY_ALLOWLIST), "family allowlist ignores case and spaces");
 assert(VAULT_ALLOWLIST.every((email) => email === email.trim().toLowerCase()), "vault allowlist entries are lowercase");
 assert(isAllowlisted(" VannaTrader@Gmail.com "), "vault allowlist ignores case and spaces");
 assert(!isAllowlisted("someone@example.com") && !isAllowlisted(""), "vault allowlist rejects other emails");
-assert(FAMILY_ALLOWLIST.includes("vannatrader@gmail.com"), "family allowlist carries the CEO login so they can test Insight");
-assert(FAMILY_ALLOWLIST.every((email) => email === email.trim().toLowerCase()), "family allowlist entries are lowercase");
-assert(isAllowlisted(" VannaTrader@Gmail.com ", FAMILY_ALLOWLIST), "family allowlist ignores case and spaces");
+assert(existsSync(join(root, "src/family-allowlist.js")) && existsSync(join(root, "src/hub-gate.js")), "Hub keeps its own allowlist and gate");
 
 const done = nextStep({ status: "complete", createdSessionId: "sess_1" });
 assert(done.action === "activate" && done.sessionId === "sess_1", "a complete sign-in activates its session");
@@ -929,32 +946,61 @@ const gateHit = [gateSource, signInSource, readFileSync(join(root, "src/vault-al
   .find((text) => monetization.test(text));
 assert(!gateHit, `Vault gate UI copy says ${gateHit}`);
 
-/* Insight wall: family-gated surface, same pattern as Vault but with FAMILY_ALLOWLIST. */
+/* Insight is not a tab. The old URL returns to the public Dashboard and does not name the private entry. */
 const insightPage = readFileSync(join(root, "insight/index.html"), "utf8");
 assert(viteConfig.includes('"insight/index.html"'), "vite builds insight/index.html");
-assert(insightPage.includes('<body class="is-insight">'), "Insight page carries the Insight theme");
-assert(css.includes(".is-insight {"), "stylesheet scopes Insight theme tokens under .is-insight");
-const insightMain = insightPage.match(/<main id="content">([\s\S]*?)<\/main>/)?.[1] ?? "";
-const insightTemplate = insightMain.match(/<template id="insight-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
-const insightOutside = insightMain.replace(/<template id="insight-content">[\s\S]*?<\/template>/, "");
-assert(insightPage.includes('src="/src/insight-gate.js"'), "Insight page runs insight-gate.js");
-assert(/<section class="insight-wall" id="insight-wall" data-state="checking"/.test(insightOutside), "Insight wall renders by default, before the gate decides");
-assert(/<h1 id="insight-wall-title">Sign in for Insight<\/h1>/.test(insightOutside), "Insight wall reads Sign in for Insight");
-assert(/<input id="wall-email"[^>]*type="email"/.test(insightOutside), "Insight wall asks for an email");
-assert(/<input id="wall-password"[^>]*type="password"/.test(insightOutside), "Insight wall asks for a password");
-assert(/<h1>Insight/.test(insightTemplate), "Insight hero lives in the template");
-assert(!insightOutside.includes("insight-hero"), "no Insight content renders outside the template");
-const insightGateSource = readFileSync(join(root, "src/insight-gate.js"), "utf8");
-assert(insightGateSource.includes("import.meta.env.VITE_CLERK_PUBLISHABLE_KEY"), "Insight gate reads VITE_CLERK_PUBLISHABLE_KEY");
-assert(insightGateSource.includes('import("@clerk/clerk-js")'), "Insight gate loads Clerk only on demand");
-assert(insightGateSource.includes('strategy: "password"'), "Insight signs in with email and password");
-assert(insightGateSource.includes("isAllowlisted(email)"), "Insight checks the allowlist before calling Clerk");
-const insightGateHit = [insightGateSource, readFileSync(join(root, "src/family-allowlist.js"), "utf8")]
-  .flatMap((text) => text.match(/(["'`])(?:(?!\1)[^\\]|\\.)*\1/g) ?? [])
-  .find((text) => monetization.test(text));
-assert(!insightGateHit, `Insight gate UI copy says ${insightGateHit}`);
-const insightFooter = insightPage.match(/<footer class="site-footer">[\s\S]*?<\/footer>/)?.[0] ?? "";
-assert(insightFooter.includes('<p class="foot-note">Insight · for family.</p>'), "Insight footer reads Insight · for family.");
+assert(insightPage.includes('http-equiv="refresh"') && insightPage.includes("url=../"), "Insight refreshes to the Dashboard");
+assert(insightPage.includes("location.replace") && insightPage.includes('href="../"'), "Insight link returns to the Dashboard");
+assert(!insightPage.includes(FAMILY_ENTRY) && !insightPage.includes("hub/"), "Insight does not reveal the private entry");
+assert(!insightPage.includes('aria-label="Surface"'), "Insight redirect does not carry the Positioning % switcher");
+assert(!existsSync(join(root, "src/insight-gate.js")) && !existsSync(join(root, "src/family-content-gate.js")), "the old Insight gate is gone");
+assert(!/href="(?:\.\.\/)*insight\//.test([...publicPages, "insight/index.html"].map((file) => readFileSync(join(root, file), "utf8")).join("\n")), "no page links back to Insight");
+assert(!readFileSync(join(root, "README.md"), "utf8").includes(FAMILY_ENTRY), "the public README does not name the private entry");
+for (const file of publicPages) {
+  const html = readFileSync(join(root, file), "utf8");
+  assert(!html.includes(`${FAMILY_ENTRY}/`) && !html.includes("hub/"), `${file} does not link the private entry`);
+}
+
+const privatePages = [
+  `${FAMILY_ENTRY}/index.html`,
+  `${FAMILY_ENTRY}/options-flow/index.html`,
+  `${FAMILY_ENTRY}/options-flow/dollar/index.html`,
+  `${FAMILY_ENTRY}/options-flow/spotlights/index.html`,
+  `${FAMILY_ENTRY}/options-flow/scorecard/index.html`,
+  `${FAMILY_ENTRY}/new-today/index.html`,
+];
+for (const file of privatePages) {
+  assert(viteConfig.includes(`"${file}"`), `vite builds ${file}`);
+  const html = readFileSync(join(root, file), "utf8");
+  const outside = html.replace(/<template id="vault-content">[\s\S]*<\/template>/, "");
+  assert(html.includes('name="robots" content="noindex, nofollow"'), `${file} asks crawlers not to index`);
+  assert(outside.includes(">Coming soon</h1>") && outside.includes("Nothing on this page yet."), `${file} signed-out wall is generic`);
+  assert(!/family|the Hub|>Hub</i.test(outside), `${file} signed-out wall does not market a private desk`);
+  assert(!outside.includes("<header") && !outside.includes('aria-label="Surface"'), `${file} keeps product chrome behind the wall`);
+  assert(!html.includes("portfolio/"), `${file} does not open the book`);
+  const order = [...(html.match(/<nav class="nav" aria-label="Departments">[\s\S]*?<\/nav>/)?.[0] ?? "").matchAll(/>(Desk|Options Flow|New Today)</g)].map((match) => match[1]);
+  assert(JSON.stringify(order) === '["Desk","Options Flow","New Today"]', `${file} department nav ${order}`);
+}
+const privateHome = readFileSync(join(root, `${FAMILY_ENTRY}/index.html`), "utf8");
+const privateFlow = readFileSync(join(root, `${FAMILY_ENTRY}/options-flow/index.html`), "utf8");
+assert(privateHome.includes('src="/src/hub-gate.js"') && privateFlow.includes('src="/src/hub-gate.js"'), "private pages run the allowlist gate");
+assert(privateHome.includes('href="options-flow/"') && privateHome.includes('href="../positioning/"') && privateHome.includes('href="new-today/"'), "private desk links its three departments");
+const privateFlowTemplate = privateFlow.match(/<template id="vault-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
+assert(JSON.stringify([...privateFlowTemplate.matchAll(/<a class="tile hub-tile[^"]*" href="([^"]+)"/g)].map((match) => match[1])) === '["dollar/","spotlights/","scorecard/"]', "private Options Flow links the three pages");
+assert(readFileSync(join(root, `${FAMILY_ENTRY}/options-flow/dollar/index.html`), "utf8").includes('src="/src/options-flow.js"'), "private Shopping List uses the shared flow module");
+assert(readFileSync(join(root, `${FAMILY_ENTRY}/options-flow/spotlights/index.html`), "utf8").includes('src="/src/spotlights.js"'), "private Spotlights use the shared module");
+assert(readFileSync(join(root, `${FAMILY_ENTRY}/options-flow/scorecard/index.html`), "utf8").includes('src="/src/scorecard.js"'), "private scorecard uses the shared module");
+assert(readFileSync(join(root, `${FAMILY_ENTRY}/new-today/index.html`), "utf8").includes(`data-flow-base="${FAMILY_ENTRY}/options-flow/"`), "private New Today rewrites flow rows into the private entry");
+assert(readFileSync(join(root, "src/new-today.js"), "utf8").includes("dataset.flowBase"), "New Today can retarget flow links");
+const privateGate = readFileSync(join(root, "src/hub-gate.js"), "utf8");
+assert(privateGate.includes("FAMILY_ALLOWLIST") && privateGate.includes("FAMILY_ENTRY") && privateGate.includes('new CustomEvent("vault-open")'), "private gate uses the allowlist and the shared mount event");
+for (const feed of PRODUCT_FEEDS) {
+  assert(existsSync(join(root, feed.file)), `shared feed ${feed.id} is missing at ${feed.file}`);
+  assert(feed.surfaces.length > 0, `${feed.id} names a product`);
+}
+assert(PRODUCT_FEEDS.find((feed) => feed.id === "portfolio").surfaces.join() === "vault", "the book feed is Vault-only");
+const sharedFlow = PRODUCT_FEEDS.filter((feed) => feed.surfaces.includes("vault") && feed.surfaces.includes("private") && feed.id !== "portfolio");
+assert(sharedFlow.length >= 3, "Options Flow data is listed for Vault and the private entry");
 
 const envExample = readFileSync(join(root, ".env.example"), "utf8");
 assert(/^VITE_CLERK_PUBLISHABLE_KEY=$/m.test(envExample), ".env.example documents an empty VITE_CLERK_PUBLISHABLE_KEY");
@@ -965,7 +1011,7 @@ for (const file of [".env.example", "README.md", "src/vault-gate.js", "vault/ind
 }
 
 const scrubbed = /\bsample\b|\beducation\b|not advice|illustrative|textbook|curriculum|\blessons?\b|\bdesk [ab]\b|get_equity_|spotlight watch/i;
-for (const file of [...publicPages, "README.md", "public/data/flow/scorecard.json", "public/data/flow/plays.json", "public/data/flow/spotlights.json"]) {
+for (const file of [...publicPages, ...privatePages, "README.md", "public/data/flow/scorecard.json", "public/data/flow/plays.json", "public/data/flow/spotlights.json"]) {
   const hit = readFileSync(join(root, file), "utf8").match(scrubbed);
   assert(!hit, `${file} still says "${hit?.[0]}"`);
 }
@@ -1460,7 +1506,7 @@ assert(biasOf(1) === "RISK-OFF" && biasOf(-1.01) === "RISK-ON" && biasOf(0) === 
 const csrJs = readFileSync(join(root, "src/vault-csr.js"), "utf8");
 const csrChartJs = readFileSync(join(root, "src/csr-chart.js"), "utf8");
 assert(wallJs.includes('import "./vault-csr.js"'), "the wall mounts Credit Spread Regime");
-assert(csrJs.includes("data/vault/credit-spread-regime/") && csrJs.includes('"vault-open"') && csrJs.includes('getElementById("credit-spread-regime")'), "Credit Spread Regime loads csr.json once the Vault opens");
+assert(csrJs.includes("data/vault/credit-spread-regime/") && csrJs.includes("onDeskReady") && csrJs.includes('getElementById("credit-spread-regime")'), "Credit Spread Regime loads csr.json once the desk is ready");
 for (const piece of ["drawSpx", "drawZones", "drawBackground", "drawMarkers", "drawLevels", "drawCrosshair"]) assert(csrChartJs.includes(`function ${piece}(`), `Credit Spread Regime chart keeps ${piece}`);
 assert(!/shadowBlur|backdrop-filter|feGaussian|filter:\s*blur|globalAlpha|drawImage\(/.test(csrChartJs), "Credit Spread Regime chart draws a sharp line with no glow or blur");
 const csrCss = css.slice(css.indexOf("/* Credit Spread Regime"), css.indexOf("/* Wall breadth"));
@@ -1476,7 +1522,7 @@ assert(readFileSync(join(root, "src/vault-gate.js"), "utf8").includes('new Custo
 const svbJs = readFileSync(join(root, "src/vault-svb.js"), "utf8");
 assert(wallJs.includes('import "./vault-svb.js"'), "the wall mounts Spot Vol Beta");
 assert(svbJs.includes("data/vault/spot-vol-beta/") && svbJs.includes("drawDualLine") && svbJs.includes('new CustomEvent("vault-open")') === false, "Spot Vol Beta loads its series and does not mint a second gate event");
-assert(svbJs.includes("vault-open") && svbJs.includes("FORMULA") && svbJs.includes('getElementById("spot-vol-beta")'), "Spot Vol Beta listens for the gate and keeps the desk formula");
+assert(svbJs.includes("onDeskReady") && svbJs.includes("FORMULA") && svbJs.includes('getElementById("spot-vol-beta")'), "Spot Vol Beta mounts on the desk and keeps the formula");
 assert(svbJs.indexOf('"pct svb-gauge') < svbJs.indexOf('"svb-desk"'), "the gauge renders before the desk estimate");
 assert(css.includes(".svb-plot") && css.includes(".svb-gauge") && css.includes(".svb-desk"), "Spot Vol Beta has a gauge, a desk estimate, and a chart plate");
 assert(svbJs.includes('class: "svb-dial"') && svbJs.includes('class: "svb-needle"') && svbJs.includes("svbDial("), "Spot Vol Beta paints the live reading on a dial with a needle");
@@ -1674,79 +1720,91 @@ for (const piece of ["data/vault/portfolio/journal.json", "exit_pending_fill", "
 assert(bookJs.includes("!isPending(trade)") || bookJs.includes("!isPending(trade)"), "closed total skips a working close");
 const bookPath = join(root, "public/data/vault/portfolio/journal.json");
 const book = JSON.parse(readFileSync(bookPath, "utf8"));
-assert(bannedAllow.has(bookPath) && bannedAllow.size === 1, "only the locked journal is exempt from the source-name scan");
+assert(bannedAllow.size === 0, "the mock book is not exempt from the source-name scan");
 assert(book.schema === "ahead-portfolio-journal-v1", `portfolio schema ${book.schema}`);
-assert(book.summary.journal_lock === "2026-10-30-hawk-only-oct" && book.summary.as_of_ct === "2026-10-30 ~3:20 PM CT", "portfolio journal is the hawk-only Oct lock");
-assert(book.summary.closed_pnl_usd === -5097 && book.summary.closed_count === 8 && book.summary.open_count === 4, "portfolio closed PnL, closed count, and open count");
-assert(book.summary.hawk_october_book_locked === true, "portfolio book is locked");
+assert(book.summary.book === "desk-mock" && book.summary.journal_lock === "2026-10-30-desk-mock" && book.summary.as_of_ct === "2026-10-30 ~3:20 PM CT", "portfolio journal is the desk mock book");
+assert(book.summary.starting_balance_usd === 50000 && book.summary.ticket_usd === 4000, "mock book starts at 50000 with a 4000 ticket");
+assert(book.summary.closed_pnl_usd === 1321 && book.summary.closed_count === 8 && book.summary.open_count === 4, "portfolio closed PnL, closed count, and open count");
+assert(!("account" in book.summary), "mock book has no account identifier");
 assert(JSON.stringify(book.summary.open_tickers) === JSON.stringify(["AZN", "NFLX", "GS", "XYZ"]), "open tickers are AZN, NFLX, GS, XYZ");
 assert(
-  book.summary.by_category.Spotlight === -5462 &&
-    book.summary.by_category["Earnings Snapshot"] === -447 &&
-    book.summary.by_category["Weekly Radar / Earnings Research"] === 812,
+  book.summary.by_category.Spotlight === -4409 &&
+    book.summary.by_category["Earnings Snapshot"] === 431 &&
+    book.summary.by_category["Weekly Radar Earnings Preview"] === 5299,
   "portfolio category totals",
 );
 assert(book.trades.length === 12, `portfolio has ${book.trades.length} lines`);
 assert(
   JSON.stringify(book.trades.map((trade) => trade.id)) ===
     JSON.stringify([
-      "hawk-fcx-spotlight-43676-lot1",
-      "hawk-fcx-spotlight-43676-lot2",
-      "hawk-gld-spotlight-43774",
-      "hawk-azn-featured-43721",
-      "hawk-be-earnings-snapshot-2026-10-19",
-      "hawk-meta-earnings-snapshot-2026-10-19",
-      "hawk-spcx-earnings-snapshot-2026-10-19",
-      "hawk-spot-earnings-snapshot-2026-10-19",
-      "hawk-nflx-earnings-snapshot-2026-10-19",
-      "hawk-txn-weekly-radar-43728",
-      "hawk-gs-weekly-radar-43728",
-      "hawk-xyz-spotlight-43878",
+      "desk-fcx-spotlight-43676-lot1",
+      "desk-fcx-spotlight-43676-lot2",
+      "desk-gld-spotlight-43774",
+      "desk-azn-featured-43721",
+      "desk-be-earnings-snapshot-2026-10-19",
+      "desk-meta-earnings-snapshot-2026-10-19",
+      "desk-spcx-earnings-snapshot-2026-10-19",
+      "desk-spot-earnings-snapshot-2026-10-19",
+      "desk-nflx-earnings-snapshot-2026-10-19",
+      "desk-txn-weekly-radar-43728",
+      "desk-gs-weekly-radar-43728",
+      "desk-xyz-spotlight-43878",
     ]),
   "portfolio lines are the locked twelve",
 );
-assert(book.trades.every((trade) => trade.ticket_lock === "hawk-team-lead 2026-10-30"), "every line carries the team-lead ticket lock");
+assert(book.trades.every((trade) => trade.ticket_lock === "desk 2026-10-30" && trade.ticket_usd === 4000), "every line is a 4000 ticket");
+function ticketPnl(trade) {
+  if (trade.exit_price == null || trade.status !== "closed") return null;
+  const credit = String(trade.structure ?? "").trim().toLowerCase().startsWith("short");
+  const ret = credit ? (trade.entry_price - trade.exit_price) / trade.entry_price : (trade.exit_price - trade.entry_price) / trade.entry_price;
+  return Math.round(ret * 4000);
+}
+assert(book.trades.every((trade) => trade.pnl_usd === ticketPnl(trade)), "displayed PnL is the 4000 ticket, not a brokerage fill");
 const byTicker = Object.fromEntries(book.trades.map((trade) => [trade.id, trade]));
-const meta = byTicker["hawk-meta-earnings-snapshot-2026-10-19"];
-assert(meta.status === "closed" && meta.outcome === "loss" && meta.pnl_usd === -666 && meta.hawk_entry === 7.15, "META is a filled close");
+const meta = byTicker["desk-meta-earnings-snapshot-2026-10-19"];
+assert(meta.status === "closed" && meta.outcome === "loss" && meta.pnl_usd === -3253 && bookSide(meta) === "closed", "META is a filled close on the Closed tab");
 assert(!isPending(meta) && !isOpen(meta) && resultLabel(meta) === "Loss", "META reads as a closed loss");
-const xyz = byTicker["hawk-xyz-spotlight-43878"];
-assert(xyz.qty === 11 && xyz.entry_price === 3.5173 && xyz.status === "open" && xyz.outcome === "open", "XYZ is 11 at 3.5173 and still held");
+const xyz = byTicker["desk-xyz-spotlight-43878"];
+assert(xyz.qty === 11 && xyz.entry_price === 3.5173 && xyz.status === "open" && xyz.outcome === "open" && bookSide(xyz) === "open", "XYZ is 11 at 3.5173 and lands on the Open tab");
 assert(formatPx(xyz.entry_price) === "3.5173", `XYZ average renders ${formatPx(xyz.entry_price)}`);
-assert(formatUsd(null) === "—" && formatUsd(undefined) === "—", "a missing PnL stays blank");
-const nflx = byTicker["hawk-nflx-earnings-snapshot-2026-10-19"];
+assert(formatUsd(null) === "—" && formatUsd(undefined) === "—" && formatBook(50000) === "$50,000", "a missing PnL stays blank and the book prints unsigned");
+const nflx = byTicker["desk-nflx-earnings-snapshot-2026-10-19"];
 assert(nflx.status === "open" && nflx.outcome === null && nflx.pnl_usd === null, "NFLX stays open with an empty outcome");
-assert(isOpen(nflx) && !isPending(nflx) && resultLabel(nflx) === "Open", "NFLX reads as open, not pending");
+assert(isOpen(nflx) && !isPending(nflx) && resultLabel(nflx) === "Open" && bookSide(nflx) === "open", "NFLX reads as open, not pending");
 assert(
   JSON.stringify(book.trades.filter(isOpen).map((trade) => trade.ticker)) === JSON.stringify(["AZN", "NFLX", "GS", "XYZ"]),
   "open rows are AZN, NFLX, GS, XYZ",
 );
-assert(book.trades.filter((trade) => trade.status === "closed").length === 8, "eight closed lines");
+assert(book.trades.filter((trade) => bookSide(trade) === "closed").map((trade) => trade.ticker).length === 8, "eight closed lines");
+assert(book.trades.filter((trade) => bookSide(trade) === "open").length === 4, "four lines land on the Open tab");
 assert(!book.trades.some(isPending), "this lock has no working close");
 for (const [id, pnl] of [
-  ["hawk-fcx-spotlight-43676-lot1", 72],
-  ["hawk-spcx-earnings-snapshot-2026-10-19", 277],
-  ["hawk-spot-earnings-snapshot-2026-10-19", 1070],
-  ["hawk-txn-weekly-radar-43728", 812],
+  ["desk-fcx-spotlight-43676-lot1", 1210],
+  ["desk-spcx-earnings-snapshot-2026-10-19", 743],
+  ["desk-spot-earnings-snapshot-2026-10-19", 5863],
+  ["desk-txn-weekly-radar-43728", 5299],
 ]) {
   assert(byTicker[id].outcome === "win" && byTicker[id].pnl_usd === pnl && resultLabel(byTicker[id]) === "Win", `${id} win ${pnl}`);
 }
 assert(resultLabel(book.trades[0]) === "Win" && resultLabel(book.trades[1]) === "Loss", "filled lines keep win and loss");
 const working = { status: "exit_pending_fill", outcome: "loss_pending", pnl_usd: -1 };
-assert(isPending(working) && !isOpen(working) && resultLabel(working) === "Pending", "a working close stays pending");
+assert(isPending(working) && !isOpen(working) && resultLabel(working) === "Pending" && bookSide(working) === "open", "a working close stays pending and on the Open tab");
 assert(closedPnl(book) === book.summary.closed_pnl_usd, `closed sum ${closedPnl(book)} drifted from the lock`);
-assert(css.includes(".pf-result.is-pending") && css.includes(".pf-result.is-open") && css.includes(".pf-table"), "portfolio table styles closed, pending, and open rows");
+const path = equityPath(book);
+assert(path.start === 50000 && path.equity === 51321 && path.points.length === 9, `mock equity path ${path.equity}`);
+assert(bookJs.includes("dataset.tab") && bookJs.includes('["open"') && bookJs.includes("bookSide") && bookJs.includes("pf-curve"), "portfolio renders status tabs and the book path");
+assert(css.includes(".pf-result.is-pending") && css.includes(".pf-result.is-open") && css.includes(".pf-table") && css.includes(".pf-tabs"), "portfolio table styles closed, pending, open rows, and tabs");
 
-/* Portfolio: the page never shows a source name from the locked journal, the week strip reads the journal's own ISO week, and marks stay blank until the journal carries them. */
-const shownFields = [book.summary.event, book.summary.journal_lock, book.summary.sources_note, book.summary.account, book.summary.as_of_ct];
-for (const trade of book.trades) shownFields.push(trade.notes, trade.ticket_lock, trade.title, trade.structure, trade.category, trade.hawk_post?.exact_ticket);
+/* Portfolio: the page never shows a source name from the mock journal, the week strip reads the journal's own ISO week, and marks stay blank until the journal carries them. */
+const shownFields = [book.summary.event, book.summary.journal_lock, book.summary.sources_note, book.summary.as_of_ct];
+for (const trade of book.trades) shownFields.push(trade.notes, trade.ticket_lock, trade.title, trade.structure, trade.category, trade.ticket?.exact_ticket);
 for (const text of shownFields) {
   const shown = deskCopy(text);
   const hit = bannedSource(shown) || (/\bwsj\b|wall street journal/i.test(shown) ? "wsj" : "");
   assert(!hit, `portfolio shows "${hit}" in ${shown}`);
 }
-assert(deskCopy(book.summary.event) === "October ticketed book (CEO port)", `portfolio headline ${deskCopy(book.summary.event)}`);
-assert(deskCopy(xyz.ticket_lock) === "team lead 2026-10-30" && deskCopy(byTicker["hawk-be-earnings-snapshot-2026-10-19"].notes).startsWith("Ticket: Long BE"), "journal copy reads ticket and team lead");
+assert(deskCopy(book.summary.event) === "Desk mock book", `portfolio headline ${deskCopy(book.summary.event)}`);
+assert(deskCopy(xyz.ticket_lock) === "desk 2026-10-30" && deskCopy(byTicker["desk-be-earnings-snapshot-2026-10-19"].notes).includes("Call spread"), "journal copy stays on the ticket");
 assert(deskCopy(["Options", "Hawk", " ", "Vol", "land"].join("")) === "", "a line that would still name a source is dropped");
 for (const piece of ["deskCopy(summary.event)", "deskCopy(trade.notes)", "deskCopy(trade.ticket_lock)", "deskCopy(summary.journal_lock)"]) {
   assert(bookJs.includes(piece), `portfolio scrubs ${piece}`);
@@ -1758,7 +1816,7 @@ assert(JSON.stringify(markOf({ mtm_price: 4.1, mtm_pnl_usd: 643, mtm_as_of_ct: "
 assert(markOf({ mtm_price: "4.1", mtm_pnl_usd: Number.NaN }).marked === false, "a malformed mark stays blank");
 const strip = weekStrip(book);
 assert(strip.week === "2026-W44" && strip.start === "2026-10-26" && strip.end === "2026-11-01", `portfolio week ${strip.week}`);
-assert(strip.closedPnl === -6516 && strip.closedCount === 5 && strip.wins === 1 && strip.losses === 4, `week closed ${strip.closedPnl} over ${strip.closedCount}`);
+assert(strip.closedPnl === -6495 && strip.closedCount === 5 && strip.wins === 1 && strip.losses === 4, `week closed ${strip.closedPnl} over ${strip.closedCount}`);
 assert(JSON.stringify(strip.closedTickers) === '["FCX","GLD","BE","META","TXN"]' && strip.openCount === 4 && strip.markedCount === 0 && strip.markPnl === null, "week strip closes and open count");
 const markedBook = structuredClone(book);
 markedBook.trades.filter(isOpen).forEach((trade, index) => Object.assign(trade, { mtm_price: 1, mtm_pnl_usd: index * 10, mtm_as_of_ct: "2026-10-30 3:00 PM CT" }));
@@ -1837,7 +1895,7 @@ assert(css.includes(".archive-entry") && css.includes(".archive-gap") && css.inc
 
 assert(breadthSpx.bars.find((bar) => bar.t === "2026-10-29")?.c === 7720.39, "wall SPX Oct 29 close 7720.39");
 const breadthJs = readFileSync(join(root, "src/vault-breadth.js"), "utf8");
-for (const piece of ["data/vault/breadth/", 'input.type = "range"', "MAX_MONTHS", "BUY ", "buyLine", "$SPX", "MA(", "directionRuns", "[data-breadth]", '"vault-open"']) {
+for (const piece of ["data/vault/breadth/", 'input.type = "range"', "MAX_MONTHS", "BUY ", "buyLine", "$SPX", "MA(", "directionRuns", "[data-breadth]", "onDeskReady"]) {
   assert(breadthJs.includes(piece), `breadth cards render ${piece}`);
 }
 for (const file of ["src/vault-breadth.js", "src/breadth.js", "scripts/pull-breadth.mjs"]) {

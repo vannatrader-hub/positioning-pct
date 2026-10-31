@@ -6254,3 +6254,49 @@ a.nt-row:hover .nt-arrow { background: var(--ink); color: #fff; }
     print-color-adjust: exact;
   }
 }
+
+/* IA v2: public desk wall, mock-book tracker, and intentional soon notes. */
+.home-wall { margin-top: 42px; }
+.home-wall .section-head { margin-bottom: 4px; }
+.home-wall .wall-grid { margin-top: 12px; }
+#wall { scroll-margin-top: 88px; }
+
+.tile:focus-visible,
+.nt-chip:focus-visible,
+.pf-tabs button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.soon-stack { display: grid; gap: 16px; }
+.soon-stack .soon-card { margin-top: 0; }
+.soon-stack .soon-card h2 {
+  margin: 14px 0 8px;
+  font-size: clamp(26px, 3vw, 34px);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.pf-curve { padding: 6px 22px 4px; }
+.pf-curve-head,
+.pf-curve-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+}
+.pf-curve-head strong { font-size: 14px; letter-spacing: -0.01em; }
+.pf-curve-head span,
+.pf-curve-meta { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pf-curve svg { display: block; width: 100%; height: 128px; margin-top: 8px; }
+.pf-curve-line { fill: none; stroke: #f5c451; stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; }
+.pf-curve-axis { fill: none; stroke: var(--line-strong); stroke-width: 1; }
+.pf-curve-dot { fill: #f5c451; }
+.pf-tabs { margin: 6px 22px 14px; width: fit-content; }
+.pf-panel[hidden] { display: none; }
+.pf-empty { margin: 0 22px 22px; color: var(--muted); }
+.nt-chip.is-quiet .nt-chip-sub { color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-curve-line { stroke-dasharray: none; }
+}

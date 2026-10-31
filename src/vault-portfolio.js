@@ -116,6 +116,33 @@ export function closedPnl(journal) {
     .reduce((sum, trade) => sum + Number(trade.pnl_usd), 0);
 }
 
+/** Open tab holds anything not filled. Closed tab holds status closed only. */
+export function bookSide(trade) {
+  if (trade?.status === "closed" && !isPending(trade)) return "closed";
+  return "open";
+}
+
+/**
+ * Closed path of the mock book. Starts at the journal's starting balance and
+ * adds each filled ticket in exit order. Open lines stay off the curve.
+ */
+export function equityPath(journal) {
+  const start = Number(journal?.summary?.starting_balance_usd);
+  const book = Number.isFinite(start) ? start : 50000;
+  const ticket = Number(journal?.summary?.ticket_usd);
+  const closed = (journal?.trades ?? [])
+    .filter((trade) => bookSide(trade) === "closed")
+    .slice()
+    .sort((a, b) => String(a.exit_ts_ct).localeCompare(String(b.exit_ts_ct)) || String(a.id).localeCompare(String(b.id)));
+  let equity = book;
+  const points = [{ label: "Start", equity, day: "" }];
+  for (const trade of closed) {
+    equity += Number(trade.pnl_usd) || 0;
+    points.push({ label: trade.ticker, equity, day: stampDate(trade.exit_ts_ct) });
+  }
+  return { start: book, ticket: Number.isFinite(ticket) ? ticket : 4000, points, equity };
+}
+
 export function formatUsd(value) {
   if (value == null || value === "") return "—";
   const amount = Number(value);
@@ -124,6 +151,13 @@ export function formatUsd(value) {
   if (amount > 0) return `+$${digits}`;
   if (amount < 0) return `−$${digits}`;
   return `$${digits}`;
+}
+
+/** Unsigned dollars for the book and the ticket. PnL keeps the signed form. */
+export function formatBook(value) {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return "—";
+  return `$${Math.round(Math.abs(amount)).toLocaleString("en-US")}`;
 }
 
 export function formatPx(value) {
@@ -149,21 +183,25 @@ function isCredit(trade) {
   return String(trade?.structure ?? "").trim().toLowerCase().startsWith("short");
 }
 
+function ticketOf(trade) {
+  return trade?.ticket && typeof trade.ticket === "object" ? trade.ticket : trade?.[POST];
+}
+
 function postedStamp(trade) {
   const flat = trade?.[POST_STAMP];
   if (typeof flat === "string" && flat) return flat;
-  const post = trade?.[POST];
+  const post = ticketOf(trade);
   return post && typeof post.posted_ct === "string" ? post.posted_ct : "";
 }
 
 function wpId(trade) {
   if (Number.isInteger(trade?.wp_id)) return trade.wp_id;
-  const post = trade?.[POST];
+  const post = ticketOf(trade);
   return post && Number.isInteger(post.wp_id) ? post.wp_id : null;
 }
 
 function exactTicket(trade) {
-  const post = trade?.[POST];
+  const post = ticketOf(trade);
   return post && typeof post.exact_ticket === "string" ? post.exact_ticket : "";
 }
 
@@ -207,12 +245,14 @@ function summaryBlock(journal) {
   const wrap = el("div", "pf-lead");
   const event = deskCopy(summary.event);
   if (event) wrap.append(el("p", "pf-event", event));
-  const bits = [summary.as_of_ct, summary.account];
+  const path = equityPath(journal);
+  const bits = [summary.as_of_ct, `Started ${formatBook(path.start)}`, `${formatBook(path.ticket)} ticket`];
   if (deskCopy(summary.journal_lock)) bits.push(`Locked ${deskCopy(summary.journal_lock)}`);
-  wrap.append(el("p", "pf-meta", bits.map(deskCopy).filter(Boolean).join(" · ")));
+  wrap.append(el("p", "pf-meta", bits.map((bit) => deskCopy(bit) || bit).filter(Boolean).join(" · ")));
 
   const grid = el("div", "pf-summary");
   grid.append(
+    stat("Book", formatBook(path.equity), `Started at ${formatBook(path.start)}. Open lines are not in this figure.`, toneOf(path.equity - path.start)),
     stat(
       "Closed PnL",
       formatUsd(summary.closed_pnl_usd),
@@ -284,6 +324,7 @@ function structureCell(trade) {
   cell.append(el("span", "pf-struct", `${trade.structure} ×${trade.qty}`));
   const ticket = exactTicket(trade);
   if (deskCopy(ticket)) cell.append(el("span", "pf-ticket", deskCopy(ticket)));
+  if (Number.isFinite(Number(trade.ticket_usd))) cell.append(el("span", "pf-sub", `${formatBook(trade.ticket_usd)} ticket`));
   const lock = deskCopy(trade.ticket_lock);
   if (lock) cell.append(el("span", "pf-lock", lock));
   const notes = deskCopy(trade.notes);
@@ -302,9 +343,10 @@ function pxCell(value, extra, label) {
 }
 
 function tableBlock(journal) {
+  if (!journal.trades?.length) return el("p", "pf-empty", "No lines on this tab.");
   const scroll = el("div", "pf-scroll");
   const table = el("table", "pf-table");
-  const caption = el("caption", "", "Personal book");
+  const caption = el("caption", "", journal.trades?.length ? "Desk mock book" : "Desk mock book");
   const head = el("thead");
   const headRow = el("tr");
   for (const label of [
@@ -459,11 +501,112 @@ function openBlock(journal) {
   return wrap;
 }
 
+function curveBlock(journal) {
+  const path = equityPath(journal);
+  const wrap = el("section", "pf-curve");
+  wrap.setAttribute("aria-label", "Mock book equity");
+  const head = el("div", "pf-curve-head");
+  head.append(el("strong", "", "Book path"), el("span", "", `${formatBook(path.start)} start · closed tickets only`));
+  const values = path.points.map((point) => point.equity);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const span = max - min || 1;
+  const width = 640;
+  const height = 120;
+  const step = path.points.length > 1 ? width / (path.points.length - 1) : width;
+  const coords = path.points.map((point, index) => {
+    const x = index * step;
+    const y = height - 16 - ((point.equity - min) / span) * (height - 32);
+    return [x, y];
+  });
+  const line = coords.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", `Desk mock book from ${formatBook(path.start)} to ${formatBook(path.equity)}`);
+  const axis = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+  axis.setAttribute("points", `0,${height - 16} ${width},${height - 16}`);
+  axis.setAttribute("class", "pf-curve-axis");
+  const plot = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+  plot.setAttribute("points", line);
+  plot.setAttribute("class", "pf-curve-line");
+  svg.append(axis, plot);
+  for (const [x, y] of coords) {
+    const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    dot.setAttribute("cx", x.toFixed(1));
+    dot.setAttribute("cy", y.toFixed(1));
+    dot.setAttribute("r", "3.5");
+    dot.setAttribute("class", "pf-curve-dot");
+    svg.append(dot);
+  }
+  const meta = el("div", "pf-curve-meta");
+  meta.append(el("span", "", formatBook(path.start)), el("span", "", path.points.at(-1)?.label || ""), el("span", "", formatBook(path.equity)));
+  wrap.append(head, svg, meta);
+  return wrap;
+}
+
+function tabBlock(journal) {
+  const trades = journal.trades ?? [];
+  const openTrades = trades.filter((trade) => bookSide(trade) === "open");
+  const closedTrades = trades.filter((trade) => bookSide(trade) === "closed");
+  const panels = {
+    open: el("div", "pf-panel"),
+    closed: el("div", "pf-panel"),
+  };
+  panels.open.append(openBlock({ ...journal, trades: openTrades }), tableBlock({ ...journal, trades: openTrades }));
+  panels.closed.append(tableBlock({ ...journal, trades: closedTrades }));
+  const bar = el("div", "seg pf-tabs");
+  bar.setAttribute("role", "tablist");
+  bar.setAttribute("aria-label", "Open and closed");
+  const buttons = [
+    ["open", `Open · ${openTrades.length}`],
+    ["closed", `Closed · ${closedTrades.length}`],
+  ].map(([id, label]) => {
+    const button = el("button", "", label);
+    button.type = "button";
+    button.dataset.tab = id;
+    button.id = `pf-tab-${id}`;
+    button.setAttribute("role", "tab");
+    button.setAttribute("aria-controls", `pf-panel-${id}`);
+    return button;
+  });
+  const show = (id) => {
+    for (const button of buttons) {
+      const on = button.dataset.tab === id;
+      button.classList.toggle("is-on", on);
+      button.setAttribute("aria-selected", String(on));
+      button.tabIndex = on ? 0 : -1;
+    }
+    for (const [key, node] of Object.entries(panels)) {
+      node.hidden = key !== id;
+      node.id = `pf-panel-${key}`;
+      node.setAttribute("role", "tabpanel");
+      node.setAttribute("aria-labelledby", `pf-tab-${key}`);
+    }
+  };
+  bar.append(...buttons);
+  bar.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-tab]");
+    if (button) show(button.dataset.tab);
+  });
+  bar.addEventListener("keydown", (event) => {
+    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+    event.preventDefault();
+    const next = event.key === "ArrowRight" ? "closed" : "open";
+    show(next);
+    bar.querySelector(`[data-tab="${next}"]`)?.focus();
+  });
+  show(openTrades.length ? "open" : "closed");
+  const wrap = el("div", "pf-book");
+  wrap.append(bar, panels.open, panels.closed);
+  return wrap;
+}
+
 export function renderPortfolio(root, journal) {
   const board = el("section", "pf-board");
   board.id = "journal-board";
-  board.setAttribute("aria-label", "Portfolio journal");
-  board.append(summaryBlock(journal), weekBlock(journal), openBlock(journal), tableBlock(journal));
+  board.setAttribute("aria-label", "Desk mock book");
+  board.append(summaryBlock(journal), curveBlock(journal), weekBlock(journal), tabBlock(journal));
   const basis = deskCopy(journal.summary?.sources_note);
   if (basis) board.append(el("p", "pf-basis", basis));
   root.replaceChildren(board);

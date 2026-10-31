@@ -7,6 +7,7 @@
  */
 
 import { TONE, drawDualLine, mountPlot, svg } from "./chart-svg.js";
+import { onDeskReady } from "./when-mounted.js";
 
 const DATA = `${import.meta.env?.BASE_URL ?? "/"}data/vault/spot-vol-beta/`;
 
@@ -468,7 +469,7 @@ async function load(card) {
 }
 
 if (typeof document !== "undefined") {
-  document.addEventListener("vault-open", () => {
+  onDeskReady(() => {
     const card = document.getElementById("spot-vol-beta");
     if (!card || card.dataset.ready === "1") return;
     card.dataset.ready = "1";
