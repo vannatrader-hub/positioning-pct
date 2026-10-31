@@ -8,6 +8,7 @@
 
 import { TONE, drawDualLine, mountPlot, svg } from "./chart-svg.js";
 import { onDeskReady } from "./when-mounted.js";
+import { isFamilySurface } from "./family-entry.js";
 
 const DATA = `${import.meta.env?.BASE_URL ?? "/"}data/vault/spot-vol-beta/`;
 
@@ -168,17 +169,23 @@ export function signalAgreement(gauge, estimate, level = SIGNAL) {
   return "Gauge and desk estimate are both below 2.";
 }
 
-export function spotVolTip(point, level = SIGNAL) {
+export function spotVolTip(point, level = SIGNAL, name = "Vol Stress") {
   const lines = [
     formatSession(point.date),
-    `Spot Vol Beta ${formatSvb(point.svb)}`,
-    `SPX ${formatSpx(point.spx)}`,
+    `${name} ${formatSvb(point.svb)}`,
+    `S&P 500 ${formatSpx(point.spx)}`,
   ];
   if (signalOn(point.svb, level)) lines.push("Possible bottom");
   if (Number.isFinite(point.vixCloseMove) && point.vixCloseMove >= 2) {
     lines.push(`Formal vol event · VIX ${formatPts(point.vixCloseMove)}`);
   }
   return lines;
+}
+
+export function sessionPlain(spx, spxPct) {
+  const pct = formatPct(spxPct);
+  const move = spxPct < 0 ? `down ${pct.replace("−", "")}` : spxPct > 0 ? `up ${pct.replace("+", "")}` : "unchanged";
+  return `S&P 500 at ${formatSpx(spx)}, ${move} on the session.`;
 }
 
 export const ORIGIN_LABEL = {
@@ -278,6 +285,7 @@ export function readout(latest, series) {
     agreement: signalAgreement(latest.gauge, estimate, level),
     inputs: `UV Δ ${formatSvb(latest.uvDelta)} · SPX ${formatPct(latest.spxPct)}`,
     session: `SPX ${formatSpx(latest.spx)} · ${formatPct(latest.spxPct)} on the session`,
+    sessionPlain: sessionPlain(latest.spx, latest.spxPct),
     gaugeOn,
     estimateOn: signalOn(estimate, level),
     feed: latest.live ? "Live gauge" : latest.feedLabel,
@@ -310,6 +318,24 @@ function swatch(className) {
   return mark;
 }
 
+function publicBody(series, view) {
+  const level = series.signal ?? SIGNAL;
+  const body = el("div", "pchart-body");
+  const read = el("div", "svb-read is-public");
+  const num = el("p", view.estimateOn ? "svb-est is-signal" : "svb-est", view.estimate);
+  num.dataset.svbEstimate = view.estimate;
+  num.setAttribute("aria-label", `Vol Stress ${view.estimate}`);
+  const figure = el("div", "svb-public-figure");
+  figure.append(
+    num,
+    statusPill(view.estimateOn ? "At or above 2 · possible bottom" : "Below 2", view.estimateOn ? "signal" : "mid"),
+    el("p", "svb-session", view.sessionPlain),
+  );
+  read.append(figure);
+  body.append(read, closePlate(series, level));
+  return body;
+}
+
 function svbBody(series, view) {
   const read = el("div", "svb-read");
   const primary = el("div", "svb-hero");
@@ -317,9 +343,9 @@ function svbBody(series, view) {
   instrument.append(svbDial(Number(view.gauge), series.signal ?? SIGNAL));
   const gauge = el("p", view.gaugeOn ? "pct svb-gauge is-signal" : "pct svb-gauge", view.gauge);
   gauge.dataset.svbGauge = view.gauge;
-  gauge.setAttribute("aria-label", `Spot Vol Beta ${view.gauge}`);
+  gauge.setAttribute("aria-label", `Gauge ${view.gauge}`);
   instrument.append(gauge);
-  primary.append(instrument, el("p", "pct-kicker", "Spot Vol Beta"), statusPill(view.gaugeOn ? "Possible bottom" : "Below 2", view.gaugeOn ? "signal" : "mid"), el("p", "svb-session", view.session));
+  primary.append(instrument, el("p", "pct-kicker", "Gauge"), statusPill(view.gaugeOn ? "Possible bottom" : "Below 2", view.gaugeOn ? "signal" : "mid"), el("p", "svb-session", view.session));
 
   const desk = el("div", "svb-desk");
   const est = el("p", view.estimateOn ? "svb-est is-signal" : "svb-est", view.estimate);
@@ -334,26 +360,31 @@ function svbBody(series, view) {
   body.append(read, el("p", "svb-agree", view.agreement));
   if (view.formalWait) body.append(el("p", "svb-wait", view.formalWait));
 
+  body.append(closePlate(series, series.signal ?? SIGNAL), closesBlock(series), el("p", "svb-note", series.note), el("p", "svb-close", view.closeNote));
+  return body;
+}
+
+function closePlate(series, level) {
   const plate = el("div", "svb-plot");
   const legend = el("div", "legend");
   const line = el("span");
-  line.append(swatch("svb-sw-line"), document.createTextNode("Spot Vol Beta"));
+  line.append(swatch("svb-sw-line"), document.createTextNode("Vol Stress"));
   const spx = el("span");
   spx.append(swatch("svb-sw-spx"), document.createTextNode("SPX"));
   const band = el("span");
-  band.append(swatch("svb-sw-band"), document.createTextNode("≥ 2 possible bottom"));
+  band.append(swatch("svb-sw-band svb-sw-event"), document.createTextNode("≥ 2 possible bottom"));
   legend.append(line, spx, band);
   const host = el("div", "pc-plot");
   host.id = "svb-plot";
   plate.append(legend, host);
+  plate.dataset.host = "1";
 
-  const signals = series.points.filter((point) => signalOn(point.svb, series.signal));
+  const signals = series.points.filter((point) => signalOn(point.svb, level));
   const list = el("ul", "visually-hidden");
-  for (const point of signals) list.append(el("li", "", spotVolTip(point, series.signal).join(", ")));
+  for (const point of signals) list.append(el("li", "", spotVolTip(point, level).join(", ")));
   if (!signals.length) list.append(el("li", "", "No close at or above 2 in this series."));
-
-  body.append(plate, list, closesBlock(series), el("p", "svb-note", series.note), el("p", "svb-close", view.closeNote));
-  return { body, host };
+  plate.append(list);
+  return plate;
 }
 
 function closeFigure(label, value, on, note) {
@@ -366,7 +397,7 @@ function closeFigure(label, value, on, note) {
 function closesBlock(series) {
   const rows = closeRows(series, 10);
   const wrap = el("section", "svb-closes");
-  wrap.setAttribute("aria-label", "Spot Vol Beta session closes");
+  wrap.setAttribute("aria-label", "Session closes");
   const head = el("div", "svb-closes-head");
   head.append(el("h3", "", "Session closes"), el("p", "svb-closes-hint", "One close per session, written after the cash close. The gauge above can move through the day; only closes land here."));
   wrap.append(head);
@@ -377,7 +408,7 @@ function closesBlock(series) {
   const last = rows[0];
   const latest = el("div", "svb-close-latest");
   latest.append(
-    closeFigure("Spot Vol Beta · gauge close", last.gauge, last.gaugeOn, "Primary gauge"),
+    closeFigure("Gauge close", last.gauge, last.gaugeOn, "Gauge"),
     closeFigure(`${series.formulaLabel ?? FORMULA_LABEL} close`, last.estimate, last.estimateOn, last.estimate === "—" ? "Inputs not recorded for this close" : series.formula),
   );
   const stamp = el("div", "svb-close-stamp");
@@ -432,7 +463,10 @@ function closesBlock(series) {
 function chartSpec(series) {
   const level = series.signal ?? SIGNAL;
   return {
-    label: `Spot Vol Beta daily closes, ${formatSession(series.points[0].date)} through ${formatSession(series.points.at(-1).date)}. Last close ${formatSvb(series.points.at(-1).svb)}. SPX behind the line. Band at ${formatSvb(level)}.`,
+    label: `Vol Stress daily closes, ${formatSession(series.points[0].date)} through ${formatSession(series.points.at(-1).date)}. Last close ${formatSvb(series.points.at(-1).svb)}. S&P 500 on its own scale. Dashed line at ${formatSvb(level)}.`,
+    axisLabel: "Vol Stress",
+    overlayLabel: "SPX",
+    endLabel: `${formatSession(series.points.at(-1).date).replace(/, \d{4}$/, "")} · ${formatSvb(series.points.at(-1).svb)}`,
     labels: axisTicks(series.points),
     primary: series.points.map((point) => point.svb),
     overlay: series.points.map((point) => point.spx),
@@ -461,9 +495,11 @@ async function load(card) {
   if (series.sku !== "spot-vol-beta" || !Array.isArray(series.points) || series.points.length < 2) throw new Error("series is not a close line");
   if (typeof latest.gauge !== "number" || typeof latest.uvDelta !== "number" || typeof latest.spxPct !== "number") throw new Error("gauge is missing inputs");
   const view = readout(latest, series);
-  const { body, host } = svbBody(series, view);
-  card.querySelector("#svb-asof").textContent = `${latest.asOfLabel} · ${view.feed}`;
+  const family = isFamilySurface();
+  const body = family ? svbBody(series, view) : publicBody(series, view);
+  card.querySelector("#svb-asof").textContent = family ? `${latest.asOfLabel} · ${view.feed}` : latest.asOfLabel;
   card.querySelector("#svb-body").replaceChildren(body);
+  const host = body.querySelector("#svb-plot");
   const paint = mountPlot(host, drawDualLine);
   paint(chartSpec(series));
 }
@@ -476,7 +512,7 @@ if (typeof document !== "undefined") {
     load(card).catch((error) => {
       console.error(error);
       const status = card.querySelector("#svb-status");
-      if (status) status.textContent = "Spot Vol Beta did not load. Refresh to try again.";
+      if (status) status.textContent = "Vol Stress did not load. Refresh to try again.";
     });
   });
 }

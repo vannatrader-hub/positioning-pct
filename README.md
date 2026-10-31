@@ -10,7 +10,7 @@ Public sources are bank labels only: JPM, Morgan Stanley, BoA, GS, and a desk co
 
 Two surfaces, switched from the `Dashboard | Vault` control in every topbar. `/insight/` only tells the reader the old surface moved, then opens the Dashboard.
 
-- Dashboard (`/`). Public, no login. Positioning hub, the Soft ↔ Crowded desk, the six charts, a New Today chip, and the vol wall widgets on the page: Spot Vol Beta, Credit Spread Regime, the MAG7 Oscillator, NY Summation, and Nasdaq Summation. Options Flow, Spotlights, and Portfolio are not on this surface. SPX Levels is an unlinked placeholder.
+- Dashboard (`/`). Public, no login. Positioning hub, the Soft ↔ Crowded desk, the six charts, trade ideas, a New Today chip, and the vol wall widgets on the page: Vol Stress, Credit Spread Regime, the MAG7 Oscillator, NY and Nasdaq Summation, NY Highs − Lows, and NY Advance − Decline. Options Flow, Spotlights, and Portfolio are not on this surface. SPX Levels is an unlinked placeholder.
 - Vault (`/vault/`). Behind a sign-in wall. Signed out, the page shows one centered card ("Sign in to open Vault", email and password fields, a disabled "Create account · Coming soon", and a link back to Dashboard) and nothing else. Signed in, it has everything on the Dashboard plus Options Flow (`/options-flow/`, Shopping List, Spotlights, and the scorecard), the Desk mock book (`/vault/portfolio/`), the Soft ↔ Crowded weekly pack (`/vault/soft-crowded/`), and the desk-day archive (`/vault/archive/`). The full wall page remains at `/vault/vol-credit-momentum/`. Three preview tiles open short Coming soon notes (`/coming-soon/`). It has its own darker theme scoped under `body.is-vault`. Sign-in is email and password for allowlisted emails only (`src/vault-allowlist.js`), and there is no checkout. See [Vault sign-in](#vault-sign-in).
 
 **Access model:**
@@ -29,7 +29,8 @@ Site nav, in order: Positioning | Options Flow | SPX Levels.
   - Soft ↔ Crowded (`/positioning/desk/#sectors`). Eleven Select Sector cards grouped into four columns on the Soft ↔ Crowded scale (Extreme soft, Soft, Mid, Crowded) and a soft-to-crowded map, with JPM the default house for sector bars.
   - Credit (`/positioning/desk/#credit`). CDX, BBB minus AAA, and high yield versus investment grade.
   - Options & Soft Vol (`/positioning/desk/#vol`). The Soft Vol ↔ Stretched gauge, customer calls versus puts, and the vol panic index.
-  - Full desk (`/positioning/desk/`). The desk at a glance plus all ten categories, source chips, the history slider, and a Study desk that only tabs sectors meeting its criteria (JPM under 0.25 or 0.75 and up). Old `/positioning/?source=…` and `/positioning/#section` links forward here.
+  - Full desk (`/positioning/desk/`). The desk at a glance plus all ten categories, source chips, the history slider, and Trade Ideas for sectors that are very soft or very crowded. Old `/positioning/?source=…` and `/positioning/#section` links forward here.
+  - Trade ideas (`/positioning/ideas/`). This week's Soft ↔ Crowded read and a short idea under each chart, on the public Dashboard. The Vault pack keeps the archived weeks.
   - Under the four cards, a Charts row of six chart calling cards. Each has a live mini preview and fact line and opens its chart.
 - Positioning charts (`/positioning/charts/`). Six reads redrawn as interactive Soft ↔ Crowded charts, sharing one eight-week history slider. Tapping a week on any chart moves every chart to that week. Each chart carries its house chip and basis, and links back to its desk section:
   - Soft Vol ↔ Stretched VIX (`#soft-vol`). A semicircle gauge and weekly residual columns, with house chips and a Compare houses overlay.
@@ -104,13 +105,13 @@ The page opens on the latest week; `?week=2026-W42` (or `?week=2026-10-16`) open
 
 The desk-day archive (`/vault/archive/`, `src/vault-archive.js`) is an index over data already in the build: one Soft ↔ Crowded entry per committed Desk Friday (linking to the pack when the week has one, else to that week on the Dashboard) and one entry per New Today desk day from `public/data/new-today.json`, grouped by ISO week, newest first. Search takes a date (`2026-10-28`, `Oct 28`, `10/28`), an ISO week (`W44`, `2026-W44`), or words (all must match; a desk day is cut to its matching lines), and the filter narrows to packs or New Today. A week past the last committed Friday says its print is not committed yet. The query stays in the URL (`?q=W44&kind=day`). New Today on Dashboard shows only the current day.
 
-The Vol · Credit · Momentum widgets render on the public Dashboard and again on `/vault/vol-credit-momentum/`. Five cards in order: Spot Vol Beta and Credit Spread Regime side by side (stacked under 1360px), then the MAG7 Oscillator, NY Summation, and Nasdaq Summation, each across the full width.
+The Vol · Credit · Momentum widgets render on the public Dashboard and again on `/vault/vol-credit-momentum/`. Vol Stress is the desk number. At or above 2 is a possible bottom. The session chart plots that close with the S&P 500 on its own scale, and marks closes at or above 2. The gauge and the longer close read stay off the public page. NY Highs − Lows and NY Advance − Decline sit under the summation cards.
 
-Spot Vol Beta (`src/vault-svb.js`) reads `public/data/vault/spot-vol-beta/`. `latest.json` is the gauge and the inputs for the desk estimate `UV_Δ − (−0.70 × SPX%)`; the card shows the gauge first and the estimate second. `series.json` is the daily close line, one point per session, appended at the close. SPX sits behind that line, and a band marks closes at or above 2. The committed gauge is not a live feed.
+Vol Stress (`src/vault-svb.js`) reads `public/data/vault/spot-vol-beta/`. `latest.json` holds the gauge and the inputs for the desk number. `series.json` is one close per session, appended at the close. The committed print is not a live feed.
 
 Under the plate, `Session closes` shows the latest close of both numbers, labeled `Spot Vol Beta · gauge close` and `desk estimate close`, and a table of the last ten sessions with SPX, SPX %, the VIX close move, the close read, and who entered it (`Seeded` or `Close routine`). The vol event rule is the same as the gauge band: a gauge close at 2 or more is in the band, and a formal vol event is close-based (VIX up 2 points or more close to close). The ten closes through Oct 29, 2026 are seeded with their desk estimate inputs.
 
-A weekday routine (about 3:55 PM CT, after the cash and VIX closes) appends one close:
+A weekday routine (about 3:30 PM CT, after the cash close) appends one close:
 
 ```bash
 npm run svb:close -- --date 2026-11-02 --svb 1.92 --spx 6801.25 --uv-delta 2.10 --vix-move 1.4

@@ -17,6 +17,16 @@
     {
       "id": "nasi",
       "file": "nasi.json"
+    },
+    {
+      "id": "nyhl",
+      "file": "nyhl.json",
+      "asOf": "2026-10-30"
+    },
+    {
+      "id": "nyad",
+      "file": "nyad.json",
+      "asOf": "2026-10-30"
     }
   ]
 }

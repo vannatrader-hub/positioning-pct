@@ -7,6 +7,7 @@
  */
 
 import { drawLines, drawResidual, drawSectors, mountPlot } from "./chart-svg.js";
+import { onDeskReady } from "./when-mounted.js";
 
 const DATA = `${import.meta.env.BASE_URL}data/vault/soft-crowded/`;
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -138,12 +139,19 @@ function readBlock(title, text) {
   return block;
 }
 
-function readSection(week) {
+function deskRoot(pub) {
+  return pub ? ".." : "../../positioning";
+}
+
+function readSection(week, pub = false) {
   const section = el("section", "desk-section");
   section.id = "read";
   const head = el("div", "section-head");
   const row = el("div", "section-title-row");
-  row.append(el("h2", "", "One-page read"), el("span", "section-count", `${week.houseLabel} · ${week.windowWeeks}-week window`));
+  row.append(
+    el("h2", "", pub ? "This week" : "One-page read"),
+    el("span", "section-count", `${week.houseLabel} · ${week.windowWeeks}-week window`),
+  );
   head.append(row, el("p", "overview-headline", week.read.headline));
   const sheet = el("div", "pack-sheet");
   sheet.append(el("p", "pack-stance", week.read.stance));
@@ -166,7 +174,7 @@ function readSection(week) {
   return section;
 }
 
-function sectorSection(week) {
+function sectorSection(week, pub = false) {
   const section = el("section", "desk-section");
   section.id = "sectors";
   const printed = week.buckets.reduce((sum, bucket) => sum + bucket.sectors.length, 0);
@@ -177,7 +185,7 @@ function sectorSection(week) {
     el("span", "section-count", `${printed} sectors · ${week.houseLabel} · frozen ${shortDate(week.week)}`),
   );
   const desk = el("a", "section-link", "Open this week on the Desk →");
-  desk.href = `../../positioning/desk/?source=${week.house}&week=${week.week}#sectors`;
+  desk.href = `${deskRoot(pub)}/desk/?source=${week.house}&week=${week.week}#sectors`;
   row.append(desk);
   head.append(
     row,
@@ -337,14 +345,14 @@ function chartArticle(ref) {
   return block;
 }
 
-function chartBlock(ref, index, paints) {
+function chartBlock(ref, index, paints, pub = false) {
   const block = el("article", "pack-chart");
   block.id = `chart-${ref.id}`;
   const head = el("header", "pack-chart-head");
   const kicker = el("div", "tile-kicker");
   kicker.append(el("span", "tile-num", String(index + 1).padStart(2, "0")), el("span", `house h-${ref.house}`, ref.houseLabel), el("span", "pack-chart-nav", ref.nav));
   const open = el("a", "section-link", "Open on the Desk →");
-  open.href = `../../positioning/charts/#${ref.id}`;
+  open.href = `${deskRoot(pub)}/charts/#${ref.id}`;
   head.append(kicker, el("h3", "", ref.title), el("p", "chart-tile-fact", ref.fact), open);
   const snap = ref.snapshot;
   const { plate, paint } = frozenPlot(snap, ref.title);
@@ -360,24 +368,26 @@ function chartBlock(ref, index, paints) {
   return block;
 }
 
-function chartSection(week, paints) {
+function chartSection(week, paints, pub = false) {
   const section = el("section", "desk-section");
   section.id = "charts";
   const head = el("div", "section-head");
   const row = el("div", "section-title-row");
   const all = el("a", "section-link", "Open all six on the Desk →");
-  all.href = "../../positioning/charts/";
-  row.append(el("h2", "", "Charts"), el("span", "section-count", `Batch ${week.charts.batch} · six charts`), all);
+  all.href = `${deskRoot(pub)}/charts/`;
+  row.append(el("h2", "", pub ? "Trade ideas" : "Charts"), el("span", "section-count", `Batch ${week.charts.batch} · six charts`), all);
   head.append(
     row,
     el(
       "p",
       "hint",
-      `The six Positioning charts, frozen at the week of ${shortDate(week.week)}. The article under each chart is the week's framing: who is crowded, who is leaning the other way, and what breaks the read.`,
+      pub
+        ? `One idea per chart for the week of ${shortDate(week.week)}. Hover the chart. The note under it says who is crowded, who is leaning the other way, and what breaks the idea.`
+        : `The six Positioning charts, frozen at the week of ${shortDate(week.week)}. The article under each chart is the week's framing: who is crowded, who is leaning the other way, and what breaks the read.`,
     ),
   );
   const list = el("div", "chart-tiles");
-  week.charts.refs.forEach((ref, index) => list.append(chartBlock(ref, index, paints)));
+  week.charts.refs.forEach((ref, index) => list.append(chartBlock(ref, index, paints, pub)));
   section.append(head, list);
   return section;
 }
@@ -465,17 +475,18 @@ async function load(root) {
     throw new Error("week document is missing pack fields");
   }
   const paints = [];
-  root.replaceChildren(weekBar(index, week), pageHead(index, week), readSection(week), sectorSection(week), chartSection(week, paints));
+  const pub = root.dataset.public === "1";
+  root.replaceChildren(weekBar(index, week), pageHead(index, week), readSection(week, pub), sectorSection(week, pub), chartSection(week, paints, pub));
   paints.forEach((paint) => paint());
-  document.title = `${week.title} · Vault · Positioning %.`;
+  document.title = pub ? `Trade ideas · ${week.title} · Positioning %.` : `${week.title} · Vault · Positioning %.`;
 }
 
-document.addEventListener("vault-open", () => {
-  const root = document.getElementById("pack");
+onDeskReady(() => {
+  const root = document.getElementById("pack") || document.getElementById("trade-ideas");
   if (!root || root.dataset.ready === "1") return;
   root.dataset.ready = "1";
   load(root).catch((error) => {
     console.error(error);
-    root.replaceChildren(el("p", "hint", "The week did not load. Refresh to try again."));
+    root.replaceChildren(el("p", "hint", "This week did not load. Refresh to try again."));
   });
 });

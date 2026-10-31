@@ -1,5 +1,5 @@
 /**
- * Study desk. Marks come from a committed JSON snapshot in public/data, so the
+ * Trade Idea. Marks come from a committed JSON snapshot in public/data, so the
  * static site never holds broker keys. Copy names legs as short or long and
  * never prompts an order or a size.
  */
@@ -64,7 +64,7 @@ export function leapMath(leap) {
   return { premium, breakeven };
 }
 
-/** Which structures and chains each side of the study desk reads. */
+/** Which structures and chains each side of the trade idea reads. */
 export const STRUCTURES = {
   soft: { spread: "bullPut", leap: "callLeap", strip: "putStrip", leapRows: "leapCalls" },
   crowded: { spread: "bearCall", leap: "putLeap", strip: "callStrip", leapRows: "leapPuts" },

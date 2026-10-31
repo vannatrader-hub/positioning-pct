@@ -250,28 +250,29 @@ export function drawLines(root, spec, width, height) {
 
 /**
  * Daily line with a second series on its own scale, drawn behind the first.
- * spec: { labels, primary, overlay, signal, signalLabel, primaryColor, signalColor,
- * overlayColor, overlayFill, bandFill, markFill, grid, tip(index), label }
+ * spec: { labels, primary, overlay, signal, axisLabel, overlayLabel, endLabel,
+ * primaryColor, signalColor, overlayColor, grid, tip(index), label }
+ * The ≥ signal level is a dashed line plus a short hatched chip on those dates.
  * Hover uses the same crosshair tooltip as the weekly lines.
  */
 export function drawDualLine(root, spec, width, height) {
   const { labels, primary, overlay } = spec;
   const n = labels.length;
-  const narrow = width < 520;
-  const pad = { top: 16, right: narrow ? 12 : 62, bottom: 28, left: 42 };
+  const narrow = width < 360;
+  const pad = { top: 22, right: narrow ? 16 : 62, bottom: 36, left: 46 };
   const plotW = width - pad.left - pad.right;
   const plotH = height - pad.top - pad.bottom;
   const signal = spec.signal ?? 2;
   const pMin = Math.min(...primary);
   const pMax = Math.max(...primary);
-  const span = Math.max(pMax - pMin, signal - pMin, 1);
-  const lo = Math.min(0, pMin) - span * 0.08;
-  const hi = Math.max(signal, pMax) + span * 0.16;
+  const span = Math.max(pMax - pMin, 0.8);
+  const lo = Math.min(pMin, signal) - span * 0.14;
+  const hi = Math.max(pMax, signal) + span * 0.16;
   const oMin = Math.min(...overlay);
   const oMax = Math.max(...overlay);
   const oSpan = Math.max(oMax - oMin, 1);
-  const oLo = oMin - oSpan * 0.16;
-  const oHi = oMax + oSpan * 0.16;
+  const oLo = oMin - oSpan * 0.12;
+  const oHi = oMax + oSpan * 0.12;
   const x = (index) => pad.left + (n === 1 ? plotW / 2 : (index / (n - 1)) * plotW);
   const y = (value) => pad.top + (1 - (value - lo) / (hi - lo)) * plotH;
   const yOverlay = (value) => pad.top + (1 - (value - oLo) / (oHi - oLo)) * plotH;
@@ -280,40 +281,37 @@ export function drawDualLine(root, spec, width, height) {
   const primaryColor = spec.primaryColor ?? TONE.ink;
   const signalColor = spec.signalColor ?? "#9a6b12";
   const overlayColor = spec.overlayColor ?? OVERLAY_COLORS[0];
+  const hatchId = `svb-hatch-${Math.round(width)}-${Math.round(height)}`;
+
+  root.append(
+    svg("text", { x: pad.left, y: 13, class: "pc-axis svb-axis-name" }, spec.axisLabel ?? "Vol Stress"),
+    svg("text", { x: right, y: 13, "text-anchor": "end", class: "pc-axis svb-axis-name", fill: overlayColor }, spec.overlayLabel ?? "SPX"),
+  );
+
+  const defs = svg("defs");
+  const pattern = svg("pattern", { id: hatchId, width: 4, height: 4, patternUnits: "userSpaceOnUse" });
+  pattern.append(svg("path", { d: "M-1 5 L5 -1 M-1 1 L1 -1", stroke: signalColor, "stroke-width": 1 }));
+  defs.append(pattern);
+  root.append(defs);
 
   const overlayPts = overlay.map((value, index) => [x(index), yOverlay(value)]);
   const overlayPath = overlayPts.map(([px, py]) => `${px.toFixed(1)},${py.toFixed(1)}`).join(" ");
   root.append(
     svg("polygon", {
       points: `${overlayPts[0][0].toFixed(1)},${bottom} ${overlayPath} ${overlayPts[overlayPts.length - 1][0].toFixed(1)},${bottom}`,
-      fill: spec.overlayFill ?? overlayColor,
-      opacity: spec.overlayFill ? 1 : 0.12,
+      fill: overlayColor,
+      opacity: 0.06,
     }),
     svg("polyline", {
       points: overlayPath,
       fill: "none",
       stroke: overlayColor,
-      "stroke-width": 1.6,
+      "stroke-width": 1.35,
       opacity: 0.55,
       "stroke-linejoin": "round",
       "stroke-linecap": "round",
     }),
   );
-
-  const bandTop = y(hi);
-  const bandBottom = y(signal);
-  if (bandBottom > bandTop) {
-    root.append(svg("rect", { x: pad.left, y: bandTop, width: plotW, height: bandBottom - bandTop, fill: spec.bandFill ?? "rgba(245, 196, 81, 0.34)" }));
-  }
-
-  const step = n === 1 ? 8 : plotW / (n - 1);
-  primary.forEach((value, index) => {
-    if (value < signal) return;
-    const markW = Math.max(4, step * 0.72);
-    const left = Math.max(pad.left, x(index) - markW / 2);
-    const markRight = Math.min(right, left + markW);
-    root.append(svg("rect", { x: left, y: pad.top, width: markRight - left, height: plotH, fill: spec.markFill ?? "rgba(245, 196, 81, 0.42)" }));
-  });
 
   const ticks = niceTicks(lo, hi, Math.max(3, Math.round(plotH / 52)));
   for (const tick of ticks) {
@@ -339,10 +337,28 @@ export function drawDualLine(root, spec, width, height) {
   }
 
   const gy = y(signal);
-  root.append(svg("line", { x1: pad.left, x2: right, y1: gy, y2: gy, stroke: signalColor, "stroke-width": 1.25, "stroke-dasharray": "5 4" }));
-  if (bandBottom - bandTop > 18) {
-    root.append(svg("text", { x: pad.left + 8, y: bandTop + 13, class: "pc-guide svb-signal", fill: signalColor }, spec.signalLabel ?? "≥ 2"));
-  }
+  root.append(svg("line", { x1: pad.left, x2: right, y1: gy, y2: gy, stroke: signalColor, "stroke-width": 1.15, "stroke-dasharray": "5 4" }));
+
+  primary.forEach((value, index) => {
+    if (value < signal) return;
+    const cx = x(index);
+    const cy = y(value);
+    const chip = 26;
+    const top = Math.max(pad.top, Math.min(cy, gy) - 2);
+    const chipH = Math.max(10, Math.min(chip, Math.abs(cy - gy) + 8));
+    root.append(
+      svg("rect", {
+        x: cx - 3,
+        y: top,
+        width: 6,
+        height: chipH,
+        fill: `url(#${hatchId})`,
+        stroke: signalColor,
+        "stroke-width": 0.6,
+        rx: 1,
+      }),
+    );
+  });
 
   const linePts = primary.map((value, index) => [x(index), y(value)]);
   root.append(
@@ -350,7 +366,7 @@ export function drawDualLine(root, spec, width, height) {
       points: linePts.map(([px, py]) => `${px.toFixed(1)},${py.toFixed(1)}`).join(" "),
       fill: "none",
       stroke: primaryColor,
-      "stroke-width": 2.15,
+      "stroke-width": 2.6,
       "stroke-linejoin": "round",
       "stroke-linecap": "round",
     }),
@@ -410,21 +426,43 @@ export function drawDualLine(root, spec, width, height) {
     );
   }
 
+  const diamond = (cx, cy) => {
+    const r = 5.2;
+    return `${cx},${(cy - r).toFixed(1)} ${(cx + r).toFixed(1)},${cy} ${cx},${(cy + r).toFixed(1)} ${(cx - r).toFixed(1)},${cy}`;
+  };
   primary.forEach((value, index) => {
-    const on = value >= signal;
-    const last = index === n - 1;
-    if (!on && !last) return;
+    if (value < signal) return;
     root.append(
-      svg("circle", {
-        cx: x(index),
-        cy: y(value),
-        r: on ? 4.4 : 4.6,
-        fill: on ? "#f5c451" : "#fff",
-        stroke: on ? signalColor : primaryColor,
-        "stroke-width": 1.8,
+      svg("polygon", {
+        points: diamond(x(index), y(value)),
+        fill: "#f5c451",
+        stroke: "#3d2e08",
+        "stroke-width": 1.2,
       }),
     );
   });
+  const lastIndex = n - 1;
+  const lastX = x(lastIndex);
+  const lastY = y(primary[lastIndex]);
+  root.append(
+    svg("circle", {
+      cx: lastX,
+      cy: lastY,
+      r: 7.2,
+      fill: "none",
+      stroke: primaryColor,
+      "stroke-width": 2.4,
+    }),
+  );
+  if (spec.endLabel) {
+    const labelW = spec.endLabel.length * 6.4 + 10;
+    const lx = Math.max(pad.left + 4, Math.min(lastX - 8, right - labelW));
+    const ly = Math.min(bottom - 6, lastY + 20);
+    root.append(
+      svg("rect", { x: lx - labelW, y: ly - 12, width: labelW, height: 16, rx: 4, fill: "#ffffff", stroke: "rgba(11,13,18,0.12)" }),
+      svg("text", { x: lx - 5, y: ly, "text-anchor": "end", class: "pc-axis svb-end-label" }, spec.endLabel),
+    );
+  }
 
   const marks = labels.map((label, index) => ({ label, index })).filter((item) => item.label);
   const kept = [];

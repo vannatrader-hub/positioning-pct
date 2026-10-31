@@ -5,6 +5,7 @@
  */
 
 import { onDeskReady } from "./when-mounted.js";
+import { isFamilySurface } from "./family-entry.js";
 
 const BASE = `${import.meta.env?.BASE_URL ?? "/"}data/vault/`;
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -56,14 +57,17 @@ export function statusLines(files) {
   const { svbLatest, svbSeries, csr, mag7, breadth } = files;
   if (svbLatest && svbSeries) {
     const last = svbSeries.points.at(-1);
+    const family = isFamilySurface();
     lines.push({
       id: "spot-vol-beta",
-      name: "Spot Vol Beta",
+      name: family ? "Vol Stress" : "Vol Stress",
       date: svbLatest.closed ? svbLatest.session : last.date,
-      text: svbLatest.closed
-        ? `Session close ${dayLabel(svbLatest.session)} · gauge and desk estimate`
-        : `Gauge ${dayLabel(svbLatest.asOf)} ${ctTime(svbLatest.asOf)} · closes through ${dayLabel(last.date)}`,
-      note: svbLatest.live ? "Live gauge" : "Committed gauge, live feed not wired",
+      text: family
+        ? svbLatest.closed
+          ? `Session close ${dayLabel(svbLatest.session)} · gauge and Vol Stress`
+          : `Gauge ${dayLabel(svbLatest.asOf)} ${ctTime(svbLatest.asOf)} · closes through ${dayLabel(last.date)}`
+        : `Closes through ${dayLabel(last.date)}`,
+      note: family ? (svbLatest.live ? "Live gauge" : "Committed gauge, live feed not wired") : "Committed",
     });
   }
   if (csr) {
@@ -80,8 +84,17 @@ export function statusLines(files) {
     });
   }
   if (breadth) {
-    for (const [id, name] of [["nysi", "NY Summation"], ["nasi", "Nasdaq Summation"]]) {
-      lines.push({ id, name, date: breadth.asOf, text: `Daily closes through ${dayLabel(breadth.asOf)}`, note: "Committed series" });
+    const named = {
+      nysi: "NY Summation",
+      nasi: "Nasdaq Summation",
+      nyhl: "NY Highs − Lows",
+      nyad: "NY Advance − Decline",
+    };
+    for (const chart of breadth.charts ?? []) {
+      const name = named[chart.id];
+      if (!name) continue;
+      const date = chart.asOf || breadth.asOf;
+      lines.push({ id: chart.id, name, date, text: `Daily closes through ${dayLabel(date)}`, note: "Committed series" });
     }
   }
   return lines;
@@ -100,13 +113,21 @@ function el(tag, className, text) {
   return node;
 }
 
-const CARDS = [
-  ["spot-vol-beta", "Spot Vol Beta"],
-  ["credit-spread-regime", "Credit Spread Regime"],
-  ["mag7", "MAG7 Oscillator"],
-  ["nysi", "NY Summation"],
-  ["nasi", "Nasdaq Summation"],
-];
+function cardList() {
+  const cards = [...document.querySelectorAll("article.pchart[id]")].map((card) => [
+    card.id,
+    card.querySelector("h2")?.textContent?.trim() || card.id,
+  ]);
+  return cards.length
+    ? cards
+    : [
+        ["spot-vol-beta", "Vol Stress"],
+        ["credit-spread-regime", "Credit Spread Regime"],
+        ["mag7", "MAG7 Oscillator"],
+        ["nysi", "NY Summation"],
+        ["nasi", "Nasdaq Summation"],
+      ];
+}
 
 async function render(host) {
   const settle = (promise) => promise.then((value) => value, () => null);
@@ -120,7 +141,7 @@ async function render(host) {
   const lines = statusLines({ svbLatest, svbSeries, csr, mag7, breadth });
   const today = centralToday();
   const list = el("ol", "wall-asof-list");
-  for (const [id, name] of CARDS) {
+  for (const [id, name] of cardList()) {
     const line = lines.find((item) => item.id === id);
     const item = el("li");
     const link = el("a", "wall-asof-item");

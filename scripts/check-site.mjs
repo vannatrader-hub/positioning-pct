@@ -13,7 +13,7 @@ import { FAMILY_ALLOWLIST, FAMILY_ENTRY } from "../src/family-allowlist.js";
 import { PRODUCT_FEEDS } from "../src/product-feeds.js";
 import { errorCopy, nextStep } from "../src/vault-signin.js";
 import { NT_SECTIONS, PUBLIC_NT_SECTIONS, SOURCE_LABELS, deskDay, deskDayStart, deskWindow, itemsForDay, publicDeskItems, windowLabel } from "../src/new-today-window.js";
-import { BUY_LINE, DEFAULT_MONTHS, MAX_MONTHS, RANGES, breadthRead, dayChange, monthsBack, sma as breadthSma, windowStart as breadthWindowStart } from "../src/breadth.js";
+import { BUY_LINE, DEFAULT_MONTHS, MAX_MONTHS, RANGES, averageCrosses, averageOf, breadthRead, dayChange, monthsBack, sma as breadthSma, windowStart as breadthWindowStart } from "../src/breadth.js";
 import { CSR_PARAMS, biasOf, csrPanel, csrSeries, cycleOf, panelText, regimeOf as csrRegimeOf, zColor } from "../src/csr.js";
 import { DEFAULTS as MAG7_DEFAULTS, MAG7, TYPES as MAG7_TYPES, buildOscillator, fmtPct, momentum, panelAt, rangeStart, regimeOf, sma } from "../src/mag7-osc.js";
 import {
@@ -798,7 +798,7 @@ assert(itemsForDay(nt.items ?? [], "2026-10-29").length === 20, "Oct 29 desk day
 assert(itemsForDay(nt.items ?? [], "2026-10-30").length === 1, "Oct 30 desk day lists the morning research note");
 
 const nav = /<nav class="nav" aria-label="Pages">[\s\S]*?<\/nav>/;
-const dashboardPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "positioning/charts/index.html", "spx-levels/index.html", "new-today/index.html"];
+const dashboardPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "positioning/charts/index.html", "positioning/ideas/index.html", "vol/index.html", "spx-levels/index.html", "new-today/index.html"];
 const vaultSurface = {
   "vault/index.html": { dashboard: "../", vault: "./" },
   "vault/soft-crowded/index.html": { dashboard: "../../", vault: "../" },
@@ -1371,7 +1371,7 @@ assert(
 );
 assert(!/id="mag7"|mo-pane|wall-grid|wall-slot/.test(wallOutside), "wall content does not render outside the template");
 const wallOrder = [...wallTemplate.matchAll(/<article class="[^"]*" id="([^"]+)"/g)].map((match) => match[1]);
-assert(JSON.stringify(wallOrder) === '["spot-vol-beta","credit-spread-regime","mag7","nysi","nasi"]', `wall order ${wallOrder}`);
+assert(JSON.stringify(wallOrder) === '["spot-vol-beta","credit-spread-regime","mag7","nysi","nasi","nyhl","nyad"]', `wall order ${wallOrder}`);
 for (const id of ["mo-controls", "mo-pane", "mo-plot", "mo-legend", "mo-table", "mo-now", "mo-basis"]) assert(wallTemplate.includes(`id="${id}"`), `MAG7 card keeps #${id}`);
 assert(wallTemplate.includes("Caution +9") && wallTemplate.includes("Stretched −5"), "MAG7 key names the caution and stretched lines");
 assert(wallTemplate.includes("Bullish above +2") && wallTemplate.includes("Bearish below −2"), "MAG7 key names the ±2 signal thresholds");
@@ -1464,8 +1464,8 @@ const csrCard = wallTemplate.match(/<article class="[^"]*\bcsr-card\b[^"]*" id="
 assert(csrCard && !/wall-slot|is-soon|Not open yet/.test(csrCard), "Credit Spread Regime is a live card, not a Soon slot");
 for (const id of ["csr-frame", "csr-panel", "csr-legend", "csr-spx", "csr-asof"]) assert(csrCard.includes(`id="${id}"`), `Credit Spread Regime card keeps #${id}`);
 assert(csrCard.includes(">SPX overlay<"), "Credit Spread Regime card offers the SPX overlay");
-for (const zone of ["Low · Z under −1", "Normal · −1 to 1", "Elevated · 1 to 2", "Stress · 2 and up"]) assert(csrCard.includes(zone), `Credit Spread Regime key names ${zone}`);
-assert(/BAMLH0A0HYM2/.test(csrCard) && /BAMLC0A0CM/.test(csrCard) && /FRED/.test(csrCard) && /ICE BofA/.test(csrCard), "Credit Spread Regime cites FRED ICE BofA OAS");
+for (const zone of [">Low<", ">Normal<", ">Elevated<", ">Stress<"]) assert(csrCard.includes(zone), `Credit Spread Regime key names ${zone}`);
+assert(csrCard.includes("Source: Desk · Positioning %"), "Credit Spread Regime credits the desk");
 for (const file of ["src/csr.js", "src/csr-chart.js", "src/vault-csr.js", "scripts/fetch-csr.mjs", "public/data/vault/credit-spread-regime/csr.json"]) {
   const text = readFileSync(join(root, file), "utf8");
   assert(!/edge\s*tools|tradingview|\btdv\b|\bpine\b|pinescript|tv\.js|<iframe|©/i.test(text), `${file} carries third-party chart branding, script source, or an embed`);
@@ -1531,7 +1531,7 @@ assert(readFileSync(join(root, "src/vault-gate.js"), "utf8").includes('new Custo
 const svbJs = readFileSync(join(root, "src/vault-svb.js"), "utf8");
 assert(wallJs.includes('import "./vault-svb.js"'), "the wall mounts Spot Vol Beta");
 assert(svbJs.includes("data/vault/spot-vol-beta/") && svbJs.includes("drawDualLine") && svbJs.includes('new CustomEvent("vault-open")') === false, "Spot Vol Beta loads its series and does not mint a second gate event");
-assert(svbJs.includes("onDeskReady") && svbJs.includes("FORMULA") && svbJs.includes('getElementById("spot-vol-beta")'), "Spot Vol Beta mounts on the desk and keeps the formula");
+assert(svbJs.includes("onDeskReady") && svbJs.includes("FORMULA") && svbJs.includes("publicBody") && svbJs.includes('getElementById("spot-vol-beta")'), "Vol Stress mounts on the desk and keeps the formula off the public card");
 assert(svbJs.indexOf('"pct svb-gauge') < svbJs.indexOf('"svb-desk"'), "the gauge renders before the desk estimate");
 assert(css.includes(".svb-plot") && css.includes(".svb-gauge") && css.includes(".svb-desk"), "Spot Vol Beta has a gauge, a desk estimate, and a chart plate");
 assert(svbJs.includes('class: "svb-dial"') && svbJs.includes('class: "svb-needle"') && svbJs.includes("svbDial("), "Spot Vol Beta paints the live reading on a dial with a needle");
@@ -1594,7 +1594,7 @@ assert(marked.svb >= 2 && marked.vixCloseMove < 2, "October close is the band wi
 assert(quiet.svb === 1.84 && quiet.svb < 2, "the Oct 29 close sits under the band");
 assert(spotVolTip(formal).includes("Possible bottom") && spotVolTip(formal).some((line) => line.startsWith("Formal vol event")), "hover names the band and a formal vol event");
 assert(spotVolTip(marked).includes("Possible bottom") && !spotVolTip(marked).some((line) => line.startsWith("Formal")), "hover marks the band without calling a short VIX move formal");
-assert(!spotVolTip(quiet).includes("Possible bottom") && spotVolTip(quiet)[1] === "Spot Vol Beta 1.84" && spotVolTip(quiet)[2].startsWith("SPX "), "hover on a quiet close is the date, the beta, and SPX");
+assert(!spotVolTip(quiet).includes("Possible bottom") && spotVolTip(quiet)[1] === "Vol Stress 1.84" && spotVolTip(quiet)[2].startsWith("S&P 500 "), "hover on a quiet close is the date, Vol Stress, and the S&P 500");
 assert(svbSeries.points.some((point) => point.svb >= svbSeries.signal) && svbSeries.note.includes("possible-bottom") && svbSeries.note.includes("prior SPX close"), "the series can paint the band and carries the house read");
 const ticks = axisTicks(svbSeries.points).filter(Boolean);
 const lastTick = `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][Number(svbLast.date.slice(5, 7)) - 1]} ${Number(svbLast.date.slice(8))}`;
@@ -1646,7 +1646,19 @@ for (const [input, message] of [
   assert(threw, `buildClose refuses ${message}`);
 }
 const svbIndex = JSON.parse(readFileSync(join(svbDir, "index.json"), "utf8"));
-assert(svbIndex.routine?.cadence.includes("3:55 PM CT") && svbIndex.routine.command.startsWith("npm run svb:close"), "series index documents the weekday close routine");
+assert(svbIndex.routine?.cadence.includes("3:30 PM CT") && svbIndex.routine.command.startsWith("npm run svb:close"), "series index documents the weekday 3:30 CT close routine");
+const publicWall = readFileSync(join(root, "index.html"), "utf8");
+const volPage = readFileSync(join(root, "vol/index.html"), "utf8");
+assert(publicWall.includes(">Vol Stress</h2>") && publicWall.includes("NY Highs − Lows") && publicWall.includes("NY Advance − Decline"), "the public Dashboard wall names Vol Stress, NY highs−lows, and advance−decline");
+assert(!/Spot Vol Beta|UV_|desk estimate|svb-dial/i.test(publicWall + volPage), "the public wall hides the gauge, the formula, and the old name");
+assert(!publicWall.includes("on the day") && !publicWall.includes("MA(8)"), "the public wall does not ship the breadth status strip");
+const familyWall = readFileSync(join(root, "insight/vol/index.html"), "utf8");
+assert(FAMILY_ENTRY === "m4c8q" && familyWall.includes(`data-family-entry="${FAMILY_ENTRY}"`) && familyWall.includes('src="/src/hub-gate.js"') && familyWall.includes('id="vault-content"'), "the gauge stays on the family wall");
+assert(svbJs.includes("isFamilySurface") && svbJs.includes("publicBody") && svbJs.includes("svbDial("), "family renders the gauge and the public card renders the desk number");
+assert(readFileSync(join(root, "positioning/desk/index.html"), "utf8").includes(">Trade Idea</h2>"), "the public desk names Trade Idea");
+assert(!readFileSync(join(root, "positioning/desk/index.html"), "utf8").includes("Study desk"), "Study desk is renamed on the public desk");
+const ideasPage = readFileSync(join(root, "positioning/ideas/index.html"), "utf8");
+assert(viteConfig.includes('"positioning/ideas/index.html"') && ideasPage.includes('id="pack"') && ideasPage.includes('data-public="1"'), "trade ideas render on the public Dashboard");
 validatePack(svbSchema, svbCloseDef, svbIndex.routine.example, "svb.index.routine.example");
 assert(svbIndex.routine.example.origin === "close-routine" && svbIndex.routine.example.estimate.value === deskEstimate(svbIndex.routine.example.estimate.uvDelta, svbIndex.routine.example.estimate.spxPct), "routine example is a valid close");
 const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
@@ -1669,14 +1681,14 @@ assert(monthsBack("2026-10-29", 12) === "2025-10-29" && monthsBack("2026-03-31",
 const breadthDir = join(root, "public/data/vault/breadth");
 const breadthIndex = JSON.parse(readFileSync(join(breadthDir, "index.json"), "utf8"));
 assert(breadthIndex.period === "1D" && breadthIndex.defaultRangeMonths === 12 && breadthIndex.maxRangeMonths === 120, "wall index: daily, 1Y default, 10Y range");
-assert(JSON.stringify(breadthIndex.charts.map((chart) => chart.id)) === '["nysi","nasi"]' && breadthIndex.overlay.id === "spx", "wall charts are NYSI and NASI over SPX");
+assert(JSON.stringify(breadthIndex.charts.map((chart) => chart.id)) === '["nysi","nasi","nyhl","nyad"]' && breadthIndex.overlay.id === "spx", "wall charts are NYSI, NASI, NYHL, and NYAD over SPX");
 const breadthSpx = JSON.parse(readFileSync(join(breadthDir, breadthIndex.overlay.file), "utf8"));
 const breadthDocs = Object.fromEntries(breadthIndex.charts.map((chart) => [chart.id, JSON.parse(readFileSync(join(breadthDir, chart.file), "utf8"))]));
 const breadthWant = {
   nysi: { label: "NY Summation", symbol: "NYSI", close: -504.41, ma: -605.79, chg: 43.36, pct: 7.92 },
   nasi: { label: "Nasdaq Summation", symbol: "NASI", close: -699.51, ma: -769.33, chg: 33.01, pct: 4.51 },
 };
-for (const doc of [...Object.values(breadthDocs), breadthSpx]) {
+for (const doc of [breadthDocs.nysi, breadthDocs.nasi, breadthSpx]) {
   const where = `wall ${doc.id}`;
   const bars = doc.bars;
   assert(doc.asOf === breadthIndex.asOf && bars[bars.length - 1].t === breadthIndex.asOf, `${where} runs to ${breadthIndex.asOf}`);
@@ -1698,6 +1710,19 @@ for (const [id, want] of Object.entries(breadthWant)) {
   const read = breadthRead(doc);
   assert(read.buy === -1000 && read.touches > 0 && read.lastTouch, `wall ${id} finds closes through the buy line in ten years`);
 }
+for (const [id, spec] of [
+  ["nyhl", { average: "sma", period: 50 }],
+  ["nyad", { average: "ema", period: 89 }],
+]) {
+  const doc = breadthDocs[id];
+  assert(doc.kind === "cumulative" && doc.average === spec.average && doc.period === spec.period && doc.defaultRangeMonths === (id === "nyhl" ? 60 : 36), `${id} is the cumulative line`);
+  assert(doc.asOf === "2026-10-30" && doc.bars.at(-1).t === "2026-10-30" && doc.spx.at(-1).t === "2026-10-30" && doc.spx.at(-1).c === 7580.07, `${id} runs through the Oct 30 close`);
+  assert(doc.bars.length === doc.spx.length && doc.bars.every((bar, i) => bar.t === doc.spx[i].t && (i === 0 || bar.t > doc.bars[i - 1].t)), `${id} sessions line up with its S&P 500 context`);
+  const avg = averageOf(doc.bars, doc);
+  const crosses = averageCrosses(doc.bars.map((bar) => bar.c), avg);
+  assert(crosses.some((cross) => cross.side === "above") && crosses.some((cross) => cross.side === "below"), `${id} marks crosses above and below the average`);
+}
+
 /* Vault portfolio: personal book, gated like the other Vault pages. Open lines are still held. */
 const bookFile = "vault/portfolio/index.html";
 assert(viteConfig.includes(`"${bookFile}"`), `vite builds ${bookFile}`);
@@ -1904,7 +1929,7 @@ assert(css.includes(".archive-entry") && css.includes(".archive-gap") && css.inc
 
 assert(breadthSpx.bars.find((bar) => bar.t === "2026-10-29")?.c === 7720.39, "wall SPX Oct 29 close 7720.39");
 const breadthJs = readFileSync(join(root, "src/vault-breadth.js"), "utf8");
-for (const piece of ["data/vault/breadth/", 'input.type = "range"', "MAX_MONTHS", "BUY ", "buyLine", "$SPX", "MA(", "directionRuns", "[data-breadth]", "onDeskReady"]) {
+for (const piece of ["data/vault/breadth/", 'input.type = "range"', "MAX_MONTHS", "BUY ", "buyLine", "$SPX", "MA(", "directionRuns", "[data-breadth]", "onDeskReady", "bw-cross"]) {
   assert(breadthJs.includes(piece), `breadth cards render ${piece}`);
 }
 for (const file of ["src/vault-breadth.js", "src/breadth.js", "scripts/pull-breadth.mjs"]) {

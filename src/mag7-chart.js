@@ -114,13 +114,7 @@ export function drawOscillator(root, spec, width, height) {
     svg("line", { x1: 0, x2: width, y1: bottom + 0.5, y2: bottom + 0.5, stroke: PANE.axisLine }),
   );
 
-  const zy = y(0);
-  root.append(svg("line", { x1: pad.left, x2: right, y1: zy, y2: zy, stroke: PANE.zero, "stroke-width": 1 }));
-  const { upper, lower } = result.thresholds;
-  root.append(
-    svg("line", { x1: pad.left, x2: right, y1: y(upper), y2: y(upper), stroke: COLORS.bull, "stroke-opacity": 0.6, "stroke-width": 1, class: "mo-threshold" }),
-    svg("line", { x1: pad.left, x2: right, y1: y(lower), y2: y(lower), stroke: COLORS.bear, "stroke-opacity": 0.6, "stroke-width": 1, class: "mo-threshold" }),
-  );
+  /* Zone shading carries the regime. The stock zero line and the red and green threshold lines stay off the plot. */
 
   const pivotLines = [];
   if (result.pivots) {

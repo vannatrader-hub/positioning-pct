@@ -4281,6 +4281,28 @@ a.archive-item-title:hover { text-decoration: underline; }
   align-items: center;
 }
 
+.svb-read.is-public {
+  grid-template-columns: minmax(200px, 280px) minmax(0, 1fr);
+  align-items: center;
+}
+
+.svb-public-figure {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+
+.svb-read.is-public .svb-est {
+  font-size: 72px;
+  line-height: 0.9;
+}
+
+.svb-sw-event {
+  background: repeating-linear-gradient(135deg, #f5c451, #f5c451 2px, #3d2e08 2px, #3d2e08 3.5px);
+}
+
+.svb-end-label { font-weight: 700; fill: #0b0d12; }
+
 .svb-hero {
   display: flex;
   flex-direction: column;
@@ -4479,6 +4501,10 @@ a.archive-item-title:hover { text-decoration: underline; }
 .status.lv-signal {
   background: rgba(245, 196, 81, 0.16);
   color: #f6d48a;
+}
+
+body:not(.is-vault):not(.is-insight) .status.lv-signal {
+  color: #8a5a00;
 }
 
 .svb-card { container: svb / inline-size; }
