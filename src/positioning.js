@@ -280,10 +280,16 @@ function rowsBlock(rows) {
   return list;
 }
 
-function monitorCard(read, top) {
-  const card = el("article", "icard is-monitor");
+function themeCard(read, className) {
+  const card = el("article", `${className} sc-card`);
   card.dataset.id = read.id;
   card.dataset.house = read.house;
+  if (read.extreme) card.dataset.extreme = read.extreme;
+  return card;
+}
+
+function monitorCard(read, top) {
+  const card = themeCard(read, "icard is-monitor");
 
   const head = el("div", "icard-head");
   head.append(el("h3", "icard-title", read.title), el("p", "icard-sub", read.sub));
@@ -328,9 +334,7 @@ function indicatorCard(read) {
   top.append(el("span", `house h-${read.house}`, HOUSES[read.house]), el("span", "basis", read.basis));
   if (read.assets) return monitorCard(read, top);
 
-  const card = el("article", "icard");
-  card.dataset.id = read.id;
-  card.dataset.house = read.house;
+  const card = themeCard(read, "icard");
 
   const head = el("div", "icard-head");
   head.append(el("h3", "icard-title", read.title), el("p", "icard-sub", read.sub));

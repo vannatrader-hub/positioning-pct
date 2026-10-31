@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { HOUSES, INDICATORS, SECTIONS, readIndicator } from "../src/desk.js";
+import { GLOW_CROWDED_MIN, GLOW_SOFT_MAX, HOUSES, INDICATORS, SECTIONS, drift, extremeOf, readIndicator } from "../src/desk.js";
 import { CANON, JPM_MONITOR_REF, WEEKS, buildReading, formatWeek, ordinal } from "../src/readings.js";
 import { STRUCTURES, creditSpreadMath, leapMath, price } from "../src/study.js";
 import { breakeven, chartLevels, resolveExpiry } from "../src/flow-chart.js";
@@ -111,7 +111,8 @@ for (const indicator of INDICATORS) {
   for (let week = 0; week < WEEKS.length; week += 1) {
     const read = readIndicator(indicator, week);
     assert(typeof read.value === "string" && read.value.length > 0, `${indicator.id} week ${week} value`);
-    assert(/→ (building|easing|steady)$/.test(read.pill), `${indicator.id} pill "${read.pill}"`);
+    assert(/→ (stretching|unwinding|steady)$/.test(read.pill), `${indicator.id} pill "${read.pill}"`);
+    assert(read.extreme === extremeOf(read.pct, read.ends), `${indicator.id} week ${week} extreme follows the level`);
   }
   const early = readIndicator(indicator, 0);
   assert(early.latestNote === "", `${indicator.id} shows its latest-print note on an earlier week`);
@@ -153,6 +154,28 @@ const ndx = readIndicator(INDICATORS.find((indicator) => indicator.id === "desk-
 assert(ndx.value === "−11.8k", `NDX hedgers ${ndx.value}`);
 const cor = readIndicator(INDICATORS.find((indicator) => indicator.id === "desk-cor1m"), 7);
 assert(cor.value === "7.41" && cor.tone === "crowded", `COR1M ${cor.value} ${cor.tone}`);
+
+/* Soft ↔ Crowded extreme glow (CEO 2026-10-31): level only, Stretching / Unwinding chips. */
+assert(drift(97, 78) === "stretching" && drift(63, 69) === "unwinding", "crowded side: up stretches, down unwinds");
+assert(drift(16, 32) === "stretching" && drift(30, 18) === "unwinding", "soft side: down stretches, up unwinds");
+assert(drift(77, 79) === "steady" && drift(50, 60) === "unwinding", "small moves are steady; landing on mid unwinds");
+assert(extremeOf(GLOW_SOFT_MAX) === "soft" && extremeOf(GLOW_SOFT_MAX + 1) === null, "soft glow at or under the soft line");
+assert(extremeOf(GLOW_CROWDED_MIN) === "crowded" && extremeOf(GLOW_CROWDED_MIN - 1) === null, "crowded glow at or over the crowded line");
+assert(extremeOf(16, ["Unwinding", "Extending"]) === null, "glow is for Soft ↔ Crowded scale cards only");
+const latestReads = INDICATORS.map((indicator) => readIndicator(indicator, WEEKS.length - 1));
+const readById = (id) => latestReads.find((read) => read.id === id);
+assert(readById("gs-mag7").extreme === "crowded" && readById("gs-mag7").pill === "very crowded → stretching", `Mag 7 ${readById("gs-mag7").pill}`);
+assert(readById("jpm-smh-retail").extreme === "crowded", "SMH retail at the 98th glows crowded");
+assert(readById("gs-semis-software").extreme === null && readById("gs-semis-software").pill === "crowded → unwinding", "Semis vs software stays quiet");
+assert(readById("gs-global-ai").extreme === null, "Global AI at the 77th stays quiet");
+const glowing = latestReads.filter((read) => read.extreme);
+assert(glowing.length > 0 && glowing.length <= latestReads.length / 3, `${glowing.length} of ${latestReads.length} cards glow; tighten the thresholds`);
+const glowCss = readFileSync(join(root, "src/styles.css"), "utf8");
+assert(glowCss.includes(`--sc-glow-soft-max: ${GLOW_SOFT_MAX};`) && glowCss.includes(`--sc-glow-crowded-min: ${GLOW_CROWDED_MIN};`), "glow tokens match the desk thresholds");
+const glowRules = [...glowCss.matchAll(/\.sc-card\[data-extreme[^{]*\{([^}]*)\}/g)].map((match) => match[1]).join("");
+assert(glowRules.includes("box-shadow") && !/border(-width)?\s*:|outline\s*:/.test(glowRules), "extreme cards glow with a shadow, never an outline");
+const deskJs = readFileSync(join(root, "src/positioning.js"), "utf8");
+assert(deskJs.includes("sc-card") && deskJs.includes("card.dataset.extreme = read.extreme"), "desk theme cards carry data-extreme");
 
 const eight = buildReading("jpm", 7, 8);
 assert(eight.sectors.XLF.pill === "extreme soft → easing", "8-week XLF still easing");

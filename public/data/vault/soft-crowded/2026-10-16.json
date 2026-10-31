@@ -421,7 +421,7 @@
               "label": "Equities percentile",
               "value": "0.67",
               "unit": "",
-              "pill": "crowded → easing",
+              "pill": "crowded → unwinding",
               "tone": "crowded"
             }
           ],
@@ -485,14 +485,14 @@
               "label": "CDX",
               "value": "340",
               "unit": "bp",
-              "pill": "very crowded → easing",
+              "pill": "very crowded → unwinding",
               "tone": "crowded"
             },
             {
               "label": "BBB minus AAA",
               "value": "0.61",
               "unit": "pts",
-              "pill": "very crowded → easing",
+              "pill": "very crowded → unwinding",
               "tone": "crowded"
             },
             {
@@ -579,14 +579,14 @@
               "label": "Most crowded trade",
               "value": "53",
               "unit": "%",
-              "pill": "very crowded → building",
+              "pill": "very crowded → stretching",
               "tone": "crowded"
             },
             {
               "label": "Fund manager cash",
               "value": "3.9",
               "unit": "%",
-              "pill": "very crowded → building",
+              "pill": "very crowded → stretching",
               "tone": "crowded"
             }
           ],
@@ -691,21 +691,21 @@
               "label": "GS · US equity sentiment indicator",
               "value": "+1.7",
               "unit": "z",
-              "pill": "very crowded → building",
+              "pill": "very crowded → stretching",
               "tone": "crowded"
             },
             {
               "label": "GS · Risky vs safe assets",
               "value": "75",
               "unit": "%ile",
-              "pill": "crowded → building",
+              "pill": "crowded → stretching",
               "tone": "crowded"
             },
             {
               "label": "Desk · Short-term composite sentiment",
               "value": "41.4",
               "unit": "",
-              "pill": "mid → building",
+              "pill": "mid → stretching",
               "tone": "mid"
             }
           ],
