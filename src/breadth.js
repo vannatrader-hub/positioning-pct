@@ -53,6 +53,45 @@ export function rangeLabel(months) {
   return rest ? `${years}Y ${rest}M` : `${years}Y`;
 }
 
+/** Exponential moving average of a value list. Null until `period` closes exist; the seed is their simple average. */
+export function ema(values, period) {
+  const out = new Array(values.length).fill(null);
+  if (!Number.isInteger(period) || period < 1 || values.length < period) return out;
+  const k = 2 / (period + 1);
+  let sum = 0;
+  for (let i = 0; i < period; i += 1) sum += values[i];
+  let prev = sum / period;
+  out[period - 1] = Math.round(prev * 100) / 100;
+  for (let i = period; i < values.length; i += 1) {
+    prev = values[i] * k + prev * (1 - k);
+    out[i] = Math.round(prev * 100) / 100;
+  }
+  return out;
+}
+
+/** Moving average for a cumulative breadth line. `sma` or `ema`. */
+export function averageOf(bars, { average = "sma", period = MA_PERIOD } = {}) {
+  if (average === "ema") return ema(bars.map((bar) => bar.c), period);
+  return sma(bars, period);
+}
+
+/**
+ * Sessions where the line crosses its average.
+ * `above`: from on or under the average to above it.
+ * `below`: from on or over the average to under it.
+ */
+export function averageCrosses(values, avg) {
+  const crosses = [];
+  for (let i = 1; i < values.length; i += 1) {
+    if (avg[i] == null || avg[i - 1] == null) continue;
+    const before = values[i - 1] - avg[i - 1];
+    const after = values[i] - avg[i];
+    if (before <= 0 && after > 0) crosses.push({ index: i, side: "above" });
+    else if (before >= 0 && after < 0) crosses.push({ index: i, side: "below" });
+  }
+  return crosses;
+}
+
 /** Simple moving average of closes, aligned to the bars; null until `period` closes exist. */
 export function sma(bars, period = MA_PERIOD) {
   const out = new Array(bars.length).fill(null);
