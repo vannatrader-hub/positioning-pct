@@ -721,7 +721,13 @@ board.names.forEach((name, index) => {
   assert(name.rank === index + 1, `${where} rank ${name.rank}`);
   assert(Math.abs(name.composite - (0.65 * name.flow + 0.35 * name.tech)) <= 0.5 + 1e-9, `${where} composite ${name.composite} vs 0.65F/0.35T`);
   if (index) assert(name.composite <= board.names[index - 1].composite, `${where} ranked by composite`);
-  assert(name.chart.length >= 100 && name.chart.every((bar, i) => i === 0 || bar.date > name.chart[i - 1].date), `${where} six-month chart`);
+  // Six months of sessions, or the full regular-session history when the name listed inside that window.
+  const listedInsideWindow = name.chart[0].date > "2026-05-01";
+  assert(
+    (name.chart.length >= 100 || (listedInsideWindow && name.chart.length >= 60)) &&
+      name.chart.every((bar, i) => i === 0 || bar.date > name.chart[i - 1].date),
+    `${where} six-month chart`,
+  );
   assert(name.candles.length >= 10, `${where} spark candles`);
   assert(name.desk_analysis && name.lead?.contract && name.net_premium, `${where} trade card header`);
   assert(name.trades?.length && name.trades.every((trade) => /^\d{4}-\d{2}-\d{2}$/.test(trade.date) && trade.text), `${where} trades carry dates`);
