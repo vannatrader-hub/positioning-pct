@@ -6701,3 +6701,183 @@ a.nt-row:hover .nt-arrow { background: var(--ink); color: var(--p-on-ink); }
   .pulse-case.is-bear { border-right: none; border-left: 3px solid var(--sc-crowded); }
   .pulse-modal { padding: 28px 22px; }
 }
+
+/* Market Health Soft-boxes — weekly board on the Dashboard.
+   Green / grey / red only. The Soft ↔ Crowded theme-card magenta glow stays
+   on those cards (--sc-glow-*) and is not used here.
+   end Market Health Soft-boxes */
+:root,
+[data-theme="light"] {
+  --mh-page: var(--p-page);
+  --mh-panel: var(--p-card);
+  --mh-ink: var(--p-ink);
+  --mh-body: var(--p-body);
+  --mh-meta: var(--p-meta);
+  --mh-line: var(--p-line);
+  --mh-soft: #2f7a4a;
+  --mh-soft-deep: #1f5a36;
+  --mh-mid: #c8c2b6;
+  --mh-crowded: #b83232;
+  --mh-crowded-deep: #8a2222;
+  --mh-cell: 14px;
+  --mh-cell-gap: 3px;
+  --mh-radius: 2px;
+  --mh-label-w: 11.5rem;
+}
+
+@media screen {
+  :root[data-theme="dark"] {
+    --mh-page: var(--p-page);
+    --mh-panel: var(--p-card);
+    --mh-ink: var(--p-ink);
+    --mh-body: var(--p-body);
+    --mh-meta: var(--p-meta);
+    --mh-line: var(--p-line);
+    --mh-soft: #3d9a6a;
+    --mh-soft-deep: #2d7d46;
+    --mh-mid: #4a443a;
+    --mh-crowded: #c43c3c;
+    --mh-crowded-deep: #9a2e2e;
+  }
+}
+
+.mh { margin: 48px 0 28px; scroll-margin-top: 88px; }
+.mh-eye,
+.mh-tip,
+.mh-note,
+.mh-pill,
+.mh-board thead th {
+  font-family: var(--font-mono);
+}
+.mh-eye {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--mh-meta);
+}
+.mh-title {
+  margin: 0 0 6px;
+  font-family: var(--wordmark);
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--mh-ink);
+}
+.mh-sub {
+  margin: 0 0 14px;
+  max-width: 680px;
+  color: var(--mh-body);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.mh-leg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+.mh-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 3px 10px;
+  border: 1px solid var(--mh-line);
+  border-radius: 12px;
+  color: var(--mh-ink);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+.mh-card {
+  background: var(--mh-panel);
+  border: 1px solid var(--mh-line);
+  border-radius: 6px;
+  padding: 12px;
+  overflow-x: auto;
+  max-width: 100%;
+}
+.mh-board {
+  border-collapse: separate;
+  border-spacing: var(--mh-cell-gap);
+  width: max-content;
+  table-layout: fixed;
+}
+.mh-board th,
+.mh-board td { padding: 0; }
+.mh-board thead th {
+  width: var(--mh-cell);
+  padding-bottom: 3px;
+  color: var(--mh-meta);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.1;
+  text-align: center;
+  white-space: nowrap;
+}
+.mh-board td { width: var(--mh-cell); line-height: 0; }
+.mh-board th.mh-label {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  width: var(--mh-label-w);
+  min-width: var(--mh-label-w);
+  padding-right: 10px;
+  background: var(--mh-panel);
+  box-shadow: 3px 0 0 var(--mh-panel);
+  color: var(--mh-ink);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.2;
+  text-align: left;
+  text-transform: none;
+  white-space: nowrap;
+}
+.mh-board thead th.mh-label {
+  z-index: 2;
+  color: var(--mh-meta);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.mh-cell {
+  display: block;
+  width: var(--mh-cell);
+  height: var(--mh-cell);
+  border-radius: var(--mh-radius);
+}
+.mh-leg .mh-cell {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  vertical-align: -1px;
+}
+.mh-board .mh-cell:hover { outline: 1.5px solid var(--mh-ink); outline-offset: 0; }
+.mh-cell[data-state="soft"] { background: var(--mh-soft); }
+.mh-cell[data-state="soft-extreme"] { background: var(--mh-soft-deep); }
+.mh-cell[data-state="mid"] { background: var(--mh-mid); }
+.mh-cell[data-state="crowded"] { background: var(--mh-crowded); }
+.mh-cell[data-state="crowded-extreme"] { background: var(--mh-crowded-deep); }
+.mh-cell[data-state="empty"] { background: transparent; border: 1px solid var(--mh-line); }
+.mh-tip {
+  min-height: 16px;
+  margin: 8px 0 0;
+  color: var(--mh-ink);
+  font-size: 11px;
+}
+.mh-note {
+  margin: 10px 0 0;
+  color: var(--mh-meta);
+  font-size: 11px;
+}
