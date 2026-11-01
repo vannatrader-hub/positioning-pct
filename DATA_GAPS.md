@@ -42,4 +42,8 @@ To start the Spot Vol Beta line before 2026-08-03, each weekday session needs a 
 
 ## Market Health color board
 
-The W29–W44 cells in `src/market-health.js` are the locked preview demo. They were not replaced. This repo has no percentile series for Global fund, Sharpies / COT, Put / Call, or NAAIM / risk appetite, so those rows were not backfilled from the research note.
+The W29–W44 demo alphabet is replaced by `src/market-health-engine.js`. Live rows read committed vault series. Soft Vol uses the credit file’s VIX week-over-week move, and a surge leans that row green. Vol Stress uses Spot Vol Beta closes plus the latest gauge, and stays empty before 2026-08-03. Mag 7 uses the oscillator. Credit uses the credit-spread regime. NYSI, NASI, NYAD, and NYHL use level versus their own average. SPX uses the weekly 8- and 21-week EMAs on `breadth/spx.json`.
+
+Jul–Sep Soft↔Crowded percentiles are still absent. The engine does not read `src/series.js`. The only Soft Vol residuals on the board are the filed pack facts, −1.0 on W42 and −1.2 on W43. W44’s −1.2 is the Oct 23 carry and does not color that cell.
+
+Global fund and Sharpies use the digitized BoA FMS and CFTC proxies as as-of Desk readings, not percentiles. Colored weeks are July cash 3.6% (W29) and August cash 3.5% with long global semis at 53% (W34). The W43 quote, cash 3.9% and semis 53%, stays uncolored as a verify-carry. Sharpies is the single July hedger print, −66.52, on W29. NAAIM is 74.5 as of Sat Oct 17, 2026, labeled on W42 and left uncolored. Put/Call stays Demo. Spot Vol Beta is still not backfilled from the credit file’s VIX.

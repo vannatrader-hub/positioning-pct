@@ -1,104 +1,100 @@
 /**
- * Market Health Snapshot — weekly Soft ↔ Crowded color board.
- *
- * The cell strings are the locked preview demo from 2026-10-31 (s soft,
- * S deeper soft, m mid, c crowded, C deeper crowded). They are not a live
- * week-over-week read and must not be treated as desk data. The coloring
- * engine is a separate job, wired when the breadth series is live.
+ * Market Health Snapshot — weekly Soft ↔ Crowded board.
+ * Cells come from the vault engine. Put/Call stays Demo. Global fund,
+ * Sharpies, and NAAIM are as-of Desk proxies, not percentiles.
  */
 
-/** ISO weeks W29–W44 2026, the locked demo window through Fri Oct 30. */
-export const MARKET_HEALTH_WEEKS = [29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44];
+import { buildMarketHealth, MARKET_HEALTH_TIP } from "./market-health-engine.js";
 
-export const MARKET_HEALTH_ROWS = [
-  { id: "soft-vol", label: "Soft Vol", cells: "SsmmccmmSsmmccms" },
-  { id: "vol-stress", label: "Vol Stress", cells: "ssmmmmssmmmcCcmm" },
-  { id: "mag7", label: "Mag 7", cells: "mmmmmmcmccmccCCc" },
-  { id: "credit", label: "Credit / CSR", cells: "sssssmmmmmmccCCc" },
-  { id: "global-fund", label: "Global fund", cells: "mmsssmmmmmmmmccm" },
-  { id: "sharpies", label: "Sharpies / COT", cells: "cmmmSssmmmmmmmcc" },
-  { id: "nysi", label: "NY Summation", cells: "mmmcCccmmmsssmmm" },
-  { id: "nasi", label: "Nasdaq Summation", cells: "smmmccCccmmmmssm" },
-  { id: "nyad", label: "NYAD", cells: "sssmmmmmsSssmmmm" },
-  { id: "nyhl", label: "NYHL", cells: "ssmmmcmmssSsmmmc" },
-  { id: "put-call", label: "Put / Call", cells: "smcsmcSmcmsmCmsm" },
-  { id: "naaim", label: "NAAIM / risk appetite", cells: "mcccmmsssmmmcccC" },
-  { id: "spx-ema", label: "SPX vs 8/21 weekly EMA", cells: "ssssccccssssssCc" },
-];
+export { MARKET_HEALTH_ROWS, MARKET_HEALTH_STATES, MARKET_HEALTH_TIP, MARKET_HEALTH_WEEKS } from "./market-health-engine.js";
 
-/** Demo alphabet → board state. Deeper weeks stay the same voice, darker cell. */
-export const MARKET_HEALTH_STATES = {
-  s: { state: "soft", name: "Soft", voice: "Buy index / possible bottom" },
-  S: { state: "soft-extreme", name: "Soft", voice: "Buy index / possible bottom" },
-  m: { state: "mid", name: "Mid", voice: "Mid" },
-  c: { state: "crowded", name: "Crowded", voice: "Crowded / don’t add" },
-  C: { state: "crowded-extreme", name: "Crowded", voice: "Crowded / don’t add" },
+const BASE = `${import.meta.env?.BASE_URL ?? "/"}data/vault/`;
+
+const VAULT_FILES = {
+  csr: "credit-spread-regime/csr.json",
+  svbSeries: "spot-vol-beta/series.json",
+  svbLatest: "spot-vol-beta/latest.json",
+  mag7: "mag7/oscillator.json",
+  nysi: "breadth/nysi.json",
+  nasi: "breadth/nasi.json",
+  nyad: "breadth/nyad.json",
+  nyhl: "breadth/nyhl.json",
+  spx: "breadth/spx.json",
 };
 
-export const MARKET_HEALTH_TIP = "Hover a box — Row · W{n} · Soft|Mid|Crowded";
-
-function el(tag, className, text) {
-  const node = document.createElement(tag);
+function el(doc, tag, className, text) {
+  const node = doc.createElement(tag);
   if (className) node.className = className;
   if (text != null) node.textContent = text;
   return node;
 }
 
-export function mountMarketHealth(doc = document) {
+async function loadVault() {
+  const entries = await Promise.all(
+    Object.entries(VAULT_FILES).map(async ([key, path]) => {
+      try {
+        const response = await fetch(`${BASE}${path}`, { cache: "no-cache" });
+        if (!response.ok) return [key, null];
+        return [key, await response.json()];
+      } catch {
+        return [key, null];
+      }
+    }),
+  );
+  return Object.fromEntries(entries);
+}
+
+export function renderMarketHealth(board, doc = document) {
   const table = doc.getElementById("mh-board");
-  if (!table || table.dataset.ready) return;
+  if (!table) return;
   const tip = doc.getElementById("mh-tip");
 
-  const cols = el("colgroup");
-  const labelCol = el("col");
+  const cols = el(doc, "colgroup");
+  const labelCol = el(doc, "col");
   labelCol.style.width = "var(--mh-label-w)";
   cols.append(labelCol);
-  for (const _week of MARKET_HEALTH_WEEKS) {
-    const col = el("col");
+  for (const _week of board.weeks) {
+    const col = el(doc, "col");
     col.style.width = "var(--mh-cell)";
     cols.append(col);
   }
 
-  const head = el("thead");
-  const headRow = el("tr");
-  headRow.append(el("th", "mh-label", "ISO wk"));
-  for (const week of MARKET_HEALTH_WEEKS) {
-    const cell = el("th", "", `W${week}`);
+  const head = el(doc, "thead");
+  const headRow = el(doc, "tr");
+  headRow.append(el(doc, "th", "mh-label", "ISO wk"));
+  for (const week of board.weeks) {
+    const cell = el(doc, "th", "", `W${week}`);
     cell.scope = "col";
     headRow.append(cell);
   }
   head.append(headRow);
 
-  const body = el("tbody");
-  for (const row of MARKET_HEALTH_ROWS) {
-    const tr = el("tr");
-    const label = el("th", "mh-label", row.label);
+  const body = el(doc, "tbody");
+  for (const row of board.rows) {
+    const tr = el(doc, "tr");
+    tr.dataset.row = row.id;
+    if (row.kind) tr.dataset.kind = row.kind;
+    const label = el(doc, "th", "mh-label");
     label.scope = "row";
+    label.append(doc.createTextNode(row.label));
+    if (row.mark) label.append(el(doc, "span", "mh-tag", row.mark));
     tr.append(label);
-    for (let i = 0; i < MARKET_HEALTH_WEEKS.length; i += 1) {
-      const code = row.cells[i];
-      const spec = MARKET_HEALTH_STATES[code];
-      const td = el("td");
-      const box = el("span", "mh-cell");
-      if (!spec) {
-        box.dataset.state = "empty";
-        td.append(box);
-        tr.append(td);
-        continue;
+    for (const cell of row.cells) {
+      const td = el(doc, "td");
+      const box = el(doc, "span", "mh-cell");
+      box.dataset.state = cell.state || "empty";
+      if (cell.tip) {
+        box.dataset.tip = cell.tip;
+        box.setAttribute("aria-hidden", "true");
       }
-      const week = MARKET_HEALTH_WEEKS[i];
-      const text = `${row.label} · W${week} · ${spec.name}`;
-      box.dataset.state = spec.state;
-      box.dataset.tip = text;
-      box.setAttribute("aria-hidden", "true");
-      td.append(box, el("span", "visually-hidden", `${spec.name}. ${spec.voice}. Demo pattern.`));
+      td.append(box);
+      if (cell.sr) td.append(el(doc, "span", "visually-hidden", cell.sr));
       tr.append(td);
     }
     body.append(tr);
   }
 
   table.append(cols, head, body);
-  table.dataset.ready = "1";
 
   const show = (node) => {
     if (!tip) return;
@@ -111,6 +107,22 @@ export function mountMarketHealth(doc = document) {
   table.addEventListener("focusout", (event) => {
     if (!table.contains(event.relatedTarget)) show(null);
   });
+}
+
+export async function mountMarketHealth(doc = document) {
+  const table = doc.getElementById("mh-board");
+  if (!table || table.dataset.ready) return;
+  table.dataset.ready = "1";
+  const tip = doc.getElementById("mh-tip");
+  if (tip) tip.textContent = "Reading the vault…";
+  let docs = {};
+  try {
+    docs = await loadVault();
+  } catch {
+    docs = {};
+  }
+  renderMarketHealth(buildMarketHealth(docs), doc);
+  if (tip && tip.textContent === "Reading the vault…") tip.textContent = MARKET_HEALTH_TIP;
 }
 
 if (typeof document !== "undefined") {
