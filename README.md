@@ -83,7 +83,28 @@ Feed: `public/data/new-today.json`.
 - `sourceLabel`: `Desk`, `X`, `Bank note`, or a public bank or outlet label (`JPM`, `MS`, `GS`, `Goldman Sachs`, `BoA`, `Citi`, `UBS`, `Barclays`, `BNP`, `Nomura`, `Citadel`, `WSJ`, `Bloomberg`). The list lives in `SOURCE_LABELS`.
 - `thumb` (optional, Research): a chart image committed under `public/data/new-today/thumbs/` or an `https` URL, with optional `thumbAlt`.
 
-For desk pipelines (site refreshes, X pulls, bank notes, research charts): append items, set `dayStart` to `deskDayStart(deskDay(newest.publishedAt))` and `updatedAt` to the write time, keep about a week of desk days, and run `npm run check`. Public copy follows the same scrub as the rest of the site: research rows name the bank or a generic label, never the upstream service or author, and `npm run check` fails on a banned source name anywhere in the file. Live scraper wiring is not part of this page yet; the file ships with the Oct 27 and Oct 28 desk days seeded from site timestamps and an empty Research desk.
+### Desk-day pack
+
+Midnight, morning, and afternoon auto-ship each call the same builder, then `npm run check`. A second run with the same inputs does not write. `unchanged` means the routine stays silent and opens no PR.
+
+```bash
+npm run new-today:pack
+npm run new-today:pack -- --dry-run
+```
+
+- **Midnight auto-ship.** Weekdays at 12:00 AM CT (±15 min). Runs `npm run new-today:pack`.
+- **Morning auto-ship.** Weekdays at 6:30 AM CT (±15 min). Runs `npm run new-today:pack`.
+- **Afternoon auto-ship.** Weekdays, after session artifacts have landed. Hook it to the vol close routine (about 3:30 PM CT) so a later gauge and any session note still append on that desk day. Runs `npm run new-today:pack`.
+
+Weekend quiet is Friday 3:00 PM CT through Sunday 5:00 PM CT. Those routines do not run.
+
+The builder reads the last-ship stamp, the flow-post watcher, the chart-note watcher, the Soft ↔ Crowded vault index, and the Vol Stress latest stamp. It diffs them against this file, appends America/Chicago desk-day rows, dedupes by `id`, sorts newest first, sets `dayStart` from the newest row, and sets `updatedAt` to the write time only when the list changes. The last-ship stamp is reported and does not hide a row that is still missing, so a note that landed after the morning ship is not stuck behind that stamp. About eight desk days stay in the file. Paths and the overrides `NEW_TODAY_LAST_SHIP`, `NEW_TODAY_FLOW_POSTS`, `NEW_TODAY_FLOW_SEEN`, `NEW_TODAY_CHART_STATE`, and `NEW_TODAY_CHART_DIRS` live in `scripts/new-today-pack.mjs`.
+
+New rows use Desk, a bank or outlet from `SOURCE_LABELS`, or X. A row is written only when a file on disk has a title, a summary, and a timestamp. Seen ids with no post body, and a chart-note file with no titled note, are logged as gaps and do not become rows.
+
+The 2026-11-01 wire-up did not have the box watcher roots mounted, so Oct 30 and Oct 31 session lines (wraps, flow tickets, chart notes) were not backfilled. Two Positioning rows did come from committed Oct 30 vault files: the W44 Soft ↔ Crowded pack (sector columns carried forward from the Oct 23 freeze, stamped with that week's `asOf`) and the Vol Stress gauge at 12:18 CT (2.98, intraday, not a session close). Oct 31 has no on-disk note, so that desk day stays empty.
+
+Public copy follows the same scrub as the rest of the site: research rows name the bank or a generic label, never the upstream service or author, and `npm run check` fails on a banned source name anywhere in the file.
 
 Options Flow data lives in `public/data/flow/`: `plays.json` is the Shopping List seed (with `industry.broad` / `industry.focus`), `bars/<TICKER>.json` holds committed daily bars (`t,o,h,l,c,v`), `spotlights.json` holds the Spotlight tickets by row (`active`, `open`, `closed`) with their daily bars in `bars/` too, and `scorecard.json` is the weekly board snapshot. Charts are drawn as SVG from committed data, so no page needs a chart service.
 

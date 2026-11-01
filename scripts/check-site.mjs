@@ -13,6 +13,7 @@ import { FAMILY_ALLOWLIST, FAMILY_ENTRY } from "../src/family-allowlist.js";
 import { PRODUCT_FEEDS } from "../src/product-feeds.js";
 import { errorCopy, nextStep } from "../src/vault-signin.js";
 import { NT_SECTIONS, PUBLIC_NT_SECTIONS, SOURCE_LABELS, deskDay, deskDayStart, deskWindow, itemsForDay, publicDeskItems, windowLabel } from "../src/new-today-window.js";
+import { itemFromSoftCrowded, itemFromVolStress, planNewToday, runSelfTest, scrubCopy } from "./new-today-pack.mjs";
 import { BUY_LINE, DEFAULT_MONTHS, MAX_MONTHS, RANGES, averageCrosses, averageOf, breadthRead, dayChange, monthsBack, sma as breadthSma, windowStart as breadthWindowStart } from "../src/breadth.js";
 import { CSR_PARAMS, biasOf, csrPanel, csrSeries, cycleOf, panelText, regimeOf as csrRegimeOf, zColor } from "../src/csr.js";
 import { buildPulse, creditChip, cushionOf, runwayMarker } from "../src/pulse-pack.js";
@@ -913,7 +914,38 @@ assert(itemsForDay(nt.items ?? [], "2026-10-28").length === 8, "Oct 28 desk day 
 const earlyThursday = (nt.items ?? []).filter((item) => item.publishedAt === "2026-10-29T04:05:00-05:00");
 assert(earlyThursday.length === 5 && earlyThursday.every((item) => deskDay(item.publishedAt) === "2026-10-29"), "4:05 AM CT Thursday belongs to the Thursday desk day");
 assert(itemsForDay(nt.items ?? [], "2026-10-29").length === 20, "Oct 29 desk day lists the afternoon session, the evening additions, and the pre-open research notes");
-assert(itemsForDay(nt.items ?? [], "2026-10-30").length === 1, "Oct 30 desk day lists the morning research note");
+assert(itemsForDay(nt.items ?? [], "2026-10-30").length === 3, "Oct 30 desk day lists the morning research note, the W44 pack, and the vol stress print");
+assert(itemsForDay(nt.items ?? [], "2026-10-31").length === 0, "Oct 31 has no on-disk session artifact, so that desk day stays empty");
+const ntReadme = readFileSync(join(root, "README.md"), "utf8");
+assert(ntReadme.includes("npm run new-today:pack"), "README shows the New Today pack command");
+assert(ntReadme.includes("Midnight auto-ship") && ntReadme.includes("6:30 AM CT") && ntReadme.includes("Afternoon auto-ship"), "README tells midnight, morning, and afternoon auto-ship to run the same pack");
+assert(runSelfTest() === "new-today pack self-test ok", "New Today pack self-test");
+const ntScrubbed = scrubCopy("OptionsHawk Darkroom Volland note");
+assert(ntScrubbed.length > 0 && !/hawk|darkroom|volland/i.test(ntScrubbed), "pack scrub drops upstream names");
+const ntPackIndex = JSON.parse(readFileSync(join(root, "public/data/vault/soft-crowded/index.json"), "utf8"));
+const ntPackWeek = JSON.parse(readFileSync(join(root, "public/data/vault/soft-crowded", `${ntPackIndex.latest}.json`), "utf8"));
+const ntVolLatest = JSON.parse(readFileSync(join(root, "public/data/vault/spot-vol-beta/latest.json"), "utf8"));
+const ntSoft = itemFromSoftCrowded(ntPackIndex, ntPackWeek);
+const ntVol = itemFromVolStress(ntVolLatest);
+for (const built of [ntSoft, ntVol]) {
+  const stored = (nt.items ?? []).find((item) => item.id === built.id);
+  assert(stored, `new-today is missing the vault row ${built?.id}`);
+  if (!stored || !built) continue;
+  for (const key of ["section", "title", "summary", "href", "publishedAt", "sourceLabel"]) {
+    assert(stored[key] === built[key], `new-today ${built.id} ${key} drifted from the vault artifact`);
+  }
+  assert(stored.sourceLabel === "Desk" && stored.section === "positioning", `${built.id} stays a Desk positioning row`);
+}
+assert(ntVol?.summary.includes("not a session close") && ntVol?.publishedAt === "2026-10-30T12:18:00-05:00", "vol stress row is the 12:18 CT intraday gauge");
+assert(ntSoft?.publishedAt === "2026-10-30T05:00:00-05:00" && ntSoft?.summary.includes("Oct 23"), "soft-crowded row uses the pack asOf and the carry-forward date");
+const ntPlan = planNewToday({ root, now: new Date("2026-11-01T18:00:00Z") });
+assert(ntPlan.added.length === 0 && ntPlan.updated.length === 0, `new-today pack is current (would add ${ntPlan.added.map((item) => item.id).join(", ")}; update ${ntPlan.updated.map((item) => item.id).join(", ")})`);
+assert(
+  ntPlan.gaps.some((gap) => gap.includes("flow-post watcher")) && ntPlan.gaps.some((gap) => gap.includes("chart-note watcher")),
+  "missing session watchers are gaps, not invented rows",
+);
+const ntSorted = [...(nt.items ?? [])].map((item) => item.publishedAt);
+assert(JSON.stringify(ntSorted) === JSON.stringify([...ntSorted].sort((a, b) => Date.parse(b) - Date.parse(a) || 0)), "new-today.json is newest first");
 
 const nav = /<nav class="nav" aria-label="Pages">[\s\S]*?<\/nav>/;
 const dashboardPages = ["index.html", "positioning/index.html", "positioning/desk/index.html", "positioning/charts/index.html", "positioning/ideas/index.html", "vol/index.html", "spx-levels/index.html", "new-today/index.html"];

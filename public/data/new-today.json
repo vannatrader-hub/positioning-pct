@@ -2,8 +2,26 @@
   "timeZone": "America/Chicago",
   "dayStartsAt": "00:00",
   "dayStart": "2026-10-30T00:00:00-05:00",
-  "updatedAt": "2026-10-30T06:30:00-05:00",
+  "updatedAt": "2026-11-01T07:50:44-06:00",
   "items": [
+    {
+      "id": "2026-10-30-vol-stress-1218",
+      "section": "positioning",
+      "title": "Vol Stress prints 2.98",
+      "summary": "Vol Stress printed 2.98 at 12:18 CT. S&P 500 down 1.2% at that print. Intraday gauge, not a session close. At or above 2 is the desk possible-bottom band.",
+      "href": "vol/#spot-vol-beta",
+      "publishedAt": "2026-10-30T12:18:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-30-soft-crowded",
+      "section": "positioning",
+      "title": "Record Mag 7 crowding starts to unwind as vol stress prints 2.98",
+      "summary": "2026-W44 pack is filed. Sector columns carry forward from the Oct 23 Desk freeze.",
+      "href": "positioning/ideas/",
+      "publishedAt": "2026-10-30T05:00:00-05:00",
+      "sourceLabel": "Desk"
+    },
     {
       "id": "2026-10-30-research-gs-gpif",
       "section": "research",
@@ -50,19 +68,19 @@
       "sourceLabel": "Goldman Sachs"
     },
     {
-      "id": "2026-10-29-nxpi-flow",
+      "id": "2026-10-29-lyv-flow",
       "section": "options-flow",
-      "title": "NXPI ($$): March 2027 $300 calls bought",
-      "summary": "Buyer of 250 March 2027 $300 calls at $17.10 on 10/29 as the stock (~$266) bounced off the 200-day and set a 60-day high; Jan $290/$320 call ratio spreads still in open interest. Desk sees the 200-day near $247 as support.",
+      "title": "LYV ($$): Dec $155 puts sold into earnings",
+      "summary": "1,350 Dec $155 puts sold to open at $2.12 on 10/22 ahead of the 11/5 report, followed by Sept 2027 $180 call buying; ~$178 spot coiled under the August highs. Desk views the put sales as the bullish way in.",
       "href": "options-flow/",
       "publishedAt": "2026-10-29T19:27:00-05:00",
       "sourceLabel": "Desk"
     },
     {
-      "id": "2026-10-29-lyv-flow",
+      "id": "2026-10-29-nxpi-flow",
       "section": "options-flow",
-      "title": "LYV ($$): Dec $155 puts sold into earnings",
-      "summary": "1,350 Dec $155 puts sold to open at $2.12 on 10/22 ahead of the 11/5 report, followed by Sept 2027 $180 call buying; ~$178 spot coiled under the August highs. Desk views the put sales as the bullish way in.",
+      "title": "NXPI ($$): March 2027 $300 calls bought",
+      "summary": "Buyer of 250 March 2027 $300 calls at $17.10 on 10/29 as the stock (~$266) bounced off the 200-day and set a 60-day high; Jan $290/$320 call ratio spreads still in open interest. Desk sees the 200-day near $247 as support.",
       "href": "options-flow/",
       "publishedAt": "2026-10-29T19:27:00-05:00",
       "sourceLabel": "Desk"
@@ -74,15 +92,6 @@
       "summary": "Nasdaq looked far worse than the tape underneath: 400+ S&P names rose as money rotated to small caps, value and rate-sensitive cyclicals while investors questioned AI capex payback.",
       "href": "new-today/#nt-research",
       "publishedAt": "2026-10-29T16:06:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-29-qqq-puts-1402",
-      "section": "options-flow",
-      "title": "QQQ: large Dec 31 $695 put buy",
-      "summary": "Buyer took 8,000 Dec 31 (quarterly) $695 puts in a large print around 2:02 PM CT; price printed as $17/27 (~$17.27 estimate).",
-      "href": "options-flow/",
-      "publishedAt": "2026-10-29T14:02:00-05:00",
       "sourceLabel": "Desk"
     },
     {
@@ -113,6 +122,24 @@
       "sourceLabel": "Desk"
     },
     {
+      "id": "2026-10-29-qqq-puts-1402",
+      "section": "options-flow",
+      "title": "QQQ: large Dec 31 $695 put buy",
+      "summary": "Buyer took 8,000 Dec 31 (quarterly) $695 puts in a large print around 2:02 PM CT; price printed as $17/27 (~$17.27 estimate).",
+      "href": "options-flow/",
+      "publishedAt": "2026-10-29T14:02:00-05:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-29-research-db-latam",
+      "section": "research",
+      "title": "Deutsche Bank: LatAm’s silicon dividend",
+      "summary": "Bank note on Latin America’s semiconductor / silicon opportunity, logged mid-morning on the research desk.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-10-29T10:45:00-05:00",
+      "sourceLabel": "Bank note"
+    },
+    {
       "id": "2026-10-29-qqq-puts-0946",
       "section": "options-flow",
       "title": "QQQ: 35K Jan $650 puts (~$32M)",
@@ -131,15 +158,6 @@
       "sourceLabel": "Desk"
     },
     {
-      "id": "2026-10-29-research-db-latam",
-      "section": "research",
-      "title": "Deutsche Bank: LatAm’s silicon dividend",
-      "summary": "Bank note on Latin America’s semiconductor / silicon opportunity, logged mid-morning on the research desk.",
-      "href": "new-today/#nt-research",
-      "publishedAt": "2026-10-29T10:45:00-05:00",
-      "sourceLabel": "Bank note"
-    },
-    {
       "id": "2026-10-29-desk-blitz",
       "section": "options-flow",
       "title": "Desk open wrap 10/29",
@@ -147,24 +165,6 @@
       "href": "options-flow/",
       "publishedAt": "2026-10-29T06:55:00-05:00",
       "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-29-research-gs",
-      "section": "research",
-      "title": "Goldman: Wall Street’s positioning cleanout",
-      "summary": "GS note logged on the research desk before the open.",
-      "href": "new-today/#nt-research",
-      "publishedAt": "2026-10-29T04:05:00-05:00",
-      "sourceLabel": "GS"
-    },
-    {
-      "id": "2026-10-29-research-ms",
-      "section": "research",
-      "title": "Morgan Stanley’s Mike Wilson outlook",
-      "summary": "MS note logged on the research desk before the open.",
-      "href": "new-today/#nt-research",
-      "publishedAt": "2026-10-29T04:05:00-05:00",
-      "sourceLabel": "MS"
     },
     {
       "id": "2026-10-29-research-boa",
@@ -183,6 +183,24 @@
       "href": "new-today/#nt-research",
       "publishedAt": "2026-10-29T04:05:00-05:00",
       "sourceLabel": "Citadel"
+    },
+    {
+      "id": "2026-10-29-research-gs",
+      "section": "research",
+      "title": "Goldman: Wall Street’s positioning cleanout",
+      "summary": "GS note logged on the research desk before the open.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-10-29T04:05:00-05:00",
+      "sourceLabel": "GS"
+    },
+    {
+      "id": "2026-10-29-research-ms",
+      "section": "research",
+      "title": "Morgan Stanley’s Mike Wilson outlook",
+      "summary": "MS note logged on the research desk before the open.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-10-29T04:05:00-05:00",
+      "sourceLabel": "MS"
     },
     {
       "id": "2026-10-29-research-ubs",
