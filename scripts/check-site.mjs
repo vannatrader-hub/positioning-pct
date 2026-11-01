@@ -638,11 +638,17 @@ assert(
   "only the Active row opens by default",
 );
 const spotRows = Object.fromEntries(spot.sections.map((section) => [section.id, section.plays.map((play) => play.ticker)]));
-assert(JSON.stringify(spotRows) === JSON.stringify({ active: ["XYZ", "GLD", "FCX"], open: ["HOOD"], closed: ["V", "FSLY"] }), `Spotlight rows ${JSON.stringify(spotRows)}`);
+assert(
+  JSON.stringify(spotRows) === JSON.stringify({ active: ["XYZ"], open: ["HOOD"], closed: ["GLD", "FCX", "V", "FSLY"] }),
+  `Spotlight rows ${JSON.stringify(spotRows)}`,
+);
 const { start: activeStart, end: activeEnd } = spot.activeWindow;
-assert(activeStart.startsWith("2026-10-") && activeEnd.startsWith("2026-10-") && activeEnd === spot.asOf, "Active window sits inside October 2026");
+assert(activeStart === "2026-10-06" && activeEnd === "2026-10-28", "Active window stays the October 6–28 book");
+assert(spot.asOf === "2026-11-01" && spot.asOfStamp === "2026-11-01T08:47:00-06:00", `Spotlight asOf ${spot.asOf} ${spot.asOfStamp}`);
+assert(/2026-10-30/.test(spot.sourceNote) && /stopped out/i.test(spot.sourceNote), `Spotlight source note ${spot.sourceNote}`);
+assert(!/no new close notes for GLD/i.test(spot.sourceNote), "source note no longer leaves GLD and FCX open");
 const barsLag = (Date.parse(`${spot.asOf}T00:00:00Z`) - Date.parse(`${spot.barsThrough}T00:00:00Z`)) / 86400000;
-assert(barsLag >= 0 && barsLag <= 3, `Spotlight bars through ${spot.barsThrough} should be the last session on or before ${spot.asOf}`);
+assert(spot.barsThrough === "2026-10-27" && barsLag === 5, `Spotlight bars stay through ${spot.barsThrough} after the 2026-11-01 status correction`);
 for (const section of spot.sections) {
   assert(JSON.stringify(sortCards(section.plays)) === JSON.stringify(section.plays), `${section.id} row is stored newest first`);
   for (const play of section.plays) {
@@ -654,8 +660,12 @@ for (const section of spot.sections) {
     if (play.status === "active") assert(play.published >= activeStart && play.published <= activeEnd, `${where} outside the Active window`);
     if (play.status === "open") assert(play.published < activeStart, `${where} belongs in Active`);
     if (play.status === "closed") {
-      assert(play.closedAt > play.published && play.closeNote && play.result, `${where} needs a close date, note, and result`);
-      assert(["banked", "expired"].includes(play.outcome), `${where} outcome ${play.outcome}`);
+      assert(play.closedAt > play.published && play.closeNote, `${where} needs a close date and note`);
+      assert(["banked", "expired", "stopped"].includes(play.outcome), `${where} outcome ${play.outcome}`);
+      if (play.outcome === "banked" || play.outcome === "expired") assert(play.result, `${where} needs a result`);
+      if (play.outcome === "stopped") {
+        assert(!("result" in play) && !("closeQuote" in play) && !("closeEvidenceUrl" in play), `${where} stopped close invents a result or quote`);
+      }
       if (play.outcome === "banked") assert(/^https:\/\/x\.com\//.test(play.closeEvidenceUrl), `${where} close evidence ${play.closeEvidenceUrl}`);
     }
     assert(play.levels.every((level) => levelKind(level.label)), `${where} has a level with an unknown label`);
@@ -692,6 +702,15 @@ for (const [ticker, want] of Object.entries(spotWant)) {
   assert(JSON.stringify(got) === JSON.stringify(want), `spotlight ${ticker} ticket ${JSON.stringify(got)}`);
 }
 assert(spotBy.V.closedAt === "2026-10-12" && outcomeLabel(spotBy.V) === "Banked +107%", "V banked +107% on Oct 12");
+assert(spotBy.XYZ.status === "active" && spotBy.HOOD.status === "open" && spotBy.V.outcome === "banked", "XYZ stays Active, HOOD stays Open, V stays banked");
+for (const ticker of ["GLD", "FCX"]) {
+  const play = spotBy[ticker];
+  assert(play.status === "closed" && play.outcome === "stopped" && play.closedAt === "2026-10-30", `${ticker} stopped on the 2026-10-30 desk close`);
+  assert(outcomeLabel(play) === "Stopped", `${ticker} labels Stopped, not Banked`);
+  assert(/stock stop/i.test(play.closeNote) && /2026-10-30/.test(play.closeNote) && /stopped out/i.test(play.closeNote), `${ticker} close note ${play.closeNote}`);
+  assert(/^Was long /.test(play.recommendation) && /2026-10-30/.test(play.recommendation), `${ticker} recommendation ${play.recommendation}`);
+  assert(!/2026-11-01/.test(`${play.closedAt} ${play.closeNote} ${play.recommendation}`), `${ticker} must not use a Nov 1 fill`);
+}
 const fsly = spotBy.FSLY;
 const fslyChart = spotlightLevels(fsly, JSON.parse(readFileSync(join(root, "public/data/flow/bars/FSLY.json"), "utf8")).bars);
 assert(fsly.outcome === "expired" && outcomeLabel(fsly) === "Expired worthless", "FSLY expired worthless");
@@ -735,7 +754,8 @@ board.names.forEach((name, index) => {
 });
 assert(!("spotlight_watch" in board), "scorecard has no Spotlight watch list");
 const activeSet = activeSpotlights(spot);
-assert(JSON.stringify([...activeSet]) === '["XYZ","GLD","FCX"]', `Active Spotlights ${[...activeSet]}`);
+assert(JSON.stringify([...activeSet]) === '["XYZ"]', `Active Spotlights ${[...activeSet]}`);
+assert(spotlightStar("GLD", activeSet) === "" && spotlightStar("FCX", activeSet) === "", "stopped Spotlights are not Active stars");
 assert(spotlightStar("XYZ", activeSet).includes("sb-star") && spotlightStar("AAPL", activeSet) === "", "star only marks Active Spotlights");
 const boardPage = readFileSync(join(root, "options-flow/scorecard/index.html"), "utf8");
 assert(boardPage.includes('href="/src/styles.css"') && boardPage.includes('class="topbar"') && boardPage.includes('class="site-footer"'), "scorecard sits in the Positioning % shell");
