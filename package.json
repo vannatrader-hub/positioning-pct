@@ -11,6 +11,7 @@
     "pull:breadth": "node scripts/pull-breadth.mjs",
     "data:csr": "node scripts/fetch-csr.mjs",
     "pack:build": "node scripts/vault-pack-build.mjs",
+    "new-today:pack": "node scripts/new-today-pack.mjs",
     "svb:close": "node scripts/svb-close.mjs"
   },
   "engines": {
