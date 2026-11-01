@@ -6,7 +6,7 @@
     <title>Positioning %.</title>
     <meta
       name="description"
-      content="The Dashboard: positioning reads, the Soft to Crowded desk, charts, New Today, and the vol, credit, and momentum wall."
+      content="The Dashboard: positioning reads, the Soft to Crowded desk, the market health snapshot, charts, New Today, and the vol, credit, and momentum wall."
     />
     <meta name="theme-color" content="#f3f1ec" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
@@ -53,6 +53,24 @@
 
         <section class="pulse" id="pulse-pack" data-pulse="pack" data-desk-href="positioning/desk/#themes" aria-busy="true" aria-label="Soft to Crowded desk read">
           <p class="hint">Reading the desk…</p>
+        </section>
+
+        <section class="mh" id="market-health" data-demo="true" aria-labelledby="mh-title">
+          <p class="mh-eye">MARKET HEALTH SNAPSHOT · as of Fri Oct 30, 2026 close CT · Demo pattern</p>
+          <h2 class="mh-title" id="mh-title">Soft ↔ Crowded — weekly board</h2>
+          <p class="mh-sub" id="mh-legend-line">Green = buy index funds / possible bottom · Grey = mid · Red = crowded / don’t add.</p>
+          <ul class="mh-leg">
+            <li class="mh-pill"><i class="mh-cell" data-state="soft" aria-hidden="true"></i>Buy index / possible bottom</li>
+            <li class="mh-pill"><i class="mh-cell" data-state="mid" aria-hidden="true"></i>Mid</li>
+            <li class="mh-pill"><i class="mh-cell" data-state="crowded" aria-hidden="true"></i>Crowded / don’t add</li>
+          </ul>
+          <div class="mh-card">
+            <table class="mh-board" id="mh-board" aria-describedby="mh-legend-line mh-note">
+              <caption class="visually-hidden">Demo pattern through the Fri Oct 30, 2026 close. Green means buy index funds or a possible bottom, grey means mid, red means crowded, don’t add.</caption>
+            </table>
+            <p class="mh-tip" id="mh-tip" aria-live="polite">Hover a box — Row · W{n} · Soft|Mid|Crowded</p>
+          </div>
+          <p class="mh-note" id="mh-note">Desk read · not a forecast · TDV breadth series when wired</p>
         </section>
 
         <div class="tile-grid">
@@ -309,6 +327,7 @@
       </footer>
     </div>
     <script type="module" src="/src/pulse-render.js"></script>
+    <script type="module" src="/src/market-health.js"></script>
     <script type="module" src="/src/vault-wall.js"></script>
     <script type="module" src="/src/vault-breadth.js"></script>
     <script type="module" src="/src/new-today-chip.js"></script>

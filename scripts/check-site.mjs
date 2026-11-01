@@ -35,6 +35,7 @@ import { columnMoves, isoWeek, isoWeekRange, packFrame } from "../src/vault-pack
 import { FORMULA, axisTicks, buildClose, closeEvent, closeRows, closeSpxPct, deskEstimate, formatSvb, gaugeFraction, readout, spotVolTip } from "../src/vault-svb.js";
 import { archiveGroups, deskWeekEntries, displaySource, filterEntries, longDay, newTodayDays, parseDateQuery } from "../src/vault-archive.js";
 import { THEMES, THEME_KEY, THEME_PAGE, resolveTheme } from "../src/theme.js";
+import { MARKET_HEALTH_ROWS, MARKET_HEALTH_STATES, MARKET_HEALTH_WEEKS } from "../src/market-health.js";
 import { bookSide, closedPnl, deskCopy, equityPath, formatBook, formatPx, formatUsd, isOpen, isPending, markOf, resultLabel, stopOf, targetOf, weekStrip } from "../src/vault-portfolio.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -842,6 +843,43 @@ for (const id of ["spot-vol-beta", "credit-spread-regime", "mag7", "nysi", "nasi
   assert(homePage.includes(`id="${id}"`), `Dashboard shows the ${id} wall widget`);
 }
 assert(homePage.includes('src="/src/vault-wall.js"') && homePage.includes('src="/src/vault-breadth.js"'), "Dashboard runs the wall widgets");
+const mhLabels = [
+  "Soft Vol",
+  "Vol Stress",
+  "Mag 7",
+  "Credit / CSR",
+  "Global fund",
+  "Sharpies / COT",
+  "NY Summation",
+  "Nasdaq Summation",
+  "NYAD",
+  "NYHL",
+  "Put / Call",
+  "NAAIM / risk appetite",
+  "SPX vs 8/21 weekly EMA",
+];
+assert(JSON.stringify(MARKET_HEALTH_ROWS.map((row) => row.label)) === JSON.stringify(mhLabels), "Market Health rows stay in the locked order");
+assert(MARKET_HEALTH_WEEKS.length >= 12 && MARKET_HEALTH_WEEKS.length <= 16, "Market Health shows about 12 to 16 ISO weeks");
+for (const row of MARKET_HEALTH_ROWS) {
+  assert(row.cells.length === MARKET_HEALTH_WEEKS.length, `${row.label} has one demo cell per week`);
+  assert([...row.cells].every((code) => MARKET_HEALTH_STATES[code]), `${row.label} stays inside the demo alphabet`);
+}
+const pulseAt = homePage.indexOf('data-pulse="pack"');
+const mhAt = homePage.indexOf('id="market-health"');
+const tilesAt = homePage.indexOf('class="tile-grid"');
+const wallAt = homePage.indexOf('id="wall"');
+assert(pulseAt !== -1 && mhAt > pulseAt && tilesAt > mhAt && wallAt > tilesAt, "Market Health sits below the Pulse read and above the tiles");
+assert(homePage.includes("MARKET HEALTH SNAPSHOT · as of Fri Oct 30, 2026 close CT · Demo pattern"), "snapshot eyebrow names the demo pattern and the as-of");
+assert(homePage.includes("Green = buy index funds / possible bottom · Grey = mid · Red = crowded / don’t add."), "snapshot one-liner uses the buy-index voice");
+assert(homePage.includes("Buy index / possible bottom") && homePage.includes(">Mid<") && homePage.includes("Crowded / don’t add"), "snapshot pills use the buy-index voice");
+assert(homePage.includes("Desk read · not a forecast · TDV breadth series when wired"), "snapshot footnote stays the desk line");
+assert(homePage.includes('src="/src/market-health.js"') && homePage.includes('data-demo="true"'), "Dashboard mounts the demo board");
+assert(!homePage.includes("PREVIEW MOCK") && !homePage.includes("NOT SHIPPED"), "the preview banner stays off the Dashboard");
+const mhCss = css.slice(css.indexOf("/* Market Health Soft-boxes"));
+assert(mhCss.startsWith("/* Market Health Soft-boxes"), "stylesheet has the Market Health block");
+assert(mhCss.includes("--mh-soft: #2f7a4a") && mhCss.includes("--mh-mid: #c8c2b6") && mhCss.includes("--mh-mid: #4a443a") && mhCss.includes("--mh-crowded: #b83232"), "snapshot cells use the locked green, grey, and red");
+assert(!mhCss.includes("#e91e63") && !mhCss.includes("#e91e8c"), "the snapshot board does not use the theme-card magenta");
+assert(css.includes("--sc-crowded: #e91e63") && css.includes("--sc-glow-crowded-rgb: 233, 30, 99"), "Soft ↔ Crowded theme-card magenta glow stays");
 for (const banned of ["options-flow/", "portfolio/", "spx-levels/", "insight/", "vol-credit-momentum"]) {
   assert(!homePage.includes(banned), `Dashboard home does not link ${banned}`);
 }
