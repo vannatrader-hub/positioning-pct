@@ -6722,7 +6722,7 @@ a.nt-row:hover .nt-arrow { background: var(--ink); color: var(--p-on-ink); }
   --mh-cell: 14px;
   --mh-cell-gap: 3px;
   --mh-radius: 2px;
-  --mh-label-w: 11.5rem;
+  --mh-label-w: 15.5rem;
 }
 
 @media screen {
@@ -6841,6 +6841,21 @@ a.nt-row:hover .nt-arrow { background: var(--ink); color: var(--p-on-ink); }
   text-align: left;
   text-transform: none;
   white-space: nowrap;
+}
+.mh-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 4px;
+  border: 1px solid var(--mh-line);
+  border-radius: 2px;
+  color: var(--mh-meta);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  vertical-align: 1px;
 }
 .mh-board thead th.mh-label {
   z-index: 2;

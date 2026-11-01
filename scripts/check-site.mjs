@@ -36,6 +36,27 @@ import { FORMULA, axisTicks, buildClose, closeEvent, closeRows, closeSpxPct, des
 import { archiveGroups, deskWeekEntries, displaySource, filterEntries, longDay, newTodayDays, parseDateQuery } from "../src/vault-archive.js";
 import { THEMES, THEME_KEY, THEME_PAGE, resolveTheme } from "../src/theme.js";
 import { MARKET_HEALTH_ROWS, MARKET_HEALTH_STATES, MARKET_HEALTH_WEEKS } from "../src/market-health.js";
+import {
+  BUYABLE_ROWS,
+  GLOBAL_FUND_PROXIES,
+  GLOBAL_FUND_UNCONFIRMED,
+  NAAIM_PROXIES,
+  SHARPIES_PROXIES,
+  SOFT_VOL_PRINTS,
+  biasPhrase,
+  bucketCredit,
+  bucketCumulative,
+  bucketMag7,
+  bucketSoftVol,
+  bucketSpxEma,
+  bucketSummation,
+  bucketSvb,
+  buildMarketHealth,
+  creditIsStress,
+  paintCell,
+  svbSurge,
+  vixSurge,
+} from "../src/market-health-engine.js";
 import { bookSide, closedPnl, deskCopy, equityPath, formatBook, formatPx, formatUsd, isOpen, isPending, markOf, resultLabel, stopOf, targetOf, weekStrip } from "../src/vault-portfolio.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -860,20 +881,21 @@ const mhLabels = [
 ];
 assert(JSON.stringify(MARKET_HEALTH_ROWS.map((row) => row.label)) === JSON.stringify(mhLabels), "Market Health rows stay in the locked order");
 assert(MARKET_HEALTH_WEEKS.length >= 12 && MARKET_HEALTH_WEEKS.length <= 16, "Market Health shows about 12 to 16 ISO weeks");
-for (const row of MARKET_HEALTH_ROWS) {
-  assert(row.cells.length === MARKET_HEALTH_WEEKS.length, `${row.label} has one demo cell per week`);
-  assert([...row.cells].every((code) => MARKET_HEALTH_STATES[code]), `${row.label} stays inside the demo alphabet`);
-}
+assert(JSON.stringify(MARKET_HEALTH_WEEKS) === JSON.stringify([29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44]), "Market Health stays on W29–W44");
+assert(MARKET_HEALTH_STATES.soft.state === "soft" && MARKET_HEALTH_STATES["soft-extreme"].name === "Soft", "soft cells keep the buy-index name");
+assert(MARKET_HEALTH_STATES.crowded.voice === "Crowded / don’t add" && MARKET_HEALTH_STATES.mid.name === "Mid", "crowded and mid keep the locked voice");
+assert(JSON.stringify(BUYABLE_ROWS) === JSON.stringify(["soft-vol", "vol-stress"]), "only Soft Vol and Vol Stress take the index-buy lean");
 const pulseAt = homePage.indexOf('data-pulse="pack"');
 const mhAt = homePage.indexOf('id="market-health"');
 const tilesAt = homePage.indexOf('class="tile-grid"');
 const wallAt = homePage.indexOf('id="wall"');
 assert(pulseAt !== -1 && mhAt > pulseAt && tilesAt > mhAt && wallAt > tilesAt, "Market Health sits below the Pulse read and above the tiles");
-assert(homePage.includes("MARKET HEALTH SNAPSHOT · as of Fri Oct 30, 2026 close CT · Demo pattern"), "snapshot eyebrow names the demo pattern and the as-of");
+assert(homePage.includes("MARKET HEALTH SNAPSHOT · as of Fri Oct 30, 2026 close CT"), "snapshot eyebrow keeps the Fri Oct 30 as-of");
+assert(!homePage.includes("Demo pattern"), "the snapshot no longer calls the whole board a demo pattern");
 assert(homePage.includes("Green = buy index funds / possible bottom · Grey = mid · Red = crowded / don’t add."), "snapshot one-liner uses the buy-index voice");
 assert(homePage.includes("Buy index / possible bottom") && homePage.includes(">Mid<") && homePage.includes("Crowded / don’t add"), "snapshot pills use the buy-index voice");
-assert(homePage.includes("Desk read · not a forecast · TDV breadth series when wired"), "snapshot footnote stays the desk line");
-assert(homePage.includes('src="/src/market-health.js"') && homePage.includes('data-demo="true"'), "Dashboard mounts the demo board");
+assert(homePage.includes("Desk read · not a forecast · Put/Call stays Demo · Global fund, Sharpies, and NAAIM are Desk proxies"), "snapshot footnote names Demo and the Desk proxies");
+assert(homePage.includes('src="/src/market-health.js"') && !homePage.includes('data-demo="true"'), "Dashboard mounts the live board");
 assert(!homePage.includes("PREVIEW MOCK") && !homePage.includes("NOT SHIPPED"), "the preview banner stays off the Dashboard");
 const mhCss = css.slice(css.indexOf("/* Market Health Soft-boxes"));
 assert(mhCss.startsWith("/* Market Health Soft-boxes"), "stylesheet has the Market Health block");
@@ -2140,6 +2162,117 @@ assert(familyEntry.replace(/<template id="vault-content">[\s\S]*?<\/template>/, 
 for (const file of ["src/vault-breadth.js", "src/csr-chart.js", "src/mag7-chart.js", "src/flow-chart.js"]) {
   assert(!/data-theme|var\(--p-/.test(readFileSync(join(root, file), "utf8")), `${file} chart embed stays as shipped`);
 }
+
+/* Market Health engine: inverse vol, credit stress, and honest gaps. */
+assert(bucketSoftVol({ vix: 28, wow: 10, residual: -1.2 }) === "soft-extreme", "a VIX surge is soft even when the residual is cheap");
+assert(bucketSoftVol({ vix: 19.99, wow: 5.15, residual: -1 }) === "soft-extreme", "W42-sized VIX jump is soft-extreme");
+assert(bucketSoftVol({ vix: 18.77, wow: 3.74 }) === "soft", "a surge under 4 points is soft");
+assert(bucketSoftVol({ vix: 13, wow: -0.2 }) === "crowded", "calm low VIX is crowded");
+assert(bucketSoftVol({ vix: 19.45, wow: -0.54, residual: -1.2 }) === "crowded", "cheap Soft Vol without a surge is crowded");
+assert(bucketSoftVol({ vix: 19.45, wow: -0.54 }) === "mid", "the same week without a filed residual stays mid");
+assert(bucketSoftVol({ vix: 14.5, wow: null }) === null, "a missing week-over-week VIX move is not invented");
+assert(vixSurge(2) && !vixSurge(1.9), "VIX surge starts at a 2 point week");
+assert(bucketSvb({ svb: 2.98, wow: 1.87 }) === "soft-extreme", "a 2.98 gauge jump is soft-extreme");
+assert(bucketSvb({ svb: 0.55, wow: 0 }) === "crowded", "a calm vol-stress gauge is crowded");
+assert(bucketSvb({ svb: 1.11, wow: 0.21 }) === "mid", "a gauge between 1 and 2 is mid");
+assert(svbSurge(2.18, 1.73) && svbSurge(1.58, 1.12) && !svbSurge(0.9, -0.68), "vol-stress surge is the signal or a jump through 1.5");
+assert(bucketMag7(12) === "crowded-extreme" && bucketMag7(8.13) === "crowded" && bucketMag7(0) === "mid", "Mag 7 extended is crowded");
+assert(bucketMag7(-4.58) === "soft" && bucketMag7(-6) === "soft-extreme", "a washed-out Mag 7 oscillator is soft");
+assert(bucketCredit({ z: 2.58, regime: "STRESS", mag7: "soft" }) === "crowded-extreme", "credit stress stays red");
+assert(bucketCredit({ z: 1.85, regime: "ELEVATED", mag7: "soft" }) === "crowded", "elevated credit is crowded");
+assert(bucketCredit({ z: -1.51, regime: "LOW", mag7: "mid" }) === "mid", "tight credit alone is mid");
+assert(bucketCredit({ z: -1.51, regime: "LOW", mag7: "crowded" }) === "crowded", "tight credit with Mag 7 extended is crowded");
+assert(bucketCredit({ z: -0.44, regime: "NORMAL", mag7: "crowded" }) === "mid", "a normal spread stays mid");
+assert(creditIsStress(1) && !creditIsStress(-1.5), "credit-stress bias starts at elevated, not at a tight spread");
+assert(bucketSummation({ close: -1100, ma: -900, prev: -800, buyLine: -1000 }) === "soft-extreme", "through the buy line and falling is soft-extreme");
+assert(bucketSummation({ close: 378.62, ma: 356.57, prev: 347.09, buyLine: -1000 }) === "crowded", "a high summation above its average is crowded");
+assert(bucketSummation({ close: -767.23, ma: -633.37, prev: -559.16, buyLine: -1000 }) === "soft-extreme", "a deep summation under its average is soft-extreme");
+assert(bucketSummation({ close: -722.68, ma: -765.07, prev: -782.79, buyLine: -1000 }) === "mid", "a rebound still below zero stays mid");
+assert(bucketCumulative({ close: 647913, ma: 643986.89, prev: 647664 }) === "crowded", "NYAD extended above its average is crowded");
+assert(bucketCumulative({ close: 642128, ma: 645622.81, prev: 644227 }) === "soft-extreme", "NYAD falling through its average is soft-extreme");
+assert(bucketSpxEma({ close: 7757.64, ema8: 7515.2, ema21: 7322.01 }) === "crowded-extreme", "SPX extended above both weekly EMAs is crowded");
+assert(bucketSpxEma({ close: 7659.44, ema8: 7698.73, ema21: 7562.69 }) === "mid", "SPX between the 8- and 21-week EMAs is mid");
+assert(bucketSpxEma({ close: 7100, ema8: 7200, ema21: 7400 }) === "soft", "SPX under both weekly EMAs is soft");
+assert(bucketSpxEma({ close: 7000, ema8: 7200, ema21: 7400 }) === "soft-extreme", "SPX extended under both weekly EMAs is soft-extreme");
+assert(paintCell("mag7", "crowded-extreme", { active: true, vixSurge: true, creditStress: true }) === "crowded-extreme", "Mag 7 stays crowded through a vol spike and credit stress");
+assert(paintCell("spx-ema", "crowded", { active: true, vixSurge: true, creditStress: true }) === "crowded", "SPX extended stays crowded through a vol spike");
+assert(paintCell("global-fund", "crowded", { active: true, vixSurge: true }) === "crowded", "the fund proxy stays crowded through a VIX surge");
+assert(paintCell("sharpies", "mid", { active: true, vixSurge: true }) === "mid", "the COT proxy is not repainted by a VIX surge");
+assert(paintCell("credit", "crowded-extreme", { active: true, vixSurge: true }) === "crowded-extreme", "credit stress stays red when vol surges");
+assert(paintCell("soft-vol", "crowded", { active: true, creditStress: true }) === "soft", "credit stress leans Soft Vol green");
+assert(paintCell("vol-stress", "mid", { active: true, vixSurge: true }) === "soft", "a VIX surge leans Vol Stress green");
+assert(paintCell("vol-stress", "empty", { active: true, vixSurge: true }) === "empty", "a missing vol-stress week is not filled from the VIX");
+assert(paintCell("soft-vol", "soft-extreme", { active: true, creditStress: true }) === "soft-extreme", "a surge that is already soft-extreme stays there");
+assert(biasPhrase({ vixSurge: true, creditStress: true }).includes("lean buy index"), "the bias names the buy-index lean");
+assert(GLOBAL_FUND_PROXIES.map((row) => row.isoWeek).join() === "2026-W29,2026-W34", "Global fund proxies are the July and August notes only");
+assert(GLOBAL_FUND_PROXIES[0].cash === 3.6 && GLOBAL_FUND_PROXIES[0].priorCash === 4.1 && GLOBAL_FUND_PROXIES[0].sentiment === 7.2, "July fund proxy is cash 3.6% from 4.1% and sentiment 7.2");
+assert(GLOBAL_FUND_PROXIES[1].cash === 3.5 && GLOBAL_FUND_PROXIES[1].owGlobal === 56 && GLOBAL_FUND_PROXIES[1].semis === 53, "August fund proxy is cash 3.5%, equities 56% overweight, semis 53%");
+assert(GLOBAL_FUND_PROXIES.every((row) => row.direction === "Stretching"), "June through August fund direction is Stretching");
+assert(GLOBAL_FUND_UNCONFIRMED.isoWeek === "2026-W43" && GLOBAL_FUND_UNCONFIRMED.cash === 3.9 && GLOBAL_FUND_UNCONFIRMED.semis === 53, "W43 fund quote is recorded and not a fresh proxy");
+assert(SHARPIES_PROXIES.length === 1 && SHARPIES_PROXIES[0].hedger === -66.52 && SHARPIES_PROXIES[0].isoWeek === "2026-W29", "Sharpies is the single July −66.52 print");
+assert(NAAIM_PROXIES.length === 1 && NAAIM_PROXIES[0].value === 74.5 && NAAIM_PROXIES[0].asOfLabel === "Sat Oct 17, 2026", "NAAIM is 74.5 as of Sat Oct 17, 2026");
+assert(SOFT_VOL_PRINTS["2026-W42"].residual === -1 && SOFT_VOL_PRINTS["2026-W42"].fresh, "W42 Soft Vol residual is the filed −1.0 print");
+assert(SOFT_VOL_PRINTS["2026-W43"].residual === -1.2 && SOFT_VOL_PRINTS["2026-W43"].fresh, "W43 Soft Vol residual is the filed −1.2 print");
+assert(SOFT_VOL_PRINTS["2026-W44"].fresh === false && SOFT_VOL_PRINTS["2026-W44"].carriedFrom === "2026-10-23", "W44 Soft Vol residual is the Oct 23 carry");
+const engineSrc = readFileSync(join(root, "src/market-health-engine.js"), "utf8");
+assert(!engineSrc.includes("JPM_VOL") && !engineSrc.includes('from "./series.js"'), "the board does not read the illustrative sector or vol path");
+for (const file of ["2026-10-16.json", "2026-10-23.json", "2026-10-30.json"]) {
+  const pack = JSON.parse(readFileSync(join(root, "public/data/vault/soft-crowded", file), "utf8"));
+  const fact = pack.charts.refs.find((ref) => ref.id === "soft-vol").fact;
+  const print = SOFT_VOL_PRINTS[pack.isoWeek];
+  assert(fact.includes(String(Math.abs(print.residual))), `${pack.isoWeek} Soft Vol residual matches ${fact}`);
+}
+const carryPack = JSON.parse(readFileSync(join(root, "public/data/vault/soft-crowded/2026-10-30.json"), "utf8"));
+assert(carryPack.carryForward.from === "2026-10-23", "W44 pack is the Oct 23 carry");
+
+const mhDocs = {
+  csr: csrDoc,
+  svbSeries: JSON.parse(readFileSync(join(root, "public/data/vault/spot-vol-beta/series.json"), "utf8")),
+  svbLatest: pulseSvb,
+  mag7: oscDoc,
+  nysi: breadthDocs.nysi,
+  nasi: breadthDocs.nasi,
+  nyad: breadthDocs.nyad,
+  nyhl: breadthDocs.nyhl,
+  spx: breadthSpx,
+};
+const mhBoard = buildMarketHealth(mhDocs);
+const mhRow = (id) => mhBoard.rows.find((row) => row.id === id);
+const mhAtWeek = (id, week) => mhRow(id).cells[MARKET_HEALTH_WEEKS.indexOf(week)];
+assert(mhBoard.rows.length === 13 && mhBoard.rows.every((row) => row.cells.length === 16), "the engine paints 13 rows and 16 weeks");
+assert(mhAtWeek("soft-vol", 29).state === "soft" && mhAtWeek("soft-vol", 29).tip.includes("+3.74"), "W29 VIX surge is green on Soft Vol");
+assert(mhAtWeek("soft-vol", 33).state === "crowded" && mhAtWeek("soft-vol", 39).state === "crowded", "calm September VIX stays crowded");
+assert(mhAtWeek("soft-vol", 42).state === "soft-extreme" && mhAtWeek("soft-vol", 42).tip.includes("−1.0"), "W42 surge stays green and names the filed residual");
+assert(mhAtWeek("soft-vol", 43).base === "crowded" && mhAtWeek("soft-vol", 43).state === "soft", "W43 cheap vol is leaned green by credit stress");
+assert(mhAtWeek("soft-vol", 44).tip.includes("carried from Oct 23"), "W44 names the carried residual");
+assert(mhAtWeek("vol-stress", 29).state === "empty" && mhAtWeek("vol-stress", 32).state === "crowded", "Vol Stress starts with the August closes");
+assert(mhAtWeek("vol-stress", 36).state === "soft-extreme" && mhAtWeek("vol-stress", 44).state === "soft-extreme", "the 2.18 and 2.98 gauges are soft");
+assert(mhAtWeek("vol-stress", 44).tip.includes("2.98") && mhAtWeek("vol-stress", 44).tip.includes("close not appended"), "W44 uses the latest gauge and says the close is not appended");
+assert(mhAtWeek("mag7", 29).state === "crowded" && mhAtWeek("mag7", 44).state === "soft", "Mag 7 is crowded in July and soft at the Oct 30 oscillator");
+assert(mhAtWeek("credit", 42).state === "crowded-extreme" && mhAtWeek("credit", 44).state === "crowded", "stressed credit stays red");
+assert(mhAtWeek("credit", 30).state === "mid", "tight credit without an extended Mag 7 is mid");
+assert(mhAtWeek("spx-ema", 32).state === "crowded-extreme" && mhAtWeek("spx-ema", 29).state === "crowded", "SPX above both weekly EMAs stays crowded");
+assert(mhAtWeek("spx-ema", 42).state === "mid", "the W42 dip under the 8-week EMA is mid, including through the VIX surge");
+assert(mhAtWeek("nysi", 29).state === "crowded" && mhAtWeek("nysi", 40).state === "soft-extreme" && mhAtWeek("nysi", 42).state === "mid", "NY summation distinguishes a high line, a washout, and a rebound");
+for (const id of ["mag7", "credit", "spx-ema", "nysi", "nasi", "nyad", "nyhl", "global-fund", "sharpies"]) {
+  assert(mhRow(id).cells.every((cell) => cell.base == null || cell.state === cell.base), `${id} is not leaned green by vol or credit stress`);
+}
+const fund = mhRow("global-fund");
+assert(fund.mark === "Proxy" && mhAtWeek("global-fund", 29).state === "crowded" && mhAtWeek("global-fund", 29).tip.includes("3.6") && mhAtWeek("global-fund", 29).tip.includes("Stretching"), "July fund proxy is crowded and labeled");
+assert(mhAtWeek("global-fund", 34).state === "crowded-extreme" && mhAtWeek("global-fund", 34).tip.includes("53%") && mhAtWeek("global-fund", 34).tip.includes("not a Soft↔Crowded percentile"), "August fund proxy names semis 53% and is not a percentile");
+assert(mhAtWeek("global-fund", 43).kind === "unconfirmed" && mhAtWeek("global-fund", 43).state === "empty" && mhAtWeek("global-fund", 43).tip.includes("verify-carry"), "W43 fund quote is an uncolored verify-carry");
+assert(fund.cells.filter((cell) => cell.kind === "proxy").length === 2, "Global fund has two proxy weeks, not a filled path");
+assert(!fund.cells.some((cell) => /%ile|percentile of/.test(cell.tip)), "Global fund tips do not invent a percentile");
+const sharpies = mhRow("sharpies");
+assert(sharpies.mark === "Proxy" && sharpies.cells.filter((cell) => cell.kind === "proxy").length === 1, "Sharpies is a one-print proxy");
+assert(mhAtWeek("sharpies", 29).state === "mid" && mhAtWeek("sharpies", 29).tip.includes("−66.52") && mhAtWeek("sharpies", 29).tip.includes("slightly net short"), "the July COT print is labeled on W29");
+assert(mhRow("put-call").mark === "Demo" && mhRow("put-call").cells.every((cell) => cell.kind === "demo" && cell.state === "empty" && cell.sr.includes("Demo")), "Put/Call stays an empty Demo row");
+assert(mhRow("naaim").mark === "Proxy" && mhAtWeek("naaim", 42).state === "empty" && mhAtWeek("naaim", 42).tip.includes("74.5") && mhAtWeek("naaim", 42).tip.includes("Sat Oct 17, 2026"), "NAAIM 74.5 is labeled on W42 without a color");
+assert(mhRow("naaim").cells.filter((cell) => cell.kind === "proxy").length === 1, "NAAIM is not copied onto other weeks");
+const bare = buildMarketHealth({});
+assert(bare.rows.find((row) => row.id === "soft-vol").cells.every((cell) => cell.kind === "gap"), "missing vault files leave Soft Vol empty");
+assert(bare.rows.find((row) => row.id === "global-fund").cells.some((cell) => cell.kind === "proxy"), "Desk proxies still render when the vault fetch fails");
+assert(!engineSrc.includes("Ssmmcc") && !readFileSync(join(root, "src/market-health.js"), "utf8").includes("Ssmmcc"), "the demo cell alphabet is gone");
 
 if (failed) {
   console.error(`${failed} check(s) failed`);
