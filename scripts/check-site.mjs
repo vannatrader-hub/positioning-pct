@@ -940,8 +940,18 @@ assert(ntVol?.summary.includes("not a session close") && ntVol?.publishedAt === 
 assert(ntSoft?.publishedAt === "2026-10-30T05:00:00-05:00" && ntSoft?.summary.includes("Oct 23"), "soft-crowded row uses the pack asOf and the carry-forward date");
 const ntPlan = planNewToday({ root, now: new Date("2026-11-01T18:00:00Z") });
 assert(ntPlan.added.length === 0 && ntPlan.updated.length === 0, `new-today pack is current (would add ${ntPlan.added.map((item) => item.id).join(", ")}; update ${ntPlan.updated.map((item) => item.id).join(", ")})`);
+const ntMissing = planNewToday({
+  root,
+  now: new Date("2026-11-01T18:00:00Z"),
+  lastShip: "/no/such/new-today-last-ship.json",
+  flowPosts: "/no/such/new-today-flow-posts",
+  flowSeen: "/no/such/new-today-seen.json",
+  chartState: "/no/such/new-today-STATE.md",
+  chartDirs: "/no/such/new-today-charts",
+});
+assert(ntMissing.added.length === 0 && ntMissing.updated.length === 0, "missing session watchers do not invent rows");
 assert(
-  ntPlan.gaps.some((gap) => gap.includes("flow-post watcher")) && ntPlan.gaps.some((gap) => gap.includes("chart-note watcher")),
+  ntMissing.gaps.some((gap) => /flow-post/.test(gap)) && ntMissing.gaps.some((gap) => /chart-note/.test(gap)),
   "missing session watchers are gaps, not invented rows",
 );
 const ntSorted = [...(nt.items ?? [])].map((item) => item.publishedAt);
