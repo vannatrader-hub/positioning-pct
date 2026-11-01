@@ -3044,7 +3044,8 @@ body:has(.cc[open]) { overflow: hidden; }
 .spot-status.is-closed { background: var(--p-fill); color: var(--ink-2); border-color: var(--line-strong); }
 
 .spot-chip.is-banked { background: var(--ink); color: var(--p-on-ink); border-color: var(--ink); }
-.spot-chip.is-expired { background: var(--neg-tint); color: var(--neg-ink); border-color: rgba(224, 50, 43, 0.2); }
+.spot-chip.is-expired,
+.spot-chip.is-stopped { background: var(--neg-tint); color: var(--neg-ink); border-color: rgba(224, 50, 43, 0.2); }
 
 .spot-sum-badges { display: inline-flex; flex-wrap: wrap; gap: 6px; }
 
@@ -3066,7 +3067,8 @@ body:has(.cc[open]) { overflow: hidden; }
   color: var(--soft-ink);
 }
 
-.badge.is-expired {
+.badge.is-expired,
+.badge.is-stopped {
   background: var(--neg-tint);
   border-color: rgba(224, 50, 43, 0.24);
   color: var(--neg-ink);
@@ -3188,7 +3190,8 @@ body:has(.cc[open]) { overflow: hidden; }
 }
 
 .spot-close-line strong { color: var(--soft-ink); font-weight: 750; }
-.spot-close-line strong.is-expired { color: var(--neg-ink); }
+.spot-close-line strong.is-expired,
+.spot-close-line strong.is-stopped { color: var(--neg-ink); }
 
 .spot-close-text {
   margin: 6px 0 0;

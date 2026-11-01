@@ -89,10 +89,13 @@ export function spotlightLevels(play, bars) {
   }
   if (closeBar && closeBar.t >= window[0].t) {
     const expired = play.outcome === "expired";
+    const stopped = play.outcome === "stopped";
     markers.push({
       t: closeBar.t,
       value: closeBar.c,
-      label: expired ? `Expired ${shortDate(play.closedAt)}` : `Closed ${shortDate(play.closedAt)} ${play.result ?? ""}`.trim(),
+      label: expired
+        ? `Expired ${shortDate(play.closedAt)}`
+        : `${stopped ? "Stopped" : "Closed"} ${shortDate(play.closedAt)} ${play.result ?? ""}`.trim(),
       line: !(expiryInView && closeBar.t === expiry),
     });
   }
@@ -102,15 +105,17 @@ export function spotlightLevels(play, bars) {
 const OUTCOME = {
   banked: { chip: "Banked", badge: "Closed", row: "", tone: "banked" },
   expired: { chip: "Expired worthless", badge: "Expired", row: "expired", tone: "expired" },
+  stopped: { chip: "Stopped", badge: "Stopped", row: "stopped", tone: "stopped" },
 };
 
 function outcome(play) {
   return OUTCOME[play.outcome] ?? OUTCOME.banked;
 }
 
-/** "Banked +107%" or "Expired worthless" — the card's one-line close result. */
+/** "Banked +107%", "Stopped", or "Expired worthless" — the card's one-line close result. */
 export function outcomeLabel(play) {
-  return play.outcome === "expired" ? outcome(play).chip : `${outcome(play).chip} ${play.result ?? ""}`.trim();
+  if (play.outcome === "expired" || play.outcome === "stopped") return outcome(play).chip;
+  return `${outcome(play).chip} ${play.result ?? ""}`.trim();
 }
 
 function statusPill(play) {
@@ -172,7 +177,10 @@ function sectionBadge(section) {
     const badges = el("span", "spot-sum-badges");
     badges.append(
       ...closed.map((play) => {
-        const text = play.outcome === "expired" ? `${play.ticker} ${outcome(play).row}` : `${play.ticker} ${play.result ?? "closed"}`;
+        const text =
+          play.outcome === "expired" || play.outcome === "stopped"
+            ? `${play.ticker} ${outcome(play).row}`
+            : `${play.ticker} ${play.result ?? "closed"}`;
         return el("span", `badge is-${outcome(play).tone}`, text);
       }),
     );
@@ -288,7 +296,8 @@ function headBadge(play) {
   }
   if (play.status === "closed") {
     const { badge, tone } = outcome(play);
-    return el("span", `badge is-${tone}`, play.outcome === "expired" ? badge : `${badge} ${play.result ?? ""}`.trim());
+    const bare = play.outcome === "expired" || play.outcome === "stopped";
+    return el("span", `badge is-${tone}`, bare ? badge : `${badge} ${play.result ?? ""}`.trim());
   }
   return el("span", "badge", "Open");
 }
