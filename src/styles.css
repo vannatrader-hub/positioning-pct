@@ -1347,6 +1347,19 @@ input[type="range"]::-moz-range-thumb {
   font-weight: 650;
 }
 
+.vol-name.is-mid { background: var(--p-fill); color: var(--p-body); }
+.vol-name.is-crowded { background: var(--crowded); color: #fff; }
+
+.series-break {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  font-weight: 650;
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+
+.gauge-copy .series-break { margin: 0; }
+
 .g-labels {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -5908,6 +5921,8 @@ a.archive-item-title:hover { text-decoration: underline; }
 }
 
 .vol-readout .status { margin: 0; }
+
+#soft-vol .basis { max-width: 420px; }
 .pchart .gauge-copy { margin-top: 0; }
 
 .pchart-figure { display: grid; gap: 14px; }

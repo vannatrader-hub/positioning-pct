@@ -18,7 +18,7 @@ export const CHARTS = [
     nav: "Soft Vol",
     title: "Soft Vol ↔ Stretched VIX",
     house: "desk",
-    sub: "The VIX against what the S&P 500 implies, as a residual in vol points. Below zero the VIX is cheap.",
+    sub: "Daily EOD residual, VIX close minus 20-day realized vol. Scale −5 to +15. series break, new definition from 2026-11-02 lock.",
     deskSection: "vol",
     sources: CHART_SOURCES,
     defaultSource: "desk",

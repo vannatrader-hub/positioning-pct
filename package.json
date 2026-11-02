@@ -12,7 +12,8 @@
     "data:csr": "node scripts/fetch-csr.mjs",
     "pack:build": "node scripts/vault-pack-build.mjs",
     "new-today:pack": "node scripts/new-today-pack.mjs",
-    "svb:close": "node scripts/svb-close.mjs"
+    "svb:close": "node scripts/svb-close.mjs",
+    "soft-vol:close": "node scripts/soft-vol-close.mjs"
   },
   "engines": {
     "node": ">=20"

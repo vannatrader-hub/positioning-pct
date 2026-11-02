@@ -1,0 +1,16 @@
+{
+  "$schema": "./schema.json#/$defs/latest",
+  "session": "2026-10-30",
+  "asOf": "2026-10-30T15:00:00-05:00",
+  "asOfLabel": "Fri Oct 30, 2026 · 15:00 CT · cash close",
+  "vix": 19.42,
+  "hv20": 11.78,
+  "spx": 7580.07,
+  "softVol": 7.6,
+  "bucket": "Stretched",
+  "seriesBreak": "2026-11-02",
+  "chartScale": "-5..+15",
+  "closed": true,
+  "formula": "VIX close − HV20(SPX)",
+  "note": "series break, new definition from 2026-11-02 lock"
+}
