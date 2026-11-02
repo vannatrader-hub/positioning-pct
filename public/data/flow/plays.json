@@ -1,8 +1,32 @@
 {
-  "asOf": "2026-10-29",
-  "asOfLabel": "Fri Oct 30, 2026 pre-market · DAR quote Thu Oct 29 close; earlier names Wed Oct 28 close",
-  "window": "Last 3 weeks · Oct 13 – Oct 29, 2026",
+  "asOf": "2026-10-31",
+  "asOfLabel": "Mon Nov 2, 2026 pre-market · EXE quote Fri Oct 30 close; earlier names through Thu Oct 29 close",
+  "window": "Last 3 weeks · Oct 13 – Oct 31, 2026",
   "plays": [
+    {
+      "id": 44031,
+      "ticker": "EXE",
+      "exchange": "NASDAQ",
+      "name": "Expand Energy",
+      "industry": { "broad": "Energy", "focus": "Natural gas · LNG" },
+      "date": "2026-10-31",
+      "alertedAtCt": "2026-10-31 11:46 AM CT",
+      "title": "Call Buying Lines Up in Natural Gas Leader After the Pullback",
+      "confidence": "$$$",
+      "refPrice": 90.55,
+      "flow": [
+        "Expand Energy (EXE) saw 3,000 January 2028 $120 calls bought for about $1.8M and 2,000 June $97.5 calls bought for about $1.7M.",
+        "EXE is a natural-gas leader with LNG growth drivers and a new CEO. Shares have pulled back off the highs after the EQT/RRC deal headline. The reference price is about $90.55."
+      ],
+      "customerPurchased": [
+        { "contract": "Jan 2028 $120 calls", "detail": "3,000 bought · ~$1.8M · more recently", "side": "calls_bought" },
+        { "contract": "June $97.5 calls", "detail": "2,000 bought · ~$1.7M · more recently", "side": "calls_bought" }
+      ],
+      "oi": [],
+      "recommendation": "EXE is a quality natural-gas business the desk wants for a multi-year rerate, with room toward about $125 in 2027.",
+      "lead": { "type": "call", "action": "bought", "qty": 3000, "strike": 120, "expiry": "January 2028", "price": null },
+      "quote": { "date": "2026-10-30", "last": 90.55, "prev": 90.44 }
+    },
     {
       "id": 43901,
       "ticker": "DAR",
