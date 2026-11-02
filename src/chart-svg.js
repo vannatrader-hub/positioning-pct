@@ -612,9 +612,44 @@ export function drawResidual(root, spec, width, height) {
   };
 }
 
+/** Soft↔Crowded column fills. Mid is #9e978c in light, separate from the N/A stub. */
+const SECTOR_FILL = {
+  xsoft: "var(--sec-soft-x, #1f5a36)",
+  soft: "var(--sec-soft, #2d7d46)",
+  mid: "var(--sec-mid, #9e978c)",
+  crowded: "var(--sec-crowded, #e91e63)",
+};
+
+const NA_STUB = 72;
+const NA_LABEL = 18;
+
+/** Grey outlined N/A stub. Height is the CSS lock on `.sec-bar[data-state="na"]`, not a percentile. */
+function sectorNaStub(x, bottom, barW) {
+  const fo = svg("foreignObject", {
+    x: x - barW / 2,
+    y: bottom - NA_STUB - NA_LABEL,
+    width: barW,
+    height: NA_STUB + NA_LABEL,
+    class: "sec-na-fo",
+  });
+  const slot = document.createElement("div");
+  slot.className = "sec-na-slot";
+  const bar = document.createElement("div");
+  bar.className = "sec-bar";
+  bar.dataset.state = "na";
+  const value = document.createElement("span");
+  value.className = "sec-bar-value";
+  value.textContent = "N/A";
+  bar.append(value);
+  slot.append(bar);
+  fo.append(slot);
+  return fo;
+}
+
 /**
  * Sector columns on a 0 to 1 percentile axis with the four Soft ↔ Crowded buckets
  * as bands. spec: { bars, buckets, selected, focus, tip(bar), onPick(ticker) }
+ * A sector with no print keeps its column as a 72px hatched N/A stub.
  */
 export function drawSectors(root, spec, width, height) {
   const { bars, buckets } = spec;
@@ -629,7 +664,7 @@ export function drawSectors(root, spec, width, height) {
   const right = pad.left + plotW;
   const bottom = pad.top + plotH;
   const fills = { xsoft: TONE.bandXsoft, soft: TONE.bandSoft, mid: TONE.bandMid, crowded: TONE.bandCrowded };
-  const inks = { xsoft: TONE.softInk2, soft: TONE.softInk, mid: TONE.muted, crowded: TONE.crowded };
+  const inks = { xsoft: TONE.softInk2, soft: TONE.softInk, mid: TONE.muted, crowded: SECTOR_FILL.crowded };
 
   for (const bucket of buckets) {
     const top = y(bucket.to);
@@ -653,13 +688,10 @@ export function drawSectors(root, spec, width, height) {
     const dim = spec.focus && bar.bucket !== spec.focus;
     const group = svg("g", { opacity: dim ? 0.22 : 1 });
     if (!bar.available) {
-      group.append(
-        svg("rect", { x: x - barW / 2, y: y(50), width: barW, height: bottom - y(50), rx: 6, fill: "none", stroke: TONE.faint, "stroke-dasharray": "4 3" }),
-        svg("text", { x, y: y(50) - 8, "text-anchor": "middle", class: "pc-val" }, "—"),
-      );
+      group.append(sectorNaStub(x, bottom, barW));
     } else {
       const top = y(bar.points);
-      const color = TONE[bar.tone];
+      const color = SECTOR_FILL[bar.tone] ?? TONE[bar.tone];
       group.append(
         svg("rect", {
           x: x - barW / 2,
@@ -673,12 +705,12 @@ export function drawSectors(root, spec, width, height) {
         }),
         svg("path", {
           d: `M ${x - 6} ${top - 13} L ${x + 6} ${top - 13} L ${x} ${top - 5} Z`,
-          fill: bar.tone === "crowded" ? TONE.crowded : TONE.ink,
+          fill: bar.tone === "crowded" ? SECTOR_FILL.crowded : TONE.ink,
         }),
       );
       if (!tight || on) {
         group.append(
-          svg("text", { x, y: top - 17, "text-anchor": "middle", class: on ? "pc-val is-on" : "pc-val", fill: bar.tone === "crowded" ? TONE.crowded : null }, bar.display),
+          svg("text", { x, y: top - 17, "text-anchor": "middle", class: on ? "pc-val is-on" : "pc-val", fill: bar.tone === "crowded" ? SECTOR_FILL.crowded : null }, bar.display),
         );
       }
     }
@@ -796,10 +828,20 @@ export function miniColumns(bars) {
   bars.forEach((bar, index) => {
     const x = slot * index + slot * 0.2;
     if (!bar.available) {
-      root.append(svg("rect", { x, y: y(50), width: slot * 0.6, height: y(0) - y(50), rx: 3, fill: "none", stroke: TONE.faint, "stroke-dasharray": "3 2" }));
+      const stub = 14;
+      root.append(svg("rect", {
+        x,
+        y: y(0) - stub,
+        width: slot * 0.6,
+        height: stub,
+        rx: 2,
+        fill: "var(--sec-na-fill, #e8e4dc)",
+        stroke: "var(--sec-na-outline, #8a857c)",
+        "stroke-width": 1,
+      }));
       return;
     }
-    root.append(svg("rect", { x, y: y(bar.points), width: slot * 0.6, height: y(0) - y(bar.points), rx: 3, fill: TONE[bar.tone] }));
+    root.append(svg("rect", { x, y: y(bar.points), width: slot * 0.6, height: y(0) - y(bar.points), rx: 3, fill: SECTOR_FILL[bar.tone] ?? TONE[bar.tone] }));
   });
   return root;
 }

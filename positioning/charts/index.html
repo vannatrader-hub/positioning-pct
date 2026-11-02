@@ -98,10 +98,21 @@
 
           <article class="pchart is-wide" id="sectors" data-chart="sectors" aria-labelledby="sectors-title">
             <div class="icard-top"><span class="house h-jpm">JPM</span><span class="basis">Ref chart 06-Oct-26 (JPM)</span></div>
-            <header class="pchart-head">
-              <span class="section-num">02</span>
-              <h2 id="sectors-title">Sector Soft ↔ Crowded</h2>
-              <p class="icard-sub">The 11 Select Sector funds, XLF to XLC, as positioning percentiles on one Soft ↔ Crowded scale.</p>
+            <header class="pchart-head sec-head">
+              <div class="sec-head-copy">
+                <span class="section-num">02</span>
+                <h2 id="sectors-title">Sector Soft ↔ Crowded</h2>
+                <p class="icard-sub">The 11 Select Sector funds, XLF to XLC, as positioning percentiles on one Soft ↔ Crowded scale.</p>
+              </div>
+              <div class="sec-scrub">
+                <p class="sec-asof" id="sectors-asof" aria-live="polite">As of W43 · Fri Oct 23, 2026 CT</p>
+                <input id="sectors-week" type="range" min="0" max="7" step="1" value="7" aria-label="Soft↔Crowded week" aria-valuetext="As of W43 · Fri Oct 23, 2026 CT" />
+                <div class="sec-ticks" aria-hidden="true">
+                  <span id="sectors-week-start">W36</span>
+                  <span id="sectors-week-now">▲ W43</span>
+                  <span id="sectors-week-end">W43</span>
+                </div>
+              </div>
             </header>
             <div class="pchart-body"></div>
           </article>

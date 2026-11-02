@@ -6,7 +6,8 @@
  * chart and its desk card always agree. Houses are public labels only.
  */
 
-import { CANON, WEEKS, buildReading, levelOf, ordinal, volLabel, volSeries } from "./readings.js";
+import { isoWeek } from "./iso-week.js";
+import { CANON, WEEKS, buildReading, formatWeek, levelOf, ordinal, volLabel, volSeries } from "./readings.js";
 import { HOUSES, INDICATORS, changeText, readIndicator } from "./desk.js";
 
 export const CHART_SOURCES = ["jpm", "ms", "gs", "boa", "desk"];
@@ -80,6 +81,27 @@ export function shortWeek(iso) {
 }
 
 export const WEEK_LABELS = WEEKS.map(shortWeek);
+
+const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+/** ISO week number for a committed series Friday. 2026-10-23 is 43. */
+export function weekNumber(iso) {
+  return Number(isoWeek(iso).split("W")[1]);
+}
+
+export function weekMark(iso) {
+  return `W${weekNumber(iso)}`;
+}
+
+/**
+ * As-of voice for the Soft↔Crowded print on screen.
+ * The date is the series Friday itself (`WEEKS`), labeled CT. Never a placeholder.
+ */
+export function sectorAsOf(iso) {
+  const [year, month, day] = iso.split("-").map(Number);
+  const weekday = WEEKDAY[new Date(Date.UTC(year, month - 1, day)).getUTCDay()];
+  return `As of ${weekMark(iso)} · ${weekday} ${formatWeek(iso)} CT`;
+}
 
 export function signed(value, digits = 1) {
   const text = Math.abs(value).toFixed(digits);
