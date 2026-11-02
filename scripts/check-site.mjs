@@ -350,7 +350,7 @@ for (const [ticker, want] of Object.entries(studyWant)) {
 }
 
 const flow = JSON.parse(readFileSync(join(root, "public/data/flow/plays.json"), "utf8"));
-const flowTickers = ["DAR", "JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN", "ALAB", "CSCO"];
+const flowTickers = ["EXE", "DAR", "JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN", "ALAB", "CSCO"];
 assert(
   JSON.stringify(sortPlays(flow.plays).map((play) => play.ticker)) === JSON.stringify(flowTickers),
   `Shopping List newest alert first: ${sortPlays(flow.plays).map((play) => play.ticker)}`,
@@ -444,6 +444,7 @@ assert(JSON.stringify(casyLevels.lines.map((line) => line.value)) === "[890,671.
 assert(casyLevels.expiry === "2027-12-17", `CASY December 2027 expiry ${casyLevels.expiry}`);
 assert(!flowBy.UPS, "UPS is a $$ alert and stays off the $$$ watchlist");
 assert(!flowBy.P && !flowBy.BX, "P and BX are $$ alerts and stay off the $$$ watchlist");
+assert(!flowBy.ABBV && !flowBy.CNC, "ABBV and CNC are $$ alerts and stay off the $$$ watchlist");
 assert(
   JSON.stringify(flowBy.JAZZ.lead) === JSON.stringify({ type: "call", action: "bought", qty: 2700, strike: 240, expiry: "December 2026", price: null }),
   `JAZZ lead is the Dec 2026 $240 call buy ${JSON.stringify(flowBy.JAZZ.lead)}`,
@@ -458,6 +459,13 @@ assert(
 assert(flowBy.DAR.customerPurchased[0]?.contract === "Apr 2027 $62.5 calls" && flowBy.DAR.customerPurchased[0]?.side === "calls_bought", "DAR Customer purchased is the Apr 2027 $62.5 call buy");
 const darLevels = chartLevels(flowBy.DAR, JSON.parse(readFileSync(join(root, "public/data/flow/bars/DAR.json"), "utf8")).bars);
 assert(JSON.stringify(darLevels.lines.map((line) => line.value)) === "[62.5]", `DAR chart draws only the $62.5 strike ${darLevels.lines.map((line) => line.value)}`);
+assert(
+  JSON.stringify(flowBy.EXE.lead) === JSON.stringify({ type: "call", action: "bought", qty: 3000, strike: 120, expiry: "January 2028", price: null }),
+  `EXE lead is the Jan 2028 $120 call buy ${JSON.stringify(flowBy.EXE.lead)}`,
+);
+assert(flowBy.EXE.customerPurchased[0]?.contract === "Jan 2028 $120 calls" && flowBy.EXE.customerPurchased[0]?.side === "calls_bought", "EXE Customer purchased is the Jan 2028 $120 call buy");
+const exeLevels = chartLevels(flowBy.EXE, JSON.parse(readFileSync(join(root, "public/data/flow/bars/EXE.json"), "utf8")).bars);
+assert(JSON.stringify(exeLevels.lines.map((line) => line.value)) === "[120]", `EXE chart draws only the $120 strike ${exeLevels.lines.map((line) => line.value)}`);
 assert(resolveExpiry("December", "2026-10-27") === "2026-12-18", "December resolves to Dec 18, 2026");
 assert(resolveExpiry("January", "2026-10-22") === "2027-01-15", "January resolves to Jan 15, 2027");
 assert(resolveExpiry("January 2028", "2026-10-25") === "2028-01-21", "January 2028 resolves to Jan 21, 2028");
@@ -937,7 +945,9 @@ const earlyThursday = (nt.items ?? []).filter((item) => item.publishedAt === "20
 assert(earlyThursday.length === 5 && earlyThursday.every((item) => deskDay(item.publishedAt) === "2026-10-29"), "4:05 AM CT Thursday belongs to the Thursday desk day");
 assert(itemsForDay(nt.items ?? [], "2026-10-29").length === 20, "Oct 29 desk day lists the afternoon session, the evening additions, and the pre-open research notes");
 assert(itemsForDay(nt.items ?? [], "2026-10-30").length === 3, "Oct 30 desk day lists the morning research note, the W44 pack, and the vol stress print");
-assert(itemsForDay(nt.items ?? [], "2026-10-31").length === 0, "Oct 31 has no on-disk session artifact, so that desk day stays empty");
+assert(itemsForDay(nt.items ?? [], "2026-10-31").length === 1, "Oct 31 desk day lists the EXE shopping-list alert");
+assert(itemsForDay(nt.items ?? [], "2026-11-01").length === 2, "Nov 1 desk day lists the ABBV and CNC featured alerts");
+assert(itemsForDay(nt.items ?? [], "2026-11-02").length === 5, "Nov 2 desk day lists the morning research notes");
 const ntReadme = readFileSync(join(root, "README.md"), "utf8");
 assert(ntReadme.includes("npm run new-today:pack"), "README shows the New Today pack command");
 assert(ntReadme.includes("Midnight auto-ship") && ntReadme.includes("6:30 AM CT") && ntReadme.includes("Afternoon auto-ship"), "README tells midnight, morning, and afternoon auto-ship to run the same pack");

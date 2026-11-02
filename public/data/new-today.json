@@ -1,9 +1,81 @@
 {
   "timeZone": "America/Chicago",
   "dayStartsAt": "00:00",
-  "dayStart": "2026-10-30T00:00:00-05:00",
-  "updatedAt": "2026-11-01T07:50:44-06:00",
+  "dayStart": "2026-11-02T00:00:00-06:00",
+  "updatedAt": "2026-11-02T06:36:12-06:00",
   "items": [
+    {
+      "id": "2026-11-02-research-gs-hf-book",
+      "section": "research",
+      "title": "Goldman: seven signs from the hedge fund book",
+      "summary": "Hedge-fund net leverage is near levels that historically preceded 20%+ drawdowns while the S&P sits only modestly off the highs. Implied correlation is near the lows, defensives look expensive, and systematic selling is a near-term obstacle.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-11-02T06:25:00-06:00",
+      "sourceLabel": "Goldman Sachs"
+    },
+    {
+      "id": "2026-11-02-research-ms-ai",
+      "section": "research",
+      "title": "Morgan Stanley: hedge funds go underweight AI",
+      "summary": "Hedge funds are underweight AI for the first time since early 2023, the most sustained gross reduction in the prime-book history. Single-stock vol versus the index is at a record and pairwise correlation is under 10%, which may be a final clearing phase.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-11-02T06:24:00-06:00",
+      "sourceLabel": "MS"
+    },
+    {
+      "id": "2026-11-02-research-gs-gold",
+      "section": "research",
+      "title": "Goldman: spec gold futures selling",
+      "summary": "About $19.5B of speculative gold futures were sold over five weeks, about $8B of that from Oct 20–27, mostly smaller reportable and non-reportable traders. About $3,850 is flagged as support.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-11-02T06:23:00-06:00",
+      "sourceLabel": "Goldman Sachs"
+    },
+    {
+      "id": "2026-11-02-research-boa-tech-ig",
+      "section": "research",
+      "title": "BofA: turning constructive on US tech IG bonds",
+      "summary": "Tech investment-grade bonds are at their worst relative underperformance in about 30 years. AI issuers have raised about $182B in bonds and $89B in equity in 2026, and the next big risk-on window is seen in the first half of 2027.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-11-02T06:22:00-06:00",
+      "sourceLabel": "BoA"
+    },
+    {
+      "id": "2026-11-02-research-bbg-eq-weight",
+      "section": "research",
+      "title": "Bloomberg: equal-weight beat cap-weight by the most since 2009",
+      "summary": "October's equal-weight minus cap-weight S&P gap was the widest since April 2009, while the Nasdaq 100 sat about 9% off its peak.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-11-02T06:21:00-06:00",
+      "sourceLabel": "Bloomberg"
+    },
+    {
+      "id": "2026-11-01-abbv-flow",
+      "section": "options-flow",
+      "title": "ABBV ($$): Jan 2029 $300 calls bought",
+      "summary": "750 Jan 2029 $300 calls bought at $53.70 on 10/30, looking like a roll out of Jan 2028 $260 calls, plus 800 March $320 calls; spot about $294.90 at new highs. Desk prefers selling puts on a pullback toward the 21-day EMA over chasing.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-01T15:37:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-01-cnc-flow",
+      "section": "options-flow",
+      "title": "CNC ($$): Nov $57.5 puts sold",
+      "summary": "16,000 Nov $57.5 puts sold to open at $0.24 on 10/30 and 11,200 Dec 4 weekly $55 puts sold; spot about $68.50. Desk likes selling December puts under the 50-day to own the base into the February report.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-01T15:36:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-10-31-exe-dollar",
+      "section": "options-flow",
+      "title": "EXE joins the $$$ Shopping List",
+      "summary": "3,000 Jan 2028 $120 calls bought (~$1.8M) and 2,000 June $97.5 calls bought (~$1.7M); spot about $90.55 after a pullback off the highs. Desk sees a multi-year rerate with room toward ~$125 in 2027.",
+      "href": "options-flow/dollar/#EXE",
+      "publishedAt": "2026-10-31T11:46:00-05:00",
+      "sourceLabel": "Desk"
+    },
     {
       "id": "2026-10-30-vol-stress-1218",
       "section": "positioning",
