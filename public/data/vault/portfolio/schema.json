@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://vannatrader-hub.github.io/positioning-pct/data/vault/portfolio/schema.json",
   "title": "Portfolio journal",
-  "description": "Desk mock book behind the Vault wall. A 50000 book sizes every line to a 4000 ticket. Closed lines carry the ticket PnL. Open lines may carry a mark (mtm_*); the page shows a dash and keeps the line Open until the journal has one. No broker mark is pulled by the page.",
+  "description": "Desk mock book behind the Vault wall. A 50000 book sizes Spotlight and Featured Options Radar lines to a 4000 ticket. Earnings Snapshot, Weekly Radar Earnings Preview, and Weekly Radar Credit Spread of the Week are one contract. Closed lines carry that line's ticket PnL. Open lines may carry a mark (mtm_*); the page shows a dash and keeps the line Open until the journal has one. No broker mark is pulled by the page.",
   "type": "object",
   "required": ["schema", "summary", "trades"],
   "properties": {
@@ -41,7 +41,11 @@
         "exit_price": { "type": ["number", "null"] },
         "outcome": { "enum": ["win", "loss", "open", "loss_pending", null] },
         "pnl_usd": { "type": ["number", "null"] },
-        "ticket_usd": { "const": 4000, "description": "Display ticket for this line. PnL dollars are this ticket, not a brokerage fill." },
+        "ticket_usd": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Display ticket for this line. Spotlight and Featured Options Radar stay at 4000. Earnings Snapshot, Weekly Radar Earnings Preview, and Weekly Radar Credit Spread of the Week are one contract, about round(entry_price * 100). PnL dollars are this ticket, not a brokerage fill."
+        },
         "ticket": {
           "type": "object",
           "properties": {
