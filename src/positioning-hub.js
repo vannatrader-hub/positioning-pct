@@ -1,6 +1,9 @@
 import { CANON, WEEKS, buildReading, ordinal } from "./readings.js";
 import { INDICATORS, SECTIONS, leanOf, median, readIndicator } from "./desk.js";
-import { VOL_RANGE, broadEquityChart, chartFacts, creditChart, fundManagerChart, riskChart, sectorChart, softVolChart } from "./pct-charts.js";
+import { broadEquityChart, chartFacts, creditChart, fundManagerChart, riskChart, sectorChart } from "./pct-charts.js";
+import softVolSeries from "../public/data/vault/soft-vol/series.json" with { type: "json" };
+import softVolLatest from "../public/data/vault/soft-vol/latest.json" with { type: "json" };
+import { hubFact, liveRead } from "./soft-vol.js";
 import { TONE, gaugeSvg, miniBars, miniColumns, miniLines, miniTracks } from "./chart-svg.js";
 
 const base = import.meta.env ? import.meta.env.BASE_URL : "/";
@@ -33,18 +36,16 @@ if (credit.length) {
   fact("credit", `${credit.length} reads · median ${ordinal(mid)} · leans ${leanOf(mid).word.toLowerCase()}`);
 }
 
-const desk = buildReading("all", latest, 4);
-fact("vol", `${desk.volName} ${desk.volDisplay} pts · week of ${desk.weekLabel}`);
+const liveVol = liveRead(softVolSeries, softVolLatest);
+fact("vol", `${liveVol.bucket} ${liveVol.display} pts · ${liveVol.sessionLabel} · ${liveVol.seriesBreakLabel}`);
 
 for (const [id, text] of Object.entries(chartFacts(latest))) fact(`chart-${id}`, text);
-
-const vol = softVolChart("desk", latest);
-const cut = (points) => (points + VOL_RANGE) / (2 * VOL_RANGE);
+fact("chart-soft-vol", `${hubFact(softVolLatest)} · ${liveVol.seriesBreakLabel}`);
 const broad = broadEquityChart(latest).read;
 const creditCharts = creditChart(latest);
 const fms = fundManagerChart(latest);
 const previews = {
-  "soft-vol": () => gaugeSvg({ position: vol.position, cuts: [cut(-0.4), cut(0.4)], compact: true }),
+  "soft-vol": () => gaugeSvg({ position: liveVol.position, cuts: liveVol.cuts, compact: true }),
   sectors: () => miniColumns(sectorChart("jpm", latest).bars),
   "broad-equity": () =>
     miniLines([{ values: broad.pctPath, color: TONE.ink }], {

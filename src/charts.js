@@ -15,6 +15,9 @@ import {
   volTone,
 } from "./pct-charts.js";
 import { OVERLAY_COLORS, TONE, drawLines, drawResidual, drawSectors, gaugeSvg, mountPlot, setNeedle } from "./chart-svg.js";
+import softVolSeries from "../public/data/vault/soft-vol/series.json" with { type: "json" };
+import softVolLatest from "../public/data/vault/soft-vol/latest.json" with { type: "json" };
+import { formatSigned, liveRead, tipLines } from "./soft-vol.js";
 
 const STORAGE_KEY = "positioning-pct-source";
 const LATEST = WEEKS.length - 1;
@@ -194,22 +197,13 @@ function shell(id) {
 const weekTip = (index) => formatWeek(WEEKS[index]);
 const housesOf = (sources) => sources.map((id) => ({ id, label: HOUSES[id] }));
 
-/* 01 · Soft Vol ↔ Stretched */
+/* 01 · Soft Vol ↔ Stretched — daily EOD series, lock 2026-11-02 */
 function buildSoftVol() {
   const { chart, body, basis, card } = shell("soft-vol");
-  const pick = chipGroup("House", housesOf(chart.sources), () => state.vol.source, (id) => {
-    state.vol.source = id;
-    paint();
-  });
-  const compare = el("button", "toggle", "Compare houses");
-  compare.type = "button";
-  compare.addEventListener("click", () => {
-    state.vol.compare = !state.vol.compare;
-    paint();
-  });
+  const model = liveRead(softVolSeries, softVolLatest);
+  state.vol.index = model.sessions.length - 1;
 
-  const cut = (points) => (points + VOL_RANGE) / (2 * VOL_RANGE);
-  const gauge = gaugeSvg({ position: 0.5, cuts: [cut(-0.4), cut(0.4)] });
+  const gauge = gaugeSvg({ position: model.position, cuts: model.cuts, ticks: model.ticks, marks: model.marks });
   const gaugeCol = el("div", "vol-gauge");
   const legend = el("div", "g-labels");
   legend.append(el("span", "", "Soft vol"), el("span", "", "Fair"), el("span", "", "Stretched"));
@@ -218,7 +212,7 @@ function buildSoftVol() {
 
   const plotCol = el("div", "vol-plot");
   const host = el("div", "pc-plot is-tall");
-  plotCol.append(el("p", "pc-plot-label", "Residual by week, in vol points"), host);
+  plotCol.append(el("p", "pc-plot-label", "Daily residual, VIX close minus HV20, in vol points"), host);
   const draw = mountPlot(host, drawResidual);
 
   const layout = el("div", "vol-layout");
@@ -226,48 +220,42 @@ function buildSoftVol() {
 
   const copy = el("div", "gauge-copy");
   copy.append(
-    el("p", "", "Soft Vol means the VIX is cheaper than the S&P 500 usually implies. Stretched means the VIX is richer than fair."),
-    el("p", "", "Within 0.4 points of zero reads Fair. The gauge runs −3 to +3, the same scale as the desk gauge."),
-    el("p", "", "Each house shifts the same residual by its own read. Desk is the blend of JPM, MS, GS, and BoA."),
+    el("p", "series-break", model.seriesBreakLabel),
+    el("p", "", "Soft Vol means the VIX close is below 20-day realized vol. Stretched means the VIX close is above it. Fair is within 0.4 points of zero, on the raw residual."),
+    el("p", "", "The gauge and the columns run from −5 to +15. Desk is the label on this print. The weekly house blend through Oct 23 stays on its own history."),
   );
   const foot = el("div", "pchart-foot");
   const change = el("p", "icard-change");
   foot.append(change, deskLink(chart));
 
-  body.append(controlRow(["House", pick.node], ["View", compare]), layout, copy, foot);
+  body.append(layout, copy, foot);
 
   painters.push(() => {
-    const read = softVolChart(state.vol.source, state.week);
-    pick.sync();
-    compare.setAttribute("aria-pressed", state.vol.compare ? "true" : "false");
-    compare.classList.toggle("is-on", state.vol.compare);
-    basis.textContent = read.source === "desk" ? "Desk composite of JPM, MS, GS, BoA" : `${read.houseLabel} house view`;
-    card.querySelector(".house").className = `house h-${read.source}`;
-    card.querySelector(".house").textContent = read.houseLabel;
-    setNeedle(gauge, read.position);
-    gauge.setAttribute("aria-label", `${read.name}, ${read.display} points`);
-    const big = el("p", "ivalue", read.display);
+    const point = model.sessions[state.vol.index] ?? model.sessions.at(-1);
+    const onLatest = point.date === model.session;
+    basis.textContent = model.seriesBreakLabel;
+    card.querySelector(".house").className = "house h-desk";
+    card.querySelector(".house").textContent = "Desk";
+    setNeedle(gauge, onLatest ? model.position : Math.min(1, Math.max(0, (point.softVol + 5) / 20)));
+    gauge.setAttribute("aria-label", `${point.bucket}, ${formatSigned(point.softVol)} points`);
+    const big = el("p", "ivalue", formatSigned(point.softVol));
     big.append(el("span", "iunit", "pts"));
-    readout.replaceChildren(big, statusPill(read.name, read.tone));
-    change.textContent = `${read.change} · week of ${formatWeek(WEEKS[read.week])}`;
+    const tone = point.bucket === "Soft Vol" ? "soft" : point.bucket === "Stretched" ? "crowded" : "mid";
+    readout.replaceChildren(big, statusPill(point.bucket, tone));
+    change.textContent = `${formatSigned(point.softVol)} · ${point.bucket} · ${point.date} cash close · VIX ${Number(point.vix).toFixed(2)} · HV20 ${Number(point.hv20).toFixed(2)}`;
     draw({
-      label: `${read.houseLabel} Soft Vol residual by week. This week ${read.display} points, ${read.name}.`,
-      labels: WEEK_LABELS,
-      values: read.points,
-      week: read.week,
-      tone: volTone,
-      ghosts: state.vol.compare
-        ? chart.sources.filter((id) => id !== read.source).map((id) => ({ label: HOUSES[id], values: read.houses[id], color: HOUSE_COLORS[id] }))
-        : [],
-      tip: (index) => {
-        const value = read.points[index];
-        const lines = [weekTip(index), `${read.houseLabel} ${signed(value)} pts · ${softVolChart(read.source, index).name}`];
-        if (state.vol.compare) {
-          for (const id of chart.sources) if (id !== read.source) lines.push(`${HOUSES[id]} ${signed(read.houses[id][index])}`);
-        }
-        return lines;
+      label: `Desk Soft Vol daily residual. ${point.date} ${formatSigned(point.softVol)} points, ${point.bucket}. ${model.seriesBreakLabel}.`,
+      labels: model.labels,
+      values: model.points,
+      week: state.vol.index,
+      tone: (value) => (value <= -0.4 ? "soft" : value >= 0.4 ? "crowded" : "mid"),
+      domain: model.domain,
+      ticks: model.scaleTicks,
+      tip: (index) => tipLines(model.sessions[index]),
+      onPick: (index) => {
+        state.vol.index = index;
+        paint();
       },
-      onPick: setWeek,
     });
   });
 }

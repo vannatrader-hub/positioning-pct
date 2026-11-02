@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vannatrader-hub.github.io/positioning-pct/data/vault/soft-vol/schema.json",
+  "title": "Soft Vol daily closes",
+  "description": "Append one object to points at each weekday cash close. One point per session, dates ascending, starting 2026-10-30. Soft Vol is the VIX close minus HV20 of the S&P 500, rounded to 0.1. This file does not continue the weekly Desk blend. It does not take an underlying-vol change input. Vol Stress stays a separate series.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sku", "cadence", "seriesBreak", "seriesBreakLabel", "formula", "chartScale", "chartMin", "chartMax", "band", "note", "points"],
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "sku": { "const": "soft-vol" },
+    "cadence": { "const": "1d-close", "description": "One point per session, taken after the official cash close." },
+    "seriesBreak": { "const": "2026-11-02" },
+    "seriesBreakLabel": { "const": "series break, new definition from 2026-11-02 lock", "x-banned-sources": true },
+    "formula": { "const": "VIX close − HV20(SPX)", "x-banned-sources": true },
+    "chartScale": { "const": "-5..+15" },
+    "chartMin": { "const": -5 },
+    "chartMax": { "const": 15 },
+    "band": { "const": 0.4, "description": "Soft Vol at or below −0.4, Stretched at or above +0.4, Fair in between. Applied to the raw residual." },
+    "note": { "type": "string", "minLength": 40, "x-banned-sources": true },
+    "points": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Append one close per session. Do not rewrite an earlier session.",
+      "items": { "$ref": "#/$defs/close" }
+    }
+  },
+  "$defs": {
+    "close": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date", "vix", "hv20", "spx", "softVol", "bucket", "origin"],
+      "properties": {
+        "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "vix": { "type": "number", "minimum": 0, "maximum": 150, "description": "VIX close for the session." },
+        "hv20": { "type": "number", "minimum": 0, "maximum": 150, "description": "20-day realized vol of SPX, sample stdev of 20 log returns, times √252, times 100, rounded to 0.01." },
+        "spx": { "type": "number", "minimum": 100, "maximum": 20000, "description": "SPX close for the same session. The last of the 21 closes used for HV20." },
+        "softVol": { "type": "number", "minimum": -40, "maximum": 80, "description": "VIX close minus HV20, rounded to 0.1." },
+        "bucket": { "enum": ["Soft Vol", "Fair", "Stretched"] },
+        "origin": {
+          "enum": ["seed", "close-routine"],
+          "description": "seed: the 2026-10-30 reconstructable print. close-routine: appended after the official cash close."
+        },
+        "recordedAt": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}[+-]\\d{2}:\\d{2}$",
+          "description": "When the close routine wrote the point, with a UTC offset. Required for close-routine points."
+        }
+      }
+    },
+    "latest": {
+      "title": "Soft Vol latest close",
+      "description": "The newest daily print. Rewritten when a session is appended. Same formula as the series. No underlying-vol change field.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["session", "asOf", "asOfLabel", "vix", "hv20", "spx", "softVol", "bucket", "seriesBreak", "chartScale", "closed", "formula", "note"],
+      "properties": {
+        "$schema": { "type": "string", "minLength": 1 },
+        "session": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "asOf": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}[+-]\\d{2}:\\d{2}$" },
+        "asOfLabel": { "type": "string", "minLength": 1, "x-banned-sources": true },
+        "vix": { "type": "number", "minimum": 0, "maximum": 150 },
+        "hv20": { "type": "number", "minimum": 0, "maximum": 150 },
+        "spx": { "type": "number", "minimum": 100, "maximum": 20000 },
+        "softVol": { "type": "number", "minimum": -40, "maximum": 80 },
+        "bucket": { "enum": ["Soft Vol", "Fair", "Stretched"] },
+        "seriesBreak": { "const": "2026-11-02" },
+        "chartScale": { "const": "-5..+15" },
+        "closed": { "type": "boolean" },
+        "formula": { "const": "VIX close − HV20(SPX)", "x-banned-sources": true },
+        "note": { "type": "string", "minLength": 8, "x-banned-sources": true }
+      }
+    }
+  }
+}

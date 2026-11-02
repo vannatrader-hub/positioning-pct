@@ -1,0 +1,33 @@
+{
+  "sku": "soft-vol",
+  "title": "Soft Vol",
+  "schema": "schema.json",
+  "series": "series.json",
+  "latest": "latest.json",
+  "append": "Add one object to series.json points after the official cash close. Keep dates ascending, one point per session, from 2026-10-30. npm run soft-vol:close writes the point and rewrites latest.json.",
+  "routine": {
+    "cadence": "Weekdays after the official cash close. Equity cash close is 4:00 PM ET (3:00 PM CT). The VIX close prints later the same afternoon, about 4:15 PM ET (3:15 PM CT). A pass around 3:30 CT is only final once those official closes are out. If the script ran before they were out, rerun the same session with --replace-last and re-commit. Do not append a second point for that session.",
+    "command": "npm run soft-vol:close -- --date 2026-11-03 --vix 19.00 --spx <21 SPX closes, oldest first, last is the session>",
+    "writes": [
+      "series.json: one close appended, origin close-routine",
+      "latest.json: the same close, closed true, seriesBreak 2026-11-02"
+    ],
+    "example": {
+      "date": "2026-11-03",
+      "vix": 19.42,
+      "hv20": 11.78,
+      "spx": 7580.07,
+      "softVol": 7.6,
+      "bucket": "Stretched",
+      "origin": "close-routine",
+      "recordedAt": "2026-11-03T15:20:00-06:00"
+    },
+    "rules": [
+      "Never rewrite or delete an earlier session. --replace-last rewrites only the last session, and only when --date is that session.",
+      "Pass the official VIX close and 21 official SPX closes. The script computes HV20. It does not fetch.",
+      "Soft Vol does not take an underlying-vol change. Leave Vol Stress on its own close routine.",
+      "Chart scale stays −5 to +15. Buckets stay at ±0.4.",
+      "The example object is a shape, not a filed session."
+    ]
+  }
+}

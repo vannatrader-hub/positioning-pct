@@ -1,4 +1,7 @@
 import { CANON, SOURCES, WEEKS, buildReading, ordinal } from "./readings.js";
+import softVolSeries from "../public/data/vault/soft-vol/series.json" with { type: "json" };
+import softVolLatest from "../public/data/vault/soft-vol/latest.json" with { type: "json" };
+import { formatSigned, liveRead } from "./soft-vol.js";
 import { renderStudy } from "./study.js";
 import { HOUSES, INDICATORS, SECTIONS, leanOf, median, readIndicator } from "./desk.js";
 
@@ -372,22 +375,24 @@ function chartLink(id, text) {
 }
 
 function gaugePanel(reading) {
+  const live = liveRead(softVolSeries, softVolLatest);
   const panel = el("div", "panel gauge");
   panel.dataset.house = "desk";
 
   const top = el("div", "icard-top");
-  top.append(el("span", "house h-desk", HOUSES.desk), el("span", "method-pill", "Methods later"));
+  top.append(el("span", "house h-desk", HOUSES.desk), el("span", "method-pill", "VIX − HV20"));
 
   const main = el("div", "gauge-main");
   const left = el("div");
   left.append(el("h3", "icard-title", "Soft Vol ↔ Stretched"));
-  const num = el("p", "vol-num", reading.volDisplay);
+  const num = el("p", "vol-num", live.display);
   num.id = "vol-value";
   num.append(el("span", "pts", "pts"));
   left.append(num);
-  const name = el("p", "vol-name", reading.volName);
+  const name = el("p", `vol-name is-${live.tone}`, live.bucket);
   name.id = "vol-name";
   left.append(name);
+  left.append(el("p", "series-break", `${live.sessionLabel} cash close`));
 
   const right = el("div");
   const labels = el("div", "g-labels");
@@ -397,25 +402,35 @@ function gaugePanel(reading) {
   track.setAttribute("role", "img");
   track.setAttribute(
     "aria-label",
-    `${reading.volName}, ${reading.volDisplay} points. Soft vol on the left, stretched on the right.`,
+    `${live.bucket}, ${live.display} points. Scale −5 to +15. Soft vol on the left, stretched on the right.`,
   );
   const lane = el("div", "g-zones");
-  for (const zone of ["z-soft", "z-mid", "z-crowd"]) lane.append(el("i", `z ${zone}`));
+  const zones = [
+    ["z-soft", live.zone.soft],
+    ["z-mid", live.zone.fair],
+    ["z-crowd", live.zone.stretched],
+  ];
+  for (const [zone, weight] of zones) {
+    const mark = el("i", `z ${zone}`);
+    mark.style.flex = `${weight} 1 0`;
+    lane.append(mark);
+  }
   const pin = el("i", "sc-pin");
   pin.id = "vol-pin";
-  pin.style.left = `${Math.min(98, Math.max(2, reading.volPosition * 100))}%`;
+  pin.style.left = `${Math.min(98, Math.max(2, live.position * 100))}%`;
   track.append(lane, pin);
   const scale = el("div", "g-scale");
-  scale.append(el("span", "", "−3"), el("span", "", "0"), el("span", "", "+3"));
+  scale.append(el("span", "", "−5"), el("span", "", "0"), el("span", "", "+15"));
   right.append(labels, track, scale);
 
   main.append(left, right);
 
+  const prior = reading.volTenths / 10;
   const copy = el("div", "gauge-copy");
   copy.append(
-    el("p", "", "Soft Vol means the VIX is cheaper than the S&P 500 usually implies. Stretched means the VIX is richer than fair."),
-    el("p", "", "Live history comes from desk-ingested bank notes. Public labels are bank names only."),
-    el("p", "", "The calculation note is not on the Desk yet."),
+    el("p", "", "Soft Vol means the VIX close is below 20-day realized vol. Stretched means the VIX close is above it. Fair is within 0.4 points of zero."),
+    el("p", "", `${live.seriesBreakLabel}. VIX ${Number(live.vix).toFixed(2)} minus HV20 ${Number(live.hv20).toFixed(2)}. Scale −5 to +15.`),
+    el("p", "", `Week of ${reading.weekLabel} Desk blend ${formatSigned(prior)} · ${reading.volName}. That weekly blend stays filed.`),
   );
 
   panel.append(top, main, copy, chartLink("soft-vol", "Open the Soft Vol ↔ Stretched chart"));

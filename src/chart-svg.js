@@ -527,10 +527,16 @@ export function drawResidual(root, spec, width, height) {
   const plotW = width - pad.left - pad.right;
   const plotH = height - pad.top - pad.bottom;
   const ghostValues = (spec.ghosts ?? []).flatMap((ghost) => ghost.values);
-  const reach = Math.max(1, ...values.map(Math.abs), ...ghostValues.map(Math.abs));
-  const top = Math.ceil(reach * 1.25 * 2) / 2;
-  const lo = -top;
-  const hi = top;
+  let lo;
+  let hi;
+  if (Array.isArray(spec.domain) && spec.domain.length === 2 && spec.domain[1] > spec.domain[0]) {
+    [lo, hi] = spec.domain;
+  } else {
+    const reach = Math.max(1, ...values.map(Math.abs), ...ghostValues.map(Math.abs));
+    const top = Math.ceil(reach * 1.25 * 2) / 2;
+    lo = -top;
+    hi = top;
+  }
   const n = values.length;
   const slot = plotW / n;
   const cx = (index) => pad.left + slot * (index + 0.5);
@@ -546,11 +552,11 @@ export function drawResidual(root, spec, width, height) {
     svg("text", { x: pad.left + 6, y: y(lo) - 6, class: "pc-band", fill: TONE.softInk }, "Soft vol"),
   );
 
-  for (const tick of niceTicks(lo, hi, 4)) {
+  for (const tick of spec.ticks ?? niceTicks(lo, hi, 4)) {
     const ty = y(tick);
     root.append(
       svg("line", { x1: pad.left, x2: right, y1: ty, y2: ty, stroke: tick === 0 ? TONE.ink : TONE.grid, "stroke-width": tick === 0 ? 1.4 : 1 }),
-      svg("text", { x: pad.left - 8, y: ty + 3.5, "text-anchor": "end", class: "pc-axis" }, tick === 0 ? "0" : `${tick > 0 ? "+" : "−"}${Math.abs(tick).toFixed(1)}`),
+      svg("text", { x: pad.left - 8, y: ty + 3.5, "text-anchor": "end", class: "pc-axis" }, tick === 0 ? "0" : `${tick > 0 ? "+" : "−"}${Number.isInteger(tick) ? Math.abs(tick).toString() : Math.abs(tick).toFixed(1)}`),
     );
   }
 
@@ -728,7 +734,7 @@ function arc(cx, cy, r, from, to) {
  * Semicircle Soft Vol ↔ Stretched gauge. `cuts` are the zone edges as 0–1
  * positions along the arc; `position` is the needle, 0 (left) to 1 (right).
  */
-export function gaugeSvg({ position, cuts, ticks = ["−3", "0", "+3"], compact = false }) {
+export function gaugeSvg({ position, cuts, ticks = ["−3", "0", "+3"], marks = [], compact = false }) {
   const cx = 120;
   const cy = 118;
   const r = 92;
@@ -763,6 +769,11 @@ export function gaugeSvg({ position, cuts, ticks = ["−3", "0", "+3"], compact 
       svg("text", { x: cx, y: cy - r + 40, "text-anchor": "middle", class: "pc-axis" }, ticks[1]),
       svg("text", { x: cx + r, y: cy + 18, "text-anchor": "middle", class: "pc-axis" }, ticks[2]),
     );
+    for (const mark of marks) {
+      const a = angle(mark.position);
+      const [mx, my] = polar(cx, cy, r + 16, a);
+      root.append(svg("text", { x: mx, y: my + 3, "text-anchor": "middle", class: "pc-axis" }, mark.label));
+    }
   }
   const needle = svg("g", { class: "pc-needle" });
   needle.style.transformOrigin = `${cx}px ${cy}px`;

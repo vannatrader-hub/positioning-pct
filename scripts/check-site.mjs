@@ -34,6 +34,18 @@ import {
 } from "../src/pct-charts.js";
 import { columnMoves, isoWeek, isoWeekRange, packFrame } from "../src/vault-pack-frame.js";
 import { FORMULA, axisTicks, buildClose, closeEvent, closeRows, closeSpxPct, deskEstimate, formatSvb, gaugeFraction, readout, spotVolTip } from "../src/vault-svb.js";
+import { JPM_VOL, VOL_SHIFT } from "../src/series.js";
+import {
+  SERIES_BREAK,
+  SERIES_BREAK_LABEL,
+  bucketOf,
+  buildSoftVolClose,
+  hv20,
+  hubFact,
+  liveRead,
+  softVolOf,
+  tipLines,
+} from "../src/soft-vol.js";
 import { archiveGroups, deskWeekEntries, displaySource, filterEntries, longDay, newTodayDays, parseDateQuery } from "../src/vault-archive.js";
 import { THEMES, THEME_KEY, THEME_PAGE, resolveTheme } from "../src/theme.js";
 import { MARKET_HEALTH_ROWS, MARKET_HEALTH_STATES, MARKET_HEALTH_WEEKS } from "../src/market-health.js";
@@ -1903,6 +1915,72 @@ validatePack(svbSchema, svbCloseDef, svbIndex.routine.example, "svb.index.routin
 assert(svbIndex.routine.example.origin === "close-routine" && svbIndex.routine.example.estimate.value === deskEstimate(svbIndex.routine.example.estimate.uvDelta, svbIndex.routine.example.estimate.spxPct), "routine example is a valid close");
 const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 assert(packageJson.scripts["svb:close"] === "node scripts/svb-close.mjs" && existsSync(join(root, "scripts/svb-close.mjs")), "npm run svb:close appends a close");
+
+/* Soft Vol daily EOD: VIX close minus HV20. Separate from Vol Stress and from the weekly Desk blend. */
+const softVolDir = join(root, "public/data/vault/soft-vol");
+const softVolSchema = JSON.parse(readFileSync(join(softVolDir, "schema.json"), "utf8"));
+const softVolSeriesDoc = JSON.parse(readFileSync(join(softVolDir, "series.json"), "utf8"));
+const softVolLatestDoc = JSON.parse(readFileSync(join(softVolDir, "latest.json"), "utf8"));
+const softVolIndex = JSON.parse(readFileSync(join(softVolDir, "index.json"), "utf8"));
+const oct30Closes = [7722.72, 7773.95, 7818.93, 7801.77, 7765.36, 7811.54, 7807.24, 7805.45, 7718.94, 7744.06, 7659.44, 7690.73, 7712.57, 7757.17, 7663.43, 7623.68, 7676.77, 7722.6, 7743.98, 7720.39, 7580.07];
+assert(hv20(oct30Closes) === 11.78, `Oct 30 HV20 ${hv20(oct30Closes)}`);
+assert(softVolOf(19.42, 11.78) === 7.6 && bucketOf(7.6) === "Stretched", "Oct 30 Soft Vol is +7.6 Stretched");
+assert(bucketOf(-0.4) === "Soft Vol" && bucketOf(-0.3) === "Fair" && bucketOf(0.3) === "Fair" && bucketOf(0.4) === "Stretched", "buckets stay on tenths ±0.4");
+assert(JSON.stringify(JPM_VOL) === JSON.stringify([-2, -4, -6, -8, -10, -11, -12, -14]), "weekly JPM_VOL blend is unchanged");
+assert(JSON.stringify(VOL_SHIFT) === JSON.stringify({ jpm: 0, ms: 4, boa: -3, gs: 6 }), "weekly VOL_SHIFT blend is unchanged");
+assert(softVolSeriesDoc.seriesBreak === SERIES_BREAK && softVolSeriesDoc.seriesBreakLabel === SERIES_BREAK_LABEL, "series carries the 2026-11-02 break");
+assert(softVolSeriesDoc.points.length === 1 && softVolSeriesDoc.points[0].date === "2026-10-30", "daily series starts at the 2026-10-30 seed");
+assert(softVolSeriesDoc.points[0].softVol === 7.6 && softVolSeriesDoc.points[0].bucket === "Stretched" && softVolSeriesDoc.points[0].vix === 19.42 && softVolSeriesDoc.points[0].hv20 === 11.78 && softVolSeriesDoc.points[0].spx === 7580.07, "seed print is the reconstructable Oct 30 close");
+assert(softVolSeriesDoc.points[0].softVol === softVolOf(softVolSeriesDoc.points[0].vix, softVolSeriesDoc.points[0].hv20), "seed residual is VIX minus HV20");
+assert(softVolLatestDoc.session === "2026-10-30" && softVolLatestDoc.softVol === 7.6 && softVolLatestDoc.bucket === "Stretched" && softVolLatestDoc.seriesBreak === "2026-11-02" && softVolLatestDoc.chartScale === "-5..+15" && softVolLatestDoc.closed === true, "latest.json is the Oct 30 seed");
+assert(!("uvDelta" in softVolLatestDoc) && !softVolSeriesDoc.points.some((point) => "uvDelta" in point), "Soft Vol does not store an underlying-vol change");
+validatePack(softVolSchema, softVolSchema, softVolSeriesDoc, "soft-vol.series");
+validatePack(softVolSchema, softVolSchema.$defs.latest, softVolLatestDoc, "soft-vol.latest");
+validatePack(softVolSchema, softVolSchema.$defs.close, softVolSeriesDoc.points[0], "soft-vol.seed");
+const softVolView = liveRead(softVolSeriesDoc, softVolLatestDoc);
+assert(softVolView.display === "+7.6" && softVolView.bucket === "Stretched" && softVolView.domain[0] === -5 && softVolView.domain[1] === 15, `live read ${softVolView.display} ${softVolView.bucket}`);
+assert(softVolView.position > softVolView.cuts[1] && softVolView.cuts[0] < softVolView.cuts[1], "Stretched +7.6 sits past the +0.4 band on the widened scale");
+assert(hubFact(softVolLatestDoc) === "Desk · Stretched +7.6 pts", `hub fact ${hubFact(softVolLatestDoc)}`);
+assert(chartFacts()["soft-vol"] === "Desk · Soft Vol −1.2 pts", "weekly chart facts keep the filed Desk blend");
+assert(readFileSync(join(root, "src/positioning-hub.js"), "utf8").includes("fact(\"chart-soft-vol\", `${hubFact(softVolLatest)} · ${liveVol.seriesBreakLabel}`)"), "the hub chart tile shows the daily print and the series break");
+assert(tipLines(softVolSeriesDoc.points[0]).includes(SERIES_BREAK_LABEL) && !tipLines(softVolSeriesDoc.points[0]).some((line) => /WoW|week-over-week/i.test(line)), "hover names the series break and does not invent a week-over-week");
+assert(softVolChart("desk", 7).display === "−1.2", "the weekly Desk blend helper still reads −1.2 for the filed weeks");
+const seededClose = buildSoftVolClose(undefined, { date: "2026-10-30", vix: 19.42, spxCloses: oct30Closes, recordedAt: "2026-10-30T15:00:00-05:00" });
+assert(seededClose.hv20 === 11.78 && seededClose.softVol === 7.6 && seededClose.bucket === "Stretched" && seededClose.spx === 7580.07, `buildSoftVolClose seed ${JSON.stringify(seededClose)}`);
+for (const [input, message] of [
+  [{ date: "2026-10-29", vix: 19, spxCloses: oct30Closes }, "a close before the last session"],
+  [{ date: "2026-10-30", vix: 19, spxCloses: oct30Closes }, "the same session without replace-last"],
+  [{ date: "2026-11-01", vix: 19, spxCloses: oct30Closes }, "a Sunday close"],
+  [{ date: "2026-11-02", vix: 19, spxCloses: oct30Closes.slice(0, 20) }, "a window that is not 21 closes"],
+]) {
+  let threw = false;
+  try {
+    buildSoftVolClose(softVolSeriesDoc.points.at(-1), input);
+  } catch {
+    threw = true;
+  }
+  assert(threw, `buildSoftVolClose refuses ${message}`);
+}
+const replaced = buildSoftVolClose(softVolSeriesDoc.points.at(-1), { date: "2026-10-30", vix: 19.42, spxCloses: oct30Closes, recordedAt: "2026-10-30T16:15:00-05:00", replaceLast: true });
+assert(replaced.date === "2026-10-30" && replaced.origin === "close-routine" && replaced.softVol === 7.6, "replace-last rewrites only the same session");
+let backdated = false;
+try {
+  buildSoftVolClose(softVolSeriesDoc.points.at(-1), { date: "2026-10-29", vix: 19.42, spxCloses: oct30Closes, replaceLast: true });
+} catch {
+  backdated = true;
+}
+assert(backdated, "replace-last still refuses a date before the last session");
+assert(packageJson.scripts["soft-vol:close"] === "node scripts/soft-vol-close.mjs" && existsSync(join(root, "scripts/soft-vol-close.mjs")), "npm run soft-vol:close appends a close");
+assert(readFileSync(join(root, "scripts/soft-vol-close.mjs"), "utf8").includes("re-commit"), "the close script tells a pre-close pass to re-commit after the official close");
+assert(softVolIndex.routine.command.startsWith("npm run soft-vol:close") && softVolIndex.routine.cadence.includes("3:30 CT"), "series index documents the cash-close routine");
+validatePack(softVolSchema, softVolSchema.$defs.close, softVolIndex.routine.example, "soft-vol.index.routine.example");
+assert(softVolIndex.routine.rules.some((rule) => rule.includes("shape")), "the routine example is marked as a shape");
+const chartsSoft = readFileSync(join(root, "src/charts.js"), "utf8");
+const deskSoft = readFileSync(join(root, "src/positioning.js"), "utf8");
+assert(chartsSoft.includes("liveRead") && chartsSoft.includes("series-break") && deskSoft.includes("liveRead"), "the chart and the desk gauge read the daily series");
+assert(chartsSoft.includes("domain: model.domain") && chartsSoft.includes('ticks: model.scaleTicks'), "the Soft Vol columns use the −5 to +15 scale");
+assert(!chartsSoft.includes("uvDelta") && !deskSoft.includes("uvDelta"), "Soft Vol UI does not read an underlying-vol change");
+assert(chartsPage.includes(SERIES_BREAK_LABEL), "the Soft Vol card labels the series break");
 for (const piece of ["closesBlock(series)", "Session closes", "Gauge close", "Desk estimate close", "Entered by", "svb-close-table"]) assert(svbJs.includes(piece), `Spot Vol Beta card renders ${piece}`);
 assert(css.includes(".svb-close-table") && css.includes(".svb-origin.is-seed"), "close history has a table and a seeded tag");
 

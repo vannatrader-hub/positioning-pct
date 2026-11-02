@@ -1,0 +1,24 @@
+{
+  "$schema": "./schema.json",
+  "sku": "soft-vol",
+  "cadence": "1d-close",
+  "seriesBreak": "2026-11-02",
+  "seriesBreakLabel": "series break, new definition from 2026-11-02 lock",
+  "formula": "VIX close − HV20(SPX)",
+  "chartScale": "-5..+15",
+  "chartMin": -5,
+  "chartMax": 15,
+  "band": 0.4,
+  "note": "Daily EOD after the official cash close, from the 2026-10-30 seed. HV20 is the sample standard deviation of the last 20 SPX log returns, times the square root of 252, times 100. Soft, Fair, and Stretched stay at ±0.4 on the raw residual. The weekly Desk blend through Oct 23 stays filed on its own history.",
+  "points": [
+    {
+      "date": "2026-10-30",
+      "vix": 19.42,
+      "hv20": 11.78,
+      "spx": 7580.07,
+      "softVol": 7.6,
+      "bucket": "Stretched",
+      "origin": "seed"
+    }
+  ]
+}

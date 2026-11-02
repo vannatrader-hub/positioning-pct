@@ -58,8 +58,9 @@
           <span class="pill">Weekly reads</span>
           <h1>Positioning charts</h1>
           <p class="lede">
-            Six headline reads redrawn on the Soft ↔ Crowded scale. Hover any chart for the week’s print, tap a week
-            to move every chart to it, and switch houses where more than one bank reads the same thing.
+            Six headline reads redrawn on the Soft ↔ Crowded scale. Hover a weekly chart for that week’s print, tap a
+            week to move the weekly charts, and switch houses where more than one bank reads the same thing. Soft Vol
+            is the daily EOD series and keeps its own scale.
           </p>
           <p class="asof-line pill" id="asof-line">Week of Oct 23, 2026 · JPM · MS · GS · BoA · Desk</p>
         </section>
@@ -81,17 +82,17 @@
               <p class="history-date" id="history-date">Oct 23, 2026</p>
             </div>
             <input id="week" type="range" min="0" max="7" value="7" aria-labelledby="history-label" />
-            <p class="hint">8 weeks of history. Every chart follows the week you pick.</p>
+            <p class="hint">8 weeks of history on the weekly charts. Soft Vol prints each cash close and does not follow this slider.</p>
           </div>
         </section>
 
         <div class="pchart-grid" id="charts">
           <article class="pchart is-wide" id="soft-vol" data-chart="soft-vol" aria-labelledby="soft-vol-title">
-            <div class="icard-top"><span class="house h-desk">Desk</span><span class="basis">Desk composite of JPM, MS, GS, BoA</span></div>
+            <div class="icard-top"><span class="house h-desk">Desk</span><span class="basis">series break, new definition from 2026-11-02 lock</span></div>
             <header class="pchart-head">
               <span class="section-num">01</span>
               <h2 id="soft-vol-title">Soft Vol ↔ Stretched VIX</h2>
-              <p class="icard-sub">The VIX against what the S&amp;P 500 implies, as a residual in vol points. Below zero the VIX is cheap.</p>
+              <p class="icard-sub">Daily EOD residual, VIX close minus 20-day realized vol. Scale −5 to +15. Bands stay at ±0.4.</p>
             </header>
             <div class="pchart-body"></div>
           </article>
