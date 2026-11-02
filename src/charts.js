@@ -9,10 +9,13 @@ import {
   creditChart,
   fundManagerChart,
   riskChart,
+  sectorAsOf,
   sectorChart,
   signed,
   softVolChart,
   volTone,
+  weekMark,
+  weekNumber,
 } from "./pct-charts.js";
 import { OVERLAY_COLORS, TONE, drawLines, drawResidual, drawSectors, gaugeSvg, mountPlot, setNeedle } from "./chart-svg.js";
 
@@ -287,8 +290,31 @@ function buildSectors() {
     paint();
   });
 
+  const asof = document.getElementById("sectors-asof");
+  const scrub = document.getElementById("sectors-week");
+  const weekStart = document.getElementById("sectors-week-start");
+  const weekNow = document.getElementById("sectors-week-now");
+  const weekEnd = document.getElementById("sectors-week-end");
+  scrub.min = "0";
+  scrub.max = String(LATEST);
+  scrub.addEventListener("input", (event) => setWeek(Number(event.target.value)));
+
   const host = el("div", "pc-plot is-sectors");
   const draw = mountPlot(host, drawSectors);
+  const legend = el("div", "legend sec-legend");
+  for (const item of [
+    ["sw", "Extreme soft", "var(--sec-soft-x)"],
+    ["sw", "Soft", "var(--sec-soft)"],
+    ["sw", "Mid", "var(--sec-mid)"],
+    ["sw", "Crowded", "var(--sec-crowded)"],
+    ["na", "N/A — no print", ""],
+  ]) {
+    const span = el("span");
+    const mark = el("i", item[0]);
+    if (item[2]) mark.style.background = item[2];
+    span.append(mark, document.createTextNode(item[1]));
+    legend.append(span);
+  }
   const key = el("div", "bucket-key");
   key.setAttribute("role", "group");
   key.setAttribute("aria-label", "Highlight a Soft ↔ Crowded column");
@@ -317,9 +343,23 @@ function buildSectors() {
   const link = deskLink(chart);
   foot.append(note, link);
 
-  body.append(controlRow(["House", pick.node], ["Order", order.node]), host, key, detail, foot);
+  body.append(controlRow(["House", pick.node], ["Order", order.node]), host, legend, key, detail, foot);
 
   painters.push(() => {
+    const iso = WEEKS[state.week];
+    const text = sectorAsOf(iso);
+    asof.textContent = text;
+    scrub.value = String(state.week);
+    scrub.max = String(LATEST);
+    scrub.style.setProperty("--pct", `${LATEST ? (state.week / LATEST) * 100 : 100}%`);
+    scrub.setAttribute("aria-valuetext", text);
+    scrub.setAttribute("aria-valuenow", String(weekNumber(iso)));
+    scrub.setAttribute("aria-valuemin", String(weekNumber(WEEKS[0])));
+    scrub.setAttribute("aria-valuemax", String(weekNumber(WEEKS[LATEST])));
+    weekStart.textContent = weekMark(WEEKS[0]);
+    weekEnd.textContent = weekMark(WEEKS[LATEST]);
+    weekNow.textContent = `▲ ${weekMark(iso)}`;
+
     const data = sectorChart(state.sectors.source, state.week, state.sectors.order);
     pick.sync();
     order.sync();
@@ -330,7 +370,7 @@ function buildSectors() {
     if (!selected?.available) selected = data.bars.find((bar) => bar.ticker === "XLF");
 
     draw({
-      label: `${data.houseLabel} sector positioning percentiles: ${data.bars.map((bar) => `${bar.ticker} ${bar.available ? bar.display : "no print"}`).join(", ")}.`,
+      label: `${data.houseLabel} sector positioning percentiles: ${data.bars.map((bar) => `${bar.ticker} ${bar.available ? bar.display : "N/A"}`).join(", ")}.`,
       bars: data.bars,
       buckets: SECTOR_BUCKETS,
       selected: selected.ticker,
@@ -338,7 +378,7 @@ function buildSectors() {
       tip: (bar) =>
         bar.available
           ? [`${bar.ticker} · ${bar.short}`, `${bar.ile} · ${bar.pill}`, bar.wowText]
-          : [`${bar.ticker} · ${bar.short}`, `${bar.note}. Switch the house for a read.`],
+          : [`${bar.ticker} · ${weekMark(iso)} · N/A — no print this house/week`],
       onPick: (ticker) => {
         const bar = data.bars.find((item) => item.ticker === ticker);
         if (!bar?.available) return;

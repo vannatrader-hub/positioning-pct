@@ -28,9 +28,11 @@ import {
   creditChart,
   fundManagerChart,
   riskChart,
+  sectorAsOf,
   sectorChart,
   shortWeek,
   softVolChart,
+  weekMark,
 } from "../src/pct-charts.js";
 import { columnMoves, isoWeek, isoWeekRange, packFrame } from "../src/vault-pack-frame.js";
 import { FORMULA, axisTicks, buildClose, closeEvent, closeRows, closeSpxPct, deskEstimate, formatSvb, gaugeFraction, readout, spotVolTip } from "../src/vault-svb.js";
@@ -611,6 +613,32 @@ for (const source of CHART_SOURCES) {
 const softest = sectorChart("jpm", 7, "softest").bars.filter((bar) => bar.available);
 assert(softest[0].ticker === "XLF" && softest.every((bar, index) => !index || bar.points >= softest[index - 1].points), "Softest first sorts by percentile");
 assert(sectorChart("jpm", 7).bars.find((bar) => bar.ticker === "XLRE").available === false, "XLRE has no JPM column");
+const softestAll = sectorChart("jpm", 7, "softest").bars;
+assert(softestAll.at(-1).ticker === "XLRE" && softestAll.at(-1).available === false, "Softest first parks the JPM N/A (XLRE) at the end");
+assert(sectorChart("jpm", 7, "fund").bars.map((bar) => bar.ticker).join() === CANON.join(), "XLF → XLC keeps canonical order, including an unprinted XLRE");
+const latestAsOf = sectorAsOf(WEEKS.at(-1));
+assert(latestAsOf === "As of W43 · Fri Oct 23, 2026 CT", `latest sector as-of ${latestAsOf}`);
+assert(sectorAsOf(WEEKS[0]) === "As of W36 · Fri Sep 4, 2026 CT", `first sector as-of ${sectorAsOf(WEEKS[0])}`);
+assert(weekMark(WEEKS.at(-1)) === "W43" && weekMark(WEEKS[0]) === "W36", "week marks come from the series Fridays");
+for (const iso of WEEKS) {
+  const text = sectorAsOf(iso);
+  assert(text.startsWith("As of W") && text.endsWith(" CT") && text.includes(formatWeek(iso)), `as-of ${iso} → ${text}`);
+  assert(!/Data from|TBD|—/.test(text), `as-of must name the series week, got ${text}`);
+}
+assert(chartsPage.includes('id="sectors-asof"') && chartsPage.includes('id="sectors-week"'), "sectors card has an as-of line and a week slider");
+assert(chartsPage.includes(latestAsOf), "sectors card as-of matches the latest series Friday");
+assert(chartsPage.includes(`aria-valuetext="${latestAsOf}"`), "sectors week slider names the same as-of string");
+assert(!chartsPage.includes("Data from"), "charts page has no Data from placeholder");
+const chartsScript = readFileSync(join(root, "src/charts.js"), "utf8");
+const chartSvg = readFileSync(join(root, "src/chart-svg.js"), "utf8");
+const siteStyles = readFileSync(join(root, "src/styles.css"), "utf8");
+assert(chartsScript.includes('scrub.setAttribute("aria-valuetext", text)') && chartsScript.includes("sectorAsOf"), "sectors slider aria-valuetext tracks the as-of string");
+assert(!chartsScript.includes("Data from"), "charts script has no Data from placeholder");
+assert(chartSvg.includes('bar.dataset.state = "na"') && chartSvg.includes('value.textContent = "N/A"'), "missing sector print draws an N/A stub");
+assert(!chartSvg.includes('class: "pc-val" }, "—"'), "sector chart does not label a missing print with an em dash");
+assert(siteStyles.includes('.sec-bar[data-state="na"]') && siteStyles.includes("height: 72px !important"), "N/A stub is a 72px hatched bar");
+assert(siteStyles.includes("--sec-mid: #9e978c"), "light Mid band is #9e978c, distinct from the N/A fill");
+assert(siteStyles.includes("--sec-na-fill: #e8e4dc") && siteStyles.includes("--sec-na-outline: #8a857c"), "N/A stub uses the grey fill and outline");
 const broadChart = broadEquityChart(7);
 assert(broadChart.read.value === "0.66" && broadChart.read.house === "jpm", `broad equity chart ${broadChart.read.value}`);
 assert(JSON.stringify(broadChart.lines.find((line) => line.label === "Equities").path) === JSON.stringify(broadChart.read.pctPath), "broad equity chart is the monitor's Equities line");
