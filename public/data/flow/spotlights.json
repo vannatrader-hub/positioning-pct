@@ -1,10 +1,10 @@
 {
   "live": true,
-  "asOf": "2026-10-28",
-  "asOfStamp": "2026-10-28T08:30:00-05:00",
+  "asOf": "2026-11-01",
+  "asOfStamp": "2026-11-01T08:47:00-06:00",
   "barsThrough": "2026-10-27",
   "activeWindow": { "start": "2026-10-06", "end": "2026-10-28" },
-  "sourceNote": "Member Spotlight PDFs pulled 2026-10-28 (XYZ posted 2026-10-27 evening); no new close notes for GLD, FCX, or HOOD; V close from public X bank note 2026-10-12. Chart bars through the 2026-10-27 close.",
+  "sourceNote": "Status correction 2026-11-01 CT: GLD and FCX stopped out and moved to Closed. Desk closed both lines 2026-10-30 when the stock stops were hit. XYZ remains Active (posted 2026-10-27). HOOD remains Open. V close from public X bank note 2026-10-12. Chart bars through the 2026-10-27 close.",
   "sections": [
     {
       "id": "active",
@@ -41,63 +41,6 @@
             { "label": "B/E Dec OpEx", "price": 78.5 },
             { "label": "Short strike", "price": 85 },
             { "label": "Target", "price": 90 }
-          ]
-        },
-        {
-          "ticker": "GLD",
-          "name": "Gold Trust",
-          "title": "Precious Metals Divergence Set-Up Emerges a Second Time",
-          "published": "2026-10-20",
-          "status": "active",
-          "side": "calls",
-          "structure": "Long January $400 calls",
-          "entry": "Jan $400 calls @ $8 or better",
-          "debit": 8.0,
-          "spotAtPost": 377.5,
-          "stop": 367,
-          "target": 400,
-          "breakeven": 408,
-          "expiryNote": "January OpEx",
-          "timeframe": "3 months",
-          "idea": [
-            "A second precious-metals divergence set-up: a falling wedge with RSI divergence, sitting just under resistance.",
-            "A push back through $393 opens a run toward $400. The Spotlight uses January calls struck at that $400 target, about three months out."
-          ],
-          "recommendation": "Long GLD January $400 calls at $8 or better. Falling-wedge / RSI divergence setup under resistance, with a shot back through $393 toward $400.",
-          "levels": [
-            { "label": "Stop", "price": 367 },
-            { "label": "Spot at post", "price": 377.5 },
-            { "label": "Target", "price": 400 },
-            { "label": "B/E Jan OpEx", "price": 408 }
-          ]
-        },
-        {
-          "ticker": "FCX",
-          "name": "Freeport-McMoRan",
-          "title": "Upside Calls Cheap in Metals Leader for AI Buildout",
-          "published": "2026-10-14",
-          "status": "active",
-          "side": "calls",
-          "structure": "Long December $75 calls",
-          "entry": "Dec $75 calls @ $3.25 or better",
-          "debit": 3.25,
-          "spotAtPost": 69.2,
-          "stop": 63,
-          "target": 80,
-          "breakeven": 78.25,
-          "expiryNote": "December OpEx",
-          "timeframe": "2 months",
-          "idea": [
-            "A copper and metals leader framed as an AI-buildout supplier, with upside calls priced cheaply.",
-            "The stock pulled back into its anchored VWAP and 21-week EMA, retesting a range breakout. Exits are set on the stock: a $63 stop and an $80 target."
-          ],
-          "recommendation": "Long FCX December $75 calls at $3.25 or better. Pullback into AVWAP / 21-week EMA / range breakout retest; stock stop $63, stock target $80.",
-          "levels": [
-            { "label": "Stop", "price": 63 },
-            { "label": "Spot at post", "price": 69.2 },
-            { "label": "Strike", "price": 75 },
-            { "label": "B/E Dec OpEx", "price": 78.25 },
-            { "label": "Target", "price": 80 }
           ]
         }
       ]
@@ -145,6 +88,69 @@
       "hint": "Banked, stopped, or expired. Close notes come from live chat or X when posted; expiry closes a trade on its own.",
       "defaultOpen": false,
       "plays": [
+        {
+          "ticker": "GLD",
+          "name": "Gold Trust",
+          "title": "Precious Metals Divergence Set-Up Emerges a Second Time",
+          "published": "2026-10-20",
+          "closedAt": "2026-10-30",
+          "status": "closed",
+          "side": "calls",
+          "structure": "Long January $400 calls",
+          "entry": "Jan $400 calls @ $8 or better",
+          "debit": 8.0,
+          "spotAtPost": 377.5,
+          "stop": 367,
+          "target": 400,
+          "breakeven": 408,
+          "expiryNote": "January OpEx",
+          "timeframe": "3 months",
+          "outcome": "stopped",
+          "closeNote": "Stock stop $367 was hit · stopped out. Desk closed the line 2026-10-30.",
+          "idea": [
+            "A second precious-metals divergence set-up: a falling wedge with RSI divergence, sitting just under resistance.",
+            "A push back through $393 opens a run toward $400. The Spotlight uses January calls struck at that $400 target, about three months out."
+          ],
+          "recommendation": "Was long GLD January $400 calls at $8 or better. Falling-wedge / RSI divergence setup under resistance, with a shot back through $393 toward $400. Stopped out when the $367 stock stop was hit; desk closed the line 2026-10-30.",
+          "levels": [
+            { "label": "Stop", "price": 367 },
+            { "label": "Spot at post", "price": 377.5 },
+            { "label": "Target", "price": 400 },
+            { "label": "B/E Jan OpEx", "price": 408 }
+          ]
+        },
+        {
+          "ticker": "FCX",
+          "name": "Freeport-McMoRan",
+          "title": "Upside Calls Cheap in Metals Leader for AI Buildout",
+          "published": "2026-10-14",
+          "closedAt": "2026-10-30",
+          "status": "closed",
+          "side": "calls",
+          "structure": "Long December $75 calls",
+          "entry": "Dec $75 calls @ $3.25 or better",
+          "debit": 3.25,
+          "spotAtPost": 69.2,
+          "stop": 63,
+          "target": 80,
+          "breakeven": 78.25,
+          "expiryNote": "December OpEx",
+          "timeframe": "2 months",
+          "outcome": "stopped",
+          "closeNote": "Stock stop $63 was hit · stopped out. Desk closed the line 2026-10-30.",
+          "idea": [
+            "A copper and metals leader framed as an AI-buildout supplier, with upside calls priced cheaply.",
+            "The stock pulled back into its anchored VWAP and 21-week EMA, retesting a range breakout. Exits are set on the stock: a $63 stop and an $80 target."
+          ],
+          "recommendation": "Was long FCX December $75 calls at $3.25 or better. Pullback into AVWAP / 21-week EMA / range breakout retest; stock stop $63, stock target $80. Stopped out when the stock stop was hit; desk closed the line 2026-10-30.",
+          "levels": [
+            { "label": "Stop", "price": 63 },
+            { "label": "Spot at post", "price": 69.2 },
+            { "label": "Strike", "price": 75 },
+            { "label": "B/E Dec OpEx", "price": 78.25 },
+            { "label": "Target", "price": 80 }
+          ]
+        },
         {
           "ticker": "V",
           "name": "Visa",
