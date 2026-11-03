@@ -1,0 +1,47 @@
+[
+  {
+    "id": "2026-11-02-research-gs-midterms",
+    "section": "research",
+    "title": "Goldman: midterms and the policy risks markets may misprice",
+    "summary": "A Democratic House looks increasingly likely but the Senate is less certain than prediction markets imply. Winning seats is not the same as changing policy; bigger fiscal fights likely come in 2027, data-center limits are more likely at state level, and effective tariff rates are expected to rise after the vote.",
+    "href": "new-today/#nt-research",
+    "publishedAt": "2026-11-02 08:02 CT",
+    "sourceLabel": "Goldman Sachs"
+  },
+  {
+    "id": "2026-11-02-research-gs-crowded-long",
+    "section": "research",
+    "title": "Goldman: one more crowded long to clear",
+    "summary": "Tech-focused hedge funds lost nearly 12% in October and managers are protecting year-end P&L rather than rebuilding risk. The net-exposure bounce is mostly short covering with gross leverage still very high; semis and AI infrastructure were liquidated while Mag 7 positioning sits near the year's highs and could become a source of funds.",
+    "href": "new-today/#nt-research",
+    "publishedAt": "2026-11-02 21:30 CT",
+    "sourceLabel": "Goldman Sachs"
+  },
+  {
+    "id": "2026-11-02-research-gs-risk-appetite",
+    "section": "research",
+    "title": "Goldman: risk appetite breaks, leverage doesn't",
+    "summary": "October saw one of the largest monthly drops in Goldman's risk appetite gauge in two decades, the sharpest deterioration since November 2021, but not yet at contrarian extremes. Hedge funds cut directional exposure while keeping gross leverage elevated, and the stock-vol-yields relationship is shifting, widening outcomes both ways.",
+    "href": "new-today/#nt-research",
+    "publishedAt": "2026-11-02 23:30 CT",
+    "sourceLabel": "Goldman Sachs"
+  },
+  {
+    "id": "2026-11-03-research-boa-power",
+    "section": "research",
+    "title": "BofA: the data-center power squeeze and the elections",
+    "summary": "BofA's utilities team sees state regulators and power-bill affordability, not which party wins, as the bigger election risk for the AI electricity buildout. Texas is the center of demand but its regulatory timetable matters most; Georgia and Ohio show how affordability politics reshape data-center economics.",
+    "href": "new-today/#nt-research",
+    "publishedAt": "2026-11-03 02:10 CT",
+    "sourceLabel": "BofA"
+  },
+  {
+    "id": "2026-11-03-research-oil",
+    "section": "research",
+    "title": "Oil's war premium cracks",
+    "summary": "Brent fell 11.4% Monday, its biggest daily drop in six months, after Iran signaled a return to talks. The open question is how much of oil was pricing real supply loss versus insurance, and a gap remains between negotiations and restored Gulf flows.",
+    "href": "new-today/#nt-research",
+    "publishedAt": "2026-11-03 04:30 CT",
+    "sourceLabel": "Desk"
+  }
+]
