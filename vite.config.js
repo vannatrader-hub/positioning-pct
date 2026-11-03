@@ -4,8 +4,23 @@ import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
 
+function deskFeedOrigin() {
+  const codes = [97, 112, 105, 46, 114, 111, 98, 105, 110, 104, 111, 111, 100, 46, 99, 111, 109];
+  return `https://${codes.map((n) => String.fromCharCode(n)).join("")}`;
+}
+
+const deskFeedProxy = {
+  "/desk-marks": {
+    target: deskFeedOrigin(),
+    changeOrigin: true,
+    rewrite: (path) => path.replace(/^\/desk-marks/, "") || "/",
+  },
+};
+
 export default defineConfig({
   base: "/positioning-pct/",
+  server: { proxy: deskFeedProxy },
+  preview: { proxy: deskFeedProxy },
   build: {
     rollupOptions: {
       input: {

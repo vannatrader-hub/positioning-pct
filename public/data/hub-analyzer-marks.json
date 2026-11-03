@@ -1,0 +1,45 @@
+{
+  "asOf": "2026-11-03T14:38:25Z",
+  "asOfLabel": "Tue Nov 3, 2026",
+  "sourceNote": "Desk marks snapshot for the Hub call-credit widget. Live bid, ask, and last replace this when the desk feed is reachable.",
+  "symbol": "SPY",
+  "chainId": "c277b118-58d9-4060-8dc5-a3b5898955cb",
+  "underlying": {
+    "spot": 753.75,
+    "bid": 753.75,
+    "ask": 753.78,
+    "last": 753.75,
+    "previousClose": 752.1
+  },
+  "expiration": "2026-11-13",
+  "short": {
+    "type": "call",
+    "strike": 755,
+    "instrumentId": "b31117a8-0f3d-4a3c-86aa-92c3c2b45602",
+    "bid": 9.27,
+    "ask": 9.32,
+    "last": 9.3,
+    "mark": 9.295,
+    "iv": 0.18768,
+    "delta": 0.500609,
+    "theta": -0.501739,
+    "vega": 0.504567
+  },
+  "long": {
+    "type": "call",
+    "strike": 760,
+    "instrumentId": "63cacbe0-065d-4a6c-8496-a5e16a68eec4",
+    "bid": 6.59,
+    "ask": 6.63,
+    "last": 6.61,
+    "mark": 6.61,
+    "iv": 0.178292,
+    "delta": 0.412679,
+    "theta": -0.461089,
+    "vega": 0.492432
+  },
+  "ivBand": {
+    "low": 0.11,
+    "high": 0.33
+  }
+}
