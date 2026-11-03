@@ -2,8 +2,35 @@
   "timeZone": "America/Chicago",
   "dayStartsAt": "00:00",
   "dayStart": "2026-11-02T00:00:00-06:00",
-  "updatedAt": "2026-11-02T06:36:12-06:00",
+  "updatedAt": "2026-11-03T00:10:00-06:00",
   "items": [
+    {
+      "id": "2026-11-02-ubs-dollar",
+      "section": "options-flow",
+      "title": "UBS joins the $$$ Shopping List",
+      "summary": "2,700 Jan 2028 $52.5 calls bought (~$1.37M) on 10/1, still in open interest, and 1,450 Jan 2028 $60 straddles bought 9/9; spot about $48.45 near the 200-day and year-to-date VWAP. Desk sees a durable 2027 earnings story as merger integration costs roll off, with the Swiss capital rule as the main overhang.",
+      "href": "options-flow/dollar/#UBS",
+      "publishedAt": "2026-11-02T19:49:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-02-wfc-flow",
+      "section": "options-flow",
+      "title": "WFC ($$): Nov $88 calls bought",
+      "summary": "1,650 Nov $88 calls bought at $0.71 on 11/2, 3,000 June $90 calls bought 9/22 at $6.10 still open, and 1,800 Jan 2028 $70 short puts building in open interest; spot about $85.90 after reclaiming the 50- and 200-day. Desk prefers short puts near $78 support; a break over ~$92 opens ~$98.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-02T18:00:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-02-w-flow",
+      "section": "options-flow",
+      "title": "W ($$): June 2027 $105/$85 bull put spreads",
+      "summary": "2,500 June 2027 $105/$85 bull put spreads opened near $8 credit on 10/28 and 2,500 Jan $115 calls bought 9/29; spot about $113.10 just off a new high, earnings 11/4. Desk likes June bull put spreads near the 50-day (~$105).",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-02T17:59:00-06:00",
+      "sourceLabel": "Desk"
+    },
     {
       "id": "2026-11-02-research-gs-hf-book",
       "section": "research",
