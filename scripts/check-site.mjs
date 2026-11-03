@@ -1021,7 +1021,8 @@ assert(itemsForDay(nt.items ?? [], "2026-10-29").length === 20, "Oct 29 desk day
 assert(itemsForDay(nt.items ?? [], "2026-10-30").length === 3, "Oct 30 desk day lists the morning research note, the W44 pack, and the vol stress print");
 assert(itemsForDay(nt.items ?? [], "2026-10-31").length === 1, "Oct 31 desk day lists the EXE shopping-list alert");
 assert(itemsForDay(nt.items ?? [], "2026-11-01").length === 2, "Nov 1 desk day lists the ABBV and CNC featured alerts");
-assert(itemsForDay(nt.items ?? [], "2026-11-02").length === 8, "Nov 2 desk day lists the UBS, W, and WFC flow alerts plus the morning research notes");
+assert(itemsForDay(nt.items ?? [], "2026-11-02").length === 11, "Nov 2 desk day lists the UBS, W, and WFC flow alerts plus the morning and evening research notes");
+assert(itemsForDay(nt.items ?? [], "2026-11-03").length === 2, "Nov 3 desk day lists the pre-open research notes");
 const ntReadme = readFileSync(join(root, "README.md"), "utf8");
 assert(ntReadme.includes("npm run new-today:pack"), "README shows the New Today pack command");
 assert(ntReadme.includes("Midnight auto-ship") && ntReadme.includes("6:30 AM CT") && ntReadme.includes("Afternoon auto-ship"), "README tells midnight, morning, and afternoon auto-ship to run the same pack");
