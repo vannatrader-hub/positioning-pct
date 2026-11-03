@@ -1,8 +1,34 @@
 {
-  "asOf": "2026-10-31",
-  "asOfLabel": "Mon Nov 2, 2026 pre-market · EXE quote Fri Oct 30 close; earlier names through Thu Oct 29 close",
-  "window": "Last 3 weeks · Oct 13 – Oct 31, 2026",
+  "asOf": "2026-11-02",
+  "asOfLabel": "Tue Nov 3, 2026 pre-market · UBS quote Mon Nov 2 close; earlier names through Fri Oct 30 close",
+  "window": "Last 3 weeks · Oct 13 – Nov 2, 2026",
   "plays": [
+    {
+      "id": 43951,
+      "ticker": "UBS",
+      "exchange": "NYSE",
+      "name": "UBS Group",
+      "industry": { "broad": "Financials", "focus": "Wealth management · global bank" },
+      "date": "2026-11-02",
+      "alertedAtCt": "2026-11-02 07:49 PM CT",
+      "title": "Long-Dated Calls in a Wealth-Led Global Bank Near the 200-Day",
+      "confidence": "$$$",
+      "refPrice": 48.45,
+      "flow": [
+        "UBS saw 2,700 January 2028 $52.5 calls bought for about $1.37M on 10/1, still in open interest, and 1,450 January 2028 $60 straddles bought on 9/9.",
+        "UBS is a wealth-led global bank where merger integration costs are rolling off as fee and lending growth builds. Shares have based near the 200-day and year-to-date VWAP. The reference price is about $48.45."
+      ],
+      "customerPurchased": [
+        { "contract": "Jan 2028 $52.5 calls", "detail": "2,700 bought · ~$1.37M · 10/1", "side": "calls_bought" }
+      ],
+      "oi": [
+        { "contract": "Jan 2028 $52.5 calls", "detail": "2,700 still in open interest · bought 10/1" },
+        { "contract": "Jan 2028 $60 straddles", "detail": "1,450 bought 9/9" }
+      ],
+      "recommendation": "UBS is a durable 2027 earnings story the desk wants, with the Swiss capital rule as the main overhang and catalyst.",
+      "lead": { "type": "call", "action": "bought", "qty": 2700, "strike": 52.5, "expiry": "January 2028", "price": null },
+      "quote": { "date": "2026-11-02", "last": 48.48, "prev": 47.69 }
+    },
     {
       "id": 44031,
       "ticker": "EXE",
