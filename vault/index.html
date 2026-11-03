@@ -10,7 +10,7 @@
     />
     <meta name="theme-color" content="#f3f1ec" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
-    <script>(function(){var d=document.documentElement,t;try{t=localStorage.getItem("p-theme");if(t!=="light"&&t!=="dark"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";localStorage.setItem("p-theme",t)}}catch(e){t=t==="dark"?"dark":"light"}d.dataset.theme=t})();</script>
+    <script>(function(){var d=document.documentElement,t;try{t=localStorage.getItem("p-theme");if(t!=="light"&&t!=="dark"){t="light";localStorage.setItem("p-theme",t)}}catch(e){t=t==="dark"?"dark":"light"}d.dataset.theme=t})();</script>
     <link rel="stylesheet" href="/src/styles.css" />
     <script type="module" src="/src/theme.js"></script>
     <script type="module" src="/src/vault-gate.js"></script>
@@ -183,13 +183,13 @@
                 <h2>Vol · Credit · Momentum</h2>
                 <p>
                   Vol Stress on a daily close line, beside Credit Spread Regime and the MAG7 Oscillator. NY and Nasdaq
-                  Summation sit underneath, then cumulative new highs minus new lows and the advance−decline line.
+                  Summation sit underneath, then Nasdaq % stocks above the 5-, 20-, 50-, and 200-day averages, then cumulative new highs minus new lows and the advance−decline line.
                 </p>
                 <ul class="hub-facts">
                   <li>Vol Stress · ≥ 2 · session closes</li>
                   <li>Credit Spread Regime · FRED ICE BofA OAS · daily</li>
                   <li>MAG7 · equal weight · 14-day momentum</li>
-                  <li>NY · Nasdaq Summation · 1Y daily · 10Y range</li>
+                  <li>NY · Nasdaq Summation · Nasdaq % above MA · daily · 10Y range</li>
                 </ul>
                 <span class="open">Open the wall <span class="arrow" aria-hidden="true">→</span></span>
               </a>

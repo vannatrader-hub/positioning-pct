@@ -87,6 +87,10 @@ export function statusLines(files) {
     const named = {
       nysi: "NY Summation",
       nasi: "Nasdaq Summation",
+      ncfd: "Nasdaq 5-day",
+      ndtw: "Nasdaq-100 20-day",
+      ncfi: "Nasdaq 50-day",
+      ncth: "Nasdaq 200-day",
       nyhl: "NY Highs − Lows",
       nyad: "NY Advance − Decline",
     };
@@ -126,6 +130,10 @@ function cardList() {
         ["mag7", "MAG7 Oscillator"],
         ["nysi", "NY Summation"],
         ["nasi", "Nasdaq Summation"],
+        ["ncfd", "Nasdaq 5-day"],
+        ["ndtw", "Nasdaq-100 20-day"],
+        ["ncfi", "Nasdaq 50-day"],
+        ["ncth", "Nasdaq 200-day"],
       ];
 }
 

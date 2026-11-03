@@ -2,6 +2,7 @@
  * Market Health Snapshot — weekly Soft ↔ Crowded board.
  * Cells come from the vault engine. Put/Call stays Demo. Global fund,
  * Sharpies, and NAAIM are as-of Desk proxies, not percentiles.
+ * Nasdaq 5/20/50/200-day boxes use that series’ historical percentile.
  */
 
 import { buildMarketHealth, MARKET_HEALTH_TIP } from "./market-health-engine.js";
@@ -17,6 +18,10 @@ const VAULT_FILES = {
   mag7: "mag7/oscillator.json",
   nysi: "breadth/nysi.json",
   nasi: "breadth/nasi.json",
+  ncfd: "breadth/ncfd.json",
+  ndtw: "breadth/ndtw.json",
+  ncfi: "breadth/ncfi.json",
+  ncth: "breadth/ncth.json",
   nyad: "breadth/nyad.json",
   nyhl: "breadth/nyhl.json",
   spx: "breadth/spx.json",

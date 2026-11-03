@@ -15,7 +15,7 @@ import { PRODUCT_FEEDS } from "../src/product-feeds.js";
 import { errorCopy, nextStep } from "../src/vault-signin.js";
 import { NT_SECTIONS, PUBLIC_NT_SECTIONS, SOURCE_LABELS, deskDay, deskDayStart, deskWindow, itemsForDay, publicDeskItems, windowLabel } from "../src/new-today-window.js";
 import { itemFromSoftCrowded, itemFromVolStress, planNewToday, runSelfTest, scrubCopy } from "./new-today-pack.mjs";
-import { BUY_LINE, DEFAULT_MONTHS, MAX_MONTHS, RANGES, averageCrosses, averageOf, breadthRead, dayChange, monthsBack, sma as breadthSma, windowStart as breadthWindowStart } from "../src/breadth.js";
+import { BUY_LINE, CROWDED_PCTILE, DEFAULT_MONTHS, MAX_MONTHS, PCT_RAILS, RANGES, SOFT_PCTILE, averageCrosses, averageOf, breadthRead, bucketPctile, dayChange, monthsBack, percentileRank, pctileOrdinal, pctileRead, sma as breadthSma, windowStart as breadthWindowStart } from "../src/breadth.js";
 import { CSR_PARAMS, biasOf, csrPanel, csrSeries, cycleOf, panelText, regimeOf as csrRegimeOf, zColor } from "../src/csr.js";
 import { buildPulse, creditChip, cushionOf, runwayMarker } from "../src/pulse-pack.js";
 import { DEFAULTS as MAG7_DEFAULTS, MAG7, TYPES as MAG7_TYPES, buildOscillator, fmtPct, momentum, panelAt, rangeStart, regimeOf, sma } from "../src/mag7-osc.js";
@@ -944,7 +944,7 @@ assert(
 assert(JSON.stringify(PUBLIC_NT_SECTIONS.map((section) => section.id)) === '["positioning","spx","research"]', "public New Today drops Options Flow");
 assert(publicDeskItems([{ section: "options-flow" }, { section: "positioning" }]).length === 1, "public desk items keep Positioning and drop Options Flow");
 assert(homePage.includes('class="nt-chip"') && homePage.includes('data-public="1"'), "Dashboard home shows the public New Today chip");
-for (const id of ["spot-vol-beta", "credit-spread-regime", "mag7", "nysi", "nasi"]) {
+for (const id of ["spot-vol-beta", "credit-spread-regime", "mag7", "nysi", "nasi", "ncfd", "ndtw", "ncfi", "ncth"]) {
   assert(homePage.includes(`id="${id}"`), `Dashboard shows the ${id} wall widget`);
 }
 assert(homePage.includes('src="/src/vault-wall.js"') && homePage.includes('src="/src/vault-breadth.js"'), "Dashboard runs the wall widgets");
@@ -957,6 +957,10 @@ const mhLabels = [
   "Sharpies / COT",
   "NY Summation",
   "Nasdaq Summation",
+  "Nasdaq 5-day",
+  "Nasdaq-100 20-day",
+  "Nasdaq 50-day",
+  "Nasdaq 200-day",
   "NYAD",
   "NYHL",
   "Put / Call",
@@ -978,7 +982,7 @@ assert(homePage.includes("MARKET HEALTH SNAPSHOT · as of Fri Oct 30, 2026 close
 assert(!homePage.includes("Demo pattern"), "the snapshot no longer calls the whole board a demo pattern");
 assert(homePage.includes("Green = buy index funds / possible bottom · Grey = mid · Red = crowded / don’t add."), "snapshot one-liner uses the buy-index voice");
 assert(homePage.includes("Buy index / possible bottom") && homePage.includes(">Mid<") && homePage.includes("Crowded / don’t add"), "snapshot pills use the buy-index voice");
-assert(homePage.includes("Desk read · not a forecast · Put/Call stays Demo · Global fund, Sharpies, and NAAIM are Desk proxies"), "snapshot footnote names Demo and the Desk proxies");
+assert(homePage.includes("Desk read · not a forecast · Put/Call stays Demo · Global fund, Sharpies, and NAAIM are Desk proxies · Nasdaq % above MA uses that series’ historical percentile (soft ≤20th, crowded ≥80th)"), "snapshot footnote names Demo, Desk proxies, and Nasdaq percentile bands");
 assert(homePage.includes('src="/src/market-health.js"') && !homePage.includes('data-demo="true"'), "Dashboard mounts the live board");
 assert(!homePage.includes("PREVIEW MOCK") && !homePage.includes("NOT SHIPPED"), "the preview banner stays off the Dashboard");
 const mhCss = css.slice(css.indexOf("/* Market Health Soft-boxes"));
@@ -1687,7 +1691,7 @@ assert(
 );
 assert(!/id="mag7"|mo-pane|wall-grid|wall-slot/.test(wallOutside), "wall content does not render outside the template");
 const wallOrder = [...wallTemplate.matchAll(/<article class="[^"]*" id="([^"]+)"/g)].map((match) => match[1]);
-assert(JSON.stringify(wallOrder) === '["spot-vol-beta","credit-spread-regime","mag7","nysi","nasi","nyhl","nyad"]', `wall order ${wallOrder}`);
+assert(JSON.stringify(wallOrder) === '["spot-vol-beta","credit-spread-regime","mag7","nysi","nasi","ncfd","ndtw","ncfi","ncth","nyhl","nyad"]', `wall order ${wallOrder}`);
 for (const id of ["mo-controls", "mo-pane", "mo-plot", "mo-legend", "mo-table", "mo-now", "mo-basis"]) assert(wallTemplate.includes(`id="${id}"`), `MAG7 card keeps #${id}`);
 assert(wallTemplate.includes("Caution +9") && wallTemplate.includes("Stretched −5"), "MAG7 key names the caution and stretched lines");
 assert(wallTemplate.includes("Bullish above +2") && wallTemplate.includes("Bearish below −2"), "MAG7 key names the ±2 signal thresholds");
@@ -2050,7 +2054,14 @@ assert(css.includes(".svb-close-table") && css.includes(".svb-origin.is-seed"), 
 
 /* Breadth cards on the same wall: NY and Nasdaq Summation, 1Y / 1D default, 10Y range, −1000 buy line. */
 assert(wallPage.includes('src="/src/vault-breadth.js"'), "wall page runs the breadth cards");
-for (const [id, label] of [["nysi", "NY Summation"], ["nasi", "Nasdaq Summation"]]) {
+for (const [id, label] of [
+  ["nysi", "NY Summation"],
+  ["nasi", "Nasdaq Summation"],
+  ["ncfd", "Nasdaq 5-day"],
+  ["ndtw", "Nasdaq-100 20-day"],
+  ["ncfi", "Nasdaq 50-day"],
+  ["ncth", "Nasdaq 200-day"],
+]) {
   assert(wallTemplate.includes(`<article class="pchart is-wide bw-card" id="${id}" data-breadth="${id}"`), `wall carries the ${label} card`);
   assert(wallTemplate.includes(`>${label}</h2>`) && wallTemplate.includes(`<a href="#${id}">${label}</a>`), `wall names ${label} and links it from the subnav`);
 }
@@ -2063,7 +2074,7 @@ assert(monthsBack("2026-10-29", 12) === "2025-10-29" && monthsBack("2026-03-31",
 const breadthDir = join(root, "public/data/vault/breadth");
 const breadthIndex = JSON.parse(readFileSync(join(breadthDir, "index.json"), "utf8"));
 assert(breadthIndex.period === "1D" && breadthIndex.defaultRangeMonths === 12 && breadthIndex.maxRangeMonths === 120, "wall index: daily, 1Y default, 10Y range");
-assert(JSON.stringify(breadthIndex.charts.map((chart) => chart.id)) === '["nysi","nasi","nyhl","nyad"]' && breadthIndex.overlay.id === "spx", "wall charts are NYSI, NASI, NYHL, and NYAD over SPX");
+assert(JSON.stringify(breadthIndex.charts.map((chart) => chart.id)) === '["nysi","nasi","ncfd","ndtw","ncfi","ncth","nyhl","nyad"]' && breadthIndex.overlay.id === "spx", "wall charts are NYSI, NASI, the Nasdaq % above MA stack, NYHL, and NYAD over SPX");
 const breadthSpx = JSON.parse(readFileSync(join(breadthDir, breadthIndex.overlay.file), "utf8"));
 const breadthDocs = Object.fromEntries(breadthIndex.charts.map((chart) => [chart.id, JSON.parse(readFileSync(join(breadthDir, chart.file), "utf8"))]));
 const breadthWant = {
@@ -2104,6 +2115,32 @@ for (const [id, spec] of [
   const crosses = averageCrosses(doc.bars.map((bar) => bar.c), avg);
   assert(crosses.some((cross) => cross.side === "above") && crosses.some((cross) => cross.side === "below"), `${id} marks crosses above and below the average`);
 }
+
+const pctWant = {
+  ncfd: { label: "Nasdaq 5-day", symbol: "NCFD", window: 5, universe: "nasdaq-comp", close: 38.87, months: 24 },
+  ndtw: { label: "Nasdaq-100 20-day", symbol: "NDTW", window: 20, universe: "nasdaq-100", close: 50.51, months: 60 },
+  ncfi: { label: "Nasdaq 50-day", symbol: "NCFI", window: 50, universe: "nasdaq-comp", close: 33.98, months: 24 },
+  ncth: { label: "Nasdaq 200-day", symbol: "NCTH", window: 200, universe: "nasdaq-comp", close: 37.71, months: 60 },
+};
+assert(JSON.stringify(PCT_RAILS) === "[20,40,60,80]" && SOFT_PCTILE === 20 && CROWDED_PCTILE === 80, "participation rails and Soft/Crowded %ile bands are 20 / 80");
+assert(percentileRank([10, 20, 30, 40, 50], 10) === 10 && percentileRank([10, 20, 30, 40, 50], 50) === 90, "percentile rank counts ties as half");
+assert(bucketPctile(20) === "soft" && bucketPctile(20.01) === "mid" && bucketPctile(80) === "crowded", "Soft is ≤20th %ile and Crowded is ≥80th %ile");
+assert(pctileOrdinal(20) === "20th" && pctileOrdinal(21) === "21st" && pctileOrdinal(12) === "12th", "percentile ordinals keep 11–13 as th");
+for (const [id, want] of Object.entries(pctWant)) {
+  const doc = breadthDocs[id];
+  assert(doc.kind === "pct-above-ma" && doc.symbol === want.symbol && doc.label === want.label && doc.window === want.window, `${id} is the participation pane`);
+  assert(doc.universe === want.universe && JSON.stringify(doc.rails) === "[20,40,60,80]" && doc.softPctile === 20 && doc.crowdedPctile === 80, `${id} keeps 20/80 Soft/Crowded bands`);
+  assert(doc.defaultRangeMonths === want.months && doc.asOf === "2026-11-02" && doc.bars.at(-1).t === "2026-11-02" && doc.bars.at(-1).c === want.close, `${id} last ${doc.bars.at(-1)?.c} on ${doc.bars.at(-1)?.t}`);
+  assert(doc.provenance?.kind === "desk-computed" && doc.provenance.feedSymbol === `$${want.symbol}` && !/tradingview|darkmatter|optionshawk/i.test(JSON.stringify(doc)), `${id} is a desk-computed series with a feed replacement path`);
+  assert(doc.bars.length >= 1500 && doc.bars.every((bar, i) => /^\d{4}-\d{2}-\d{2}$/.test(bar.t) && bar.c >= 0 && bar.c <= 100 && (i === 0 || bar.t > doc.bars[i - 1].t)), `${id} is a dated 0–100 series`);
+  assert(breadthWindowStart(doc.bars, MAX_MONTHS) >= 0 && doc.bars[breadthWindowStart(doc.bars, MAX_MONTHS)].t <= monthsBack("2026-11-02", 120), `${id} covers ten years`);
+  const read = pctileRead(doc);
+  assert(read.close === want.close && read.date === "2026-11-02" && Number.isFinite(read.pctile) && bucketPctile(read.pctile) === read.state, `${id} card read uses this series’ historical %ile`);
+}
+assert(pctileRead(breadthDocs.ncfi).state === "soft" && pctileRead(breadthDocs.ncfi).pctile <= 20, "Nov 2 Nasdaq 50-day sits in the left-tail %ile (Soft)");
+assert(pctileRead(breadthDocs.ncfd).state === "mid", "Nov 2 Nasdaq 5-day is mid, not a raw-level washout");
+assert(readFileSync(join(root, "scripts/pull-breadth.mjs"), "utf8").includes("$NCFD") && readFileSync(join(root, "scripts/pull-breadth.mjs"), "utf8").includes("PCT_IDS"), "the breadth pull refreshes NCFD / NDTW / NCFI / NCTH and leaves NYHL / NYAD in place");
+assert(packageJson.scripts["seed:nasdaq-ma"] === "node scripts/seed-nasdaq-ma.mjs", "npm run seed:nasdaq-ma rebuilds the computed participation series");
 
 /* Vault portfolio: personal book, gated like the other Vault pages. Open lines are still held. */
 const bookFile = "vault/portfolio/index.html";
@@ -2346,18 +2383,18 @@ assert(css.includes(".archive-entry") && css.includes(".archive-gap") && css.inc
 
 assert(breadthSpx.bars.find((bar) => bar.t === "2026-10-29")?.c === 7720.39, "wall SPX Oct 29 close 7720.39");
 const breadthJs = readFileSync(join(root, "src/vault-breadth.js"), "utf8");
-for (const piece of ["data/vault/breadth/", 'input.type = "range"', "MAX_MONTHS", "BUY ", "buyLine", "$SPX", "MA(", "directionRuns", "[data-breadth]", "onDeskReady", "bw-cross"]) {
+for (const piece of ["data/vault/breadth/", 'input.type = "range"', "MAX_MONTHS", "BUY ", "buyLine", "$SPX", "MA(", "directionRuns", "[data-breadth]", "onDeskReady", "bw-cross", "pct-above-ma", "PCT_LINE"]) {
   assert(breadthJs.includes(piece), `breadth cards render ${piece}`);
 }
-for (const file of ["src/vault-breadth.js", "src/breadth.js", "scripts/pull-breadth.mjs"]) {
+for (const file of ["src/vault-breadth.js", "src/breadth.js", "scripts/pull-breadth.mjs", "scripts/seed-nasdaq-ma.mjs"]) {
   const text = readFileSync(join(root, file), "utf8");
-  assert(!/stockcharts|<img\b|<iframe|©/i.test(text), `${file} carries chart-vendor branding or an embed`);
+  assert(!/stockcharts|<img\b|<iframe|©|tradingview|darkmatter|optionshawk/i.test(text), `${file} carries chart-vendor branding or an embed`);
 }
 
-/* Light + dark: stored choice wins; the OS preference only seeds the first visit. */
+/* Light + dark: stored choice wins; first visit with nothing stored is always light. */
 assert(THEME_KEY === "p-theme" && THEMES.join() === "light,dark", "theme persists under p-theme as light | dark");
-assert(resolveTheme("dark", false) === "dark" && resolveTheme("light", true) === "light", "a stored theme beats the OS preference");
-assert(resolveTheme(null, true) === "dark" && resolveTheme(null, false) === "light" && resolveTheme("sepia", true) === "dark", "first visit falls back to prefers-color-scheme");
+assert(resolveTheme("dark", false) === "dark" && resolveTheme("light", true) === "light", "a stored theme beats the first-visit default");
+assert(resolveTheme(null, true) === "light" && resolveTheme(null, false) === "light" && resolveTheme("sepia", true) === "light", "first visit defaults to light");
 assert(THEME_PAGE.light === "#f3f1ec" && THEME_PAGE.dark === "#161410", "theme-color follows the page token");
 const lightBlock = css.match(/:root,\s*\[data-theme="light"\] \{([^}]*)\}/)?.[1] ?? "";
 const darkBlock = css.match(/@media screen \{\s*:root\[data-theme="dark"\] \{([^}]*)\}/)?.[1] ?? "";
@@ -2370,6 +2407,8 @@ for (const file of viteInputs) {
   if (!html.includes('href="/src/styles.css"')) continue;
   const boot = html.indexOf('localStorage.getItem("p-theme")');
   assert(boot > -1 && boot < html.indexOf('href="/src/styles.css"'), `${file} sets data-theme before the stylesheet paints`);
+  assert(html.includes('if(t!=="light"&&t!=="dark"){t="light";localStorage.setItem("p-theme",t)}'), `${file} first-visit boot is light`);
+  assert(!html.includes("prefers-color-scheme"), `${file} boot does not follow the OS color scheme`);
   assert(html.includes('<script type="module" src="/src/theme.js"></script>'), `${file} loads the theme toggle`);
   if (!html.includes('class="topbar"')) continue;
   const toggles = html.match(/<div class="theme-toggle" role="group" aria-label="Theme">[\s\S]*?<\/div>/g) ?? [];
@@ -2450,6 +2489,10 @@ const mhDocs = {
   mag7: oscDoc,
   nysi: breadthDocs.nysi,
   nasi: breadthDocs.nasi,
+  ncfd: breadthDocs.ncfd,
+  ndtw: breadthDocs.ndtw,
+  ncfi: breadthDocs.ncfi,
+  ncth: breadthDocs.ncth,
   nyad: breadthDocs.nyad,
   nyhl: breadthDocs.nyhl,
   spx: breadthSpx,
@@ -2457,7 +2500,7 @@ const mhDocs = {
 const mhBoard = buildMarketHealth(mhDocs);
 const mhRow = (id) => mhBoard.rows.find((row) => row.id === id);
 const mhAtWeek = (id, week) => mhRow(id).cells[MARKET_HEALTH_WEEKS.indexOf(week)];
-assert(mhBoard.rows.length === 13 && mhBoard.rows.every((row) => row.cells.length === 16), "the engine paints 13 rows and 16 weeks");
+assert(mhBoard.rows.length === 17 && mhBoard.rows.every((row) => row.cells.length === 16), "the engine paints 17 rows and 16 weeks");
 assert(mhAtWeek("soft-vol", 29).state === "soft" && mhAtWeek("soft-vol", 29).tip.includes("+3.74"), "W29 VIX surge is green on Soft Vol");
 assert(mhAtWeek("soft-vol", 33).state === "crowded" && mhAtWeek("soft-vol", 39).state === "crowded", "calm September VIX stays crowded");
 assert(mhAtWeek("soft-vol", 42).state === "soft-extreme" && mhAtWeek("soft-vol", 42).tip.includes("−1.0"), "W42 surge stays green and names the filed residual");
@@ -2472,7 +2515,10 @@ assert(mhAtWeek("credit", 30).state === "mid", "tight credit without an extended
 assert(mhAtWeek("spx-ema", 32).state === "crowded-extreme" && mhAtWeek("spx-ema", 29).state === "crowded", "SPX above both weekly EMAs stays crowded");
 assert(mhAtWeek("spx-ema", 42).state === "mid", "the W42 dip under the 8-week EMA is mid, including through the VIX surge");
 assert(mhAtWeek("nysi", 29).state === "crowded" && mhAtWeek("nysi", 40).state === "soft-extreme" && mhAtWeek("nysi", 42).state === "mid", "NY summation distinguishes a high line, a washout, and a rebound");
-for (const id of ["mag7", "credit", "spx-ema", "nysi", "nasi", "nyad", "nyhl", "global-fund", "sharpies"]) {
+assert(mhAtWeek("ncfd", 42).state === "soft" && mhAtWeek("ncfd", 42).tip.includes("%ile") && mhAtWeek("ncfd", 44).state === "mid", "Nasdaq 5-day Soft-box uses this series’ %ile, not raw 20/80");
+assert(mhAtWeek("ncfi", 42).state === "soft" && mhAtWeek("ncfi", 44).state === "soft" && mhAtWeek("ncth", 42).state === "soft", "left-tail %ile of 50-day and 200-day participation is Soft");
+assert(mhAtWeek("ndtw", 37).state === "soft" && mhAtWeek("ndtw", 32).state === "mid", "Nasdaq-100 20-day only goes Soft in the left tail");
+for (const id of ["mag7", "credit", "spx-ema", "nysi", "nasi", "ncfd", "ndtw", "ncfi", "ncth", "nyad", "nyhl", "global-fund", "sharpies"]) {
   assert(mhRow(id).cells.every((cell) => cell.base == null || cell.state === cell.base), `${id} is not leaned green by vol or credit stress`);
 }
 const fund = mhRow("global-fund");

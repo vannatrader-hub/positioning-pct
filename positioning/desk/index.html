@@ -10,7 +10,7 @@
     />
     <meta name="theme-color" content="#f3f1ec" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
-    <script>(function(){var d=document.documentElement,t;try{t=localStorage.getItem("p-theme");if(t!=="light"&&t!=="dark"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";localStorage.setItem("p-theme",t)}}catch(e){t=t==="dark"?"dark":"light"}d.dataset.theme=t})();</script>
+    <script>(function(){var d=document.documentElement,t;try{t=localStorage.getItem("p-theme");if(t!=="light"&&t!=="dark"){t="light";localStorage.setItem("p-theme",t)}}catch(e){t=t==="dark"?"dark":"light"}d.dataset.theme=t})();</script>
     <link rel="stylesheet" href="/src/styles.css" />
     <script type="module" src="/src/theme.js"></script>
   </head>

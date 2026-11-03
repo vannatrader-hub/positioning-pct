@@ -5450,7 +5450,8 @@ a.archive-item-title:hover { text-decoration: underline; }
   .csr-panel th, .csr-panel td { text-align: left; }
 }
 
-/* Wall breadth cards: NY and Nasdaq Summation in end-of-day chart frames on a light canvas. */
+/* Wall breadth cards: NY and Nasdaq Summation, plus Nasdaq % stocks-above-MA,
+   in end-of-day chart frames on a light canvas. */
 .bw-card { gap: 14px; scroll-margin-top: 88px; }
 .bw-card .pchart-head h2 { margin-top: 8px; }
 
@@ -5553,6 +5554,10 @@ a.archive-item-title:hover { text-decoration: underline; }
   border-radius: 4px;
   color: #111111;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.bw-frame.is-pct {
+  background: #ffffff;
 }
 
 .bw-head {
