@@ -10,7 +10,7 @@ Public sources are bank labels only: JPM, Morgan Stanley, BoA, GS, and a desk co
 
 Two surfaces, switched from the `Dashboard | Vault` control in every topbar. `/insight/` only tells the reader the old surface moved, then opens the Dashboard.
 
-- Dashboard (`/`). Public, no login. Positioning hub, the Soft ↔ Crowded desk, the six charts, trade ideas, a New Today chip, the Market Health Snapshot (a weekly Soft ↔ Crowded color board under the Pulse read; the cells are a demo pattern until the breadth series is wired), and the vol wall widgets on the page: Vol Stress, Credit Spread Regime, the MAG7 Oscillator, NY and Nasdaq Summation, NY Highs − Lows, and NY Advance − Decline. Options Flow, Spotlights, and Portfolio are not on this surface. SPX Levels is an unlinked placeholder.
+- Dashboard (`/`). Public, no login. Positioning hub, the Soft ↔ Crowded desk, the six charts, trade ideas, a New Today chip, the Market Health Snapshot (a weekly Soft ↔ Crowded color board under the Pulse read), and the vol wall widgets on the page: Vol Stress, Credit Spread Regime, the MAG7 Oscillator, NY and Nasdaq Summation, Nasdaq % stocks above the 5 / 20 / 50 / 200-day averages, NY Highs − Lows, and NY Advance − Decline. The first visit opens in light; the toggle keeps an explicit stored dark choice. Options Flow, Spotlights, and Portfolio are not on this surface. SPX Levels is an unlinked placeholder.
 - Vault (`/vault/`). Behind a sign-in wall. Signed out, the page shows one centered card ("Sign in to open Vault", email and password fields, a disabled "Create account · Coming soon", and a link back to Dashboard) and nothing else. Signed in, it has everything on the Dashboard plus Options Flow (`/options-flow/`, Shopping List, Spotlights, and the scorecard), the Desk mock book (`/vault/portfolio/`), the Soft ↔ Crowded weekly pack (`/vault/soft-crowded/`), and the desk-day archive (`/vault/archive/`). The full wall page remains at `/vault/vol-credit-momentum/`. Three preview tiles open short Coming soon notes (`/coming-soon/`). It has its own darker theme scoped under `body.is-vault`. Sign-in is email and password for allowlisted emails only (`src/vault-allowlist.js`), and there is no checkout. See [Vault sign-in](#vault-sign-in).
 
 **Access model:**
@@ -169,16 +169,22 @@ The MAG7 Oscillator card:
 
 Card copy uses Desk labels only. The cards are redrawn from committed data: no embedded chart widget, no third-party indicator source in the repo. `npm run check` fails on either.
 
-The breadth cards on the same wall (`#nysi`, `#nasi`) are two end-of-day charts, NY Summation (NYSI) and Nasdaq Summation (NASI), the ratio-adjusted McClellan Summation Index for each exchange. Each chart frame follows the familiar EOD layout: symbol and name header with Open / High / Low / Close / Chg for the hovered session, an SPX pane on top for context, the summation line drawn black on rising sessions and red on falling ones, MA(8), right-axis value tags, and a horizontal **buy line at −1000** marked `BUY`. Defaults are daily bars (1D) over one year; presets (3M to 10Y) and a range slider run the window out to ten years, and the SPX pane can be hidden. `src/breadth.js` holds the math (MA, windows, ticks) and `src/vault-breadth.js` draws the SVG into the wall's `[data-breadth]` cards. Cards use desk labels only; no chart-vendor branding.
+The breadth cards on the same wall (`#nysi`, `#nasi`) are two end-of-day charts, NY Summation (NYSI) and Nasdaq Summation (NASI), the ratio-adjusted McClellan Summation Index for each exchange. Each chart frame follows the familiar EOD layout: symbol and name header with Open / High / Low / Close / Chg for the hovered session, an SPX pane on top for context, the summation line drawn black on rising sessions and red on falling ones, MA(8), right-axis value tags, and a horizontal **buy line at −1000** marked `BUY`. Defaults are daily bars (1D) over one year; presets (3M to 10Y) and a range slider run the window out to ten years, and the SPX pane can be hidden.
 
-Data lives in `public/data/vault/breadth/`: `index.json` (as-of date, `period`, `defaultRangeMonths`, `maxRangeMonths`, chart list), `nysi.json` and `nasi.json` (label, title, `ma`, `buyLine`, and daily `bars` as `{t, c}`), and `spx.json` (SPX daily closes on the same sessions). The seed runs eleven years through Oct 29, 2026 so the ten-year window has its MA lead-in. To refresh after the close:
+Four Nasdaq participation panes sit next to that family (`#ncfd`, `#ndtw`, `#ncfi`, `#ncth`): the share of Nasdaq Composite (or Nasdaq-100, for NDTW) stocks closing above their 5-, 20-, 50-, and 200-day averages. Each is a single % line, colored vertically red at the high of the pane and green at a washout, with rails at 20 / 40 / 60 / 80 and a Last + Δ header. The same range slider runs to ten years; there is no SPX overlay on these panes. Soft-box color on Market Health is the **historical percentile of that series’ raw %‑above‑MA value**: soft at or under the 20th, mid 20th–80th, crowded at or over the 80th.
+
+`src/breadth.js` holds the math (MA, windows, ticks, percentile rank) and `src/vault-breadth.js` draws the SVG into the wall's `[data-breadth]` cards. Cards use desk labels only; no chart-vendor branding.
+
+Data lives in `public/data/vault/breadth/`: `index.json` (as-of date, `period`, `defaultRangeMonths`, `maxRangeMonths`, chart list), `nysi.json` and `nasi.json` (label, title, `ma`, `buyLine`, and daily `bars` as `{t, c}`), `ncfd.json` / `ndtw.json` / `ncfi.json` / `ncth.json` (kind `pct-above-ma`, window, rails, provenance, daily `bars`), and `spx.json` (SPX daily closes on the summation sessions). The summation seed runs eleven years through Oct 29, 2026 so the ten-year window has its MA lead-in. The participation files are a desk-computed series through Nov 2, 2026 until the EOD feed replaces them. To refresh after the close:
 
 ```bash
 BREADTH_FEED="<desk EOD text feed>" npm run pull:breadth
 npm run check
 ```
 
-The feed address is kept in env, never in a committed file. `npm run check` pins the Oct 29, 2026 prints (NYSI −504.41, NASI −699.51 with MA(8) −769.33, SPX 7720.39), the 1Y / 10Y defaults, and the −1000 buy line.
+The feed address is kept in env, never in a committed file. `npm run check` pins the Oct 29, 2026 prints (NYSI −504.41, NASI −699.51 with MA(8) −769.33, SPX 7720.39), the Nov 2, 2026 participation closes, the 1Y / 10Y defaults, and the −1000 buy line. See `DATA_GAPS.md` for how the participation series was built.
+
+Light is the site-wide default. `src/theme.js` and every page-head boot script resolve stored `p-theme` if it is `light` or `dark`, otherwise light, then store that choice. The toggle still switches, and a stored dark choice is kept.
 
 ## Develop
 

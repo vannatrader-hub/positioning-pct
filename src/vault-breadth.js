@@ -1,13 +1,15 @@
 /**
  * Breadth cards on the Vault Vol · Credit · Momentum wall: NY and Nasdaq
  * Summation drawn as end-of-day line charts with the SPX pane on top, MA(8),
- * and the −1000 buy line. Fills the [data-breadth] cards on the public
- * Dashboard, or after the Vault gate opens a template, from public/data/vault/breadth/.
+ * and the −1000 buy line, plus Nasdaq % stocks-above-MA panes. Fills the
+ * [data-breadth] cards on the public Dashboard, or after the Vault gate
+ * opens a template, from public/data/vault/breadth/.
  */
 import {
   BUY_LINE,
   DEFAULT_MONTHS,
   MAX_MONTHS,
+  PCT_RAILS,
   RANGES,
   averageCrosses,
   averageOf,
@@ -19,6 +21,8 @@ import {
   longDate,
   monthMarks,
   paneDomain,
+  pctileOrdinal,
+  pctileRead,
   plainDate,
   rangeLabel,
   signed,
@@ -53,6 +57,15 @@ const GRADIENT = [
   [0.62, "#f3e3b6"],
   [0.82, "#f4d0b0"],
   [1, "#f1bea7"],
+];
+
+/* High of the pane is red, washout is green — vertical, not up/down. */
+const PCT_LINE = [
+  [0, "#e23b5a"],
+  [0.28, "#ee7a55"],
+  [0.52, "#e0b56a"],
+  [0.78, "#8cbc62"],
+  [1, "#2f9e5f"],
 ];
 
 let gradientSeq = 0;
@@ -116,6 +129,23 @@ function frameHead(doc) {
   return { head, show };
 }
 
+function pctHead(doc) {
+  const head = el("div", "bw-head");
+  const name = el("p", "bw-name");
+  name.append(el("strong", "bw-sym", doc.symbol), document.createTextNode(` · ${doc.title} · 1D`));
+  const values = el("p", "bw-values");
+  const date = el("p", "bw-date");
+  head.append(name, values, date);
+  const show = (bars, index) => {
+    const bar = bars[index];
+    const { chg, pct } = dayChange(bars, index);
+    values.replaceChildren(el("b", "", "Last"), document.createTextNode(` ${fixed(bar.c)} `));
+    values.append(el("span", chg >= 0 ? "bw-up" : "bw-down", `${minus(signed(chg))} (${minus(signed(pct))}%)`));
+    date.textContent = longDate(bar.t);
+  };
+  return { head, show };
+}
+
 /* Toolbar: Daily period, range presets, the range slider out to ten years, SPX pane on or off. */
 function toolbar(doc, state, onChange) {
   const bar = el("div", "pchart-controls bw-controls");
@@ -158,7 +188,8 @@ function toolbar(doc, state, onChange) {
   toggle.addEventListener("click", () => onChange({ overlay: !state.overlay }));
   overlay.append(el("span", "pchart-control-label", "Context"), toggle);
 
-  bar.append(period, range, slide, overlay);
+  if (doc.kind !== "pct-above-ma") bar.append(period, range, slide, overlay);
+  else bar.append(period, range, slide);
 
   const sync = () => {
     for (const button of buttons) {
@@ -169,8 +200,10 @@ function toolbar(doc, state, onChange) {
     input.value = String(state.months);
     input.style.setProperty("--fill", `${((state.months - 1) / (MAX_MONTHS - 1)) * 100}%`);
     slideValue.textContent = rangeLabel(state.months);
-    toggle.classList.toggle("is-on", state.overlay);
-    toggle.setAttribute("aria-pressed", String(state.overlay));
+    if (doc.kind !== "pct-above-ma") {
+      toggle.classList.toggle("is-on", state.overlay);
+      toggle.setAttribute("aria-pressed", String(state.overlay));
+    }
   };
   return { bar, sync };
 }
@@ -618,6 +651,158 @@ function drawCumulative(host, doc, spx, state, head) {
   return draw;
 }
 
+function drawPctChart(host, doc, state, head) {
+  const svg = svgNode("svg", { class: "bw-svg", role: "img" });
+  host.replaceChildren(svg);
+  const gradientId = `bw-pct-${(gradientSeq += 1)}`;
+  const rails = doc.rails ?? PCT_RAILS;
+  let geometry = null;
+  let hoverLayer = null;
+
+  const draw = () => {
+    const width = Math.round(host.clientWidth);
+    const height = Math.round(host.clientHeight);
+    if (!width || !height) return;
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+    svg.replaceChildren();
+
+    const from = windowStart(doc.bars, state.months);
+    const bars = doc.bars.slice(from);
+    const closes = bars.map((bar) => bar.c);
+    const lastIndex = bars.length - 1;
+    const last = bars[lastIndex];
+    const { chg, pct } = dayChange(doc.bars, from + lastIndex);
+    svg.setAttribute(
+      "aria-label",
+      `${doc.label}, daily ${plainDate(bars[0].t)} to ${plainDate(last.t)}. Last ${fixed(last.c)} percent, ${minus(signed(chg))} (${minus(signed(pct))}%). Red is high participation. Green is a washout.`,
+    );
+
+    const pad = { top: 8, right: 48, bottom: 19, left: 8 };
+    const left = pad.left;
+    const right = width - pad.right;
+    const plotW = right - left;
+    const top = pad.top;
+    const mainH = height - pad.top - pad.bottom;
+    const t0 = utc(bars[0].t);
+    const t1 = utc(last.t) + DAY;
+    const x = (t) => left + 2 + ((t - t0) / (t1 - t0)) * (plotW - 6);
+    const xs = bars.map((bar) => x(utc(bar.t)));
+    const lo = 0;
+    const hi = 100;
+    const y = (value) => top + (1 - (value - lo) / (hi - lo)) * mainH;
+
+    const defs = svgNode("defs");
+    const gradient = svgNode("linearGradient", {
+      id: gradientId,
+      x1: 0,
+      y1: top,
+      x2: 0,
+      y2: top + mainH,
+      gradientUnits: "userSpaceOnUse",
+    });
+    for (const [offset, color] of PCT_LINE) gradient.append(svgNode("stop", { offset, "stop-color": color }));
+    defs.append(gradient);
+    svg.append(defs);
+
+    svg.append(svgNode("rect", { x: left, y: top, width: plotW, height: mainH, fill: "#ffffff" }));
+
+    const grid = svgNode("g", { class: "bw-grid" });
+    for (const rail of rails) {
+      const ty = y(rail);
+      grid.append(svgNode("line", { x1: left, x2: right, y1: ty, y2: ty, stroke: "rgba(0, 0, 0, 0.16)", "stroke-width": 1 }));
+      grid.append(svgNode("text", { x: right + 6, y: ty + 3.5, fill: INK.axis, class: "bw-axis" }, String(rail)));
+    }
+    grid.append(svgNode("text", { x: right + 6, y: y(100) + 3.5, fill: INK.axis, class: "bw-axis" }, "100"));
+    grid.append(svgNode("text", { x: right + 6, y: y(0) + 3.5, fill: INK.axis, class: "bw-axis" }, "0"));
+    const marks = monthMarks(bars[0].t, last.t, (plotW - 6) / ((t1 - t0) / DAY));
+    for (const mark of marks) {
+      const mx = x(utc(mark.t));
+      grid.append(svgNode("line", { x1: mx, x2: mx, y1: top, y2: top + mainH, stroke: "rgba(0, 0, 0, 0.06)" }));
+    }
+    svg.append(grid);
+
+    const pts = closes.map((value, i) => `${xs[i].toFixed(1)},${y(value).toFixed(1)}`);
+    svg.append(
+      svgNode("polyline", {
+        points: pts.join(" "),
+        fill: "none",
+        stroke: `url(#${gradientId})`,
+        "stroke-width": 1.85,
+        "stroke-linejoin": "round",
+        "stroke-linecap": "round",
+      }),
+    );
+    svg.append(svgNode("rect", { x: left, y: top, width: plotW, height: mainH, fill: "none", stroke: INK.frame }));
+
+    axisTag(svg, {
+      x: right,
+      y: y(last.c),
+      text: fixed(last.c),
+      stroke: last.c >= 50 ? "#e23b5a" : "#2f9e5f",
+      color: last.c >= 50 ? "#e23b5a" : "#2f9e5f",
+      bold: true,
+    });
+
+    const axis = svgNode("g", { class: "bw-grid" });
+    for (const mark of marks) {
+      const mx = x(utc(mark.t));
+      axis.append(
+        svgNode("line", { x1: mx, x2: mx, y1: height - pad.bottom, y2: height - pad.bottom + 4, stroke: INK.frame }),
+        svgNode("text", { x: mx, y: height - 5, "text-anchor": "middle", fill: INK.axis, class: `bw-axis${mark.year ? " is-bold" : ""}` }, mark.label),
+      );
+    }
+    svg.append(axis);
+
+    hoverLayer = svgNode("g", { class: "bw-hover", visibility: "hidden" });
+    hoverLayer.append(
+      svgNode("line", { y1: top, y2: height - pad.bottom, stroke: INK.cross, "stroke-dasharray": "3 3" }),
+      svgNode("circle", { r: 3.2, fill: "#ffffff", stroke: "#e23b5a", "stroke-width": 1.6 }),
+    );
+    svg.append(hoverLayer);
+    geometry = { bars, xs, y, left, right, from };
+  };
+
+  const hover = (event) => {
+    if (!geometry || !hoverLayer) return;
+    const box = svg.getBoundingClientRect();
+    const px = event.clientX - box.left;
+    const { bars, xs, y, left, right, from } = geometry;
+    if (px < left || px > right) {
+      leave();
+      return;
+    }
+    let lo = 0;
+    let hi = xs.length - 1;
+    while (hi - lo > 1) {
+      const mid = (lo + hi) >> 1;
+      if (xs[mid] < px) lo = mid;
+      else hi = mid;
+    }
+    const i = Math.abs(xs[lo] - px) <= Math.abs(xs[hi] - px) ? lo : hi;
+    const [line, dot] = hoverLayer.children;
+    line.setAttribute("x1", xs[i]);
+    line.setAttribute("x2", xs[i]);
+    dot.setAttribute("cx", xs[i]);
+    dot.setAttribute("cy", y(bars[i].c));
+    hoverLayer.setAttribute("visibility", "visible");
+    head.show(doc.bars, from + i);
+  };
+  const leave = () => {
+    hoverLayer?.setAttribute("visibility", "hidden");
+    head.show(doc.bars, doc.bars.length - 1);
+  };
+
+  svg.addEventListener("pointermove", hover);
+  svg.addEventListener("pointerleave", leave);
+  const observer = new ResizeObserver(draw);
+  observer.observe(host);
+  draw();
+  leave();
+  return draw;
+}
+
 function levelText(value) {
   if (value == null || Number.isNaN(value)) return "—";
   if (Math.abs(value) >= 1000) return minus(Math.round(value).toLocaleString("en-US"));
@@ -625,6 +810,18 @@ function levelText(value) {
 }
 
 function readLine(doc, { plain = false } = {}) {
+  if (doc.kind === "pct-above-ma") {
+    const read = pctileRead(doc);
+    const line = el("p", "bw-read");
+    const tone = read.state === "soft" ? "is-buy" : read.state === "crowded" ? "is-weak" : "is-firm";
+    const status = el("span", `bw-status ${tone}`);
+    status.textContent = read.state === "soft" ? "Soft" : read.state === "crowded" ? "Crowded" : "Mid";
+    line.append(status, el("strong", "bw-read-value", `${fixed(read.close)}%`));
+    if (!plain && read.pctile != null) {
+      line.append(document.createTextNode(` · ${pctileOrdinal(read.pctile)} %ile of this series · ${minus(signed(read.chg))} on the day`));
+    }
+    return { line, read };
+  }
   if (doc.kind === "cumulative") {
     const avg = averageOf(doc.bars, doc);
     const last = doc.bars.at(-1).c;
@@ -657,14 +854,15 @@ function readLine(doc, { plain = false } = {}) {
 
 function fillCard(card, doc, spx, defaults) {
   const plain = !isFamilySurface();
+  const pct = doc.kind === "pct-above-ma";
   const head = card.querySelector(".pchart-head");
   const { line, read } = readLine(doc, { plain });
   head.append(line);
 
-  const state = { months: clampMonths(Number(card.dataset.months) || doc.defaultRangeMonths || defaults.months), overlay: true };
+  const state = { months: clampMonths(Number(card.dataset.months) || doc.defaultRangeMonths || defaults.months), overlay: !pct };
   const overlay = doc.spx?.length ? { bars: doc.spx } : spx;
-  const frame = el("div", "bw-frame");
-  const frameHeader = frameHead(doc);
+  const frame = el("div", pct ? "bw-frame is-pct" : "bw-frame");
+  const frameHeader = pct ? pctHead(doc) : frameHead(doc);
   const plot = el("div", "bw-plot");
   frame.append(frameHeader.head, plot);
   frameHeader.show(doc.bars, doc.bars.length - 1);
@@ -680,7 +878,15 @@ function fillCard(card, doc, spx, defaults) {
 
   card.querySelector(".bw-load")?.remove();
   card.append(tools.bar, frame);
-  if (!plain && doc.kind !== "cumulative" && read) {
+  if (!plain && pct && read) {
+    card.append(
+      el(
+        "p",
+        "bw-note",
+        `Share of names closing above the ${doc.window}-day average. The line is red at the high of the pane and green at a washout. Soft-box color is this print’s historical percentile (soft at or under the 20th, crowded at or over the 80th). Daily closes through ${plainDate(read.date)}.`,
+      ),
+    );
+  } else if (!plain && doc.kind !== "cumulative" && read) {
     card.append(
       el(
         "p",
@@ -689,7 +895,7 @@ function fillCard(card, doc, spx, defaults) {
       ),
     );
   }
-  redraw = (doc.kind === "cumulative" ? drawCumulative : drawChart)(plot, doc, overlay, state, frameHeader);
+  redraw = pct ? drawPctChart(plot, doc, state, frameHeader) : (doc.kind === "cumulative" ? drawCumulative : drawChart)(plot, doc, overlay, state, frameHeader);
 }
 
 async function getJson(file) {

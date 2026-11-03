@@ -4,6 +4,25 @@ Checked 2026-11-01 against files committed in this repo. No series was lengthene
 
 Mag 7, Credit Spread Regime, and the breadth files (NYSI, NASI, NYAD, NYHL, SPX) were left as they are. Those histories are already multi-year.
 
+## Nasdaq % stocks above MA (NCFD, NDTW, NCFI, NCTH)
+
+The four Nasdaq participation series on the Vol · Credit · Momentum wall are desk-computed from Yahoo Finance daily closes, not a vendor INDEX live feed.
+
+- **NDTW** (Nasdaq-100 stocks above the 20-day average) uses the Nasdaq-100 list (99 names with enough history on the seed).
+- **NCFD / NCFI / NCTH** (Nasdaq Composite stocks above the 5-, 50-, and 200-day averages) use Nasdaq-listed common stocks from the official `nasdaqlisted.txt` directory, excluding ETFs, tests, warrants, preferreds, and SPACs. The Nov 2, 2026 seed kept 2,596 names.
+
+That count is a participation share: names closing above their own N-session average, equal-weighted. It will not match vendor INDEX prints of `$NCFD`, `$NDTW`, `$NCFI`, or `$NCTH` session-for-session. A public EOD INDEX quote page was used only as a cross-check of recent levels (NDTW on Nov 2 printed 49.50 there vs 50.51 here). Do not treat the committed JSON as a live vendor close.
+
+History starts once enough names have an N-session average (5d from Nov 2014, 200d from Aug 2015) and runs through **2026-11-02**. NYSI / NASI remain through 2026-10-29.
+
+To replace the computed files with the desk EOD INDEX feed:
+
+```bash
+BREADTH_FEED="<desk EOD text feed>" npm run pull:breadth
+```
+
+That pull writes `$NCFD`, `$NDTW`, `$NCFI`, and `$NCTH` and marks `provenance.kind` `"feed"`. Re-running `node scripts/seed-nasdaq-ma.mjs` rebuilds the computed series. Neither path should be described on the product surface as a live quote.
+
 ## Soft ↔ Crowded — not extended
 
 `src/series.js` holds eight Fridays, 2026-09-04 through 2026-10-23. The JPM arrays end on the Cross Asset Positioning Monitor print dated 06-Oct-26 (`JPM_MONITOR_REF`). The comment on those arrays says the earlier weeks are not that monitor’s week-over-week record. MS, GS, and BoA are fixed offsets in `SHIFTS`, not separate prints. XLRE is not on the JPM monitor.
@@ -42,7 +61,7 @@ To start the Spot Vol Beta line before 2026-08-03, each weekday session needs a 
 
 ## Market Health color board
 
-The W29–W44 demo alphabet is replaced by `src/market-health-engine.js`. Live rows read committed vault series. Soft Vol uses the credit file’s VIX week-over-week move, and a surge leans that row green. Vol Stress uses Spot Vol Beta closes plus the latest gauge, and stays empty before 2026-08-03. Mag 7 uses the oscillator. Credit uses the credit-spread regime. NYSI, NASI, NYAD, and NYHL use level versus their own average. SPX uses the weekly 8- and 21-week EMAs on `breadth/spx.json`.
+The W29–W44 demo alphabet is replaced by `src/market-health-engine.js`. Live rows read committed vault series. Soft Vol uses the credit file’s VIX week-over-week move, and a surge leans that row green. Vol Stress uses Spot Vol Beta closes plus the latest gauge, and stays empty before 2026-08-03. Mag 7 uses the oscillator. Credit uses the credit-spread regime. NYSI, NASI, NYAD, and NYHL use level versus their own average. Nasdaq 5-day, Nasdaq-100 20-day, Nasdaq 50-day, and Nasdaq 200-day use the expanding-window historical percentile of that series’ raw %‑above‑MA close: **soft ≤ 20th %ile, mid 20th–80th, crowded ≥ 80th %ile**. A raw print near 10 on the 5-day series is typically around the 20th %ile and reads Soft (green). SPX uses the weekly 8- and 21-week EMAs on `breadth/spx.json`.
 
 Jul–Sep Soft↔Crowded percentiles are still absent. The engine does not read `src/series.js`. The only Soft Vol residuals on the board are the filed pack facts, −1.0 on W42 and −1.2 on W43. W44’s −1.2 is the Oct 23 carry and does not color that cell.
 

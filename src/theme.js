@@ -1,7 +1,7 @@
 /**
- * Light / dark theme for every Positioning % surface: Dashboard, Vault, and the Hub.
+ * Light / dark theme for every Positioning % surface: Dashboard, Vault, Hub, New Today.
  * The inline boot script in each page head sets `data-theme` on <html> before first
- * paint (stored `p-theme`, else `prefers-color-scheme` on the first visit, then stored).
+ * paint (stored `p-theme`, else light). An explicit stored dark choice is kept.
  * This module wires the topbar toggle, keeps aria-pressed and theme-color in step,
  * and follows a change made in another tab.
  */
@@ -9,9 +9,9 @@ export const THEME_KEY = "p-theme";
 export const THEMES = ["light", "dark"];
 export const THEME_PAGE = { light: "#f3f1ec", dark: "#161410" };
 
-export function resolveTheme(stored, prefersDark) {
+export function resolveTheme(stored, _prefersDark) {
   if (THEMES.includes(stored)) return stored;
-  return prefersDark ? "dark" : "light";
+  return "light";
 }
 
 function readStored() {
@@ -39,8 +39,7 @@ function apply(theme) {
 }
 
 if (typeof document !== "undefined") {
-  const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
-  const current = () => resolveTheme(document.documentElement.dataset.theme ?? readStored(), prefersDark);
+  const current = () => resolveTheme(document.documentElement.dataset.theme ?? readStored());
   const first = current();
   if (!THEMES.includes(readStored())) store(first);
   apply(first);

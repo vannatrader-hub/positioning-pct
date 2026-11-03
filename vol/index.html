@@ -10,7 +10,7 @@
     />
     <meta name="theme-color" content="#f3f1ec" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
-    <script>(function(){var d=document.documentElement,t;try{t=localStorage.getItem("p-theme");if(t!=="light"&&t!=="dark"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";localStorage.setItem("p-theme",t)}}catch(e){t=t==="dark"?"dark":"light"}d.dataset.theme=t})();</script>
+    <script>(function(){var d=document.documentElement,t;try{t=localStorage.getItem("p-theme");if(t!=="light"&&t!=="dark"){t="light";localStorage.setItem("p-theme",t)}}catch(e){t=t==="dark"?"dark":"light"}d.dataset.theme=t})();</script>
     <link rel="stylesheet" href="/src/styles.css" />
     <script type="module" src="/src/theme.js"></script>
     <script type="module" src="/src/vault-wall.js"></script>
@@ -48,7 +48,11 @@
             <a href="#credit-spread-regime">Credit Spread Regime</a>
             <a href="#mag7">MAG7 Oscillator</a>
             <a href="#nysi">NY Summation</a>
-            <a href="#nasi">Nasdaq Summation</a>
+                        <a href="#nasi">Nasdaq Summation</a>
+            <a href="#ncfd">Nasdaq 5-day</a>
+            <a href="#ndtw">Nasdaq-100 20-day</a>
+            <a href="#ncfi">Nasdaq 50-day</a>
+            <a href="#ncth">Nasdaq 200-day</a>
             <a href="#nyhl">NY Highs − Lows</a>
             <a href="#nyad">NY Advance − Decline</a>
           </nav>
@@ -192,10 +196,59 @@
               <p class="hint bw-load">Loading Nasdaq Summation…</p>
             </article>
 
-            <article class="pchart is-wide bw-card" id="nyhl" data-breadth="nyhl" data-months="60" aria-labelledby="nyhl-title">
+
+            <article class="pchart is-wide bw-card" id="ncfd" data-breadth="ncfd" data-months="24" aria-labelledby="ncfd-title">
               <header class="pchart-head">
                 <div class="tile-kicker">
                   <span class="tile-num">06</span>
+                  <span class="badge is-live"><i aria-hidden="true"></i>Daily close</span>
+                </div>
+                <h2 id="ncfd-title">Nasdaq 5-day</h2>
+                <p class="wall-sub">Share of Nasdaq Composite stocks closing above their 5-day average. Red is high. Green is a washout.</p>
+              </header>
+              <p class="hint bw-load">Loading Nasdaq 5-day…</p>
+            </article>
+
+            <article class="pchart is-wide bw-card" id="ndtw" data-breadth="ndtw" data-months="60" aria-labelledby="ndtw-title">
+              <header class="pchart-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">07</span>
+                  <span class="badge is-live"><i aria-hidden="true"></i>Daily close</span>
+                </div>
+                <h2 id="ndtw-title">Nasdaq-100 20-day</h2>
+                <p class="wall-sub">Share of Nasdaq-100 stocks closing above their 20-day average. Red is high. Green is a washout.</p>
+              </header>
+              <p class="hint bw-load">Loading Nasdaq-100 20-day…</p>
+            </article>
+
+            <article class="pchart is-wide bw-card" id="ncfi" data-breadth="ncfi" data-months="24" aria-labelledby="ncfi-title">
+              <header class="pchart-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">08</span>
+                  <span class="badge is-live"><i aria-hidden="true"></i>Daily close</span>
+                </div>
+                <h2 id="ncfi-title">Nasdaq 50-day</h2>
+                <p class="wall-sub">Share of Nasdaq Composite stocks closing above their 50-day average. Red is high. Green is a washout.</p>
+              </header>
+              <p class="hint bw-load">Loading Nasdaq 50-day…</p>
+            </article>
+
+            <article class="pchart is-wide bw-card" id="ncth" data-breadth="ncth" data-months="60" aria-labelledby="ncth-title">
+              <header class="pchart-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">09</span>
+                  <span class="badge is-live"><i aria-hidden="true"></i>Daily close</span>
+                </div>
+                <h2 id="ncth-title">Nasdaq 200-day</h2>
+                <p class="wall-sub">Share of Nasdaq Composite stocks closing above their 200-day average. Red is high. Green is a washout.</p>
+              </header>
+              <p class="hint bw-load">Loading Nasdaq 200-day…</p>
+            </article>
+
+            <article class="pchart is-wide bw-card" id="nyhl" data-breadth="nyhl" data-months="60" aria-labelledby="nyhl-title">
+              <header class="pchart-head">
+                <div class="tile-kicker">
+                  <span class="tile-num">10</span>
                   <span class="badge is-live"><i aria-hidden="true"></i>Daily close</span>
                 </div>
                 <h2 id="nyhl-title">NY Highs − Lows</h2>
@@ -207,7 +260,7 @@
             <article class="pchart is-wide bw-card" id="nyad" data-breadth="nyad" data-months="36" aria-labelledby="nyad-title">
               <header class="pchart-head">
                 <div class="tile-kicker">
-                  <span class="tile-num">07</span>
+                  <span class="tile-num">11</span>
                   <span class="badge is-live"><i aria-hidden="true"></i>Daily close</span>
                 </div>
                 <h2 id="nyad-title">NY Advance − Decline</h2>

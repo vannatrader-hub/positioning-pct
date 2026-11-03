@@ -1,5 +1,6 @@
 /**
- * Vault breadth wall: the math behind the NY and Nasdaq Summation charts.
+ * Vault breadth wall: the math behind the NY and Nasdaq Summation charts
+ * and the Nasdaq % stocks-above-MA panes.
  * Pure so `npm run check` can import it without a page.
  */
 
@@ -7,6 +8,9 @@ export const DEFAULT_MONTHS = 12;
 export const MAX_MONTHS = 120;
 export const BUY_LINE = -1000;
 export const MA_PERIOD = 8;
+export const PCT_RAILS = [20, 40, 60, 80];
+export const SOFT_PCTILE = 20;
+export const CROWDED_PCTILE = 80;
 
 export const RANGES = [
   { months: 3, label: "3M" },
@@ -182,6 +186,53 @@ export function monthMarks(fromIso, toIso, pxPerDay, minGap = 34) {
     marks.push({ t: date.toISOString().slice(0, 10), label: month === 0 ? String(year) : MONTHS[month], year: month === 0 });
   }
   return marks;
+}
+
+/**
+ * Percentile rank of value in a history list, 0–100.
+ * Values below the print count fully; ties count half.
+ */
+export function percentileRank(history, value) {
+  if (!history.length || !Number.isFinite(value)) return null;
+  let less = 0;
+  let equal = 0;
+  for (const item of history) {
+    if (item < value) less += 1;
+    else if (item === value) equal += 1;
+  }
+  return Math.round(((less + 0.5 * equal) / history.length) * 10000) / 100;
+}
+
+/** Soft ≤ 20th %ile, crowded ≥ 80th, mid in between. */
+export function bucketPctile(pctile, soft = SOFT_PCTILE, crowded = CROWDED_PCTILE) {
+  if (!Number.isFinite(pctile)) return null;
+  if (pctile <= soft) return "soft";
+  if (pctile >= crowded) return "crowded";
+  return "mid";
+}
+
+export function pctileOrdinal(pctile) {
+  if (!Number.isFinite(pctile)) return "—";
+  const n = Math.round(pctile);
+  const mod = n % 100;
+  const suffix = mod > 10 && mod < 14 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" }[n % 10] ?? "th");
+  return `${n}${suffix}`;
+}
+
+/** Card read for a % stocks-above-MA series: last print, day change, historical %ile. */
+export function pctileRead(doc, { throughIndex = null, minSample = 1 } = {}) {
+  const bars = doc.bars;
+  const last = throughIndex == null ? bars.length - 1 : throughIndex;
+  const history = bars.slice(0, last + 1).map((bar) => bar.c);
+  const close = bars[last].c;
+  const pctile = history.length >= minSample ? percentileRank(history, close) : null;
+  return {
+    date: bars[last].t,
+    close,
+    ...dayChange(bars, last),
+    pctile,
+    state: bucketPctile(pctile, doc.softPctile, doc.crowdedPctile),
+  };
 }
 
 /** Card read: last close, MA, day change, and where the print sits against the buy line. */

@@ -9,6 +9,11 @@
  * <pricedata> block of "|"-separated bars: `n start end close vol` for the
  * breadth indexes and `n start end open high low close vol` for SPX.
  * Only completed sessions (stamped to 16:00) are kept.
+ *
+ * Pulled symbols: $NYSI, $NASI, $NCFD, $NDTW, $NCFI, $NCTH, $SPX.
+ * NYHL / NYAD keep their committed files; this script does not overwrite them.
+ * After a successful pull, each %‑above‑MA file is marked provenance.kind
+ * "feed" so the wall stops reading as a desk-computed series.
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -51,19 +56,47 @@ function write(file, doc) {
   writeFileSync(join(out, file), `${top},\n  "bars": [\n${lines}\n  ]\n}\n`);
 }
 
-const [nysi, nasi, spxAll] = await Promise.all(["$NYSI", "$NASI", "$SPX"].map(pull));
-const asOf = nysi[nysi.length - 1].t;
-if (nasi[nasi.length - 1].t !== asOf) throw new Error(`NYSI ends ${asOf}, NASI ends ${nasi[nasi.length - 1].t}`);
-const sessions = new Set(nysi.map((bar) => bar.t));
-const spx = spxAll.filter((bar) => bar.t <= asOf && sessions.has(bar.t));
+const PCT_IDS = ["ncfd", "ndtw", "ncfi", "ncth"];
+const pulled = Object.fromEntries(
+  await Promise.all(
+    [
+      ["nysi", "$NYSI"],
+      ["nasi", "$NASI"],
+      ["ncfd", "$NCFD"],
+      ["ndtw", "$NDTW"],
+      ["ncfi", "$NCFI"],
+      ["ncth", "$NCTH"],
+      ["spx", "$SPX"],
+    ].map(async ([id, symbol]) => [id, await pull(symbol)]),
+  ),
+);
+const asOf = pulled.nysi[pulled.nysi.length - 1].t;
+for (const id of ["nasi", ...PCT_IDS]) {
+  const end = pulled[id][pulled[id].length - 1].t;
+  if (end !== asOf) throw new Error(`NYSI ends ${asOf}, ${id} ends ${end}`);
+}
+const sessions = new Set(pulled.nysi.map((bar) => bar.t));
+const spx = pulled.spx.filter((bar) => bar.t <= asOf && sessions.has(bar.t));
 
 const index = JSON.parse(readFileSync(join(out, "index.json"), "utf8"));
 for (const chart of index.charts) {
+  const bars = pulled[chart.id];
+  if (!bars) continue;
   const doc = JSON.parse(readFileSync(join(out, chart.file), "utf8"));
-  write(chart.file, { ...doc, asOf, bars: chart.id === "nysi" ? nysi : nasi });
+  const next = { ...doc, asOf, bars };
+  if (PCT_IDS.includes(chart.id)) {
+    next.provenance = {
+      ...(doc.provenance ?? {}),
+      kind: "feed",
+      note: `End-of-day ${doc.provenance?.feedSymbol ?? chart.id} from the desk feed through ${asOf}.`,
+    };
+  }
+  write(chart.file, next);
+  if (chart.asOf) chart.asOf = asOf;
 }
 const overlay = JSON.parse(readFileSync(join(out, index.overlay.file), "utf8"));
 write(index.overlay.file, { ...overlay, asOf, bars: spx });
 index.asOf = asOf;
 writeFileSync(join(out, "index.json"), `${JSON.stringify(index, null, 2)}\n`);
-console.log(`breadth through ${asOf}: NYSI ${nysi.at(-1).c} · NASI ${nasi.at(-1).c} · SPX ${spx.at(-1).c}`);
+const pct = PCT_IDS.map((id) => `${id.toUpperCase()} ${pulled[id].at(-1).c}`).join(" · ");
+console.log(`breadth through ${asOf}: NYSI ${pulled.nysi.at(-1).c} · NASI ${pulled.nasi.at(-1).c} · ${pct} · SPX ${spx.at(-1).c}`);

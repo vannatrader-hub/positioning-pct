@@ -9,6 +9,7 @@
     "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
     "check": "node scripts/check-site.mjs",
     "pull:breadth": "node scripts/pull-breadth.mjs",
+    "seed:nasdaq-ma": "node scripts/seed-nasdaq-ma.mjs",
     "data:csr": "node scripts/fetch-csr.mjs",
     "pack:build": "node scripts/vault-pack-build.mjs",
     "new-today:pack": "node scripts/new-today-pack.mjs",

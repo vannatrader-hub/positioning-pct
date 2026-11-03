@@ -11,10 +11,12 @@
  * not read src/series.js. The only Soft Vol residuals used are the filed
  * pack facts for W42 and W43. W44’s residual is the Oct 23 carry and does
  * not color the cell. Global fund, Sharpies, and NAAIM are as-of Desk
- * proxies. Put/Call stays Demo.
+ * proxies. Put/Call stays Demo. Nasdaq 5/20/50/200-day boxes use the
+ * historical percentile of that series’ raw %‑above‑MA print: soft at or
+ * under the 20th, crowded at or over the 80th.
  */
 
-import { averageOf, ema } from "./breadth.js";
+import { averageOf, ema, pctileOrdinal, pctileRead } from "./breadth.js";
 import { csrSeries, regimeOf } from "./csr.js";
 import { isoWeek, isoWeekRange } from "./iso-week.js";
 import { buildOscillator } from "./mag7-osc.js";
@@ -103,6 +105,10 @@ export const MARKET_HEALTH_ROWS = [
   { id: "sharpies", label: "Sharpies / COT", kind: "proxy", mark: "Proxy" },
   { id: "nysi", label: "NY Summation", kind: "live" },
   { id: "nasi", label: "Nasdaq Summation", kind: "live" },
+  { id: "ncfd", label: "Nasdaq 5-day", kind: "live" },
+  { id: "ndtw", label: "Nasdaq-100 20-day", kind: "live" },
+  { id: "ncfi", label: "Nasdaq 50-day", kind: "live" },
+  { id: "ncth", label: "Nasdaq 200-day", kind: "live" },
   { id: "nyad", label: "NYAD", kind: "live" },
   { id: "nyhl", label: "NYHL", kind: "live" },
   { id: "put-call", label: "Put / Call", kind: "demo", mark: "Demo" },
@@ -360,6 +366,22 @@ function mag7Weeks(doc) {
   return { map, params };
 }
 
+function pctileWeeks(doc) {
+  if (!doc?.bars?.length) return new Map();
+  const indexed = indexByWeek(doc.bars.map((bar) => bar.t));
+  const out = new Map();
+  for (const [key, hit] of indexed) {
+    const read = pctileRead(doc, { throughIndex: hit.index, minSample: 252 });
+    out.set(key, {
+      date: hit.date,
+      close: read.close,
+      pctile: read.pctile,
+      state: read.state,
+    });
+  }
+  return out;
+}
+
 function breadthWeeks(doc, bucket) {
   if (!doc?.bars?.length) return new Map();
   const period = doc.period ?? doc.ma ?? 8;
@@ -503,6 +525,10 @@ export function buildMarketHealth(docs = {}) {
   const mag7 = mag7Weeks(docs.mag7);
   const nysi = breadthWeeks(docs.nysi, bucketSummation);
   const nasi = breadthWeeks(docs.nasi, bucketSummation);
+  const ncfd = pctileWeeks(docs.ncfd);
+  const ndtw = pctileWeeks(docs.ndtw);
+  const ncfi = pctileWeeks(docs.ncfi);
+  const ncth = pctileWeeks(docs.ncth);
   const nyad = breadthWeeks(docs.nyad, bucketCumulative);
   const nyhl = breadthWeeks(docs.nyhl, bucketCumulative);
   const spx = spxWeeks(docs.spx);
@@ -556,6 +582,13 @@ export function buildMarketHealth(docs = {}) {
         const read = source.get(key);
         if (!read?.state) return gapCell(row.label, week);
         return coloredCell(row.label, week, read.state, read.state, `${fmt(read.close)} vs its average ${fmt(read.ma)}`, "live");
+      }
+      if (row.id === "ncfd" || row.id === "ndtw" || row.id === "ncfi" || row.id === "ncth") {
+        const source = { ncfd, ndtw, ncfi, ncth }[row.id];
+        const read = source.get(key);
+        if (!read?.state) return gapCell(row.label, week);
+        const fact = `${fmt(read.close)}% · ${pctileOrdinal(read.pctile)} %ile of this series`;
+        return coloredCell(row.label, week, read.state, read.state, fact, "live");
       }
       if (row.id === "spx-ema") {
         const read = spx.get(key);

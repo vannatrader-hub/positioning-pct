@@ -19,6 +19,26 @@
       "file": "nasi.json"
     },
     {
+      "id": "ncfd",
+      "file": "ncfd.json",
+      "asOf": "2026-11-02"
+    },
+    {
+      "id": "ndtw",
+      "file": "ndtw.json",
+      "asOf": "2026-11-02"
+    },
+    {
+      "id": "ncfi",
+      "file": "ncfi.json",
+      "asOf": "2026-11-02"
+    },
+    {
+      "id": "ncth",
+      "file": "ncth.json",
+      "asOf": "2026-11-02"
+    },
+    {
       "id": "nyhl",
       "file": "nyhl.json",
       "asOf": "2026-10-30"
