@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { GLOW_CROWDED_MIN, GLOW_SOFT_MAX, HOUSES, INDICATORS, SECTIONS, drift, extremeOf, isSoftCrowded, readIndicator } from "../src/desk.js";
 import { CANON, JPM_MONITOR_REF, WEEKS, buildReading, formatWeek, ordinal } from "../src/readings.js";
 import { STRUCTURES, creditSpreadMath, leapMath, price } from "../src/study.js";
+import { calendarDays, callValue, expirationPnL, markPnL, pickStrikes, spreadStats } from "../src/analyzer-math.js";
 import { breakeven, chartLevels, resolveExpiry } from "../src/flow-chart.js";
 import { SIDES, alertLabel, sortPlays } from "../src/options-flow.js";
 import { SECTION_ORDER, STATUS, allPlays, levelKind, outcomeLabel, sortCards, spotlightLevels, spotlightLines } from "../src/spotlights.js";
@@ -2490,6 +2491,42 @@ const bare = buildMarketHealth({});
 assert(bare.rows.find((row) => row.id === "soft-vol").cells.every((cell) => cell.kind === "gap"), "missing vault files leave Soft Vol empty");
 assert(bare.rows.find((row) => row.id === "global-fund").cells.some((cell) => cell.kind === "proxy"), "Desk proxies still render when the vault fetch fails");
 assert(!engineSrc.includes("Ssmmcc") && !readFileSync(join(root, "src/market-health.js"), "utf8").includes("Ssmmcc"), "the demo cell alphabet is gone");
+
+/* Family Hub call-credit analyzer: teach widget on the gated desk only. */
+assert(pickStrikes(518).short === 520 && pickStrikes(518).long === 525, "a 518 spot rounds to a 5-wide 520/525 call credit");
+assert(pickStrikes(753.75).short === 755 && pickStrikes(753.75).long === 760, "a 753.75 spot rounds to a 5-wide 755/760 call credit");
+const analyzerDemo = spreadStats(520, 525, 1.35);
+assert(analyzerDemo.maxGain === 135 && analyzerDemo.maxLoss === 365 && analyzerDemo.breakeven === 521.35, "tip-sheet max gain, max loss, and BE");
+assert(expirationPnL(500, 520, 525, 1.35) === 135, "left of the short strike the credit is kept");
+assert(Math.abs(expirationPnL(521.35, 520, 525, 1.35)) < 1e-9, "P/L is 0 at breakeven");
+assert(expirationPnL(525, 520, 525, 1.35) === -365 && expirationPnL(540, 520, 525, 1.35) === -365, "loss is capped at the long strike");
+assert(Math.abs(markPnL(518, 520, 525, 0, 0.21, 0.21, 1.35) - expirationPnL(518, 520, 525, 1.35)) < 1e-9, "the as-of curve meets expiration at 0DTE");
+const atmCall = callValue(100, 100, 30 / 365, 0.2);
+assert(atmCall > 1.5 && atmCall < 4, `30-day ATM 20% call should be a few dollars, got ${atmCall}`);
+assert(callValue(753.75, 755, 10 / 365, 0.18768) > 4 && callValue(753.75, 755, 10 / 365, 0.18768) < 16, "10-day 755c on 753.75 is in a live-mark range");
+const liveMtm = markPnL(753.75, 755, 760, 5 / 365, 0.18768, 0.178292, 2.685);
+assert(liveMtm > -250 && liveMtm < 280, `5-day mark stays inside the defined-risk band, got ${liveMtm}`);
+assert(markPnL(518, 520, 525, 6 / 365, 0.33, 0.33, 1.35) < markPnL(518, 520, 525, 6 / 365, 0.11, 0.11, 1.35), "higher IV sags the today curve on a short call credit");
+assert(calendarDays("2026-11-03", "2026-11-13") === 10, "Nov 3 to Nov 13 is 10 calendar days");
+const familyHubPage = readFileSync(join(root, `${FAMILY_ENTRY}/index.html`), "utf8");
+const familyHubTemplate = familyHubPage.match(/<template id="vault-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
+assert(familyHubPage.includes('src="/src/hub-analyzer.js"') && familyHubTemplate.includes('id="hub-analyzer"'), "the signed-in Hub desk mounts the call-credit analyzer");
+assert(familyHubPage.includes('src="/src/desk-brief.js"') && familyHubTemplate.includes('data-desk-brief="open"'), "the Hub analyzer sits with the desk brief");
+const anCss = readFileSync(join(root, "src/analyzer.css"), "utf8");
+assert(anCss.includes("--an-loss: #c43c3c") && anCss.includes("--an-profit: #2d7d46") && !/#e91e/i.test(anCss), "analyzer loss is brand % red, not Soft↔Crowded magenta");
+assert(anCss.includes("--an-now:") && anCss.includes(".an-chip"), "analyzer keeps the today-curve token and the credit chip");
+assert(readFileSync(join(root, "src/hub-analyzer.js"), "utf8").includes("PREVIEW"), "fallback copy names PREVIEW");
+assert(readFileSync(join(root, "src/analyzer-marks.js"), "utf8").includes("preview: source !== \"live\""), "non-live marks carry preview");
+for (const file of publicPages) {
+  const html = readFileSync(join(root, file), "utf8");
+  assert(!html.includes("hub-analyzer") && !html.includes("analyzer.css") && !html.includes("hub-analyzer.js"), `${file} does not load the Hub analyzer`);
+}
+assert(readFileSync(join(root, "src/study.js"), "utf8").includes("Call chain strip"), "the public Trade Idea call-chain strip stays on the desk");
+const anMarks = JSON.parse(readFileSync(join(root, "public/data/hub-analyzer-marks.json"), "utf8"));
+assert(anMarks.short.bid <= anMarks.short.mark && anMarks.short.mark <= anMarks.short.ask, "snapshot short mark sits inside bid/ask");
+assert(anMarks.long.bid <= anMarks.long.mark && anMarks.long.mark <= anMarks.long.ask, "snapshot long mark sits inside bid/ask");
+assert(anMarks.short.strike < anMarks.long.strike && anMarks.short.type === "call" && anMarks.long.type === "call", "snapshot is a short call over a higher long call");
+assert(PRODUCT_FEEDS.some((feed) => feed.id === "hub-analyzer-marks" && feed.surfaces.join() === "private"), "analyzer marks stay on the private Hub feed");
 
 if (failed) {
   console.error(`${failed} check(s) failed`);

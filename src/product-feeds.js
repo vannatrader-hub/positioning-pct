@@ -56,4 +56,9 @@ export const PRODUCT_FEEDS = [
     file: "public/data/vault/portfolio/journal.json",
     surfaces: ["vault"],
   },
+  {
+    id: "hub-analyzer-marks",
+    file: "public/data/hub-analyzer-marks.json",
+    surfaces: ["private"],
+  },
 ];
