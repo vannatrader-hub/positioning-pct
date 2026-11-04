@@ -365,7 +365,7 @@ for (const [ticker, want] of Object.entries(studyWant)) {
 }
 
 const flow = JSON.parse(readFileSync(join(root, "public/data/flow/plays.json"), "utf8"));
-const flowTickers = ["UBS", "EXE", "DAR", "JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN", "ALAB", "CSCO"];
+const flowTickers = ["MPWR", "INSM", "UBS", "EXE", "DAR", "JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN", "ALAB", "CSCO"];
 assert(
   JSON.stringify(sortPlays(flow.plays).map((play) => play.ticker)) === JSON.stringify(flowTickers),
   `Shopping List newest alert first: ${sortPlays(flow.plays).map((play) => play.ticker)}`,
@@ -461,6 +461,7 @@ assert(!flowBy.UPS, "UPS is a $$ alert and stays off the $$$ watchlist");
 assert(!flowBy.P && !flowBy.BX, "P and BX are $$ alerts and stay off the $$$ watchlist");
 assert(!flowBy.ABBV && !flowBy.CNC, "ABBV and CNC are $$ alerts and stay off the $$$ watchlist");
 assert(!flowBy.W && !flowBy.WFC, "W and WFC are $$ alerts and stay off the $$$ watchlist");
+assert(!flowBy.VZ, "VZ is a $$ alert and stays off the $$$ watchlist");
 assert(
   JSON.stringify(flowBy.JAZZ.lead) === JSON.stringify({ type: "call", action: "bought", qty: 2700, strike: 240, expiry: "December 2026", price: null }),
   `JAZZ lead is the Dec 2026 $240 call buy ${JSON.stringify(flowBy.JAZZ.lead)}`,
@@ -489,6 +490,20 @@ assert(
 assert(flowBy.UBS.customerPurchased[0]?.contract === "Jan 2028 $52.5 calls" && flowBy.UBS.customerPurchased[0]?.side === "calls_bought", "UBS Customer purchased is the Jan 2028 $52.5 call buy");
 const ubsLevels = chartLevels(flowBy.UBS, JSON.parse(readFileSync(join(root, "public/data/flow/bars/UBS.json"), "utf8")).bars);
 assert(JSON.stringify(ubsLevels.lines.map((line) => line.value)) === "[52.5]", `UBS chart draws only the $52.5 strike ${ubsLevels.lines.map((line) => line.value)}`);
+assert(
+  JSON.stringify(flowBy.MPWR.lead) === JSON.stringify({ type: "call", action: "bought", qty: 150, strike: 1400, expiry: "February", price: null }),
+  `MPWR lead is the Feb $1400 call buy ${JSON.stringify(flowBy.MPWR.lead)}`,
+);
+assert(flowBy.MPWR.customerPurchased[0]?.contract === "Feb $1400 calls" && flowBy.MPWR.customerPurchased[0]?.side === "calls_bought", "MPWR Customer purchased is the Feb $1400 call buy");
+const mpwrLevels = chartLevels(flowBy.MPWR, JSON.parse(readFileSync(join(root, "public/data/flow/bars/MPWR.json"), "utf8")).bars);
+assert(JSON.stringify(mpwrLevels.lines.map((line) => line.value)) === "[1400]", `MPWR chart draws only the $1400 strike ${mpwrLevels.lines.map((line) => line.value)}`);
+assert(
+  JSON.stringify(flowBy.INSM.lead) === JSON.stringify({ type: "call", action: "bought", qty: 5000, strike: 110, expiry: "January", price: 8.62 }),
+  `INSM lead is the Jan $110 call buy ${JSON.stringify(flowBy.INSM.lead)}`,
+);
+assert(flowBy.INSM.customerPurchased[0]?.contract === "Jan $110 calls" && flowBy.INSM.customerPurchased[0]?.side === "calls_bought", "INSM Customer purchased is the Jan $110 call buy");
+const insmLevels = chartLevels(flowBy.INSM, JSON.parse(readFileSync(join(root, "public/data/flow/bars/INSM.json"), "utf8")).bars);
+assert(JSON.stringify(insmLevels.lines.map((line) => line.value)) === "[110,118.62]", `INSM chart draws the $110 strike and break-even ${insmLevels.lines.map((line) => line.value)}`);
 assert(resolveExpiry("December", "2026-10-27") === "2026-12-18", "December resolves to Dec 18, 2026");
 assert(resolveExpiry("January", "2026-10-22") === "2027-01-15", "January resolves to Jan 15, 2027");
 assert(resolveExpiry("January 2028", "2026-10-25") === "2028-01-21", "January 2028 resolves to Jan 21, 2028");
@@ -1027,7 +1042,7 @@ assert(itemsForDay(nt.items ?? [], "2026-10-30").length === 3, "Oct 30 desk day 
 assert(itemsForDay(nt.items ?? [], "2026-10-31").length === 1, "Oct 31 desk day lists the EXE shopping-list alert");
 assert(itemsForDay(nt.items ?? [], "2026-11-01").length === 2, "Nov 1 desk day lists the ABBV and CNC featured alerts");
 assert(itemsForDay(nt.items ?? [], "2026-11-02").length === 11, "Nov 2 desk day lists the UBS, W, and WFC flow alerts plus the morning and evening research notes");
-assert(itemsForDay(nt.items ?? [], "2026-11-03").length === 2, "Nov 3 desk day lists the pre-open research notes");
+assert(itemsForDay(nt.items ?? [], "2026-11-03").length === 5, "Nov 3 desk day lists the MPWR and INSM shopping-list alerts, the VZ featured alert, and the pre-open research notes");
 const ntReadme = readFileSync(join(root, "README.md"), "utf8");
 assert(ntReadme.includes("npm run new-today:pack"), "README shows the New Today pack command");
 assert(ntReadme.includes("Midnight auto-ship") && ntReadme.includes("6:30 AM CT") && ntReadme.includes("Afternoon auto-ship"), "README tells midnight, morning, and afternoon auto-ship to run the same pack");

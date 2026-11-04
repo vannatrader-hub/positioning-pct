@@ -1,8 +1,61 @@
 {
-  "asOf": "2026-11-02",
-  "asOfLabel": "Tue Nov 3, 2026 pre-market · UBS quote Mon Nov 2 close; earlier names through Fri Oct 30 close",
-  "window": "Last 3 weeks · Oct 13 – Nov 2, 2026",
+  "asOf": "2026-11-03",
+  "asOfLabel": "Wed Nov 4, 2026 pre-market · MPWR and INSM quotes Tue Nov 3 close; earlier names through Mon Nov 2 close",
+  "window": "Last 3 weeks · Oct 13 – Nov 3, 2026",
   "plays": [
+    {
+      "id": 43972,
+      "ticker": "MPWR",
+      "exchange": "NASDAQ",
+      "name": "Monolithic Power Systems",
+      "industry": { "broad": "Technology", "focus": "Semis · power management" },
+      "date": "2026-11-03",
+      "alertedAtCt": "2026-11-03 06:31 PM CT",
+      "title": "February Calls Roll Up in an AI-Server Power Semi",
+      "confidence": "$$$",
+      "refPrice": 1328.3,
+      "flow": [
+        "Monolithic Power Systems (MPWR) saw 150 February $1400 calls bought for about $2.35M on 11/3, rolling out of November $1200 calls. 100 May $1300 short puts opened on 8/11 in a strangle sale with the $2260 calls.",
+        "MPWR supplies power management for AI servers. Shares are up big this year and have pulled back about 30% with the semis into a falling-wedge base that is holding anchored VWAP from the March lows. The desk watches a breakout over about $1400. A strong third-quarter beat, with data-center and communications growth, is driving content gains. The reference price is $1,328.30."
+      ],
+      "customerPurchased": [
+        { "contract": "Feb $1400 calls", "detail": "150 bought · ~$2.35M · 11/3", "side": "calls_bought" }
+      ],
+      "oi": [
+        { "contract": "Feb $1400 calls", "detail": "150 bought 11/3, rolling out of Nov $1200 calls" },
+        { "contract": "May $1300 short puts", "detail": "100 opened 8/11, strangle sale with $2260 calls" }
+      ],
+      "recommendation": "The desk wants MPWR on a breakout over about $1400, with the falling-wedge base and March anchored VWAP as the hold.",
+      "lead": { "type": "call", "action": "bought", "qty": 150, "strike": 1400, "expiry": "February", "price": null },
+      "quote": { "date": "2026-11-03", "last": 1328.3, "prev": 1243.95 }
+    },
+    {
+      "id": 43968,
+      "ticker": "INSM",
+      "exchange": "NASDAQ",
+      "name": "Insmed",
+      "industry": { "broad": "Health Care", "focus": "Biotech · respiratory" },
+      "date": "2026-11-03",
+      "alertedAtCt": "2026-11-03 05:03 PM CT",
+      "title": "January Calls Bought in a Respiratory Biotech Holding Its Averages",
+      "confidence": "$$$",
+      "refPrice": 104.44,
+      "flow": [
+        "Insmed (INSM) saw 5,000 January $110 calls bought at $8.62 on 11/3. 10,000 January $100/$130 call spreads were bought on 10/27, and 1,000 January $95 short puts opened on 10/14.",
+        "INSM is a respiratory biotech with a new bronchiectasis drug already at a blockbuster run-rate. Shares are down about 40% this year but are holding above the 8- and 21-day EMAs. About $112, the 50-day, is resistance, and the October low near $93 is support. The reference price is $104.44."
+      ],
+      "customerPurchased": [
+        { "contract": "Jan $110 calls", "detail": "5,000 bought @ $8.62 · 11/3", "side": "calls_bought" }
+      ],
+      "oi": [
+        { "contract": "Jan $110 calls", "detail": "5,000 bought at $8.62 on 11/3" },
+        { "contract": "Jan $100/$130 call spread", "detail": "10,000 bought 10/27" },
+        { "contract": "Jan $95 short puts", "detail": "1,000 opened 10/14" }
+      ],
+      "recommendation": "The desk wants INSM while it holds above the 8- and 21-day EMAs, with about $112 as resistance and the October low near $93 as support.",
+      "lead": { "type": "call", "action": "bought", "qty": 5000, "strike": 110, "expiry": "January", "price": 8.62 },
+      "quote": { "date": "2026-11-03", "last": 104.44, "prev": 109.31 }
+    },
     {
       "id": 43951,
       "ticker": "UBS",
