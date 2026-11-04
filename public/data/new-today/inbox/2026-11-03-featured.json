@@ -1,0 +1,35 @@
+[
+  {
+    "id": "2026-11-03-mpwr-dollar",
+    "section": "options-flow",
+    "kind": "dollar",
+    "ticker": "MPWR",
+    "title": "MPWR joins the $$$ Shopping List",
+    "summary": "150 Feb $1400 calls bought (~$2.35M) on 11/3, rolling out of Nov $1200 calls, and 100 May $1300 short puts opened 8/11 in a strangle with $2260 calls; spot $1,328.30. Desk watches a breakout over ~$1400 in an AI-server power-management semi that has pulled back ~30% into a falling-wedge base holding anchored VWAP from the March lows.",
+    "href": "options-flow/dollar/#MPWR",
+    "publishedAt": "2026-11-03 18:31 CT",
+    "sourceLabel": "Desk"
+  },
+  {
+    "id": "2026-11-03-vz-flow",
+    "section": "options-flow",
+    "kind": "flow",
+    "ticker": "VZ",
+    "title": "VZ ($$): Jan 2029 $38 puts sold",
+    "summary": "1,000 Jan 2029 $38 puts sold at $3.88 (~$388K) on 11/2, 10,000 Dec $44 short puts opened 10/23, and 5,000 June 2027 $47 calls bought 10/13; spot $45.24. Desk sees a high-yield telecom at a cheap free-cash-flow multiple, below the converged 50- and 200-day near $47, with a break through that targeting the ~$51.70 September high.",
+    "href": "options-flow/",
+    "publishedAt": "2026-11-03 17:04 CT",
+    "sourceLabel": "Desk"
+  },
+  {
+    "id": "2026-11-03-insm-dollar",
+    "section": "options-flow",
+    "kind": "dollar",
+    "ticker": "INSM",
+    "title": "INSM joins the $$$ Shopping List",
+    "summary": "5,000 Jan $110 calls bought at $8.62 on 11/3, 10,000 Jan $100/$130 call spreads bought 10/27, and 1,000 Jan $95 short puts opened 10/14; spot $104.44. Desk sees a respiratory biotech with a bronchiectasis drug at a blockbuster run-rate, holding above the 8- and 21-day EMAs, with ~$112 as resistance and the ~$93 October low as support.",
+    "href": "options-flow/dollar/#INSM",
+    "publishedAt": "2026-11-03 17:03 CT",
+    "sourceLabel": "Desk"
+  }
+]
