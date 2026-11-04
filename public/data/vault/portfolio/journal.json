@@ -1,27 +1,26 @@
 {
   "schema": "ahead-portfolio-journal-v1",
   "summary": {
-    "as_of_ct": "2026-11-01 CT",
+    "as_of_ct": "2026-11-04 CT",
     "event": "Desk mock book",
     "book": "desk-mock",
     "starting_balance_usd": 50000,
     "ticket_usd": 4000,
-    "closed_pnl_usd": -4049,
-    "closed_count": 8,
-    "open_count": 4,
+    "closed_pnl_usd": -493.03,
+    "closed_count": 9,
+    "open_count": 3,
     "by_category": {
-      "Spotlight": -4409,
+      "Spotlight": -853.03,
       "Earnings Snapshot": -452,
       "Weekly Radar Earnings Preview": 812
     },
     "journal_lock": "2026-10-30-desk-mock",
     "sources_note": "Spotlights and Featured Radars are sized to a 4,000 ticket on a 50,000 book. Earnings Snapshot, Weekly Radar Earnings Preview, and Weekly Radar Credit Spread of the Week are 1 contract. Stops and targets stay with the idea. Dollars shown are the ticket, not a brokerage fill.",
-    "updated_ct": "2026-11-01 CT",
+    "updated_ct": "2026-11-04 CT",
     "open_tickers": [
       "AZN",
       "NFLX",
-      "GS",
-      "XYZ"
+      "GS"
     ]
   },
   "trades": [
@@ -323,12 +322,14 @@
       "entry_price": 3.5173,
       "stop_stock": 70,
       "target_stock": 90,
-      "exit_ts_ct": null,
-      "exit_price": null,
-      "outcome": "open",
-      "pnl_usd": null,
-      "status": "open",
-      "notes": "Call spread still open. Stock stop 70, target 90.",
+      "exit_ts_ct": "2026-11-04 8:34 AM CT",
+      "exit_price": 6.75,
+      "closedAt": "2026-11-04",
+      "outcome": "win",
+      "pnl_usd": 3555.97,
+      "return_label": "+92%",
+      "status": "closed",
+      "notes": "Call spread banked at 6.75, +92% on the debit.",
       "ticket_lock": "desk 2026-10-30",
       "ticket": {
         "posted_ct": "2026-10-27 8:51 PM CT",

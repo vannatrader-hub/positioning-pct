@@ -147,10 +147,15 @@ export function formatUsd(value) {
   if (value == null || value === "") return "—";
   const amount = Number(value);
   if (!Number.isFinite(amount)) return "—";
-  const digits = Math.round(Math.abs(amount)).toLocaleString("en-US");
+  const cents = Math.round(Math.abs(amount) * 100);
+  const hasCents = cents % 100 !== 0;
+  const digits = (cents / 100).toLocaleString("en-US", {
+    minimumFractionDigits: hasCents ? 2 : 0,
+    maximumFractionDigits: hasCents ? 2 : 0,
+  });
+  if (cents === 0) return "$0";
   if (amount > 0) return `+$${digits}`;
-  if (amount < 0) return `−$${digits}`;
-  return `$${digits}`;
+  return `−$${digits}`;
 }
 
 /** Unsigned dollars for the book and the ticket. PnL keeps the signed form. */
@@ -389,6 +394,9 @@ function tableBlock(journal) {
 
     const result = tag(el("td"), "Result");
     result.append(el("span", `pf-result is-${tone}`, resultLabel(trade)));
+    if (typeof trade.return_label === "string" && trade.return_label.trim()) {
+      result.append(el("span", "pf-sub", trade.return_label.trim()));
+    }
 
     const pnl = tag(el("td", `pf-num pf-pnl is-${tone}`), "PnL");
     const mark = markOf(trade);

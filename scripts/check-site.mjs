@@ -2192,13 +2192,13 @@ const bookPath = join(root, "public/data/vault/portfolio/journal.json");
 const book = JSON.parse(readFileSync(bookPath, "utf8"));
 assert(bannedAllow.size === 0, "the mock book is not exempt from the source-name scan");
 assert(book.schema === "ahead-portfolio-journal-v1", `portfolio schema ${book.schema}`);
-assert(book.summary.book === "desk-mock" && book.summary.journal_lock === "2026-10-30-desk-mock" && book.summary.as_of_ct === "2026-11-01 CT" && book.summary.updated_ct === "2026-11-01 CT", "portfolio journal is the desk mock book stamped 2026-11-01 CT");
+assert(book.summary.book === "desk-mock" && book.summary.journal_lock === "2026-10-30-desk-mock" && book.summary.as_of_ct === "2026-11-04 CT" && book.summary.updated_ct === "2026-11-04 CT", "portfolio journal is the desk mock book stamped 2026-11-04 CT");
 assert(book.summary.starting_balance_usd === 50000 && book.summary.ticket_usd === 4000, "mock book starts at 50000 with a 4000 ticket for Spotlight and Featured");
-assert(book.summary.closed_pnl_usd === -4049 && book.summary.closed_count === 8 && book.summary.open_count === 4, "portfolio closed PnL, closed count, and open count");
+assert(book.summary.closed_pnl_usd === -493.03 && book.summary.closed_count === 9 && book.summary.open_count === 3, "portfolio closed PnL, closed count, and open count");
 assert(!("account" in book.summary), "mock book has no account identifier");
-assert(JSON.stringify(book.summary.open_tickers) === JSON.stringify(["AZN", "NFLX", "GS", "XYZ"]), "open tickers are AZN, NFLX, GS, XYZ");
+assert(JSON.stringify(book.summary.open_tickers) === JSON.stringify(["AZN", "NFLX", "GS"]), "open tickers are AZN, NFLX, GS");
 assert(
-  book.summary.by_category.Spotlight === -4409 &&
+  book.summary.by_category.Spotlight === -853.03 &&
     book.summary.by_category["Earnings Snapshot"] === -452 &&
     book.summary.by_category["Weekly Radar Earnings Preview"] === 812,
   "portfolio category totals",
@@ -2238,12 +2238,10 @@ assert(
 function ticketPnl(trade) {
   if (trade.exit_price == null || trade.status !== "closed") return null;
   const credit = String(trade.structure ?? "").trim().toLowerCase().startsWith("short");
-  if (oneLotCategories.has(trade.category)) {
-    const signed = credit ? trade.entry_price - trade.exit_price : trade.exit_price - trade.entry_price;
-    return Math.round(signed * 100 * trade.qty);
-  }
-  const ret = credit ? (trade.entry_price - trade.exit_price) / trade.entry_price : (trade.exit_price - trade.entry_price) / trade.entry_price;
-  return Math.round(ret * 4000);
+  const signed = credit ? trade.entry_price - trade.exit_price : trade.exit_price - trade.entry_price;
+  if (trade.id === "desk-xyz-spotlight-43878") return Math.round(signed * 100 * trade.qty * 100) / 100;
+  if (oneLotCategories.has(trade.category)) return Math.round(signed * 100 * trade.qty);
+  return Math.round((signed / trade.entry_price) * 4000);
 }
 assert(book.trades.every((trade) => trade.pnl_usd === ticketPnl(trade)), "displayed PnL matches the line's sizing rule");
 const byTicker = Object.fromEntries(book.trades.map((trade) => [trade.id, trade]));
@@ -2251,21 +2249,38 @@ const meta = byTicker["desk-meta-earnings-snapshot-2026-10-19"];
 assert(meta.status === "closed" && meta.outcome === "loss" && meta.qty === 1 && meta.pnl_usd === -666 && bookSide(meta) === "closed", "META is a 1-lot filled close on the Closed tab");
 assert(!isPending(meta) && !isOpen(meta) && resultLabel(meta) === "Loss", "META reads as a closed loss");
 const xyz = byTicker["desk-xyz-spotlight-43878"];
-assert(xyz.qty === 11 && xyz.entry_price === 3.5173 && xyz.status === "open" && xyz.outcome === "open" && bookSide(xyz) === "open", "XYZ is 11 at 3.5173 and lands on the Open tab");
-assert(formatPx(xyz.entry_price) === "3.5173", `XYZ average renders ${formatPx(xyz.entry_price)}`);
-assert(formatUsd(null) === "—" && formatUsd(undefined) === "—" && formatBook(50000) === "$50,000", "a missing PnL stays blank and the book prints unsigned");
+assert(
+  xyz.qty === 11 &&
+    xyz.entry_price === 3.5173 &&
+    xyz.exit_price === 6.75 &&
+    xyz.exit_ts_ct === "2026-11-04 8:34 AM CT" &&
+    xyz.closedAt === "2026-11-04" &&
+    xyz.status === "closed" &&
+    xyz.outcome === "win" &&
+    xyz.pnl_usd === 3555.97 &&
+    xyz.return_label === "+92%" &&
+    bookSide(xyz) === "closed" &&
+    resultLabel(xyz) === "Win",
+  "XYZ Spotlight 43878 is a filled win at 6.75 on 2026-11-04",
+);
+assert(!isOpen(xyz) && !isPending(xyz), "XYZ is off the Open tab");
+assert(formatPx(xyz.entry_price) === "3.5173" && formatPx(xyz.exit_price) === "6.75", `XYZ prices render entry ${formatPx(xyz.entry_price)} exit ${formatPx(xyz.exit_price)}`);
+assert(formatUsd(xyz.pnl_usd) === "+$3,555.97" && formatUsd(1210) === "+$1,210" && formatUsd(-493.03) === "−$493.03" && formatUsd(-4049) === "−$4,049", "XYZ PnL keeps cents and whole-dollar lines stay whole");
+assert(formatUsd(null) === "—" && formatUsd(undefined) === "—" && formatUsd(0) === "$0" && formatBook(50000) === "$50,000", "a missing PnL stays blank and the book prints unsigned");
 const nflx = byTicker["desk-nflx-earnings-snapshot-2026-10-19"];
 assert(nflx.status === "open" && nflx.qty === 1 && nflx.ticket_usd === 227 && nflx.outcome === null && nflx.pnl_usd === null, "NFLX stays open at 1 contract with an empty outcome");
 assert(isOpen(nflx) && !isPending(nflx) && resultLabel(nflx) === "Open" && bookSide(nflx) === "open", "NFLX reads as open, not pending");
 assert(
-  JSON.stringify(book.trades.filter(isOpen).map((trade) => trade.ticker)) === JSON.stringify(["AZN", "NFLX", "GS", "XYZ"]),
-  "open rows are AZN, NFLX, GS, XYZ",
+  JSON.stringify(book.trades.filter(isOpen).map((trade) => trade.ticker)) === JSON.stringify(["AZN", "NFLX", "GS"]),
+  "open rows are AZN, NFLX, GS",
 );
-assert(book.trades.filter((trade) => bookSide(trade) === "closed").map((trade) => trade.ticker).length === 8, "eight closed lines");
-assert(book.trades.filter((trade) => bookSide(trade) === "open").length === 4, "four lines land on the Open tab");
+assert(book.trades.filter((trade) => bookSide(trade) === "closed").map((trade) => trade.ticker).length === 9, "nine closed lines");
+assert(book.trades.filter((trade) => bookSide(trade) === "open").length === 3, "three lines land on the Open tab");
 assert(!book.trades.some(isPending), "this lock has no working close");
+const azn = byTicker["desk-azn-featured-43721"];
+assert(azn.status === "open" && azn.outcome === "open" && azn.entry_price === 4.5 && azn.exit_price === null && azn.pnl_usd === null && bookSide(azn) === "open", "AZN featured debit stays open");
 const gs = byTicker["desk-gs-weekly-radar-43728"];
-assert(gs.status === "open" && gs.qty === 1 && gs.ticket_usd === 480 && gs.pnl_usd === null, "GS weekly credit spread stays open at 1 contract");
+assert(gs.status === "open" && gs.qty === 1 && gs.ticket_usd === 480 && gs.pnl_usd === null && gs.exit_price === null, "GS weekly credit spread stays open at 1 contract");
 assert(byTicker["desk-be-earnings-snapshot-2026-10-19"].pnl_usd === -1133, "BE 1-lot loss");
 for (const id of ["desk-fcx-spotlight-43676-lot1", "desk-fcx-spotlight-43676-lot2", "desk-gld-spotlight-43774", "desk-xyz-spotlight-43878", "desk-azn-featured-43721"]) {
   assert(byTicker[id].ticket_usd === 4000 && !oneLotCategories.has(byTicker[id].category), `${id} stays on the 4000 ticket`);
@@ -2281,10 +2296,11 @@ for (const [id, pnl] of [
 assert(resultLabel(book.trades[0]) === "Win" && resultLabel(book.trades[1]) === "Loss", "filled lines keep win and loss");
 const working = { status: "exit_pending_fill", outcome: "loss_pending", pnl_usd: -1 };
 assert(isPending(working) && !isOpen(working) && resultLabel(working) === "Pending" && bookSide(working) === "open", "a working close stays pending and on the Open tab");
-assert(closedPnl(book) === book.summary.closed_pnl_usd, `closed sum ${closedPnl(book)} drifted from the lock`);
+const moneyCents = (value) => Math.round(Number(value) * 100);
+assert(moneyCents(closedPnl(book)) === moneyCents(book.summary.closed_pnl_usd), `closed sum ${closedPnl(book)} drifted from the lock`);
 const path = equityPath(book);
-assert(path.start === 50000 && path.equity === 45951 && path.points.length === 9, `mock equity path ${path.equity}`);
-assert(bookJs.includes("dataset.tab") && bookJs.includes('["open"') && bookJs.includes("bookSide") && bookJs.includes("pf-curve"), "portfolio renders status tabs and the book path");
+assert(path.start === 50000 && path.equity === 49506.97 && path.points.length === 10, `mock equity path ${path.equity}`);
+assert(bookJs.includes("dataset.tab") && bookJs.includes('["open"') && bookJs.includes("bookSide") && bookJs.includes("pf-curve") && bookJs.includes("return_label"), "portfolio renders status tabs, the book path, and a close return");
 assert(css.includes(".pf-result.is-pending") && css.includes(".pf-result.is-open") && css.includes(".pf-table") && css.includes(".pf-tabs"), "portfolio table styles closed, pending, open rows, and tabs");
 
 /* Portfolio: the page never shows a source name from the mock journal, the week strip reads the journal's own ISO week, and marks stay blank until the journal carries them. */
@@ -2296,23 +2312,23 @@ for (const text of shownFields) {
   assert(!hit, `portfolio shows "${hit}" in ${shown}`);
 }
 assert(deskCopy(book.summary.event) === "Desk mock book", `portfolio headline ${deskCopy(book.summary.event)}`);
-assert(deskCopy(xyz.ticket_lock) === "desk 2026-10-30" && deskCopy(byTicker["desk-be-earnings-snapshot-2026-10-19"].notes).includes("Call spread"), "journal copy stays on the ticket");
+assert(deskCopy(xyz.ticket_lock) === "desk 2026-10-30" && deskCopy(xyz.notes).includes("+92%") && deskCopy(xyz.notes).includes("6.75") && deskCopy(byTicker["desk-be-earnings-snapshot-2026-10-19"].notes).includes("Call spread"), "journal copy stays on the ticket");
 assert(deskCopy(["Options", "Hawk", " ", "Vol", "land"].join("")) === "", "a line that would still name a source is dropped");
 for (const piece of ["deskCopy(summary.event)", "deskCopy(trade.notes)", "deskCopy(trade.ticket_lock)", "deskCopy(summary.journal_lock)"]) {
   assert(bookJs.includes(piece), `portfolio scrubs ${piece}`);
 }
 assert(!/summary\.event\)\);|trade\.notes\)\);|"pf-lock", trade\.ticket_lock/.test(bookJs), "portfolio does not render raw journal copy");
-assert(stopOf(xyz) === 70 && targetOf(xyz) === 90 && stopOf(nflx) === null && targetOf(nflx) === null, "open lines read stop and target from the journal");
+assert(stopOf(xyz) === 70 && targetOf(xyz) === 90 && stopOf(nflx) === null && targetOf(nflx) === null, "XYZ keeps stock stop 70 and target 90; NFLX has neither");
 assert(JSON.stringify(markOf(xyz)) === '{"price":null,"pnl":null,"asOf":"","marked":false}', "a line without mtm fields has no mark");
 assert(JSON.stringify(markOf({ mtm_price: 4.1, mtm_pnl_usd: 643, mtm_as_of_ct: "2026-10-30 3:00 PM CT" })) === '{"price":4.1,"pnl":643,"asOf":"2026-10-30 3:00 PM CT","marked":true}', "mtm fields read through");
 assert(markOf({ mtm_price: "4.1", mtm_pnl_usd: Number.NaN }).marked === false, "a malformed mark stays blank");
 const strip = weekStrip(book);
-assert(strip.week === "2026-W44" && strip.start === "2026-10-26" && strip.end === "2026-11-01", `portfolio week ${strip.week}`);
-assert(strip.closedPnl === -6606 && strip.closedCount === 5 && strip.wins === 1 && strip.losses === 4, `week closed ${strip.closedPnl} over ${strip.closedCount}`);
-assert(JSON.stringify(strip.closedTickers) === '["FCX","GLD","BE","META","TXN"]' && strip.openCount === 4 && strip.markedCount === 0 && strip.markPnl === null, "week strip closes and open count");
+assert(strip.week === "2026-W45" && strip.start === "2026-11-02" && strip.end === "2026-11-08", `portfolio week ${strip.week}`);
+assert(strip.closedPnl === 3555.97 && strip.closedCount === 1 && strip.wins === 1 && strip.losses === 0, `week closed ${strip.closedPnl} over ${strip.closedCount}`);
+assert(JSON.stringify(strip.closedTickers) === '["XYZ"]' && strip.openCount === 3 && strip.markedCount === 0 && strip.markPnl === null, "week strip closes and open count");
 const markedBook = structuredClone(book);
 markedBook.trades.filter(isOpen).forEach((trade, index) => Object.assign(trade, { mtm_price: 1, mtm_pnl_usd: index * 10, mtm_as_of_ct: "2026-10-30 3:00 PM CT" }));
-assert(weekStrip(markedBook).markPnl === 60 && weekStrip(markedBook).markedCount === 4, "open marks total only when every open line is marked");
+assert(weekStrip(markedBook).markPnl === 30 && weekStrip(markedBook).markedCount === 3, "open marks total only when every open line is marked");
 assert(css.includes(".pf-week-cells") && css.includes(".pf-open-grid"), "portfolio styles the week strip and open lines");
 const bookSchema = JSON.parse(readFileSync(join(root, "public/data/vault/portfolio/schema.json"), "utf8"));
 validatePack(bookSchema, bookSchema, book, "portfolio");
