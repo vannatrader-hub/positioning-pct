@@ -365,7 +365,7 @@ for (const [ticker, want] of Object.entries(studyWant)) {
 }
 
 const flow = JSON.parse(readFileSync(join(root, "public/data/flow/plays.json"), "utf8"));
-const flowTickers = ["MPWR", "INSM", "UBS", "EXE", "DAR", "JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN", "ALAB", "CSCO"];
+const flowTickers = ["EPD", "MPWR", "INSM", "UBS", "EXE", "DAR", "JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN", "ALAB"];
 assert(
   JSON.stringify(sortPlays(flow.plays).map((play) => play.ticker)) === JSON.stringify(flowTickers),
   `Shopping List newest alert first: ${sortPlays(flow.plays).map((play) => play.ticker)}`,
@@ -445,7 +445,7 @@ assert(
 for (const ticker of ["COIN", "ALAB"]) {
   assert(flowBy[ticker].customerPurchased.every((line) => line.detail.includes("sold")), `${ticker} short puts read as sold`);
 }
-const beWant = { CASY: 671.2, JCI: 163.54, MMM: 179.8, COIN: 123.5, ALAB: 183.8, CORT: 130.94, CRWD: null, DDOG: null, CSCO: null, QCOM: null };
+const beWant = { CASY: 671.2, JCI: 163.54, MMM: 179.8, COIN: 123.5, ALAB: 183.8, CORT: 130.94, CRWD: null, DDOG: null, EPD: null, QCOM: null };
 for (const [ticker, want] of Object.entries(beWant)) {
   assert(breakeven(flowBy[ticker].lead) === want, `${ticker} break-even ${breakeven(flowBy[ticker].lead)} !== ${want}`);
 }
@@ -505,6 +505,14 @@ assert(
 assert(flowBy.INSM.customerPurchased[0]?.contract === "Jan $110 calls" && flowBy.INSM.customerPurchased[0]?.side === "calls_bought", "INSM Customer purchased is the Jan $110 call buy");
 const insmLevels = chartLevels(flowBy.INSM, JSON.parse(readFileSync(join(root, "public/data/flow/bars/INSM.json"), "utf8")).bars);
 assert(JSON.stringify(insmLevels.lines.map((line) => line.value)) === "[110,118.62]", `INSM chart draws the $110 strike and break-even ${insmLevels.lines.map((line) => line.value)}`);
+assert(
+  JSON.stringify(flowBy.EPD.lead) === JSON.stringify({ type: "call", action: "bought", qty: 10000, strike: 40, expiry: "March", price: null }),
+  `EPD lead is the March $40 call buy ${JSON.stringify(flowBy.EPD.lead)}`,
+);
+assert(flowBy.EPD.customerPurchased[0]?.contract === "March $40 calls" && flowBy.EPD.customerPurchased[0]?.side === "calls_bought", "EPD Customer purchased is the March $40 call buy");
+const epdLevels = chartLevels(flowBy.EPD, JSON.parse(readFileSync(join(root, "public/data/flow/bars/EPD.json"), "utf8")).bars);
+assert(JSON.stringify(epdLevels.lines.map((line) => line.value)) === "[40]", `EPD chart draws only the $40 strike ${epdLevels.lines.map((line) => line.value)}`);
+assert(!flowBy.CSCO, "CSCO aged out of the 3-week $$$ window on the Nov 4 as-of");
 assert(resolveExpiry("December", "2026-10-27") === "2026-12-18", "December resolves to Dec 18, 2026");
 assert(resolveExpiry("January", "2026-10-22") === "2027-01-15", "January resolves to Jan 15, 2027");
 assert(resolveExpiry("January 2028", "2026-10-25") === "2028-01-21", "January 2028 resolves to Jan 21, 2028");
@@ -1044,7 +1052,7 @@ assert(itemsForDay(nt.items ?? [], "2026-10-31").length === 1, "Oct 31 desk day 
 assert(itemsForDay(nt.items ?? [], "2026-11-01").length === 2, "Nov 1 desk day lists the ABBV and CNC featured alerts");
 assert(itemsForDay(nt.items ?? [], "2026-11-02").length === 11, "Nov 2 desk day lists the UBS, W, and WFC flow alerts plus the morning and evening research notes");
 assert(itemsForDay(nt.items ?? [], "2026-11-03").length === 5, "Nov 3 desk day lists the MPWR and INSM shopping-list alerts, the VZ featured alert, and the pre-open research notes");
-assert(itemsForDay(nt.items ?? [], "2026-11-04").length === 2, "Nov 4 desk day lists the TSCO and UBER featured alerts");
+assert(itemsForDay(nt.items ?? [], "2026-11-04").length === 3, "Nov 4 desk day lists the EPD shopping-list alert and the TSCO and UBER featured alerts");
 const ntReadme = readFileSync(join(root, "README.md"), "utf8");
 assert(ntReadme.includes("npm run new-today:pack"), "README shows the New Today pack command");
 assert(ntReadme.includes("Midnight auto-ship") && ntReadme.includes("6:30 AM CT") && ntReadme.includes("Afternoon auto-ship"), "README tells midnight, morning, and afternoon auto-ship to run the same pack");

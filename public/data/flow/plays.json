@@ -1,8 +1,36 @@
 {
-  "asOf": "2026-11-03",
-  "asOfLabel": "Wed Nov 4, 2026 pre-market · MPWR and INSM quotes Tue Nov 3 close; earlier names through Mon Nov 2 close",
-  "window": "Last 3 weeks · Oct 13 – Nov 3, 2026",
+  "asOf": "2026-11-04",
+  "asOfLabel": "Thu Nov 5, 2026 morning · EPD quote Wed Nov 4 close; earlier names through Tue Nov 3 close",
+  "window": "Last 3 weeks · Oct 14 – Nov 4, 2026",
   "plays": [
+    {
+      "id": 43985,
+      "ticker": "EPD",
+      "exchange": "NYSE",
+      "name": "Enterprise Products Partners",
+      "industry": { "broad": "Energy", "focus": "Midstream · NGL & gas" },
+      "date": "2026-11-04",
+      "alertedAtCt": "2026-11-04 09:40 PM CT",
+      "title": "March Calls in a Midstream Gas/NGL Leader",
+      "confidence": "$$$",
+      "refPrice": 36.5,
+      "flow": [
+        "Enterprise Products Partners (EPD) saw 10,000 March $40 calls bought for about $980K on 11/3. About 9,000 December $42 calls and about 9,000 January $42 calls sit in long-call open interest, with further accumulation in January 2027 and January 2028 call strikes.",
+        "EPD is an integrated midstream partnership gathering, processing, transporting and exporting Permian natural gas and NGLs. Shares broke under a rising 200-day this week. A longer-term weekly bull flag has been in place since early 2026, and shares are up 14% year to date. The desk watches a breakout over about $39 toward about $45 on volume growth from Permian wet-gas, NGLs, and export capacity. The reference price is about $36.50."
+      ],
+      "customerPurchased": [
+        { "contract": "March $40 calls", "detail": "10,000 bought · ~$980K · 11/3", "side": "calls_bought" }
+      ],
+      "oi": [
+        { "contract": "March $40 calls", "detail": "10,000 bought 11/3 · ~$980K" },
+        { "contract": "Dec $42 calls", "detail": "~9,000 long-call open interest" },
+        { "contract": "Jan $42 calls", "detail": "~9,000 long-call open interest" },
+        { "contract": "Jan 2027 and Jan 2028 calls", "detail": "Further accumulation in longer-dated call strikes" }
+      ],
+      "recommendation": "The desk wants EPD on a breakout over about $39, with the weekly bull flag and volume-growth thesis as the hold.",
+      "lead": { "type": "call", "action": "bought", "qty": 10000, "strike": 40, "expiry": "March", "price": null },
+      "quote": { "date": "2026-11-04", "last": 36.71, "prev": 37.5 }
+    },
     {
       "id": 43972,
       "ticker": "MPWR",
@@ -399,30 +427,6 @@
       "recommendation": "ALAB valuation will make for a bumpy ride but reminds me of SNOW years ago, dips will find buyers which is why put sales attractive when RSI gets oversold.",
       "lead": { "type": "put", "action": "sold", "qty": 600, "strike": 220, "expiry": "September 2027", "price": 36.2 },
       "quote": { "date": "2026-10-26", "last": 259.51, "prev": 257.16 }
-    },
-    {
-      "id": 43649,
-      "ticker": "CSCO",
-      "exchange": "NASDAQ",
-      "name": "Cisco",
-      "industry": { "broad": "Technology", "focus": "Networking" },
-      "date": "2026-10-13",
-      "alertedAtCt": "2026-10-13 06:34 PM CT",
-      "title": "Bulls Put on Size Positions in Full AI Stack Provider",
-      "confidence": "$$$",
-      "refPrice": 115.15,
-      "flow": [
-        "Cisco (CSCO) on 10/12 with a buyer of 1950 December 2028 $140 calls for $3.8M and also with 1000 March $110 short puts opening.",
-        "These bull trades follow size buys in September $135 calls for $2.7M, June $170 way OTM calls 2500X and 2000 December $110 calls, accumulation of bull positioning with 11-12 the next earnings date.",
-        "CSCO shares are +50% YTD and recently pulled back to $105 support from $130 post-earnings highs but recently showing relative strength with $121 and $127.5 key overhead levels. The weekly is forming a large bull pennant that measures to $170 above $125."
-      ],
-      "customerPurchased": [
-        { "contract": "Dec 2028 $140 calls", "detail": "1,950 bought · $3.8M · 10/12", "side": "calls_bought" }
-      ],
-      "oi": [],
-      "recommendation": "CSCO looks positioned for more upside in 2027 as the AI story plays out and a safer way to play the theme with re-rate potential.",
-      "lead": { "type": "call", "action": "bought", "qty": 1950, "strike": 140, "expiry": "December 2028", "price": null },
-      "quote": { "date": "2026-10-26", "last": 110.24, "prev": 106.5 }
     }
   ]
 }
