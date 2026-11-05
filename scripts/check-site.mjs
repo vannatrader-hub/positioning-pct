@@ -462,6 +462,7 @@ assert(!flowBy.P && !flowBy.BX, "P and BX are $$ alerts and stay off the $$$ wat
 assert(!flowBy.ABBV && !flowBy.CNC, "ABBV and CNC are $$ alerts and stay off the $$$ watchlist");
 assert(!flowBy.W && !flowBy.WFC, "W and WFC are $$ alerts and stay off the $$$ watchlist");
 assert(!flowBy.VZ, "VZ is a $$ alert and stays off the $$$ watchlist");
+assert(!flowBy.TSCO && !flowBy.UBER, "TSCO and UBER are $$ alerts and stay off the $$$ watchlist");
 assert(
   JSON.stringify(flowBy.JAZZ.lead) === JSON.stringify({ type: "call", action: "bought", qty: 2700, strike: 240, expiry: "December 2026", price: null }),
   `JAZZ lead is the Dec 2026 $240 call buy ${JSON.stringify(flowBy.JAZZ.lead)}`,
@@ -1043,6 +1044,7 @@ assert(itemsForDay(nt.items ?? [], "2026-10-31").length === 1, "Oct 31 desk day 
 assert(itemsForDay(nt.items ?? [], "2026-11-01").length === 2, "Nov 1 desk day lists the ABBV and CNC featured alerts");
 assert(itemsForDay(nt.items ?? [], "2026-11-02").length === 11, "Nov 2 desk day lists the UBS, W, and WFC flow alerts plus the morning and evening research notes");
 assert(itemsForDay(nt.items ?? [], "2026-11-03").length === 5, "Nov 3 desk day lists the MPWR and INSM shopping-list alerts, the VZ featured alert, and the pre-open research notes");
+assert(itemsForDay(nt.items ?? [], "2026-11-04").length === 2, "Nov 4 desk day lists the TSCO and UBER featured alerts");
 const ntReadme = readFileSync(join(root, "README.md"), "utf8");
 assert(ntReadme.includes("npm run new-today:pack"), "README shows the New Today pack command");
 assert(ntReadme.includes("Midnight auto-ship") && ntReadme.includes("6:30 AM CT") && ntReadme.includes("Afternoon auto-ship"), "README tells midnight, morning, and afternoon auto-ship to run the same pack");
