@@ -1,8 +1,35 @@
 {
-  "asOf": "2026-11-04",
-  "asOfLabel": "Thu Nov 5, 2026 morning · EPD quote Wed Nov 4 close; earlier names through Tue Nov 3 close",
-  "window": "Last 3 weeks · Oct 14 – Nov 4, 2026",
+  "asOf": "2026-11-05",
+  "asOfLabel": "Fri Nov 6, 2026 midnight · SBUX quote Thu Nov 5 close; earlier names through Wed Nov 4 close",
+  "window": "Last 3 weeks · Oct 15 – Nov 5, 2026",
   "plays": [
+    {
+      "id": 44002,
+      "ticker": "SBUX",
+      "exchange": "NASDAQ",
+      "name": "Starbucks",
+      "industry": { "broad": "Consumer Discretionary", "focus": "Restaurants · coffeehouses" },
+      "date": "2026-11-05",
+      "alertedAtCt": "2026-11-05 07:56 PM CT",
+      "title": "January Calls on a Coffeehouse Turnaround",
+      "confidence": "$$$",
+      "refPrice": 107,
+      "flow": [
+        "Starbucks (SBUX) saw 7,500 January $105 calls bought, still in open interest from 7/31. 2,000 January 2028 $95 short puts opened, with 1,500 September $85 short puts and 1,500 September $95 short puts opening.",
+        "SBUX is a global coffeehouse operator with about 41,600 stores, North America about 80% of revenue, in a productivity-led turnaround: Q4 U.S. comps +7.7% with transaction growth, Rewards at a record 36 million 90-day actives, and more than half of a $2B gross savings program realized. Shares are up 26% year to date and are probing the $108 to $110 resistance that has capped the year. A move above targets the early-2025 $116 highs, and above about $112 is a trend inflection from the all-time highs. Valuation sits near the 50th percentile of its 10-year range. The desk leans with the longer-term put sellers and the January $105 call open interest on strength through $110 to $112. The reference price is about $107."
+      ],
+      "customerPurchased": [
+        { "contract": "Jan $105 calls", "detail": "7,500 bought · still in OI from 7/31", "side": "calls_bought" }
+      ],
+      "oi": [
+        { "contract": "Jan $105 calls", "detail": "7,500 bought 7/31 · remain in open interest" },
+        { "contract": "Jan 2028 $95 short puts", "detail": "2,000 opened" },
+        { "contract": "Sep $85 / $95 short puts", "detail": "1,500 each opened" }
+      ],
+      "recommendation": "The desk wants SBUX through about $110–$112, with the turnaround comps, Rewards scale, and savings program as the hold.",
+      "lead": { "type": "call", "action": "bought", "qty": 7500, "strike": 105, "expiry": "January", "price": null },
+      "quote": { "date": "2026-11-05", "last": 106.16, "prev": 109.7 }
+    },
     {
       "id": 43985,
       "ticker": "EPD",
@@ -403,30 +430,6 @@
       "recommendation": "COIN is a high beta way to play a crypto rebound and with December call buyers and put sellers active into the 10/29 report, the flows look attractive here.",
       "lead": { "type": "put", "action": "sold", "qty": 300, "strike": 150, "expiry": "September 2027", "price": 26.5 },
       "quote": { "date": "2026-10-26", "last": 159.6, "prev": 164.45 }
-    },
-    {
-      "id": 43665,
-      "ticker": "ALAB",
-      "exchange": "NASDAQ",
-      "name": "Astera Labs",
-      "industry": { "broad": "Technology", "focus": "Semis · AI connectivity" },
-      "date": "2026-10-14",
-      "alertedAtCt": "2026-10-14 08:23 PM CT",
-      "title": "Put Sales Accumulate in Hyper Growth Connectivity Winner",
-      "confidence": "$$$",
-      "refPrice": 300.0,
-      "flow": [
-        "Astera Labs (ALAB) on 10/14 with a large opening sale of 600 September 2027 $220 puts at $36.20 and has seen a string of size long-dated put sales into weakness.",
-        "ALAB September $200 short puts opened 600X on 10/13 while 500 of the $320 calls bought, March $230 short puts 4000X, March $220 short puts 350X, January $250 short puts 850X, March $280 short puts 500X, January $260 puts 400X and January 2028 $300 short puts have all opened in the last two weeks.",
-        "ALAB on the weekly is in a longer-term rising channel pattern and the past six-months a bull pennant forming. On more weakness, monthly lower value and rising 200MA support at $248.5 should hold."
-      ],
-      "customerPurchased": [
-        { "contract": "Sep 2027 $220 puts", "detail": "600 sold / short @ $36.20 · 10/14", "side": "puts_sold" }
-      ],
-      "oi": [],
-      "recommendation": "ALAB valuation will make for a bumpy ride but reminds me of SNOW years ago, dips will find buyers which is why put sales attractive when RSI gets oversold.",
-      "lead": { "type": "put", "action": "sold", "qty": 600, "strike": 220, "expiry": "September 2027", "price": 36.2 },
-      "quote": { "date": "2026-10-26", "last": 259.51, "prev": 257.16 }
     }
   ]
 }

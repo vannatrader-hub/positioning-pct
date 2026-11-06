@@ -1,9 +1,36 @@
 {
   "timeZone": "America/Chicago",
   "dayStartsAt": "00:00",
-  "dayStart": "2026-11-04T00:00:00-06:00",
-  "updatedAt": "2026-11-05T06:29:57-06:00",
+  "dayStart": "2026-11-05T00:00:00-06:00",
+  "updatedAt": "2026-11-06T00:14:03-06:00",
   "items": [
+    {
+      "id": "2026-11-05-sbux-dollar",
+      "section": "options-flow",
+      "title": "SBUX joins the $$$ Shopping List",
+      "summary": "7,500 January $105 calls remain in open interest from 7/31, with 2,000 January 2028 $95 short puts and 1,500 September $85 / $95 short puts opening; spot ~$107. Global coffeehouse turnaround (+26% YTD) probing $108–$110 resistance toward early-2025 $116 highs; desk watches strength through $110–$112 with comps, Rewards scale, and the $2B savings program as the hold.",
+      "href": "options-flow/dollar/#SBUX",
+      "publishedAt": "2026-11-05T19:56:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-05-pypl-flow",
+      "section": "options-flow",
+      "title": "PYPL ($$): Apr 2027 $67.50 calls bought",
+      "summary": "1,200 April 2027 $67.50 calls bought at $2.14 (~$256K) on 11/5, 500 January 2029 $55 ITM calls bought 10/30 (937 in OI), and 3,100 April 2027 $47.50 short puts still open from 9/14; spot $59. Desk sees a cheap payments turnaround holding the 200-day; lean is following long-dated call buyers on pullbacks toward the 50-day.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-05T18:17:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-05-cboe-flow",
+      "section": "options-flow",
+      "title": "CBOE ($$): Dec $360 calls bought",
+      "summary": "325 December $360 calls bought at $16 (~$520K) on 11/5 into a 60-day high, after 350 December $340 calls (~$595K) on 10/30 and 750 June 2028 $400 calls (~$3M+) on 10/22; spot ~$353. Desk sees a +40% YTD exchange compounder pressing May highs with KPI event-contract launch ahead; add on pullbacks toward the short-term averages.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-05T18:16:00-06:00",
+      "sourceLabel": "Desk"
+    },
     {
       "id": "2026-11-04-epd-dollar",
       "section": "options-flow",
@@ -408,78 +435,6 @@
       "href": "new-today/#nt-research",
       "publishedAt": "2026-10-29T04:05:00-05:00",
       "sourceLabel": "UBS"
-    },
-    {
-      "id": "2026-10-28-jazz-dollar",
-      "section": "options-flow",
-      "title": "JAZZ joins the $$$ Shopping List",
-      "summary": "2,700 Dec 2026 $240 calls bought on Oct 22 for about $865K; alerted Oct 28, 8:32 PM CT.",
-      "href": "options-flow/dollar/#JAZZ",
-      "publishedAt": "2026-10-28T20:32:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-28-p-flow",
-      "section": "options-flow",
-      "title": "P ($$): long-dated calls bought",
-      "summary": "900 Sep 2027 $210 calls bought Oct 8 at $28.50 ($2.5M+); 800 Nov 2026 $180 calls Oct 7; 300 Nov 2026 $170 calls Oct 14. Pullback held the 50-day near $119; $157.57 is the 10/13 high. Alerted Oct 28, 5:28 PM CT.",
-      "href": "options-flow/",
-      "publishedAt": "2026-10-28T17:28:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-28-bx-flow",
-      "section": "options-flow",
-      "title": "BX ($$): long-dated puts sold",
-      "summary": "2,000 Jan 2028 $115 puts sold to open Oct 28 at $17.60, a bullish put sale. Also 1,000 Jan 2029 $105 calls bought Oct 16 ($2.4M) and 2,500 Jan 2029 $105/$70 bull put spreads opened Oct 21. $105 support, $124 resistance. Alerted Oct 28, 5:27 PM CT.",
-      "href": "options-flow/",
-      "publishedAt": "2026-10-28T17:27:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-28-positioning-charts",
-      "section": "positioning",
-      "title": "Six interactive positioning charts",
-      "summary": "Soft Vol, sectors, broad equity, credit stress, fund managers, and GS risk appetite redrawn on one eight-week slider.",
-      "href": "positioning/charts/",
-      "publishedAt": "2026-10-28T14:30:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-28-positioning-hub",
-      "section": "positioning",
-      "title": "Positioning hub: four calling cards",
-      "summary": "Soft ↔ Crowded, Credit, Options & Soft Vol, and the full desk each open the desk at their own section.",
-      "href": "positioning/",
-      "publishedAt": "2026-10-28T13:39:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-28-scorecard-oi",
-      "section": "options-flow",
-      "title": "Weekly scorecard: OI and dealer levels filled",
-      "summary": "IV, volume vs OI, earnings boxes, and OI & dealer levels now sit on the W42 trade cards.",
-      "href": "options-flow/scorecard/",
-      "publishedAt": "2026-10-28T12:15:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-28-casy-dollar",
-      "section": "options-flow",
-      "title": "CASY joins the $$$ Shopping List",
-      "summary": "275 Dec 2027 $890 puts sold to open; alerted Oct 27, 8:10 PM CT.",
-      "href": "options-flow/dollar/#CASY",
-      "publishedAt": "2026-10-28T08:40:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-28-xyz-spotlight",
-      "section": "options-flow",
-      "title": "XYZ is an Active Spotlight",
-      "summary": "Long Dec $75/$85 call spreads in a payments name; posted Oct 27 evening, on the board with this morning's refresh.",
-      "href": "options-flow/spotlights/#XYZ",
-      "publishedAt": "2026-10-28T08:30:00-05:00",
-      "sourceLabel": "Desk"
     }
   ]
 }
