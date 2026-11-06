@@ -13,7 +13,7 @@ import { VAULT_ALLOWLIST, isAllowlisted } from "../src/vault-allowlist.js";
 import { FAMILY_ALLOWLIST, FAMILY_ENTRY } from "../src/family-allowlist.js";
 import { PRODUCT_FEEDS } from "../src/product-feeds.js";
 import { errorCopy, nextStep } from "../src/vault-signin.js";
-import { NT_SECTIONS, PUBLIC_NT_SECTIONS, SOURCE_LABELS, deskDay, deskDayStart, deskWindow, itemsForDay, publicDeskItems, windowLabel } from "../src/new-today-window.js";
+import { NT_SECTIONS, PUBLIC_NT_SECTIONS, SOURCE_LABELS, catchUpChip, catchUpCountText, catchUpDays, catchUpSummary, catchUpWindowLabel, dayRelation, deskDay, deskDayStart, deskStateUrl, deskWindow, earlierState, emptyDeskMessage, feedLine, itemsForDay, laterState, publicDeskItems, readDeskState, rowDayLabel, visibleDeskItems, windowLabel, yesterdayNote } from "../src/new-today-window.js";
 import { itemFromSoftCrowded, itemFromVolStress, planNewToday, runSelfTest, scrubCopy } from "./new-today-pack.mjs";
 import { BUY_LINE, CROWDED_PCTILE, DEFAULT_MONTHS, MAX_MONTHS, PCT_RAILS, RANGES, SOFT_PCTILE, averageCrosses, averageOf, breadthRead, bucketPctile, dayChange, monthsBack, percentileRank, pctileOrdinal, pctileRead, sma as breadthSma, windowStart as breadthWindowStart } from "../src/breadth.js";
 import { CSR_PARAMS, biasOf, csrPanel, csrSeries, cycleOf, panelText, regimeOf as csrRegimeOf, zColor } from "../src/csr.js";
@@ -957,6 +957,11 @@ assert(
 const ntPage = readFileSync(join(root, "new-today/index.html"), "utf8");
 const homePage = readFileSync(join(root, "index.html"), "utf8");
 assert(ntPage.includes("12:00 AM through 11:59 PM"), "New Today lede describes the calendar desk day");
+assert(ntPage.includes("today and yesterday") && ntPage.includes("Each row keeps"), "New Today lede includes yesterday and keeps the original calendar day");
+assert(
+  readFileSync(join(root, `${FAMILY_ENTRY}/new-today/index.html`), "utf8").includes("today and yesterday"),
+  "private New Today lede includes yesterday",
+);
 for (const [file, text] of [
   ["new-today/index.html", ntPage],
   ["index.html", homePage],
@@ -969,7 +974,9 @@ assert(ntPage.includes('src="/src/new-today.js"') && ntPage.includes('id="nt-bod
 for (const section of PUBLIC_NT_SECTIONS) assert(ntPage.includes(`href="#nt-${section.id}"`), `New Today subnav jumps to ${section.title}`);
 assert(!ntPage.includes('href="#nt-options-flow"'), "public New Today does not jump into Options Flow");
 assert(ntPage.includes('data-surface="public"') && ntPage.includes('id="nt-fresh"'), "New Today stamps the feed and stays on the public surface");
-assert(readFileSync(join(root, "src/new-today.js"), "utf8").includes("Feed updated"), "New Today copy names when the feed was updated");
+assert(readFileSync(join(root, "src/new-today-window.js"), "utf8").includes("Feed updated"), "New Today copy names when the feed was updated");
+assert(readFileSync(join(root, "src/new-today.js"), "utf8").includes("rowDayLabel"), "New Today rows keep a Today or Yesterday label");
+assert(readFileSync(join(root, "src/new-today-chip.js"), "utf8").includes("catchUpChip"), "the Dashboard chip counts today and yesterday");
 assert(
   JSON.stringify(NT_SECTIONS.map((section) => section.title)) === '["Positioning","Options Flow","SPX Levels","Research desk"]',
   "New Today sections run Positioning, Options Flow, SPX Levels, Research desk",
@@ -1063,6 +1070,132 @@ assert(itemsForDay(nt.items ?? [], "2026-11-02").length === 11, "Nov 2 desk day 
 assert(itemsForDay(nt.items ?? [], "2026-11-03").length === 5, "Nov 3 desk day lists the MPWR and INSM shopping-list alerts, the VZ featured alert, and the pre-open research notes");
 assert(itemsForDay(nt.items ?? [], "2026-11-04").length === 3, "Nov 4 desk day lists the EPD shopping-list alert and the TSCO and UBER featured alerts");
 assert(itemsForDay(nt.items ?? [], "2026-11-05").length === 3, "Nov 5 desk day lists the SBUX shopping-list alert and the PYPL and CBOE featured alerts");
+
+/* Default New Today is two Chicago calendar days. Yesterday keeps its own date. */
+const nov6Today = "2026-11-06";
+assert(JSON.stringify(catchUpDays(nov6Today)) === '["2026-11-06","2026-11-05"]', "Nov 6 catch-up is today then yesterday");
+assert(
+  catchUpWindowLabel(nov6Today) === "Today Fri, Nov 6 · Yesterday Thu, Nov 5 · 12:00 AM CT through 11:59 PM CT",
+  `catch-up window ${catchUpWindowLabel(nov6Today)}`,
+);
+assert(
+  yesterdayNote(nov6Today) === "Nothing new today (Fri, Nov 6). Rows below landed yesterday (Thu, Nov 5) and keep that date.",
+  `yesterday note ${yesterdayNote(nov6Today)}`,
+);
+const beforeMidnight = "2026-11-06T05:59:59Z";
+const afterMidnight = "2026-11-06T06:00:00Z";
+assert(deskDay(beforeMidnight) === "2026-11-05" && deskDay(afterMidnight) === "2026-11-06", "midnight CT rolls the desk day from Nov 5 to Nov 6");
+const beforeRoll = visibleDeskItems(nt.items, { today: deskDay(beforeMidnight), mode: "catchup" });
+const afterRoll = visibleDeskItems(nt.items, { today: deskDay(afterMidnight), mode: "catchup" });
+assert(beforeRoll.some((item) => item.id === "2026-11-05-sbux-dollar") && beforeRoll.some((item) => item.id === "2026-11-04-epd-dollar"), "before midnight, Nov 5 is today and Nov 4 is yesterday");
+assert(beforeRoll.every((item) => ["2026-11-05", "2026-11-04"].includes(deskDay(item.publishedAt))), "the pre-midnight catch-up stays on those two dates");
+assert(!beforeRoll.some((item) => item.id.startsWith("2026-11-03")), "Nov 3 leaves the default view once Nov 4 is yesterday");
+for (const id of ["2026-11-05-sbux-dollar", "2026-11-05-pypl-flow", "2026-11-05-cboe-flow"]) {
+  const stored = (nt.items ?? []).find((item) => item.id === id);
+  const shown = afterRoll.find((item) => item.id === id);
+  assert(shown === stored, `${id} shows on the Nov 6 default view without a copied stamp`);
+  assert(shown.publishedAt.startsWith("2026-11-05T"), `${id} keeps its Nov 5 publishedAt`);
+  const dated = rowDayLabel(shown.publishedAt, nov6Today);
+  assert(dated.relation === "yesterday" && dated.day === "2026-11-05" && dated.label === "Yesterday · Thu, Nov 5", `${id} stays labelled ${dated.label}`);
+  assert(dayRelation(dated.day, nov6Today) === "yesterday", `${id} is not relabelled as today`);
+}
+assert(afterRoll.length === 3 && afterRoll.every((item) => deskDay(item.publishedAt) === "2026-11-05"), "Nov 6 default lists only the three Nov 5 rows when Nov 6 is empty");
+assert(!afterRoll.some((item) => item.id.startsWith("2026-11-04")), "Nov 4 drops out of the default view at the Nov 6 midnight rollover");
+assert(
+  JSON.stringify(visibleDeskItems(nt.items, { today: nov6Today, mode: "catchup", publicOnly: true }).map((item) => item.id)) === "[]",
+  "public Nov 6 catch-up still omits Options Flow",
+);
+assert(
+  visibleDeskItems(nt.items, { today: nov6Today, mode: "catchup", section: "options-flow" }).map((item) => item.id).join() ===
+    "2026-11-05-sbux-dollar,2026-11-05-pypl-flow,2026-11-05-cboe-flow",
+  "section filter keeps the three Nov 5 flow rows, newest first",
+);
+assert(visibleDeskItems(nt.items, { today: nov6Today, mode: "catchup", section: "positioning" }).length === 0, "Nov 6 positioning filter does not borrow Nov 5 flow rows");
+const nov4Only = visibleDeskItems(nt.items, { today: nov6Today, mode: "day", day: "2026-11-04" });
+assert(nov4Only.length === 3 && nov4Only.every((item) => deskDay(item.publishedAt) === "2026-11-04"), "an older desk day stays a single calendar day");
+assert(!nov4Only.some((item) => item.id.includes("2026-11-05")), "Nov 5 rows do not leak into the Nov 4 page");
+
+const utcTrap = { id: "utc-trap", section: "spx", publishedAt: "2026-11-06T04:30:00Z", title: "UTC date is still Thursday in Chicago" };
+const utcToday = { id: "utc-today", section: "spx", publishedAt: "2026-11-06T06:30:00Z", title: "UTC instant after Chicago midnight" };
+assert(deskDay(utcTrap.publishedAt) === "2026-11-05", "04:30Z on Nov 6 is still Nov 5 in Chicago");
+assert(deskDay(utcToday.publishedAt) === "2026-11-06", "06:30Z on Nov 6 is Nov 6 in Chicago");
+assert(rowDayLabel(utcTrap.publishedAt, nov6Today).relation === "yesterday" && rowDayLabel(utcTrap.publishedAt, nov6Today).label === "Yesterday · Thu, Nov 5", "a UTC Nov 6 stamp before 06:00Z stays yesterday");
+assert(rowDayLabel(utcToday.publishedAt, nov6Today).relation === "today" && rowDayLabel(utcToday.publishedAt, nov6Today).label === "Today · Fri, Nov 6", "a UTC stamp after Chicago midnight is today");
+
+const dstRows = [
+  { id: "fb-before", section: "positioning", publishedAt: "2026-11-01T01:30:00-05:00" },
+  { id: "fb-after", section: "research", publishedAt: "2026-11-01T01:30:00-06:00" },
+  { id: "fb-next", section: "spx", publishedAt: "2026-11-02T00:30:00-06:00" },
+  { id: "fb-prior", section: "positioning", publishedAt: "2026-10-31T23:00:00-05:00" },
+  { id: "sf-early", section: "positioning", publishedAt: "2026-03-08T06:30:00Z" },
+  { id: "sf-late", section: "research", publishedAt: "2026-03-08T07:30:00Z" },
+  { id: "sf-edge", section: "spx", publishedAt: "2026-03-09T04:30:00Z" },
+  { id: "sf-today", section: "positioning", publishedAt: "2026-03-09T05:00:00Z" },
+];
+assert(deskDay("2026-11-01T01:30:00-05:00") === "2026-11-01" && deskDay("2026-11-01T01:30:00-06:00") === "2026-11-01", "both fall-back 1:30 AM hours stay on Nov 1");
+const fallCatch = visibleDeskItems(dstRows, { today: "2026-11-02", mode: "catchup" });
+assert(fallCatch.map((item) => item.id).join() === "fb-next,fb-after,fb-before", `fall-back catch-up ${fallCatch.map((item) => item.id).join()}`);
+assert(rowDayLabel(fallCatch[0].publishedAt, "2026-11-02").relation === "today", "Nov 2 12:30 AM CST is today after the fall-back");
+assert(fallCatch.slice(1).every((item) => rowDayLabel(item.publishedAt, "2026-11-02").relation === "yesterday"), "both Nov 1 hours are yesterday on Nov 2");
+assert(!fallCatch.some((item) => item.id === "fb-prior"), "Oct 31 is outside the Nov 2 catch-up");
+assert(deskDay("2026-03-08T06:30:00Z") === "2026-03-08" && deskDay("2026-03-08T07:30:00Z") === "2026-03-08", "spring-forward keeps 1:30 AM CST and 2:30 AM CDT on Mar 8");
+assert(deskDay("2026-03-09T04:30:00Z") === "2026-03-08" && deskDay("2026-03-09T05:00:00Z") === "2026-03-09", "Mar 9 04:30Z is still Mar 8 in Chicago; 05:00Z is Mar 9");
+const springCatch = visibleDeskItems(dstRows, { today: "2026-03-09", mode: "catchup" });
+assert(springCatch.map((item) => item.id).join() === "sf-today,sf-edge,sf-late,sf-early", `spring-forward catch-up ${springCatch.map((item) => item.id).join()}`);
+assert(rowDayLabel("2026-03-09T04:30:00Z", "2026-03-09").relation === "yesterday", "the UTC Mar 9 stamp before Chicago midnight is yesterday");
+assert(rowDayLabel("2026-03-09T05:00:00Z", "2026-03-09").label.startsWith("Today"), "Chicago midnight on Mar 9 is today");
+assert(catchUpDays("2026-03-01")[1] === "2026-02-28", "yesterday of Mar 1 2026 is Feb 28");
+assert(catchUpDays("2024-03-01")[1] === "2024-02-29", "yesterday of Mar 1 2024 is Feb 29");
+assert(catchUpDays("2026-01-01")[1] === "2025-12-31", "yesterday of Jan 1 is Dec 31");
+assert(catchUpDays("2026-11-02")[1] === "2026-11-01", "yesterday of the post-fallback day is the 25-hour day");
+
+const mixed = [
+  { id: "today-pos", section: "positioning", publishedAt: "2026-11-06T15:00:00-06:00" },
+  { id: "today-res", section: "research", publishedAt: "2026-11-06T09:00:00-06:00" },
+  { id: "y-flow", section: "options-flow", publishedAt: "2026-11-05T19:56:00-06:00" },
+  { id: "y-pos", section: "positioning", publishedAt: "2026-11-05T08:00:00-06:00" },
+  { id: "old-res", section: "research", publishedAt: "2026-11-04T21:00:00-06:00" },
+  utcTrap,
+];
+const mixedCatch = visibleDeskItems(mixed, { today: nov6Today, mode: "catchup" });
+assert(mixedCatch.map((item) => item.id).join() === "today-pos,today-res,utc-trap,y-flow,y-pos", `mixed catch-up order ${mixedCatch.map((item) => item.id).join()}`);
+assert(mixedCatch.every((item) => item.publishedAt === mixed.find((row) => row.id === item.id).publishedAt), "mixed rows keep their original stamps");
+assert(!mixedCatch.some((item) => item.id === "old-res"), "the day before yesterday stays off the default view");
+const mixedPos = visibleDeskItems(mixed, { today: nov6Today, mode: "catchup", section: "positioning" });
+assert(mixedPos.map((item) => item.id).join() === "today-pos,y-pos", "section filter keeps both days and drops the other sections");
+assert(rowDayLabel(mixedPos[0].publishedAt, nov6Today).relation === "today" && rowDayLabel(mixedPos[1].publishedAt, nov6Today).relation === "yesterday", "filtered rows keep Today and Yesterday");
+const mixedPublic = visibleDeskItems(mixed, { today: nov6Today, mode: "catchup", publicOnly: true });
+assert(!mixedPublic.some((item) => item.section === "options-flow") && mixedPublic.some((item) => item.id === "y-pos") && mixedPublic.some((item) => item.id === "utc-trap"), "public filter drops flow and keeps yesterday's other sections");
+const mixedOld = visibleDeskItems(mixed, { today: nov6Today, mode: "day", day: "2026-11-04", section: "research" });
+assert(mixedOld.map((item) => item.id).join() === "old-res", "an older day filter does not pull yesterday forward");
+const mixedSummary = catchUpSummary(mixed, nov6Today);
+assert(mixedSummary.todayCount === 2 && mixedSummary.yesterdayCount === 3 && mixedSummary.total === 5, "mixed counts split today from yesterday");
+assert(catchUpCountText(mixedSummary) === "2 today · 3 yesterday", "a mixed badge names both days");
+assert(catchUpCountText(catchUpSummary(afterRoll, nov6Today)) === "3 from yesterday", "a yesterday-only badge does not say new today");
+assert(emptyDeskMessage("catchup") === "Nothing new today or yesterday." && emptyDeskMessage("day") === "Nothing new that desk day.", "empty copy follows the view");
+const yChip = catchUpChip(catchUpSummary(nt.items, nov6Today), nt.updatedAt);
+assert(yChip.sub === "3 from yesterday" && yChip.lit === false && yChip.quiet === false, "yesterday-only chip names yesterday and does not pulse");
+assert(yChip.aria.includes("nothing new today") && yChip.aria.includes("3 from yesterday") && !yChip.aria.includes("since 12"), "yesterday-only chip does not call the rows fresh today");
+const quietChip = catchUpChip(catchUpSummary([], nov6Today), "");
+assert(quietChip.sub === "Quiet since yesterday" && quietChip.quiet === true && quietChip.lit === false, "a two-day quiet chip says so");
+const bothChip = catchUpChip(mixedSummary, "2026-11-06T14:00:00-06:00");
+assert(bothChip.lit === true && bothChip.sub === "2 today · 3 yesterday", "today's rows light the chip and the subtitle keeps yesterday separate");
+assert(!feedLine(nt.updatedAt, { quiet: false, mode: "catchup" }).includes("nothing new"), "a catch-up with rows does not say the desk is empty");
+assert(feedLine(nt.updatedAt, { quiet: true, mode: "catchup" }).endsWith("nothing new today or yesterday"), "a quiet catch-up names both days");
+assert(feedLine("2026-11-06T00:14:03-06:00", { quiet: false, mode: "day" }).startsWith("Feed updated"), "the feed line still names the update");
+
+const homeState = readDeskState("", nov6Today);
+assert(homeState.mode === "catchup" && homeState.day === nov6Today && homeState.view === "sections" && deskStateUrl(homeState) === "./", "the default URL is the two-day catch-up");
+assert(readDeskState("?day=2026-11-06", nov6Today).mode === "catchup", "asking for today stays on the catch-up");
+assert(readDeskState("?day=nope", nov6Today).mode === "catchup", "a bad day stays on the catch-up");
+const earlier = earlierState(homeState);
+assert(earlier.mode === "day" && earlier.day === "2026-11-04" && deskStateUrl(earlier) === "?day=2026-11-04", "Earlier from the catch-up opens the day before yesterday");
+const yesterdayState = readDeskState("?day=2026-11-05&view=all", nov6Today);
+assert(yesterdayState.mode === "day" && yesterdayState.day === "2026-11-05" && yesterdayState.view === "all", "an explicit yesterday URL is one desk day");
+assert(laterState(yesterdayState).mode === "catchup" && deskStateUrl(laterState(yesterdayState)) === "?view=all", "Later from yesterday returns to the catch-up and keeps All");
+assert(laterState(earlier).mode === "day" && laterState(earlier).day === "2026-11-05", "Later from the day before yesterday opens yesterday alone");
+assert(deskStateUrl({ ...homeState, view: "all" }) === "?view=all", "All on the catch-up stays free of a day param");
+assert(laterState(homeState) === null, "the catch-up has no later day");
 const ntReadme = readFileSync(join(root, "README.md"), "utf8");
 assert(ntReadme.includes("npm run new-today:pack"), "README shows the New Today pack command");
 assert(ntReadme.includes("Midnight auto-ship") && ntReadme.includes("6:30 AM CT") && ntReadme.includes("Afternoon auto-ship"), "README tells midnight, morning, and afternoon auto-ship to run the same pack");

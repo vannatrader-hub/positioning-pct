@@ -6314,7 +6314,8 @@ a.nt-row:hover {
 .nt-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
 .nt-tags .house { padding: 2px 7px; font-size: 10.5px; }
 
-.nt-sec {
+.nt-sec,
+.nt-day {
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 10.5px;
@@ -6322,6 +6323,36 @@ a.nt-row:hover {
   color: var(--muted);
   background: var(--p-fill);
   border: 1px solid var(--line);
+}
+
+.nt-day.is-today {
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+
+.nt-day.is-yesterday { color: var(--muted); }
+
+.nt-dayhead {
+  margin: 14px 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink-2);
+}
+
+.nt-note {
+  margin: 22px 0 0;
+  max-width: 660px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+#nt-window,
+#nt-fresh {
+  max-width: 100%;
+  white-space: normal;
+  line-height: 1.45;
 }
 
 .nt-title {

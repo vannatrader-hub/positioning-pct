@@ -1,15 +1,27 @@
+import { onDeskReady } from "./when-mounted.js";
 import {
   NT_SECTIONS,
   PUBLIC_NT_SECTIONS,
+  catchUpCountText,
+  catchUpDays,
+  catchUpSummary,
+  catchUpWindowLabel,
   ctTime,
   dayLabel,
   deskDay,
-  itemsForDay,
-  nextDeskDay,
-  prevDeskDay,
-  publicDeskItems,
+  deskStateUrl,
+  earlierState,
+  emptyDayMessage,
+  emptyDeskMessage,
+  feedLine,
+  laterState,
+  readDeskState,
   resolveHref,
+  rowDayLabel,
+  sectionEmptyMessage,
+  visibleDeskItems,
   windowLabel,
+  yesterdayNote,
 } from "./new-today-window.js";
 
 const base = import.meta.env ? import.meta.env.BASE_URL : "/";
@@ -26,22 +38,10 @@ function el(tag, className, text) {
 }
 
 function readState() {
-  const params = new URLSearchParams(window.location.search);
-  const today = deskDay();
-  const asked = params.get("day");
-  const day = /^\d{4}-\d{2}-\d{2}$/.test(asked ?? "") && asked < today ? asked : today;
-  return { today, day, view: params.get("view") === "all" ? "all" : "sections" };
+  return readDeskState(window.location.search, deskDay());
 }
 
-function stateUrl({ day, view, today }) {
-  const params = new URLSearchParams();
-  if (day !== today) params.set("day", day);
-  if (view === "all") params.set("view", "all");
-  const query = params.toString();
-  return query ? `?${query}` : "./";
-}
-
-function row(item, { showSection }) {
+function row(item, { showSection, state }) {
   const href = resolveHref(item.href || item.thumb, base);
   const external = /^https?:\/\//.test(href);
   const node = el(href ? "a" : "div", `nt-row${item.thumb ? " has-thumb" : ""}`);
@@ -68,6 +68,10 @@ function row(item, { showSection }) {
 
   const copy = el("div", "nt-copy");
   const tags = el("div", "nt-tags");
+  if (state?.mode === "catchup") {
+    const dated = rowDayLabel(item.publishedAt, state.today);
+    tags.append(el("span", `nt-day is-${dated.relation}`, dated.label));
+  }
   if (showSection) tags.append(el("span", "nt-sec", SECTION_TITLE[item.section] ?? item.section));
   tags.append(el("span", `house ${HOUSE_CLASS[item.sourceLabel] ?? ""}`.trim(), item.sourceLabel));
   copy.append(tags, el("strong", "nt-title", item.title), el("p", "nt-summary", item.summary));
@@ -87,10 +91,23 @@ function list(items, options) {
   return ol;
 }
 
-function freshLine(updatedAt, quiet) {
-  if (!updatedAt) return quiet ? "Feed time is not stamped. Nothing new on this desk day." : "Feed time is not stamped.";
-  const stamp = `Feed updated ${dayLabel(deskDay(updatedAt))} · ${ctTime(updatedAt)}`;
-  return quiet ? `${stamp} · nothing new on this desk day` : stamp;
+function countText(rows, state) {
+  if (state.mode !== "catchup") return rows.length ? `${rows.length} new` : "None";
+  const [today, yesterday] = catchUpDays(state.today);
+  return catchUpCountText(
+    {
+      todayCount: rows.filter((item) => deskDay(item.publishedAt) === today).length,
+      yesterdayCount: rows.filter((item) => deskDay(item.publishedAt) === yesterday).length,
+      total: rows.length,
+    },
+    { quiet: "None" },
+  );
+}
+
+function dayTitle(day, today) {
+  const relation = day === today ? "today" : "yesterday";
+  const word = relation === "today" ? "Today" : "Yesterday";
+  return { relation, text: `${word} · ${dayLabel(day)}` };
 }
 
 function withFlowBase(items) {
@@ -105,66 +122,106 @@ function withFlowBase(items) {
 function render(state, items, updatedAt) {
   const routed = withFlowBase(items);
   const publicOnly = document.body?.dataset.surface === "public";
-  const feed = publicOnly ? publicDeskItems(routed) : routed;
   const sections = publicOnly ? PUBLIC_NT_SECTIONS : NT_SECTIONS;
-  const todays = itemsForDay(feed, state.day);
-  const isToday = state.day === state.today;
+  const rows = visibleDeskItems(routed, {
+    today: state.today,
+    mode: state.mode,
+    day: state.day,
+    publicOnly,
+  });
+  const summary = state.mode === "catchup" ? catchUpSummary(rows, state.today) : null;
+  const onCatchUp = state.mode === "catchup";
   const fresh = document.querySelector("#nt-fresh");
-  if (fresh) fresh.textContent = freshLine(updatedAt, todays.length === 0);
+  if (fresh) fresh.textContent = feedLine(updatedAt, { quiet: rows.length === 0, mode: state.mode });
 
   const pill = $("#nt-pill");
-  pill.replaceChildren(document.createTextNode(isToday ? "New Today " : `Desk day ${dayLabel(state.day)} `));
-  const badge = el("span", todays.length ? "badge is-live" : "badge");
-  if (todays.length) {
+  pill.replaceChildren(document.createTextNode(onCatchUp ? "New Today " : `Desk day ${dayLabel(state.day)} `));
+  const live = summary ? summary.todayCount > 0 : rows.length > 0;
+  const badge = el("span", live ? "badge is-live" : "badge");
+  if (live) {
     const dot = el("i");
     dot.setAttribute("aria-hidden", "true");
     badge.append(dot);
   }
-  badge.append(document.createTextNode(todays.length ? `${todays.length} new` : "Quiet"));
+  const badgeText = summary ? catchUpCountText(summary, { quiet: "Quiet" }) : rows.length ? `${rows.length} new` : "Quiet";
+  badge.append(document.createTextNode(badgeText));
   pill.append(badge);
-  $("#nt-window").textContent = `Desk day ${windowLabel(state.day)}`;
+  $("#nt-window").textContent = onCatchUp ? catchUpWindowLabel(state.today) : `Desk day ${windowLabel(state.day)}`;
 
   for (const button of document.querySelectorAll("[data-view]")) {
     const on = button.dataset.view === state.view;
     button.classList.toggle("is-on", on);
     button.setAttribute("aria-pressed", String(on));
   }
-  $("#nt-prev").href = stateUrl({ ...state, day: prevDeskDay(state.day) });
-  $("#nt-next").hidden = isToday;
-  $("#nt-next").href = stateUrl({ ...state, day: nextDeskDay(state.day) });
-  $("#nt-today").hidden = isToday;
-  $("#nt-today").href = stateUrl({ ...state, day: state.today });
+  $("#nt-prev").href = deskStateUrl(earlierState(state));
+  const later = laterState(state);
+  $("#nt-next").hidden = !later;
+  if (later) $("#nt-next").href = deskStateUrl(later);
+  $("#nt-today").hidden = onCatchUp;
+  $("#nt-today").href = deskStateUrl({ ...state, mode: "catchup", day: state.today });
 
   const body = $("#nt-body");
   body.replaceChildren();
-  if (!todays.length) {
-    body.append(el("p", "nt-empty is-all", isToday ? "Nothing new this desk day yet." : "Nothing new that desk day."));
+  if (!rows.length) {
+    body.append(el("p", "nt-empty is-all", emptyDeskMessage(state.mode)));
     return;
   }
 
+  if (summary && summary.todayCount === 0 && summary.yesterdayCount > 0) {
+    body.append(el("p", "nt-note", yesterdayNote(state.today)));
+  }
+
   if (state.view === "all") {
-    const section = el("section", "desk-section nt-section");
-    section.append(list(todays, { showSection: true }));
-    body.append(section);
+    if (!onCatchUp) {
+      const section = el("section", "desk-section nt-section");
+      section.append(list(rows, { showSection: true, state }));
+      body.append(section);
+      return;
+    }
+    for (const day of catchUpDays(state.today)) {
+      const group = rows.filter((item) => deskDay(item.publishedAt) === day);
+      const dated = dayTitle(day, state.today);
+      const section = el("section", "desk-section nt-section");
+      const head = el("div", "section-title-row");
+      head.append(el("h2", null, dated.text), el("span", "section-count", group.length ? String(group.length) : "None"));
+      section.append(head);
+      section.append(group.length ? list(group, { showSection: true, state }) : el("p", "nt-empty", emptyDayMessage(dated.relation)));
+      body.append(section);
+    }
     return;
   }
 
   for (const meta of sections) {
-    const rows = todays.filter((item) => item.section === meta.id);
+    const sectionRows = rows.filter((item) => item.section === meta.id);
     const section = el("section", "desk-section nt-section");
     section.id = `nt-${meta.id}`;
     section.setAttribute("aria-labelledby", `nt-${meta.id}-title`);
     const head = el("div", "section-title-row");
     const title = el("h2", null, meta.title);
     title.id = `nt-${meta.id}-title`;
-    head.append(title, el("span", "section-count", rows.length ? `${rows.length} new` : "None"));
+    head.append(title, el("span", "section-count", countText(sectionRows, state)));
     section.append(head);
-    section.append(rows.length ? list(rows, { showSection: false }) : el("p", "nt-empty", meta.empty));
+    if (!sectionRows.length) {
+      section.append(el("p", "nt-empty", sectionEmptyMessage(meta, state.mode)));
+    } else if (onCatchUp) {
+      for (const day of catchUpDays(state.today)) {
+        const group = sectionRows.filter((item) => deskDay(item.publishedAt) === day);
+        if (!group.length) continue;
+        section.append(el("h3", "nt-dayhead", dayTitle(day, state.today).text));
+        section.append(list(group, { showSection: false, state }));
+      }
+    } else {
+      section.append(list(sectionRows, { showSection: false, state }));
+    }
     body.append(section);
   }
 }
 
+let booted = false;
+
 async function main() {
+  if (booted || !document.getElementById("nt-body")) return;
+  booted = true;
   let state = readState();
   let items = [];
   let updatedAt = "";
@@ -182,7 +239,7 @@ async function main() {
   for (const button of document.querySelectorAll("[data-view]")) {
     button.addEventListener("click", () => {
       state = { ...state, view: button.dataset.view };
-      history.replaceState(null, "", stateUrl(state));
+      history.replaceState(null, "", deskStateUrl(state));
       render(state, items, updatedAt);
     });
   }
@@ -191,4 +248,6 @@ async function main() {
   if (target) target.scrollIntoView({ behavior: "instant", block: "start" });
 }
 
-main();
+onDeskReady(() => {
+  main();
+});
