@@ -6,7 +6,7 @@
     <title>New Today · Positioning %.</title>
     <meta
       name="description"
-      content="New Today: public desk-day rows for Positioning and the Research desk, with the time the feed was updated."
+      content="New Today: public desk rows from today and yesterday for Positioning and the Research desk. Each row keeps its original Central-time date."
     />
     <meta name="theme-color" content="#f3f1ec" />
     <link rel="icon" href="%BASE_URL%favicon.svg" />
@@ -48,8 +48,8 @@
           <span class="pill" id="nt-pill">New Today</span>
           <h1>New Today</h1>
           <p class="lede">
-            Everything that landed on the Desk this desk day, newest first. A desk day is the calendar day in Central
-            time, 12:00 AM through 11:59 PM.
+            Everything that landed on the Desk today and yesterday, newest first. Each row keeps the Central-time
+            calendar day it landed. A desk day is the calendar day in Central time, 12:00 AM through 11:59 PM.
           </p>
           <p class="asof-line pill" id="nt-window">Loading New Today…</p>
           <p class="asof-line pill" id="nt-fresh">Checking the feed…</p>
@@ -63,7 +63,7 @@
           <div class="nt-days">
             <a class="toggle" id="nt-prev" href="?day=">← Earlier desk day</a>
             <a class="toggle" id="nt-next" href="./" hidden>Later →</a>
-            <a class="toggle is-on" id="nt-today" href="./" hidden>Today</a>
+            <a class="toggle is-on" id="nt-today" href="./" hidden>New Today</a>
           </div>
         </div>
 
