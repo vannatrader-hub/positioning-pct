@@ -1,0 +1,35 @@
+[
+  {
+    "id": "2026-11-05-sbux-dollar",
+    "section": "options-flow",
+    "kind": "dollar",
+    "ticker": "SBUX",
+    "title": "SBUX joins the $$$ Shopping List",
+    "summary": "7,500 January $105 calls remain in open interest from 7/31, with 2,000 January 2028 $95 short puts and 1,500 September $85 / $95 short puts opening; spot ~$107. Global coffeehouse turnaround (+26% YTD) probing $108–$110 resistance toward early-2025 $116 highs; desk watches strength through $110–$112 with comps, Rewards scale, and the $2B savings program as the hold.",
+    "href": "options-flow/dollar/#SBUX",
+    "publishedAt": "2026-11-05 19:56 CT",
+    "sourceLabel": "Desk"
+  },
+  {
+    "id": "2026-11-05-pypl-flow",
+    "section": "options-flow",
+    "kind": "flow",
+    "ticker": "PYPL",
+    "title": "PYPL ($$): Apr 2027 $67.50 calls bought",
+    "summary": "1,200 April 2027 $67.50 calls bought at $2.14 (~$256K) on 11/5, 500 January 2029 $55 ITM calls bought 10/30 (937 in OI), and 3,100 April 2027 $47.50 short puts still open from 9/14; spot $59. Desk sees a cheap payments turnaround holding the 200-day; lean is following long-dated call buyers on pullbacks toward the 50-day.",
+    "href": "options-flow/",
+    "publishedAt": "2026-11-05 18:17 CT",
+    "sourceLabel": "Desk"
+  },
+  {
+    "id": "2026-11-05-cboe-flow",
+    "section": "options-flow",
+    "kind": "flow",
+    "ticker": "CBOE",
+    "title": "CBOE ($$): Dec $360 calls bought",
+    "summary": "325 December $360 calls bought at $16 (~$520K) on 11/5 into a 60-day high, after 350 December $340 calls (~$595K) on 10/30 and 750 June 2028 $400 calls (~$3M+) on 10/22; spot ~$353. Desk sees a +40% YTD exchange compounder pressing May highs with KPI event-contract launch ahead; add on pullbacks toward the short-term averages.",
+    "href": "options-flow/",
+    "publishedAt": "2026-11-05 18:16 CT",
+    "sourceLabel": "Desk"
+  }
+]

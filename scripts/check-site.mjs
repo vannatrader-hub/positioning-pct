@@ -365,7 +365,7 @@ for (const [ticker, want] of Object.entries(studyWant)) {
 }
 
 const flow = JSON.parse(readFileSync(join(root, "public/data/flow/plays.json"), "utf8"));
-const flowTickers = ["EPD", "MPWR", "INSM", "UBS", "EXE", "DAR", "JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN", "ALAB"];
+const flowTickers = ["SBUX", "EPD", "MPWR", "INSM", "UBS", "EXE", "DAR", "JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN"];
 assert(
   JSON.stringify(sortPlays(flow.plays).map((play) => play.ticker)) === JSON.stringify(flowTickers),
   `Shopping List newest alert first: ${sortPlays(flow.plays).map((play) => play.ticker)}`,
@@ -442,10 +442,10 @@ assert(
   JSON.stringify(chartLevels(flowBy.CORT, cortBars).lines.map((line) => line.value)) === JSON.stringify([120, 160, 130.94]),
   "CORT chart draws the $120/$160 spread and its break-even",
 );
-for (const ticker of ["COIN", "ALAB"]) {
+for (const ticker of ["COIN"]) {
   assert(flowBy[ticker].customerPurchased.every((line) => line.detail.includes("sold")), `${ticker} short puts read as sold`);
 }
-const beWant = { CASY: 671.2, JCI: 163.54, MMM: 179.8, COIN: 123.5, ALAB: 183.8, CORT: 130.94, CRWD: null, DDOG: null, EPD: null, QCOM: null };
+const beWant = { CASY: 671.2, JCI: 163.54, MMM: 179.8, COIN: 123.5, CORT: 130.94, CRWD: null, DDOG: null, EPD: null, QCOM: null, SBUX: null };
 for (const [ticker, want] of Object.entries(beWant)) {
   assert(breakeven(flowBy[ticker].lead) === want, `${ticker} break-even ${breakeven(flowBy[ticker].lead)} !== ${want}`);
 }
@@ -463,6 +463,7 @@ assert(!flowBy.ABBV && !flowBy.CNC, "ABBV and CNC are $$ alerts and stay off the
 assert(!flowBy.W && !flowBy.WFC, "W and WFC are $$ alerts and stay off the $$$ watchlist");
 assert(!flowBy.VZ, "VZ is a $$ alert and stays off the $$$ watchlist");
 assert(!flowBy.TSCO && !flowBy.UBER, "TSCO and UBER are $$ alerts and stay off the $$$ watchlist");
+assert(!flowBy.PYPL && !flowBy.CBOE, "PYPL and CBOE are $$ alerts and stay off the $$$ watchlist");
 assert(
   JSON.stringify(flowBy.JAZZ.lead) === JSON.stringify({ type: "call", action: "bought", qty: 2700, strike: 240, expiry: "December 2026", price: null }),
   `JAZZ lead is the Dec 2026 $240 call buy ${JSON.stringify(flowBy.JAZZ.lead)}`,
@@ -512,7 +513,15 @@ assert(
 assert(flowBy.EPD.customerPurchased[0]?.contract === "March $40 calls" && flowBy.EPD.customerPurchased[0]?.side === "calls_bought", "EPD Customer purchased is the March $40 call buy");
 const epdLevels = chartLevels(flowBy.EPD, JSON.parse(readFileSync(join(root, "public/data/flow/bars/EPD.json"), "utf8")).bars);
 assert(JSON.stringify(epdLevels.lines.map((line) => line.value)) === "[40]", `EPD chart draws only the $40 strike ${epdLevels.lines.map((line) => line.value)}`);
+assert(
+  JSON.stringify(flowBy.SBUX.lead) === JSON.stringify({ type: "call", action: "bought", qty: 7500, strike: 105, expiry: "January", price: null }),
+  `SBUX lead is the Jan $105 call buy ${JSON.stringify(flowBy.SBUX.lead)}`,
+);
+assert(flowBy.SBUX.customerPurchased[0]?.contract === "Jan $105 calls" && flowBy.SBUX.customerPurchased[0]?.side === "calls_bought", "SBUX Customer purchased is the Jan $105 call buy");
+const sbuxLevels = chartLevels(flowBy.SBUX, JSON.parse(readFileSync(join(root, "public/data/flow/bars/SBUX.json"), "utf8")).bars);
+assert(JSON.stringify(sbuxLevels.lines.map((line) => line.value)) === "[105]", `SBUX chart draws only the $105 strike ${sbuxLevels.lines.map((line) => line.value)}`);
 assert(!flowBy.CSCO, "CSCO aged out of the 3-week $$$ window on the Nov 4 as-of");
+assert(!flowBy.ALAB, "ALAB aged out of the 3-week $$$ window on the Nov 5 as-of");
 assert(resolveExpiry("December", "2026-10-27") === "2026-12-18", "December resolves to Dec 18, 2026");
 assert(resolveExpiry("January", "2026-10-22") === "2027-01-15", "January resolves to Jan 15, 2027");
 assert(resolveExpiry("January 2028", "2026-10-25") === "2028-01-21", "January 2028 resolves to Jan 21, 2028");
@@ -1043,7 +1052,7 @@ for (const item of nt.items ?? []) {
 }
 const ntNewest = [...(nt.items ?? [])].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))[0];
 if (ntNewest) assert(deskDay(ntNewest.publishedAt) === deskDay(nt.dayStart), "new-today.json dayStart is the desk day of the newest item");
-assert(itemsForDay(nt.items ?? [], "2026-10-28").length === 8, "Oct 28 desk day lists eight items");
+assert(itemsForDay(nt.items ?? [], "2026-10-28").length === 0, "Oct 28 desk day rolled off the eight-day New Today window");
 const earlyThursday = (nt.items ?? []).filter((item) => item.publishedAt === "2026-10-29T04:05:00-05:00");
 assert(earlyThursday.length === 5 && earlyThursday.every((item) => deskDay(item.publishedAt) === "2026-10-29"), "4:05 AM CT Thursday belongs to the Thursday desk day");
 assert(itemsForDay(nt.items ?? [], "2026-10-29").length === 20, "Oct 29 desk day lists the afternoon session, the evening additions, and the pre-open research notes");
@@ -1053,6 +1062,7 @@ assert(itemsForDay(nt.items ?? [], "2026-11-01").length === 2, "Nov 1 desk day l
 assert(itemsForDay(nt.items ?? [], "2026-11-02").length === 11, "Nov 2 desk day lists the UBS, W, and WFC flow alerts plus the morning and evening research notes");
 assert(itemsForDay(nt.items ?? [], "2026-11-03").length === 5, "Nov 3 desk day lists the MPWR and INSM shopping-list alerts, the VZ featured alert, and the pre-open research notes");
 assert(itemsForDay(nt.items ?? [], "2026-11-04").length === 3, "Nov 4 desk day lists the EPD shopping-list alert and the TSCO and UBER featured alerts");
+assert(itemsForDay(nt.items ?? [], "2026-11-05").length === 3, "Nov 5 desk day lists the SBUX shopping-list alert and the PYPL and CBOE featured alerts");
 const ntReadme = readFileSync(join(root, "README.md"), "utf8");
 assert(ntReadme.includes("npm run new-today:pack"), "README shows the New Today pack command");
 assert(ntReadme.includes("Midnight auto-ship") && ntReadme.includes("6:30 AM CT") && ntReadme.includes("Afternoon auto-ship"), "README tells midnight, morning, and afternoon auto-ship to run the same pack");
@@ -2402,7 +2412,7 @@ for (const query of ["2026-10-28", "10/28", "Oct 28", "October 28, 2026", "Wed O
 assert(parseDateQuery("XLE") === null, "a ticker is a word search");
 const oct28 = archiveGroups(filterEntries(archiveEntries, "2026-10-28"));
 const oct28Days = oct28[0]?.entries.filter((entry) => entry.kind === "day") ?? [];
-assert(oct28.length === 1 && oct28Days.length === 1 && oct28Days[0].items.length === 8, "archive date search lists the eight Oct 28 items");
+assert(oct28.length === 1 && oct28Days.length === 0, "Oct 28 New Today rows rolled off the archive with the eight-day window");
 assert(oct28[0]?.entries.filter((entry) => entry.kind === "pack").every((entry) => entry.date === "2026-10-30"), "an Oct 28 search also shows that week's Friday pack");
 const w44 = archiveGroups(filterEntries(archiveEntries, "W44"));
 assert(
