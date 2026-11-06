@@ -9,7 +9,11 @@ export const NT_SECTIONS = [
   { id: "research", title: "Research desk", empty: "No research charts or bank notes this desk day." },
 ];
 
-/** Sections safe to list on the public Dashboard. Options Flow stays in the Vault. */
+/**
+ * Sections safe to list on the public Dashboard. Options Flow stays in the Vault.
+ * A flow row is not turned into a public teaser here: the public page can list it
+ * only when the row's own section is Positioning, SPX Levels, or Research.
+ */
 export const PUBLIC_NT_SECTIONS = NT_SECTIONS.filter((section) => section.id !== "options-flow");
 
 export function publicDeskItems(items) {

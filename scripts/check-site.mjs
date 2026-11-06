@@ -1101,10 +1101,27 @@ for (const id of ["2026-11-05-sbux-dollar", "2026-11-05-pypl-flow", "2026-11-05-
 }
 assert(afterRoll.length === 3 && afterRoll.every((item) => deskDay(item.publishedAt) === "2026-11-05"), "Nov 6 default lists only the three Nov 5 rows when Nov 6 is empty");
 assert(!afterRoll.some((item) => item.id.startsWith("2026-11-04")), "Nov 4 drops out of the default view at the Nov 6 midnight rollover");
-assert(
-  JSON.stringify(visibleDeskItems(nt.items, { today: nov6Today, mode: "catchup", publicOnly: true }).map((item) => item.id)) === "[]",
-  "public Nov 6 catch-up still omits Options Flow",
+const publicNov6 = visibleDeskItems(nt.items, { today: nov6Today, mode: "catchup", publicOnly: true });
+assert(JSON.stringify(publicNov6.map((item) => item.id)) === "[]", "public /new-today/ on Nov 6 lists no eligible row");
+const nov5Public = (nt.items ?? []).filter(
+  (item) => deskDay(item.publishedAt) === "2026-11-05" && PUBLIC_NT_SECTIONS.some((section) => section.id === item.section),
 );
+assert(nov5Public.length === 0, "Nov 5 has no Positioning, SPX, or Research row for the public page");
+const tradeCopy = /\$\d|\bcalls\b|\bputs\b|\bstrike\b|\bpremium\b/i;
+for (const id of ["2026-11-05-sbux-dollar", "2026-11-05-pypl-flow", "2026-11-05-cboe-flow"]) {
+  const item = (nt.items ?? []).find((row) => row.id === id);
+  assert(item.section === "options-flow" && item.href.startsWith("options-flow/"), `${id} is vault flow and links at the gated flow pages`);
+  assert(!("publicTitle" in item) && !("publicSummary" in item) && !("publicHref" in item), `${id} has no public activity fields`);
+  assert(tradeCopy.test(`${item.title} ${item.summary}`), `${id} copy is trade detail and stays off the public page`);
+  assert(!publicNov6.some((row) => row.id === id), `${id} is absent from the public Nov 6 page`);
+}
+assert(
+  PRODUCT_FEEDS.find((feed) => feed.id === "flow-plays").surfaces.join() === "vault,private",
+  "the Shopping List feed stays off the public Dashboard",
+);
+for (const file of ["options-flow/index.html", "options-flow/dollar/index.html", "options-flow/spotlights/index.html", "options-flow/scorecard/index.html"]) {
+  assert(readFileSync(join(root, file), "utf8").includes('src="/src/vault-gate.js"'), `${file} keeps the Vault gate in front of flow detail`);
+}
 assert(
   visibleDeskItems(nt.items, { today: nov6Today, mode: "catchup", section: "options-flow" }).map((item) => item.id).join() ===
     "2026-11-05-sbux-dollar,2026-11-05-pypl-flow,2026-11-05-cboe-flow",
