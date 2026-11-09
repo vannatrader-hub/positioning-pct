@@ -1,8 +1,35 @@
 {
-  "asOf": "2026-11-05",
-  "asOfLabel": "Fri Nov 6, 2026 midnight · SBUX quote Thu Nov 5 close; earlier names through Wed Nov 4 close",
-  "window": "Last 3 weeks · Oct 15 – Nov 5, 2026",
+  "asOf": "2026-11-07",
+  "asOfLabel": "Mon Nov 9, 2026 catch-up · LH quote Fri Nov 6 close; earlier names through Thu Nov 5 close",
+  "window": "Last 3 weeks · Oct 17 – Nov 7, 2026",
   "plays": [
+    {
+      "id": 44021,
+      "ticker": "LH",
+      "exchange": "NYSE",
+      "name": "Labcorp",
+      "industry": { "broad": "Health Care", "focus": "Diagnostics · clinical labs" },
+      "date": "2026-11-07",
+      "alertedAtCt": "2026-11-07 09:59 AM CT",
+      "title": "May Calls in a Diagnostics Leader Forming a Bull Flag Toward $420",
+      "confidence": "$$$",
+      "refPrice": 367,
+      "flow": [
+        "Labcorp (LH) saw 400 May $410 calls, 300 May $350 calls, and 600 May $420 calls bought to open in late October, about $2.3M in calls.",
+        "LH is a diagnostics and drug-development lab name, up 46% year to date, forming a post-earnings bull flag after a weekly flag that measures toward about $420. The desk sees a healthy long-term winner and wants the flag while it holds. The reference price is about $367."
+      ],
+      "customerPurchased": [
+        { "contract": "May $420 calls", "detail": "600 bought · more recently", "side": "calls_bought" }
+      ],
+      "oi": [
+        { "contract": "May $420 calls", "detail": "600 bought late October" },
+        { "contract": "May $410 calls", "detail": "400 bought late October" },
+        { "contract": "May $350 calls", "detail": "300 bought late October" }
+      ],
+      "recommendation": "The desk wants LH while the post-earnings bull flag holds, with the weekly flag measuring toward about $420.",
+      "lead": { "type": "call", "action": "bought", "qty": 600, "strike": 420, "expiry": "May", "price": null },
+      "quote": { "date": "2026-11-06", "last": 366.57, "prev": 363.3 }
+    },
     {
       "id": 44002,
       "ticker": "SBUX",
