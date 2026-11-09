@@ -1,0 +1,22 @@
+[
+  {
+    "id": "2026-11-09-desk-recap",
+    "section": "options-flow",
+    "kind": "recap",
+    "title": "Desk market wrap 11/9",
+    "summary": "Stocks bounced to start the week as oil dropped another 3% and eased inflation fears, though AI financing stayed an overhang. SPY and QQQ squeezed back to the 8-day average on a wide-range session; desk waits on this week's inflation data. A few large call books adjusted.",
+    "href": "options-flow/",
+    "publishedAt": "2026-11-09 14:26 CT",
+    "sourceLabel": "Desk"
+  },
+  {
+    "id": "2026-11-09-desk-blitz",
+    "section": "options-flow",
+    "kind": "blitz",
+    "title": "Desk open wrap 11/9",
+    "summary": "Futures firmer to start the week as oil kept falling and metals bid; VIX dropped again. Europe recovered some of last week's losses and Nikkei bounced after last week's slide. CPI is next.",
+    "href": "options-flow/",
+    "publishedAt": "2026-11-09 06:47 CT",
+    "sourceLabel": "Desk"
+  }
+]

@@ -365,7 +365,7 @@ for (const [ticker, want] of Object.entries(studyWant)) {
 }
 
 const flow = JSON.parse(readFileSync(join(root, "public/data/flow/plays.json"), "utf8"));
-const flowTickers = ["SBUX", "EPD", "MPWR", "INSM", "UBS", "EXE", "DAR", "JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN"];
+const flowTickers = ["LH", "SBUX", "EPD", "MPWR", "INSM", "UBS", "EXE", "DAR", "JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN"];
 assert(
   JSON.stringify(sortPlays(flow.plays).map((play) => play.ticker)) === JSON.stringify(flowTickers),
   `Shopping List newest alert first: ${sortPlays(flow.plays).map((play) => play.ticker)}`,
@@ -445,7 +445,7 @@ assert(
 for (const ticker of ["COIN"]) {
   assert(flowBy[ticker].customerPurchased.every((line) => line.detail.includes("sold")), `${ticker} short puts read as sold`);
 }
-const beWant = { CASY: 671.2, JCI: 163.54, MMM: 179.8, COIN: 123.5, CORT: 130.94, CRWD: null, DDOG: null, EPD: null, QCOM: null, SBUX: null };
+const beWant = { CASY: 671.2, JCI: 163.54, MMM: 179.8, COIN: 123.5, CORT: 130.94, CRWD: null, DDOG: null, EPD: null, QCOM: null, SBUX: null, LH: null };
 for (const [ticker, want] of Object.entries(beWant)) {
   assert(breakeven(flowBy[ticker].lead) === want, `${ticker} break-even ${breakeven(flowBy[ticker].lead)} !== ${want}`);
 }
@@ -464,6 +464,7 @@ assert(!flowBy.W && !flowBy.WFC, "W and WFC are $$ alerts and stay off the $$$ w
 assert(!flowBy.VZ, "VZ is a $$ alert and stays off the $$$ watchlist");
 assert(!flowBy.TSCO && !flowBy.UBER, "TSCO and UBER are $$ alerts and stay off the $$$ watchlist");
 assert(!flowBy.PYPL && !flowBy.CBOE, "PYPL and CBOE are $$ alerts and stay off the $$$ watchlist");
+assert(!flowBy.ARES && !flowBy.MSI, "ARES and MSI are $$ alerts and stay off the $$$ watchlist");
 assert(
   JSON.stringify(flowBy.JAZZ.lead) === JSON.stringify({ type: "call", action: "bought", qty: 2700, strike: 240, expiry: "December 2026", price: null }),
   `JAZZ lead is the Dec 2026 $240 call buy ${JSON.stringify(flowBy.JAZZ.lead)}`,
@@ -520,6 +521,13 @@ assert(
 assert(flowBy.SBUX.customerPurchased[0]?.contract === "Jan $105 calls" && flowBy.SBUX.customerPurchased[0]?.side === "calls_bought", "SBUX Customer purchased is the Jan $105 call buy");
 const sbuxLevels = chartLevels(flowBy.SBUX, JSON.parse(readFileSync(join(root, "public/data/flow/bars/SBUX.json"), "utf8")).bars);
 assert(JSON.stringify(sbuxLevels.lines.map((line) => line.value)) === "[105]", `SBUX chart draws only the $105 strike ${sbuxLevels.lines.map((line) => line.value)}`);
+assert(
+  JSON.stringify(flowBy.LH.lead) === JSON.stringify({ type: "call", action: "bought", qty: 600, strike: 420, expiry: "May", price: null }),
+  `LH lead is the May $420 call buy ${JSON.stringify(flowBy.LH.lead)}`,
+);
+assert(flowBy.LH.customerPurchased[0]?.contract === "May $420 calls" && flowBy.LH.customerPurchased[0]?.side === "calls_bought", "LH Customer purchased is the May $420 call buy");
+const lhLevels = chartLevels(flowBy.LH, JSON.parse(readFileSync(join(root, "public/data/flow/bars/LH.json"), "utf8")).bars);
+assert(JSON.stringify(lhLevels.lines.map((line) => line.value)) === "[420]", `LH chart draws only the $420 strike ${lhLevels.lines.map((line) => line.value)}`);
 assert(!flowBy.CSCO, "CSCO aged out of the 3-week $$$ window on the Nov 4 as-of");
 assert(!flowBy.ALAB, "ALAB aged out of the 3-week $$$ window on the Nov 5 as-of");
 assert(resolveExpiry("December", "2026-10-27") === "2026-12-18", "December resolves to Dec 18, 2026");
@@ -1061,15 +1069,29 @@ const ntNewest = [...(nt.items ?? [])].sort((a, b) => Date.parse(b.publishedAt) 
 if (ntNewest) assert(deskDay(ntNewest.publishedAt) === deskDay(nt.dayStart), "new-today.json dayStart is the desk day of the newest item");
 assert(itemsForDay(nt.items ?? [], "2026-10-28").length === 0, "Oct 28 desk day rolled off the eight-day New Today window");
 const earlyThursday = (nt.items ?? []).filter((item) => item.publishedAt === "2026-10-29T04:05:00-05:00");
-assert(earlyThursday.length === 5 && earlyThursday.every((item) => deskDay(item.publishedAt) === "2026-10-29"), "4:05 AM CT Thursday belongs to the Thursday desk day");
-assert(itemsForDay(nt.items ?? [], "2026-10-29").length === 20, "Oct 29 desk day lists the afternoon session, the evening additions, and the pre-open research notes");
-assert(itemsForDay(nt.items ?? [], "2026-10-30").length === 3, "Oct 30 desk day lists the morning research note, the W44 pack, and the vol stress print");
-assert(itemsForDay(nt.items ?? [], "2026-10-31").length === 1, "Oct 31 desk day lists the EXE shopping-list alert");
-assert(itemsForDay(nt.items ?? [], "2026-11-01").length === 2, "Nov 1 desk day lists the ABBV and CNC featured alerts");
+assert(earlyThursday.length === 0, "Oct 29 4:05 AM CT research notes rolled off the eight-day New Today window");
+assert(itemsForDay(nt.items ?? [], "2026-10-29").length === 0, "Oct 29 desk day rolled off the eight-day New Today window");
+assert(itemsForDay(nt.items ?? [], "2026-10-30").length === 0, "Oct 30 desk day rolled off the eight-day New Today window");
+assert(itemsForDay(nt.items ?? [], "2026-10-31").length === 0, "Oct 31 desk day rolled off the eight-day New Today window");
+assert(itemsForDay(nt.items ?? [], "2026-11-01").length === 0, "Nov 1 desk day rolled off the eight-day New Today window");
 assert(itemsForDay(nt.items ?? [], "2026-11-02").length === 11, "Nov 2 desk day lists the UBS, W, and WFC flow alerts plus the morning and evening research notes");
 assert(itemsForDay(nt.items ?? [], "2026-11-03").length === 5, "Nov 3 desk day lists the MPWR and INSM shopping-list alerts, the VZ featured alert, and the pre-open research notes");
 assert(itemsForDay(nt.items ?? [], "2026-11-04").length === 3, "Nov 4 desk day lists the EPD shopping-list alert and the TSCO and UBER featured alerts");
 assert(itemsForDay(nt.items ?? [], "2026-11-05").length === 3, "Nov 5 desk day lists the SBUX shopping-list alert and the PYPL and CBOE featured alerts");
+assert(itemsForDay(nt.items ?? [], "2026-11-06").length === 2, "Nov 6 desk day lists the open wrap and the market wrap");
+assert(itemsForDay(nt.items ?? [], "2026-11-07").length === 1, "Nov 7 desk day lists the LH shopping-list alert");
+assert(itemsForDay(nt.items ?? [], "2026-11-08").length === 2, "Nov 8 desk day lists the ARES and MSI featured alerts");
+assert(itemsForDay(nt.items ?? [], "2026-11-09").length === 2, "Nov 9 desk day lists the open wrap and the market wrap");
+assert(
+  visibleDeskItems(nt.items, { today: "2026-11-09", mode: "catchup" }).map((item) => item.id).join() ===
+    "2026-11-09-desk-recap,2026-11-09-desk-blitz,2026-11-08-ares-flow,2026-11-08-msi-flow",
+  "Nov 9 catch-up is today plus yesterday and keeps each row's original date",
+);
+assert(
+  rowDayLabel("2026-11-09T14:26:00-06:00", "2026-11-09").label === "Today · Mon, Nov 9" &&
+    rowDayLabel("2026-11-08T18:30:00-06:00", "2026-11-09").label === "Yesterday · Sun, Nov 8",
+  "Nov 9 rows stay Today and Nov 8 rows stay Yesterday",
+);
 
 /* Default New Today is two Chicago calendar days. Yesterday keeps its own date. */
 const nov6Today = "2026-11-06";
@@ -1099,7 +1121,12 @@ for (const id of ["2026-11-05-sbux-dollar", "2026-11-05-pypl-flow", "2026-11-05-
   assert(dated.relation === "yesterday" && dated.day === "2026-11-05" && dated.label === "Yesterday · Thu, Nov 5", `${id} stays labelled ${dated.label}`);
   assert(dayRelation(dated.day, nov6Today) === "yesterday", `${id} is not relabelled as today`);
 }
-assert(afterRoll.length === 3 && afterRoll.every((item) => deskDay(item.publishedAt) === "2026-11-05"), "Nov 6 default lists only the three Nov 5 rows when Nov 6 is empty");
+assert(
+  afterRoll.length === 5 &&
+    afterRoll.filter((item) => deskDay(item.publishedAt) === "2026-11-06").length === 2 &&
+    afterRoll.filter((item) => deskDay(item.publishedAt) === "2026-11-05").length === 3,
+  "Nov 6 default lists the two Nov 6 wraps plus the three Nov 5 flow rows",
+);
 assert(!afterRoll.some((item) => item.id.startsWith("2026-11-04")), "Nov 4 drops out of the default view at the Nov 6 midnight rollover");
 const publicNov6 = visibleDeskItems(nt.items, { today: nov6Today, mode: "catchup", publicOnly: true });
 assert(JSON.stringify(publicNov6.map((item) => item.id)) === "[]", "public /new-today/ on Nov 6 lists no eligible row");
@@ -1124,8 +1151,8 @@ for (const file of ["options-flow/index.html", "options-flow/dollar/index.html",
 }
 assert(
   visibleDeskItems(nt.items, { today: nov6Today, mode: "catchup", section: "options-flow" }).map((item) => item.id).join() ===
-    "2026-11-05-sbux-dollar,2026-11-05-pypl-flow,2026-11-05-cboe-flow",
-  "section filter keeps the three Nov 5 flow rows, newest first",
+    "2026-11-06-desk-recap,2026-11-06-desk-blitz,2026-11-05-sbux-dollar,2026-11-05-pypl-flow,2026-11-05-cboe-flow",
+  "section filter keeps the Nov 6 wraps and the three Nov 5 flow rows, newest first",
 );
 assert(visibleDeskItems(nt.items, { today: nov6Today, mode: "catchup", section: "positioning" }).length === 0, "Nov 6 positioning filter does not borrow Nov 5 flow rows");
 const nov4Only = visibleDeskItems(nt.items, { today: nov6Today, mode: "day", day: "2026-11-04" });
@@ -1188,11 +1215,11 @@ assert(mixedOld.map((item) => item.id).join() === "old-res", "an older day filte
 const mixedSummary = catchUpSummary(mixed, nov6Today);
 assert(mixedSummary.todayCount === 2 && mixedSummary.yesterdayCount === 3 && mixedSummary.total === 5, "mixed counts split today from yesterday");
 assert(catchUpCountText(mixedSummary) === "2 today · 3 yesterday", "a mixed badge names both days");
-assert(catchUpCountText(catchUpSummary(afterRoll, nov6Today)) === "3 from yesterday", "a yesterday-only badge does not say new today");
+assert(catchUpCountText(catchUpSummary(afterRoll, nov6Today)) === "2 today · 3 yesterday", "Nov 6 catch-up names today and yesterday");
 assert(emptyDeskMessage("catchup") === "Nothing new today or yesterday." && emptyDeskMessage("day") === "Nothing new that desk day.", "empty copy follows the view");
 const yChip = catchUpChip(catchUpSummary(nt.items, nov6Today), nt.updatedAt);
-assert(yChip.sub === "3 from yesterday" && yChip.lit === false && yChip.quiet === false, "yesterday-only chip names yesterday and does not pulse");
-assert(yChip.aria.includes("nothing new today") && yChip.aria.includes("3 from yesterday") && !yChip.aria.includes("since 12"), "yesterday-only chip does not call the rows fresh today");
+assert(yChip.sub === "2 today · 3 yesterday" && yChip.lit === true && yChip.quiet === false, "Nov 6 chip names today and yesterday and pulses");
+assert(yChip.aria.includes("2 today") && yChip.aria.includes("3 yesterday") && !yChip.aria.includes("since 12"), "Nov 6 chip keeps yesterday separate");
 const quietChip = catchUpChip(catchUpSummary([], nov6Today), "");
 assert(quietChip.sub === "Quiet since yesterday" && quietChip.quiet === true && quietChip.lit === false, "a two-day quiet chip says so");
 const bothChip = catchUpChip(mixedSummary, "2026-11-06T14:00:00-06:00");
@@ -1224,17 +1251,12 @@ const ntPackWeek = JSON.parse(readFileSync(join(root, "public/data/vault/soft-cr
 const ntVolLatest = JSON.parse(readFileSync(join(root, "public/data/vault/spot-vol-beta/latest.json"), "utf8"));
 const ntSoft = itemFromSoftCrowded(ntPackIndex, ntPackWeek);
 const ntVol = itemFromVolStress(ntVolLatest);
-for (const built of [ntSoft, ntVol]) {
-  const stored = (nt.items ?? []).find((item) => item.id === built.id);
-  assert(stored, `new-today is missing the vault row ${built?.id}`);
-  if (!stored || !built) continue;
-  for (const key of ["section", "title", "summary", "href", "publishedAt", "sourceLabel"]) {
-    assert(stored[key] === built[key], `new-today ${built.id} ${key} drifted from the vault artifact`);
-  }
-  assert(stored.sourceLabel === "Desk" && stored.section === "positioning", `${built.id} stays a Desk positioning row`);
-}
+assert(!(nt.items ?? []).some((item) => item.id === ntSoft?.id), "soft-crowded row rolled off the eight-day New Today window");
+assert(!(nt.items ?? []).some((item) => item.id === ntVol?.id), "vol-stress row rolled off the eight-day New Today window");
 assert(ntVol?.summary.includes("not a session close") && ntVol?.publishedAt === "2026-10-30T12:18:00-05:00", "vol stress row is the 12:18 CT intraday gauge");
 assert(ntSoft?.publishedAt === "2026-10-30T05:00:00-05:00" && ntSoft?.summary.includes("Oct 23"), "soft-crowded row uses the pack asOf and the carry-forward date");
+assert(ntSoft?.sourceLabel === "Desk" && ntSoft?.section === "positioning", "soft-crowded builder stays a Desk positioning row");
+assert(ntVol?.sourceLabel === "Desk" && ntVol?.section === "positioning", "vol-stress builder stays a Desk positioning row");
 const ntPlan = planNewToday({ root, now: new Date("2026-11-01T18:00:00Z") });
 assert(ntPlan.added.length === 0 && ntPlan.updated.length === 0, `new-today pack is current (would add ${ntPlan.added.map((item) => item.id).join(", ")}; update ${ntPlan.updated.map((item) => item.id).join(", ")})`);
 const ntMissing = planNewToday({

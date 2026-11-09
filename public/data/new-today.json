@@ -1,9 +1,72 @@
 {
   "timeZone": "America/Chicago",
   "dayStartsAt": "00:00",
-  "dayStart": "2026-11-05T00:00:00-06:00",
-  "updatedAt": "2026-11-06T00:14:03-06:00",
+  "dayStart": "2026-11-09T00:00:00-06:00",
+  "updatedAt": "2026-11-09T15:15:00-06:00",
   "items": [
+    {
+      "id": "2026-11-09-desk-recap",
+      "section": "options-flow",
+      "title": "Desk market wrap 11/9",
+      "summary": "Stocks bounced to start the week as oil dropped another 3% and eased inflation fears, though AI financing stayed an overhang. SPY and QQQ squeezed back to the 8-day average on a wide-range session; desk waits on this week's inflation data. A few large call books adjusted.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-09T14:26:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-09-desk-blitz",
+      "section": "options-flow",
+      "title": "Desk open wrap 11/9",
+      "summary": "Futures firmer to start the week as oil kept falling and metals bid; VIX dropped again. Europe recovered some of last week's losses and Nikkei bounced after last week's slide. CPI is next.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-09T06:47:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-08-ares-flow",
+      "section": "options-flow",
+      "title": "ARES ($$): Mar 2027 $110 puts sold",
+      "summary": "600 March 2027 $110 puts sold at $6.58 on 10/28, still in open interest, after 1,250 December $115 ITM short puts opened 10/14 (~$1.2M); spot $134. Shares are down 17% YTD, bounced off the 10/15 low and reclaimed the 50- and 200-day on 10/29. Desk lean is selling puts on pullbacks toward the moving averages.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-08T18:30:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-08-msi-flow",
+      "section": "options-flow",
+      "title": "MSI ($$): Jan $560 calls bought",
+      "summary": "1,000 January $560 calls bought at $13 (~$1.3M) on 11/5, rolling up from 2,050 January $500 calls (~$4.25M) bought 11/4 into the report; spot ~$514.50. +34% YTD, spiked to a 52-week high then faded; $548 resistance, 21-day EMA near $483 first support. Desk wants adds on pullbacks toward the 21-day.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-08T18:30:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-07-lh-dollar",
+      "section": "options-flow",
+      "title": "LH joins the $$$ Shopping List",
+      "summary": "400 May $410 calls, 300 May $350 calls, and 600 May $420 calls bought to open in late October (~$2.3M); spot ~$367. Diagnostics name +46% YTD, forming a post-earnings bull flag after a weekly flag that measures toward ~$420; desk wants the flag while it holds.",
+      "href": "options-flow/dollar/#LH",
+      "publishedAt": "2026-11-07T09:59:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-06-desk-recap",
+      "section": "options-flow",
+      "title": "Desk market wrap 11/6",
+      "summary": "Jobs print came in stronger and the dollar firmed; the AI complex faded after the open. NYAD stays in a sell signal, VIX held over 20, and SPY is trying to hold the rising 200-day into next week's inflation prints. Size put sellers were active in first-quarter 2027 in beaten-up quality names.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-06T14:21:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-06-desk-blitz",
+      "section": "options-flow",
+      "title": "Desk open wrap 11/6",
+      "summary": "Futures steadied after Thursday's plunge with jobs in focus; VIX still elevated after the spike. Tech led an early snapback while Europe and Asia sold off on AI-spend and valuation worries.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-06T06:40:00-06:00",
+      "sourceLabel": "Desk"
+    },
     {
       "id": "2026-11-05-sbux-dollar",
       "section": "options-flow",
@@ -201,240 +264,6 @@
       "href": "new-today/#nt-research",
       "publishedAt": "2026-11-02T06:21:00-06:00",
       "sourceLabel": "Bloomberg"
-    },
-    {
-      "id": "2026-11-01-abbv-flow",
-      "section": "options-flow",
-      "title": "ABBV ($$): Jan 2029 $300 calls bought",
-      "summary": "750 Jan 2029 $300 calls bought at $53.70 on 10/30, looking like a roll out of Jan 2028 $260 calls, plus 800 March $320 calls; spot about $294.90 at new highs. Desk prefers selling puts on a pullback toward the 21-day EMA over chasing.",
-      "href": "options-flow/",
-      "publishedAt": "2026-11-01T15:37:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-01-cnc-flow",
-      "section": "options-flow",
-      "title": "CNC ($$): Nov $57.5 puts sold",
-      "summary": "16,000 Nov $57.5 puts sold to open at $0.24 on 10/30 and 11,200 Dec 4 weekly $55 puts sold; spot about $68.50. Desk likes selling December puts under the 50-day to own the base into the February report.",
-      "href": "options-flow/",
-      "publishedAt": "2026-11-01T15:36:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-31-exe-dollar",
-      "section": "options-flow",
-      "title": "EXE joins the $$$ Shopping List",
-      "summary": "3,000 Jan 2028 $120 calls bought (~$1.8M) and 2,000 June $97.5 calls bought (~$1.7M); spot about $90.55 after a pullback off the highs. Desk sees a multi-year rerate with room toward ~$125 in 2027.",
-      "href": "options-flow/dollar/#EXE",
-      "publishedAt": "2026-10-31T11:46:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-30-vol-stress-1218",
-      "section": "positioning",
-      "title": "Vol Stress prints 2.98",
-      "summary": "Vol Stress printed 2.98 at 12:18 CT. S&P 500 down 1.2% at that print. Intraday gauge, not a session close. At or above 2 is the desk possible-bottom band.",
-      "href": "vol/#spot-vol-beta",
-      "publishedAt": "2026-10-30T12:18:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-30-soft-crowded",
-      "section": "positioning",
-      "title": "Record Mag 7 crowding starts to unwind as vol stress prints 2.98",
-      "summary": "2026-W44 pack is filed. Sector columns carry forward from the Oct 23 Desk freeze.",
-      "href": "positioning/ideas/",
-      "publishedAt": "2026-10-30T05:00:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-30-research-gs-gpif",
-      "section": "research",
-      "title": "Goldman: is Japan's pension giant bringing money home?",
-      "summary": "Goldman's latest look at Japan's Government Pension Investment Fund weighs whether the GPIF trims foreign assets and repatriates to yen, the question every USD/JPY trader is watching.",
-      "href": "new-today/#nt-research",
-      "publishedAt": "2026-10-30T02:15:00-05:00",
-      "sourceLabel": "Goldman Sachs"
-    },
-    {
-      "id": "2026-10-29-research-bbg-index-shorts",
-      "section": "research",
-      "title": "Bloomberg: hedge funds shift to index shorts",
-      "summary": "Hedge funds are moving from single-stock shorts to shorting the Nasdaq via QQQ, which can lift correlations and threaten the low-VIX regime after October’s ~8% tech drawdown.",
-      "href": "new-today/#nt-research",
-      "publishedAt": "2026-10-29T23:30:00-05:00",
-      "sourceLabel": "Bloomberg"
-    },
-    {
-      "id": "2026-10-29-research-asia-chips",
-      "section": "research",
-      "title": "Asia open: Korea chips hit by US AI selloff",
-      "summary": "Alphabet, Intel and Amazon weakness carried into Asia; KOSPI opened lower with SK Hynix and Samsung sold on hyperscaler capex-payback doubts rather than an HBM demand drop.",
-      "href": "new-today/#nt-research",
-      "publishedAt": "2026-10-29T20:32:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-29-dar-dollar",
-      "section": "options-flow",
-      "title": "DAR joins the $$$ Shopping List",
-      "summary": "Large call spread on 10/28: 10,000 April $62.50 calls bought against 13,000 $72.50 calls sold; ~$55 spot near key support after a ~20% pullback from summer highs. Desk likes the setup for a recovery.",
-      "href": "options-flow/dollar/#DAR",
-      "publishedAt": "2026-10-29T20:09:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-29-research-gs-alphabet",
-      "section": "research",
-      "title": "Goldman: Alphabet’s $350B capex bill",
-      "summary": "Goldman’s Q3 review: Cloud revenue up ~103% with a huge backlog while Search slows; capex seen near $203B in 2026 and $350B in 2027, so free cash flow gets squeezed.",
-      "href": "new-today/#nt-research",
-      "publishedAt": "2026-10-29T19:30:00-05:00",
-      "sourceLabel": "Goldman Sachs"
-    },
-    {
-      "id": "2026-10-29-lyv-flow",
-      "section": "options-flow",
-      "title": "LYV ($$): Dec $155 puts sold into earnings",
-      "summary": "1,350 Dec $155 puts sold to open at $2.12 on 10/22 ahead of the 11/5 report, followed by Sept 2027 $180 call buying; ~$178 spot coiled under the August highs. Desk views the put sales as the bullish way in.",
-      "href": "options-flow/",
-      "publishedAt": "2026-10-29T19:27:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-29-nxpi-flow",
-      "section": "options-flow",
-      "title": "NXPI ($$): March 2027 $300 calls bought",
-      "summary": "Buyer of 250 March 2027 $300 calls at $17.10 on 10/29 as the stock (~$266) bounced off the 200-day and set a 60-day high; Jan $290/$320 call ratio spreads still in open interest. Desk sees the 200-day near $247 as support.",
-      "href": "options-flow/",
-      "publishedAt": "2026-10-29T19:27:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-29-research-alphabet-door",
-      "section": "research",
-      "title": "Alphabet slides, but breadth finds another door",
-      "summary": "Nasdaq looked far worse than the tape underneath: 400+ S&P names rose as money rotated to small caps, value and rate-sensitive cyclicals while investors questioned AI capex payback.",
-      "href": "new-today/#nt-research",
-      "publishedAt": "2026-10-29T16:06:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-29-desk-recap",
-      "section": "options-flow",
-      "title": "Desk market wrap 10/29",
-      "summary": "Tech soft on Alphabet spend worries; breadth improved and vol compressed. Equal-weight indexes hit multi-week highs. Autos, retail, building materials, payments rotated higher. Watching Amazon into the week close.",
-      "href": "options-flow/",
-      "publishedAt": "2026-10-29T14:24:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-29-jazz-featured",
-      "section": "options-flow",
-      "title": "JAZZ ($$$): Dec $240 calls into earnings",
-      "summary": "2,700 Dec $240 calls bought 10/22 for about $865K; stock ~$205; earnings 11/2. Desk likes upside calls from key support.",
-      "href": "options-flow/dollar/#JAZZ",
-      "publishedAt": "2026-10-29T14:24:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-29-p-featured",
-      "section": "options-flow",
-      "title": "P ($$): long-dated $210 calls",
-      "summary": "Sept 2027 $210 calls bought; ~$138.6 spot; desk target $157.57 with the 50-day near $119 as support.",
-      "href": "options-flow/",
-      "publishedAt": "2026-10-29T14:24:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-29-qqq-puts-1402",
-      "section": "options-flow",
-      "title": "QQQ: large Dec 31 $695 put buy",
-      "summary": "Buyer took 8,000 Dec 31 (quarterly) $695 puts in a large print around 2:02 PM CT; price printed as $17/27 (~$17.27 estimate).",
-      "href": "options-flow/",
-      "publishedAt": "2026-10-29T14:02:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-29-research-db-latam",
-      "section": "research",
-      "title": "Deutsche Bank: LatAm’s silicon dividend",
-      "summary": "Bank note on Latin America’s semiconductor / silicon opportunity, logged mid-morning on the research desk.",
-      "href": "new-today/#nt-research",
-      "publishedAt": "2026-10-29T10:45:00-05:00",
-      "sourceLabel": "Bank note"
-    },
-    {
-      "id": "2026-10-29-qqq-puts-0946",
-      "section": "options-flow",
-      "title": "QQQ: 35K Jan $650 puts (~$32M)",
-      "summary": "Morning size: about 35,000 Jan $650 puts at $9.16, plus 5,000 Nov 28 weekly $680 puts.",
-      "href": "options-flow/",
-      "publishedAt": "2026-10-29T09:46:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-29-xyz-push",
-      "section": "options-flow",
-      "title": "XYZ Active Spotlight still live",
-      "summary": "Payments name with Dec $75/$85 call spreads; desk noted a strong push this morning with no cut language.",
-      "href": "options-flow/spotlights/#XYZ",
-      "publishedAt": "2026-10-29T08:46:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-29-desk-blitz",
-      "section": "options-flow",
-      "title": "Desk open wrap 10/29",
-      "summary": "Morning desk open wrap for Thursday’s session (Blitz 10/29).",
-      "href": "options-flow/",
-      "publishedAt": "2026-10-29T06:55:00-05:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-10-29-research-boa",
-      "section": "research",
-      "title": "BofA: the age of idiosyncratic risk",
-      "summary": "BoA note logged on the research desk before the open.",
-      "href": "new-today/#nt-research",
-      "publishedAt": "2026-10-29T04:05:00-05:00",
-      "sourceLabel": "BoA"
-    },
-    {
-      "id": "2026-10-29-research-citadel",
-      "section": "research",
-      "title": "Citadel: a narrow margin of safety",
-      "summary": "Citadel note logged on the research desk before the open.",
-      "href": "new-today/#nt-research",
-      "publishedAt": "2026-10-29T04:05:00-05:00",
-      "sourceLabel": "Citadel"
-    },
-    {
-      "id": "2026-10-29-research-gs",
-      "section": "research",
-      "title": "Goldman: Wall Street’s positioning cleanout",
-      "summary": "GS note logged on the research desk before the open.",
-      "href": "new-today/#nt-research",
-      "publishedAt": "2026-10-29T04:05:00-05:00",
-      "sourceLabel": "GS"
-    },
-    {
-      "id": "2026-10-29-research-ms",
-      "section": "research",
-      "title": "Morgan Stanley’s Mike Wilson outlook",
-      "summary": "MS note logged on the research desk before the open.",
-      "href": "new-today/#nt-research",
-      "publishedAt": "2026-10-29T04:05:00-05:00",
-      "sourceLabel": "MS"
-    },
-    {
-      "id": "2026-10-29-research-ubs",
-      "section": "research",
-      "title": "UBS: gold’s $4,082 question",
-      "summary": "UBS note logged on the research desk before the open.",
-      "href": "new-today/#nt-research",
-      "publishedAt": "2026-10-29T04:05:00-05:00",
-      "sourceLabel": "UBS"
     }
   ]
 }
