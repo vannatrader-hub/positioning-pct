@@ -999,7 +999,10 @@ assert(!ntPage.includes('href="#nt-options-flow"'), "public New Today does not j
 assert(ntPage.includes('data-surface="public"') && ntPage.includes('id="nt-fresh"'), "New Today stamps the feed and stays on the public surface");
 assert(readFileSync(join(root, "src/new-today-window.js"), "utf8").includes("Feed updated"), "New Today copy names when the feed was updated");
 assert(readFileSync(join(root, "src/new-today.js"), "utf8").includes("rowDayLabel"), "New Today rows keep a Today or Yesterday label");
-assert(readFileSync(join(root, "src/new-today-chip.js"), "utf8").includes("catchUpChip"), "the Dashboard chip counts today and yesterday");
+const chipJs = readFileSync(join(root, "src/new-today-chip.js"), "utf8");
+assert(chipJs.includes("catchUpChip"), "the Dashboard chip counts today and yesterday");
+assert(chipJs.includes("onDeskReady"), "the New Today chip mounts after the Vault gate clones the template");
+assert(chipJs.includes('dataset.public === "1"'), "only data-public=1 chips drop Options Flow");
 assert(
   JSON.stringify(NT_SECTIONS.map((section) => section.title)) === '["Positioning","Options Flow","SPX Levels","Research desk"]',
   "New Today sections run Positioning, Options Flow, SPX Levels, Research desk",
@@ -1007,6 +1010,7 @@ assert(
 assert(JSON.stringify(PUBLIC_NT_SECTIONS.map((section) => section.id)) === '["positioning","spx","research"]', "public New Today drops Options Flow");
 assert(publicDeskItems([{ section: "options-flow" }, { section: "positioning" }]).length === 1, "public desk items keep Positioning and drop Options Flow");
 assert(homePage.includes('class="nt-chip"') && homePage.includes('data-public="1"'), "Dashboard home shows the public New Today chip");
+assert(!homePage.includes('data-public="0"'), "Dashboard chip stays on the public count");
 for (const id of ["spot-vol-beta", "credit-spread-regime", "mag7", "nysi", "nasi", "ncfd", "ndtw", "ncfi", "ncth"]) {
   assert(homePage.includes(`id="${id}"`), `Dashboard shows the ${id} wall widget`);
 }
@@ -1234,6 +1238,9 @@ assert(mixedPos.map((item) => item.id).join() === "today-pos,y-pos", "section fi
 assert(rowDayLabel(mixedPos[0].publishedAt, nov6Today).relation === "today" && rowDayLabel(mixedPos[1].publishedAt, nov6Today).relation === "yesterday", "filtered rows keep Today and Yesterday");
 const mixedPublic = visibleDeskItems(mixed, { today: nov6Today, mode: "catchup", publicOnly: true });
 assert(!mixedPublic.some((item) => item.section === "options-flow") && mixedPublic.some((item) => item.id === "y-pos") && mixedPublic.some((item) => item.id === "utc-trap"), "public filter drops flow and keeps yesterday's other sections");
+const vaultChip = catchUpChip(catchUpSummary(mixed, nov6Today), "");
+const publicChipNov6 = catchUpChip(catchUpSummary(publicDeskItems(mixed), nov6Today), "");
+assert(vaultChip.sub === "2 today · 3 yesterday" && publicChipNov6.sub === "2 today · 2 yesterday", "Vault chip counts flow; public chip does not");
 const mixedOld = visibleDeskItems(mixed, { today: nov6Today, mode: "day", day: "2026-11-04", section: "research" });
 assert(mixedOld.map((item) => item.id).join() === "old-res", "an older day filter does not pull yesterday forward");
 const mixedSummary = catchUpSummary(mixed, nov6Today);
@@ -1244,6 +1251,8 @@ assert(emptyDeskMessage("catchup") === "Nothing new today or yesterday." && empt
 const yChip = catchUpChip(catchUpSummary(nt.items, nov6Today), nt.updatedAt);
 assert(yChip.sub === "2 today · 3 yesterday" && yChip.lit === true && yChip.quiet === false, "Nov 6 chip names today and yesterday and pulses");
 assert(yChip.aria.includes("2 today") && yChip.aria.includes("3 yesterday") && !yChip.aria.includes("since 12"), "Nov 6 chip keeps yesterday separate");
+const publicNov6Chip = catchUpChip(catchUpSummary(publicDeskItems(nt.items), nov6Today), nt.updatedAt);
+assert(publicNov6Chip.quiet === true && publicNov6Chip.lit === false, "public Nov 6 chip stays quiet because those rows are Options Flow");
 const quietChip = catchUpChip(catchUpSummary([], nov6Today), "");
 assert(quietChip.sub === "Quiet since yesterday" && quietChip.quiet === true && quietChip.lit === false, "a two-day quiet chip says so");
 const bothChip = catchUpChip(mixedSummary, "2026-11-06T14:00:00-06:00");
@@ -1308,6 +1317,7 @@ const vaultSurface = {
   "vault/vol-credit-momentum/index.html": { dashboard: "../../", vault: "../" },
   "vault/portfolio/index.html": { dashboard: "../../", vault: "../" },
   "vault/archive/index.html": { dashboard: "../../", vault: "../" },
+  "vault/new-today/index.html": { dashboard: "../../", vault: "../" },
 };
 const flowSurface = {
   "options-flow/index.html": { dashboard: "../", vault: "../vault/" },
@@ -1377,7 +1387,7 @@ assert(!/opening later/i.test(vaultTopbar + vaultFooter), "Vault chrome no longe
 
 const monetization = /\b(free|paid|premium|subscri\w*|paywall\w*|upgrad\w*|trials?|pric(e|es|ed|ing)|members?hips?|unlock\w*)\b/i;
 const chromeCopy = [
-  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "vault/portfolio/index.html", "vault/archive/index.html", "insight/index.html", "404.html", `${FAMILY_ENTRY}/index.html`, `${FAMILY_ENTRY}/options-flow/index.html`, `${FAMILY_ENTRY}/new-today/index.html`].map((file) => [
+  ...["index.html", "positioning/index.html", "positioning/charts/index.html", "options-flow/index.html", "spx-levels/index.html", "new-today/index.html", "vault/index.html", "vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "vault/portfolio/index.html", "vault/archive/index.html", "vault/new-today/index.html", "insight/index.html", "404.html", `${FAMILY_ENTRY}/index.html`, `${FAMILY_ENTRY}/options-flow/index.html`, `${FAMILY_ENTRY}/new-today/index.html`].map((file) => [
     file,
     readFileSync(join(root, file), "utf8"),
   ]),
@@ -1417,8 +1427,18 @@ assert(!/magic link|sign-in link|email me a link/i.test(vaultOutside), "Vault wa
 assert(/<h1>Vault/.test(vaultTemplate) && (vaultTemplate.match(/class="tile vault-tile"/g) ?? []).length === 3, "Vault hero and tiles live in the template");
 assert(vaultTemplate.includes('href="../options-flow/"') && vaultTemplate.includes(">Portfolio</h2>"), "signed-in Vault links Options Flow and Portfolio");
 assert(vaultTemplate.includes('class="tile vault-pack" href="soft-crowded/"'), "signed-in Vault links to the Soft ↔ Crowded pack");
+assert(
+  [...vaultTemplate.matchAll(/<span class="vault-dash-num">(\d+)<\/span>/g)].map((match) => match[1]).join() === "01,02,03,04,05,06",
+  "Vault dash tiles run 01 through 06",
+);
+assert(
+  vaultTemplate.includes('href="new-today/"') && vaultTemplate.includes('data-new-today') && vaultTemplate.includes('data-public="0"'),
+  "signed-in Vault dash has a vault-scope New Today chip linking to /vault/new-today/",
+);
+assert(vaultPage.includes('src="/src/new-today-chip.js"'), "Vault home runs the New Today chip");
 assert(!vaultOutside.includes("soft-crowded"), "the pack link stays inside the signed-in template");
-assert(!/vault-hero|vault-tile|vault-desk|vault-pack/.test(vaultOutside), "no Vault content renders outside the template");
+assert(!vaultOutside.includes("new-today"), "the New Today tile stays inside the signed-in template");
+assert(!/vault-hero|vault-tile|vault-desk|vault-pack|vault-dash/.test(vaultOutside), "no Vault content renders outside the template");
 const gateSource = readFileSync(join(root, "src/vault-gate.js"), "utf8");
 assert(gateSource.includes("import.meta.env.VITE_CLERK_PUBLISHABLE_KEY"), "Vault gate reads VITE_CLERK_PUBLISHABLE_KEY");
 assert(gateSource.includes('import("@clerk/clerk-js")'), "Vault gate loads Clerk only on demand");
@@ -2578,11 +2598,33 @@ for (const piece of ['id="archive-search"', 'id="archive-q"', 'data-kind="all"',
 assert(!/id="archive|archive-search/.test(archiveOutside), "archive content does not render outside the template");
 assert(vaultTemplate.includes('class="tile vault-pack" href="archive/"') && !vaultOutside.includes("archive/"), "signed-in Vault links to the archive inside the template");
 for (const file of [...dashboardPages, "404.html"]) {
-  assert(!readFileSync(join(root, file), "utf8").includes("vault/archive"), `${file} links into the Vault archive`);
+  const html = readFileSync(join(root, file), "utf8");
+  assert(!html.includes("vault/archive"), `${file} links into the Vault archive`);
+  assert(!html.includes("vault/new-today"), `${file} links into the Vault New Today page`);
 }
-for (const file of ["vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "vault/portfolio/index.html"]) {
+for (const file of ["vault/soft-crowded/index.html", "vault/vol-credit-momentum/index.html", "vault/portfolio/index.html", "vault/new-today/index.html"]) {
   assert(readFileSync(join(root, file), "utf8").includes('href="../archive/"'), `${file} links to the archive from the Vault nav`);
 }
+
+const vaultNtFile = "vault/new-today/index.html";
+assert(viteConfig.includes(`"${vaultNtFile}"`), `vite builds ${vaultNtFile}`);
+const vaultNtPage = readFileSync(join(root, vaultNtFile), "utf8");
+assert(vaultNtPage.includes('<body class="is-vault">'), "Vault New Today carries the Vault theme");
+assert(!vaultNtPage.includes('data-surface="public"'), "Vault New Today is not the public surface");
+assert(vaultNtPage.includes('src="/src/vault-gate.js"') && vaultNtPage.includes('src="/src/new-today.js"'), "Vault New Today runs the Vault gate and new-today.js");
+const vaultNtMain = vaultNtPage.match(/<main id="content">([\s\S]*?)<\/main>/)?.[1] ?? "";
+const vaultNtTemplate = vaultNtMain.match(/<template id="vault-content">([\s\S]*?)<\/template>/)?.[1] ?? "";
+const vaultNtOutside = vaultNtMain.replace(/<template id="vault-content">[\s\S]*?<\/template>/, "");
+assert(
+  vaultNtOutside.match(/<section class="vault-wall"[\s\S]*?<\/section>/)?.[0].replaceAll('href="../../"', 'href="../"') ===
+    vaultOutside.match(/<section class="vault-wall"[\s\S]*?<\/section>/)?.[0],
+  "Vault New Today sign-in card is the same allowlist sign-in card as the Vault",
+);
+for (const piece of ['id="nt-body"', 'id="nt-pill"', 'id="nt-fresh"', 'href="#nt-options-flow"', "including Options Flow"]) {
+  assert(vaultNtTemplate.includes(piece), `Vault New Today template has ${piece}`);
+}
+assert(!vaultNtOutside.includes("nt-body") && !vaultNtOutside.includes("nt-options-flow"), "Vault New Today rows stay inside the signed-in template");
+assert(readFileSync(join(root, "src/new-today.js"), "utf8").includes('dataset.surface === "public"'), "New Today only hides Options Flow on the public surface");
 for (const file of Object.keys(vaultSurface)) {
   const ids = [...readFileSync(join(root, file), "utf8").matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
   const repeated = ids.filter((id, at) => ids.indexOf(id) !== at);
