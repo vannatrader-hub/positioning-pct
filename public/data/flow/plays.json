@@ -1,8 +1,60 @@
 {
-  "asOf": "2026-11-07",
-  "asOfLabel": "Mon Nov 9, 2026 catch-up · LH quote Fri Nov 6 close; earlier names through Thu Nov 5 close",
-  "window": "Last 3 weeks · Oct 17 – Nov 7, 2026",
+  "asOf": "2026-11-09",
+  "asOfLabel": "Tue Nov 10, 2026 midnight · CBRE and CCJ quotes Mon Nov 9 close; LH quote Fri Nov 6 close; earlier names through Thu Nov 5 close",
+  "window": "Last 3 weeks · Oct 19 – Nov 9, 2026",
   "plays": [
+    {
+      "id": 44053,
+      "ticker": "CCJ",
+      "exchange": "NYSE",
+      "name": "Cameco",
+      "industry": { "broad": "Energy", "focus": "Uranium · nuclear fuel" },
+      "date": "2026-11-09",
+      "alertedAtCt": "2026-11-09 06:44 PM CT",
+      "title": "December Calls Bought as Uranium Shares Test the 200-Week EMA",
+      "confidence": "$$$",
+      "refPrice": 75.37,
+      "flow": [
+        "Cameco (CCJ) saw a buyer of 10,500 December $85 calls at $1.74 plus 5,000 December $75 calls at $4.75.",
+        "CCJ is a uranium miner and nuclear-fuel supplier. Shares are down about 18% year to date after a 52-week high near $135, with the November low near $66. The desk sees the 200-week EMA as a bottom. The reference price is $75.37."
+      ],
+      "customerPurchased": [
+        { "contract": "Dec $85 calls", "detail": "10,500 bought @ $1.74 · more recently", "side": "calls_bought" },
+        { "contract": "Dec $75 calls", "detail": "5,000 bought @ $4.75 · more recently", "side": "calls_bought" }
+      ],
+      "oi": [
+        { "contract": "Dec $85 calls", "detail": "10,500 bought at $1.74" },
+        { "contract": "Dec $75 calls", "detail": "5,000 bought at $4.75" }
+      ],
+      "recommendation": "The desk wants CCJ with the 200-week EMA as a bottom after the November low near $66.",
+      "lead": { "type": "call", "action": "bought", "qty": 10500, "strike": 85, "expiry": "December", "price": 1.74 },
+      "quote": { "date": "2026-11-09", "last": 75.37, "prev": 71.3 }
+    },
+    {
+      "id": 44051,
+      "ticker": "CBRE",
+      "exchange": "NYSE",
+      "name": "CBRE Group",
+      "industry": { "broad": "Real Estate", "focus": "Commercial real estate services" },
+      "date": "2026-11-09",
+      "alertedAtCt": "2026-11-09 05:47 PM CT",
+      "title": "December Calls in a Commercial Real Estate Services Leader",
+      "confidence": "$$$",
+      "refPrice": 138,
+      "flow": [
+        "CBRE Group (CBRE) saw December $135 calls bought.",
+        "CBRE is a commercial real estate services firm. Shares are down about 14% year to date after a 52-week high near $174 in February, with the October low near $121. The desk wants the December $135 calls. The reference price is about $138."
+      ],
+      "customerPurchased": [
+        { "contract": "Dec $135 calls", "detail": "bought · more recently", "side": "calls_bought" }
+      ],
+      "oi": [
+        { "contract": "Dec $135 calls", "detail": "Bought more recently" }
+      ],
+      "recommendation": "The desk wants CBRE via the December $135 calls, with shares holding above the October low near $121.",
+      "lead": { "type": "call", "action": "bought", "strike": 135, "expiry": "December", "price": null },
+      "quote": { "date": "2026-11-09", "last": 138.17, "prev": 135.51 }
+    },
     {
       "id": 44021,
       "ticker": "LH",

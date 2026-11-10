@@ -1,0 +1,35 @@
+[
+  {
+    "id": "2026-11-09-ccj-dollar",
+    "section": "options-flow",
+    "kind": "dollar",
+    "ticker": "CCJ",
+    "title": "CCJ joins the $$$ Shopping List",
+    "summary": "Buyer of 10,500 Dec $85 calls at $1.74 plus 5,000 Dec $75 calls at $4.75; spot $75.37. Uranium name, down ~18% YTD; desk sees the 200-week EMA as a bottom after the November low near $66.",
+    "href": "options-flow/dollar/#CCJ",
+    "publishedAt": "2026-11-09 18:44 CT",
+    "sourceLabel": "Desk"
+  },
+  {
+    "id": "2026-11-09-cbre-dollar",
+    "section": "options-flow",
+    "kind": "dollar",
+    "ticker": "CBRE",
+    "title": "CBRE joins the $$$ Shopping List",
+    "summary": "December $135 calls bought; spot ~$138. Commercial real estate services name, down ~14% YTD after a February 52-week high near $174, with the October low near $121. Desk wants the December $135 calls.",
+    "href": "options-flow/dollar/#CBRE",
+    "publishedAt": "2026-11-09 17:47 CT",
+    "sourceLabel": "Desk"
+  },
+  {
+    "id": "2026-11-09-burl-flow",
+    "section": "options-flow",
+    "kind": "flow",
+    "ticker": "BURL",
+    "title": "BURL ($$): June 2027 $230 puts sold",
+    "summary": "June 2027 $230 puts sold; spot ~$257. Off-price apparel retailer, down ~11% YTD after a July 52-week high near $378, with the September low near $227. Desk lean is the June 2027 $230 put sale.",
+    "href": "options-flow/",
+    "publishedAt": "2026-11-09 17:47 CT",
+    "sourceLabel": "Desk"
+  }
+]

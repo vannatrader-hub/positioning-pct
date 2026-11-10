@@ -365,7 +365,7 @@ for (const [ticker, want] of Object.entries(studyWant)) {
 }
 
 const flow = JSON.parse(readFileSync(join(root, "public/data/flow/plays.json"), "utf8"));
-const flowTickers = ["LH", "SBUX", "EPD", "MPWR", "INSM", "UBS", "EXE", "DAR", "JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN"];
+const flowTickers = ["CCJ", "CBRE", "LH", "SBUX", "EPD", "MPWR", "INSM", "UBS", "EXE", "DAR", "JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN"];
 assert(
   JSON.stringify(sortPlays(flow.plays).map((play) => play.ticker)) === JSON.stringify(flowTickers),
   `Shopping List newest alert first: ${sortPlays(flow.plays).map((play) => play.ticker)}`,
@@ -445,7 +445,7 @@ assert(
 for (const ticker of ["COIN"]) {
   assert(flowBy[ticker].customerPurchased.every((line) => line.detail.includes("sold")), `${ticker} short puts read as sold`);
 }
-const beWant = { CASY: 671.2, JCI: 163.54, MMM: 179.8, COIN: 123.5, CORT: 130.94, CRWD: null, DDOG: null, EPD: null, QCOM: null, SBUX: null, LH: null };
+const beWant = { CASY: 671.2, JCI: 163.54, MMM: 179.8, COIN: 123.5, CORT: 130.94, CRWD: null, DDOG: null, EPD: null, QCOM: null, SBUX: null, LH: null, CBRE: null, CCJ: 86.74 };
 for (const [ticker, want] of Object.entries(beWant)) {
   assert(breakeven(flowBy[ticker].lead) === want, `${ticker} break-even ${breakeven(flowBy[ticker].lead)} !== ${want}`);
 }
@@ -465,6 +465,7 @@ assert(!flowBy.VZ, "VZ is a $$ alert and stays off the $$$ watchlist");
 assert(!flowBy.TSCO && !flowBy.UBER, "TSCO and UBER are $$ alerts and stay off the $$$ watchlist");
 assert(!flowBy.PYPL && !flowBy.CBOE, "PYPL and CBOE are $$ alerts and stay off the $$$ watchlist");
 assert(!flowBy.ARES && !flowBy.MSI, "ARES and MSI are $$ alerts and stay off the $$$ watchlist");
+assert(!flowBy.BURL, "BURL is a $$ alert and stays off the $$$ watchlist");
 assert(
   JSON.stringify(flowBy.JAZZ.lead) === JSON.stringify({ type: "call", action: "bought", qty: 2700, strike: 240, expiry: "December 2026", price: null }),
   `JAZZ lead is the Dec 2026 $240 call buy ${JSON.stringify(flowBy.JAZZ.lead)}`,
@@ -528,6 +529,20 @@ assert(
 assert(flowBy.LH.customerPurchased[0]?.contract === "May $420 calls" && flowBy.LH.customerPurchased[0]?.side === "calls_bought", "LH Customer purchased is the May $420 call buy");
 const lhLevels = chartLevels(flowBy.LH, JSON.parse(readFileSync(join(root, "public/data/flow/bars/LH.json"), "utf8")).bars);
 assert(JSON.stringify(lhLevels.lines.map((line) => line.value)) === "[420]", `LH chart draws only the $420 strike ${lhLevels.lines.map((line) => line.value)}`);
+assert(
+  JSON.stringify(flowBy.CBRE.lead) === JSON.stringify({ type: "call", action: "bought", strike: 135, expiry: "December", price: null }),
+  `CBRE lead is the Dec $135 call buy ${JSON.stringify(flowBy.CBRE.lead)}`,
+);
+assert(flowBy.CBRE.customerPurchased[0]?.contract === "Dec $135 calls" && flowBy.CBRE.customerPurchased[0]?.side === "calls_bought", "CBRE Customer purchased is the Dec $135 call buy");
+const cbreLevels = chartLevels(flowBy.CBRE, JSON.parse(readFileSync(join(root, "public/data/flow/bars/CBRE.json"), "utf8")).bars);
+assert(JSON.stringify(cbreLevels.lines.map((line) => line.value)) === "[135]", `CBRE chart draws only the $135 strike ${cbreLevels.lines.map((line) => line.value)}`);
+assert(
+  JSON.stringify(flowBy.CCJ.lead) === JSON.stringify({ type: "call", action: "bought", qty: 10500, strike: 85, expiry: "December", price: 1.74 }),
+  `CCJ lead is the Dec $85 call buy ${JSON.stringify(flowBy.CCJ.lead)}`,
+);
+assert(flowBy.CCJ.customerPurchased[0]?.contract === "Dec $85 calls" && flowBy.CCJ.customerPurchased[0]?.side === "calls_bought", "CCJ Customer purchased is the Dec $85 call buy");
+const ccjLevels = chartLevels(flowBy.CCJ, JSON.parse(readFileSync(join(root, "public/data/flow/bars/CCJ.json"), "utf8")).bars);
+assert(JSON.stringify(ccjLevels.lines.map((line) => line.value)) === "[85,86.74]", `CCJ chart draws the $85 strike and break-even ${ccjLevels.lines.map((line) => line.value)}`);
 assert(!flowBy.CSCO, "CSCO aged out of the 3-week $$$ window on the Nov 4 as-of");
 assert(!flowBy.ALAB, "ALAB aged out of the 3-week $$$ window on the Nov 5 as-of");
 assert(resolveExpiry("December", "2026-10-27") === "2026-12-18", "December resolves to Dec 18, 2026");
@@ -1081,16 +1096,25 @@ assert(itemsForDay(nt.items ?? [], "2026-11-05").length === 3, "Nov 5 desk day l
 assert(itemsForDay(nt.items ?? [], "2026-11-06").length === 2, "Nov 6 desk day lists the open wrap and the market wrap");
 assert(itemsForDay(nt.items ?? [], "2026-11-07").length === 1, "Nov 7 desk day lists the LH shopping-list alert");
 assert(itemsForDay(nt.items ?? [], "2026-11-08").length === 2, "Nov 8 desk day lists the ARES and MSI featured alerts");
-assert(itemsForDay(nt.items ?? [], "2026-11-09").length === 2, "Nov 9 desk day lists the open wrap and the market wrap");
+assert(itemsForDay(nt.items ?? [], "2026-11-09").length === 5, "Nov 9 desk day lists the CCJ and CBRE shopping-list alerts, the BURL featured alert, and the open and market wraps");
 assert(
   visibleDeskItems(nt.items, { today: "2026-11-09", mode: "catchup" }).map((item) => item.id).join() ===
-    "2026-11-09-desk-recap,2026-11-09-desk-blitz,2026-11-08-ares-flow,2026-11-08-msi-flow",
+    "2026-11-09-ccj-dollar,2026-11-09-burl-flow,2026-11-09-cbre-dollar,2026-11-09-desk-recap,2026-11-09-desk-blitz,2026-11-08-ares-flow,2026-11-08-msi-flow",
   "Nov 9 catch-up is today plus yesterday and keeps each row's original date",
 );
 assert(
-  rowDayLabel("2026-11-09T14:26:00-06:00", "2026-11-09").label === "Today · Mon, Nov 9" &&
+  rowDayLabel("2026-11-09T18:44:00-06:00", "2026-11-09").label === "Today · Mon, Nov 9" &&
     rowDayLabel("2026-11-08T18:30:00-06:00", "2026-11-09").label === "Yesterday · Sun, Nov 8",
   "Nov 9 rows stay Today and Nov 8 rows stay Yesterday",
+);
+assert(
+  visibleDeskItems(nt.items, { today: "2026-11-10", mode: "catchup" }).map((item) => item.id).join() ===
+    "2026-11-09-ccj-dollar,2026-11-09-burl-flow,2026-11-09-cbre-dollar,2026-11-09-desk-recap,2026-11-09-desk-blitz",
+  "Nov 10 midnight catch-up keeps yesterday's Nov 9 rows with date labels and drops Nov 8",
+);
+assert(
+  rowDayLabel("2026-11-09T18:44:00-06:00", "2026-11-10").label === "Yesterday · Mon, Nov 9",
+  "Nov 9 rows stay Yesterday on the Nov 10 catch-up",
 );
 
 /* Default New Today is two Chicago calendar days. Yesterday keeps its own date. */
