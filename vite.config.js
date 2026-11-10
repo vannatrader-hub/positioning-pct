@@ -41,6 +41,7 @@ export default defineConfig({
         vaultWall: resolve(root, "vault/vol-credit-momentum/index.html"),
         vaultPortfolio: resolve(root, "vault/portfolio/index.html"),
         vaultArchive: resolve(root, "vault/archive/index.html"),
+        vaultNewToday: resolve(root, "vault/new-today/index.html"),
         insight: resolve(root, "insight/index.html"),
         insightVol: resolve(root, "insight/vol/index.html"),
         privateEntry: resolve(root, "m4c8q/index.html"),

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>New Today · Vault · Positioning %.</title>
+    <meta
+      name="description"
+      content="Vault New Today: today and yesterday on the Desk, including Options Flow. Each row keeps its original Central-time date. Behind the Vault sign-in wall."
+    />
+    <meta name="theme-color" content="#f3f1ec" />
+    <link rel="icon" href="%BASE_URL%favicon.svg" />
+    <script>(function(){var d=document.documentElement,t;try{t=localStorage.getItem("p-theme");if(t!=="light"&&t!=="dark"){t="light";localStorage.setItem("p-theme",t)}}catch(e){t=t==="dark"?"dark":"light"}d.dataset.theme=t})();</script>
+    <link rel="stylesheet" href="/src/styles.css" />
+    <script type="module" src="/src/theme.js"></script>
+    <script type="module" src="/src/vault-gate.js"></script>
+    <script type="module" src="/src/new-today.js"></script>
+  </head>
+  <body class="is-vault">
+    <a class="skip" href="#content">Skip to content</a>
+    <header class="topbar">
+      <div class="wrap topbar-in">
+        <div class="topbar-start">
+          <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+          <nav class="surface" aria-label="Surface">
+            <a href="../../"><i class="surface-dot" aria-hidden="true"></i>Dashboard</a>
+            <a class="is-current" href="../" aria-current="page"><svg class="surface-dial" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.75" /><circle cx="6" cy="6" r="1.5" /></svg>Vault</a>
+          </nav>
+        </div>
+        <nav class="nav" aria-label="Pages">
+          <a href="../../positioning/">Positioning</a>
+          <a href="../../options-flow/">Options Flow</a>
+          <a href="../portfolio/">Portfolio</a>
+          <a href="../vol-credit-momentum/">Desk wall</a>
+        </nav>
+        <div class="theme-toggle" role="group" aria-label="Theme">
+          <button type="button" data-theme-set="dark" aria-pressed="false" aria-label="Dark"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5" /><path d="M8 1.75a6.25 6.25 0 0 0 0 12.5Z" fill="currentColor" /></svg></button>
+          <button type="button" data-theme-set="light" aria-pressed="true" aria-label="Light"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="2.9" fill="currentColor" /><path d="M8 1.2v1.7M8 13.1v1.7M1.2 8h1.7M13.1 8h1.7M3.2 3.2l1.2 1.2M11.6 11.6l1.2 1.2M3.2 12.8l1.2-1.2M11.6 4.4l1.2-1.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" /></svg></button>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <main id="content">
+        <section class="vault-wall" id="vault-wall" data-state="checking" aria-labelledby="vault-wall-title">
+          <div class="wall-card">
+            <svg class="wall-dial" viewBox="0 0 48 48" aria-hidden="true">
+              <circle class="vd-ring" cx="24" cy="24" r="22" />
+              <circle class="vd-knob" cx="24" cy="24" r="14" />
+              <path class="vd-pointer" d="M24 12.5 V17" />
+              <circle class="vd-core" cx="24" cy="24" r="2.5" />
+            </svg>
+            <h1 id="vault-wall-title">Sign in to open Vault</h1>
+            <p class="wall-lede" id="wall-lede">Vault opens by invitation. Sign in with your email and password.</p>
+            <form class="wall-form" id="wall-form" novalidate>
+              <div class="wall-field">
+                <label class="wall-label" for="wall-email">Email</label>
+                <input id="wall-email" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="you@example.com" required />
+              </div>
+              <div class="wall-field" id="wall-code-field" hidden>
+                <label class="wall-label" id="wall-code-label" for="wall-code">Code from your email</label>
+                <input id="wall-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit code" />
+              </div>
+              <div class="wall-field" id="wall-password-field">
+                <label class="wall-label" id="wall-password-label" for="wall-password">Password</label>
+                <input id="wall-password" name="password" type="password" autocomplete="current-password" required />
+              </div>
+              <button class="wall-submit" id="wall-submit" type="submit">Sign in</button>
+            </form>
+            <p class="wall-status" id="wall-status" role="status" aria-live="polite"></p>
+            <div class="wall-links">
+              <button class="wall-reset" id="wall-forgot" type="button">Set or reset password</button>
+              <button class="wall-reset" id="wall-reset" type="button" hidden>Start over</button>
+            </div>
+            <div class="wall-create">
+              <span>New to Vault?</span>
+              <button class="wall-create-button" id="wall-create" type="button" disabled aria-disabled="true">Create account <span class="badge is-soon">Coming soon</span></button>
+            </div>
+            <a class="wall-back" href="../../"><span aria-hidden="true">←</span> Back to Dashboard</a>
+          </div>
+        </section>
+
+        <div class="vault-account" id="vault-account" hidden>
+          <span id="vault-account-email"></span>
+          <button type="button" id="vault-signout">Sign out</button>
+        </div>
+
+        <template id="vault-content">
+          <nav class="subnav" aria-label="New Today">
+            <a class="subnav-back" href="../"><span aria-hidden="true">←</span> Vault</a>
+            <a href="#nt-positioning">Positioning</a>
+            <a href="#nt-options-flow">Options Flow</a>
+            <a href="#nt-spx">SPX Levels</a>
+            <a href="#nt-research">Research desk</a>
+          </nav>
+          <section class="page-head">
+            <span class="pill vault-pill" id="nt-pill">New Today</span>
+            <h1>New Today</h1>
+            <p class="lede">
+              Everything that landed on the Desk today and yesterday, including Options Flow, newest first. Each row keeps the Central-time
+              calendar day it landed. A desk day is the calendar day in Central time, 12:00 AM through 11:59 PM.
+            </p>
+            <p class="asof-line pill" id="nt-window">Loading New Today…</p>
+            <p class="asof-line pill" id="nt-fresh">Checking the feed…</p>
+          </section>
+
+          <div class="nt-controls">
+            <div class="seg" role="group" aria-label="View">
+              <button type="button" class="is-on" data-view="sections" aria-pressed="true">By section</button>
+              <button type="button" data-view="all" aria-pressed="false">All</button>
+            </div>
+            <div class="nt-days">
+              <a class="toggle" id="nt-prev" href="?day=">← Earlier desk day</a>
+              <a class="toggle" id="nt-next" href="./" hidden>Later →</a>
+              <a class="toggle is-on" id="nt-today" href="./" hidden>New Today</a>
+            </div>
+          </div>
+
+          <div id="nt-body" aria-live="polite"></div>
+
+          <nav class="vault-next" aria-label="More in the Vault">
+            <span class="vault-next-label">More in the Vault</span>
+            <a href="../../options-flow/">Options Flow</a>
+            <a href="../archive/">Desk-day archive</a>
+            <a href="../portfolio/">Portfolio</a>
+          </nav>
+        </template>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <a class="lockup" href="../../">Positioning<span class="mark">%.</span></a>
+          <p class="foot-note">Vault · New Today.</p>
+        </div>
+        <nav class="foot-links" aria-label="Footer">
+          <a href="../../">Dashboard</a>
+          <a href="../../positioning/">Positioning</a>
+          <a href="../../options-flow/">Options Flow</a>
+          <a href="../portfolio/">Portfolio</a>
+          <a href="../vol-credit-momentum/">Desk wall</a>
+          <a class="is-current" aria-current="page" href="../">Vault</a>
+        </nav>
+      </footer>
+    </div>
+    <noscript>New Today needs JavaScript to sort the desk day.</noscript>
+  </body>
+</html>

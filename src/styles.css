@@ -3379,6 +3379,24 @@ body:has(.cc[open]) { overflow: hidden; }
 .vault-dash strong { font-size: 15px; letter-spacing: -0.01em; }
 .vault-dash span { font-size: 12.5px; color: var(--muted); }
 .vault-dash .vault-dash-num { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; color: var(--gold-ink); }
+.vault-dash .nt-chip {
+  margin-top: 6px;
+  justify-self: start;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.vault-dash .nt-chip:hover { transform: none; }
+.vault-dash .nt-chip-top {
+  font-size: 13.5px;
+  color: var(--ink);
+}
+.vault-dash .nt-chip-sub {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.vault-dash .nt-chip.is-lit .nt-chip-sub { color: var(--ink-2); }
 
 .vault-pack-weeks { grid-column: span 2; min-width: 0; }
 
