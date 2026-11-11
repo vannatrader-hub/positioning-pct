@@ -365,7 +365,7 @@ for (const [ticker, want] of Object.entries(studyWant)) {
 }
 
 const flow = JSON.parse(readFileSync(join(root, "public/data/flow/plays.json"), "utf8"));
-const flowTickers = ["CCJ", "CBRE", "LH", "SBUX", "EPD", "MPWR", "INSM", "UBS", "EXE", "DAR", "JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM", "COIN"];
+const flowTickers = ["KKR", "FROG", "CCJ", "CBRE", "LH", "SBUX", "EPD", "MPWR", "INSM", "UBS", "EXE", "DAR", "JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM"];
 assert(
   JSON.stringify(sortPlays(flow.plays).map((play) => play.ticker)) === JSON.stringify(flowTickers),
   `Shopping List newest alert first: ${sortPlays(flow.plays).map((play) => play.ticker)}`,
@@ -442,10 +442,10 @@ assert(
   JSON.stringify(chartLevels(flowBy.CORT, cortBars).lines.map((line) => line.value)) === JSON.stringify([120, 160, 130.94]),
   "CORT chart draws the $120/$160 spread and its break-even",
 );
-for (const ticker of ["COIN"]) {
+for (const ticker of ["KKR", "FROG"]) {
   assert(flowBy[ticker].customerPurchased.every((line) => line.detail.includes("sold")), `${ticker} short puts read as sold`);
 }
-const beWant = { CASY: 671.2, JCI: 163.54, MMM: 179.8, COIN: 123.5, CORT: 130.94, CRWD: null, DDOG: null, EPD: null, QCOM: null, SBUX: null, LH: null, CBRE: null, CCJ: 86.74 };
+const beWant = { CASY: 671.2, JCI: 163.54, MMM: 179.8, KKR: 89.2, FROG: 94.04, CORT: 130.94, CRWD: null, DDOG: null, EPD: null, QCOM: null, SBUX: null, LH: null, CBRE: null, CCJ: 86.74 };
 for (const [ticker, want] of Object.entries(beWant)) {
   assert(breakeven(flowBy[ticker].lead) === want, `${ticker} break-even ${breakeven(flowBy[ticker].lead)} !== ${want}`);
 }
@@ -466,6 +466,7 @@ assert(!flowBy.TSCO && !flowBy.UBER, "TSCO and UBER are $$ alerts and stay off t
 assert(!flowBy.PYPL && !flowBy.CBOE, "PYPL and CBOE are $$ alerts and stay off the $$$ watchlist");
 assert(!flowBy.ARES && !flowBy.MSI, "ARES and MSI are $$ alerts and stay off the $$$ watchlist");
 assert(!flowBy.BURL, "BURL is a $$ alert and stays off the $$$ watchlist");
+assert(!flowBy.TGT, "TGT is a $$ alert and stays off the $$$ watchlist");
 assert(
   JSON.stringify(flowBy.JAZZ.lead) === JSON.stringify({ type: "call", action: "bought", qty: 2700, strike: 240, expiry: "December 2026", price: null }),
   `JAZZ lead is the Dec 2026 $240 call buy ${JSON.stringify(flowBy.JAZZ.lead)}`,
@@ -543,8 +544,23 @@ assert(
 assert(flowBy.CCJ.customerPurchased[0]?.contract === "Dec $85 calls" && flowBy.CCJ.customerPurchased[0]?.side === "calls_bought", "CCJ Customer purchased is the Dec $85 call buy");
 const ccjLevels = chartLevels(flowBy.CCJ, JSON.parse(readFileSync(join(root, "public/data/flow/bars/CCJ.json"), "utf8")).bars);
 assert(JSON.stringify(ccjLevels.lines.map((line) => line.value)) === "[85,86.74]", `CCJ chart draws the $85 strike and break-even ${ccjLevels.lines.map((line) => line.value)}`);
+assert(
+  JSON.stringify(flowBy.KKR.lead) === JSON.stringify({ type: "put", action: "sold", qty: 2000, strike: 100, expiry: "May", price: 10.8 }),
+  `KKR lead is the May $100 put sale ${JSON.stringify(flowBy.KKR.lead)}`,
+);
+assert(flowBy.KKR.customerPurchased[0]?.contract === "May $100 puts" && flowBy.KKR.customerPurchased[0]?.side === "puts_sold", "KKR Customer purchased is the May $100 put sale");
+const kkrLevels = chartLevels(flowBy.KKR, JSON.parse(readFileSync(join(root, "public/data/flow/bars/KKR.json"), "utf8")).bars);
+assert(JSON.stringify(kkrLevels.lines.map((line) => line.value)) === "[100,89.2]", `KKR chart draws the $100 strike and break-even ${kkrLevels.lines.map((line) => line.value)}`);
+assert(
+  JSON.stringify(flowBy.FROG.lead) === JSON.stringify({ type: "put", action: "sold", qty: 1000, strike: 105, expiry: "December", price: 10.96 }),
+  `FROG lead is the Dec $105 put sale ${JSON.stringify(flowBy.FROG.lead)}`,
+);
+assert(flowBy.FROG.customerPurchased[0]?.contract === "Dec $105 puts" && flowBy.FROG.customerPurchased[0]?.side === "puts_sold", "FROG Customer purchased is the Dec $105 put sale");
+const frogLevels = chartLevels(flowBy.FROG, JSON.parse(readFileSync(join(root, "public/data/flow/bars/FROG.json"), "utf8")).bars);
+assert(JSON.stringify(frogLevels.lines.map((line) => line.value)) === "[105,94.04]", `FROG chart draws the $105 strike and break-even ${frogLevels.lines.map((line) => line.value)}`);
 assert(!flowBy.CSCO, "CSCO aged out of the 3-week $$$ window on the Nov 4 as-of");
 assert(!flowBy.ALAB, "ALAB aged out of the 3-week $$$ window on the Nov 5 as-of");
+assert(!flowBy.COIN, "COIN aged out of the 3-week $$$ window on the Nov 10 as-of");
 assert(resolveExpiry("December", "2026-10-27") === "2026-12-18", "December resolves to Dec 18, 2026");
 assert(resolveExpiry("January", "2026-10-22") === "2027-01-15", "January resolves to Jan 15, 2027");
 assert(resolveExpiry("January 2028", "2026-10-25") === "2028-01-21", "January 2028 resolves to Jan 21, 2028");
@@ -752,16 +768,17 @@ assert(
 );
 const spotRows = Object.fromEntries(spot.sections.map((section) => [section.id, section.plays.map((play) => play.ticker)]));
 assert(
-  JSON.stringify(spotRows) === JSON.stringify({ active: ["XYZ"], open: ["HOOD"], closed: ["GLD", "FCX", "V", "FSLY"] }),
+  JSON.stringify(spotRows) === JSON.stringify({ active: ["MDB", "XYZ"], open: ["HOOD"], closed: ["GLD", "FCX", "V", "FSLY"] }),
   `Spotlight rows ${JSON.stringify(spotRows)}`,
 );
 const { start: activeStart, end: activeEnd } = spot.activeWindow;
-assert(activeStart === "2026-10-06" && activeEnd === "2026-10-28", "Active window stays the October 6–28 book");
-assert(spot.asOf === "2026-11-01" && spot.asOfStamp === "2026-11-01T08:47:00-06:00", `Spotlight asOf ${spot.asOf} ${spot.asOfStamp}`);
-assert(/2026-10-30/.test(spot.sourceNote) && /stopped out/i.test(spot.sourceNote), `Spotlight source note ${spot.sourceNote}`);
+assert(activeStart === "2026-10-20" && activeEnd === "2026-11-10", "Active window is the Oct 20 – Nov 10 book");
+assert(spot.asOf === "2026-11-11" && spot.asOfStamp === "2026-11-11T00:15:00-06:00", `Spotlight asOf ${spot.asOf} ${spot.asOfStamp}`);
+assert(/2026-11-10/.test(spot.sourceNote) && /MDB/.test(spot.sourceNote), `Spotlight source note ${spot.sourceNote}`);
+assert(/2026-10-30/.test(spot.sourceNote) && /stopped/i.test(spot.sourceNote), `Spotlight source note still names the GLD/FCX stop ${spot.sourceNote}`);
 assert(!/no new close notes for GLD/i.test(spot.sourceNote), "source note no longer leaves GLD and FCX open");
 const barsLag = (Date.parse(`${spot.asOf}T00:00:00Z`) - Date.parse(`${spot.barsThrough}T00:00:00Z`)) / 86400000;
-assert(spot.barsThrough === "2026-10-27" && barsLag === 5, `Spotlight bars stay through ${spot.barsThrough} after the 2026-11-01 status correction`);
+assert(spot.barsThrough === "2026-11-10" && barsLag === 1, `Spotlight bars stay through ${spot.barsThrough} after the 2026-11-11 auto-ship`);
 for (const section of spot.sections) {
   assert(JSON.stringify(sortCards(section.plays)) === JSON.stringify(section.plays), `${section.id} row is stored newest first`);
   for (const play of section.plays) {
@@ -803,6 +820,7 @@ for (const section of spot.sections) {
 }
 const spotBy = Object.fromEntries(allPlays(spot).map((play) => [play.ticker, play]));
 const spotWant = {
+  MDB: { debit: 15, stop: 305, target: 430, breakeven: 385, spotAtPost: 331, published: "2026-11-10" },
   XYZ: { debit: 3.5, stop: 70, target: 90, breakeven: 78.5, spotAtPost: 75, published: "2026-10-27" },
   GLD: { debit: 8, stop: 367, target: 400, breakeven: 408, spotAtPost: 377.5, published: "2026-10-20" },
   FCX: { debit: 3.25, stop: 63, target: 80, breakeven: 78.25, spotAtPost: 69.2, published: "2026-10-14" },
@@ -815,7 +833,7 @@ for (const [ticker, want] of Object.entries(spotWant)) {
   assert(JSON.stringify(got) === JSON.stringify(want), `spotlight ${ticker} ticket ${JSON.stringify(got)}`);
 }
 assert(spotBy.V.closedAt === "2026-10-12" && outcomeLabel(spotBy.V) === "Banked +107%", "V banked +107% on Oct 12");
-assert(spotBy.XYZ.status === "active" && spotBy.HOOD.status === "open" && spotBy.V.outcome === "banked", "XYZ stays Active, HOOD stays Open, V stays banked");
+assert(spotBy.MDB.status === "active" && spotBy.XYZ.status === "active" && spotBy.HOOD.status === "open" && spotBy.V.outcome === "banked", "MDB and XYZ stay Active, HOOD stays Open, V stays banked");
 for (const ticker of ["GLD", "FCX"]) {
   const play = spotBy[ticker];
   assert(play.status === "closed" && play.outcome === "stopped" && play.closedAt === "2026-10-30", `${ticker} stopped on the 2026-10-30 desk close`);
@@ -831,6 +849,7 @@ assert(fslyChart.expiry === "2026-10-16" && fsly.closedAt === fslyChart.expiry, 
 assert(/OpEx expired/.test(fsly.closeNote) && /worthless/.test(fsly.closeNote), `FSLY close note ${fsly.closeNote}`);
 assert(fslyChart.closeBar.c < 25, `FSLY closed ${fslyChart.closeBar.c} at expiry, under the $25 strike`);
 assert(JSON.stringify(spotlightLines(spotBy.FCX).map((line) => line.value)) === "[80,78.25,75,63]", "FCX chart lines run target $80 down to stop $63");
+assert(JSON.stringify(spotlightLines(spotBy.MDB).map((line) => line.value)) === "[430,385,370,305]", "MDB chart lines run short/target $430, B/E $385, long $370, stop $305");
 assert(JSON.stringify(spotlightLines(spotBy.XYZ).map((line) => line.value)) === "[90,85,78.5,75,70]", "XYZ chart lines run target $90, short $85, B/E, long $75, stop $70");
 assert(JSON.stringify(spotlightLines(spotBy.V).map((line) => line.kind)) === '["target","breakeven","strike","stop"]', "V draws short/target, B/E, long strike, stop");
 const spotPage = readFileSync(join(root, "options-flow/spotlights/index.html"), "utf8");
@@ -873,9 +892,9 @@ board.names.forEach((name, index) => {
 });
 assert(!("spotlight_watch" in board), "scorecard has no Spotlight watch list");
 const activeSet = activeSpotlights(spot);
-assert(JSON.stringify([...activeSet]) === '["XYZ"]', `Active Spotlights ${[...activeSet]}`);
+assert(JSON.stringify([...activeSet]) === '["MDB","XYZ"]', `Active Spotlights ${[...activeSet]}`);
 assert(spotlightStar("GLD", activeSet) === "" && spotlightStar("FCX", activeSet) === "", "stopped Spotlights are not Active stars");
-assert(spotlightStar("XYZ", activeSet).includes("sb-star") && spotlightStar("AAPL", activeSet) === "", "star only marks Active Spotlights");
+assert(spotlightStar("MDB", activeSet).includes("sb-star") && spotlightStar("XYZ", activeSet).includes("sb-star") && spotlightStar("AAPL", activeSet) === "", "star only marks Active Spotlights");
 const boardPage = readFileSync(join(root, "options-flow/scorecard/index.html"), "utf8");
 assert(boardPage.includes('href="/src/styles.css"') && boardPage.includes('class="topbar"') && boardPage.includes('class="site-footer"'), "scorecard sits in the Positioning % shell");
 assert(boardPage.includes('class="subnav"') && boardPage.includes('class="is-current" href="./" aria-current="page">Weekly scorecard'), "scorecard is the current Options Flow subpage");
@@ -1093,7 +1112,7 @@ assert(itemsForDay(nt.items ?? [], "2026-10-29").length === 0, "Oct 29 desk day 
 assert(itemsForDay(nt.items ?? [], "2026-10-30").length === 0, "Oct 30 desk day rolled off the eight-day New Today window");
 assert(itemsForDay(nt.items ?? [], "2026-10-31").length === 0, "Oct 31 desk day rolled off the eight-day New Today window");
 assert(itemsForDay(nt.items ?? [], "2026-11-01").length === 0, "Nov 1 desk day rolled off the eight-day New Today window");
-assert(itemsForDay(nt.items ?? [], "2026-11-02").length === 11, "Nov 2 desk day lists the UBS, W, and WFC flow alerts plus the morning and evening research notes");
+assert(itemsForDay(nt.items ?? [], "2026-11-02").length === 0, "Nov 2 desk day rolled off the eight-day New Today window");
 assert(itemsForDay(nt.items ?? [], "2026-11-03").length === 5, "Nov 3 desk day lists the MPWR and INSM shopping-list alerts, the VZ featured alert, and the pre-open research notes");
 assert(itemsForDay(nt.items ?? [], "2026-11-04").length === 3, "Nov 4 desk day lists the EPD shopping-list alert and the TSCO and UBER featured alerts");
 assert(itemsForDay(nt.items ?? [], "2026-11-05").length === 3, "Nov 5 desk day lists the SBUX shopping-list alert and the PYPL and CBOE featured alerts");
@@ -1101,6 +1120,7 @@ assert(itemsForDay(nt.items ?? [], "2026-11-06").length === 2, "Nov 6 desk day l
 assert(itemsForDay(nt.items ?? [], "2026-11-07").length === 1, "Nov 7 desk day lists the LH shopping-list alert");
 assert(itemsForDay(nt.items ?? [], "2026-11-08").length === 2, "Nov 8 desk day lists the ARES and MSI featured alerts");
 assert(itemsForDay(nt.items ?? [], "2026-11-09").length === 5, "Nov 9 desk day lists the CCJ and CBRE shopping-list alerts, the BURL featured alert, and the open and market wraps");
+assert(itemsForDay(nt.items ?? [], "2026-11-10").length === 4, "Nov 10 desk day lists the MDB Spotlight, the KKR and FROG shopping-list alerts, and the TGT featured alert");
 assert(
   visibleDeskItems(nt.items, { today: "2026-11-09", mode: "catchup" }).map((item) => item.id).join() ===
     "2026-11-09-ccj-dollar,2026-11-09-burl-flow,2026-11-09-cbre-dollar,2026-11-09-desk-recap,2026-11-09-desk-blitz,2026-11-08-ares-flow,2026-11-08-msi-flow",
@@ -1113,12 +1133,22 @@ assert(
 );
 assert(
   visibleDeskItems(nt.items, { today: "2026-11-10", mode: "catchup" }).map((item) => item.id).join() ===
-    "2026-11-09-ccj-dollar,2026-11-09-burl-flow,2026-11-09-cbre-dollar,2026-11-09-desk-recap,2026-11-09-desk-blitz",
-  "Nov 10 midnight catch-up keeps yesterday's Nov 9 rows with date labels and drops Nov 8",
+    "2026-11-10-mdb-spotlight,2026-11-10-kkr-dollar,2026-11-10-frog-dollar,2026-11-10-tgt-flow,2026-11-09-ccj-dollar,2026-11-09-burl-flow,2026-11-09-cbre-dollar,2026-11-09-desk-recap,2026-11-09-desk-blitz",
+  "Nov 10 catch-up is today plus yesterday and keeps each row's original date",
 );
 assert(
-  rowDayLabel("2026-11-09T18:44:00-06:00", "2026-11-10").label === "Yesterday · Mon, Nov 9",
-  "Nov 9 rows stay Yesterday on the Nov 10 catch-up",
+  rowDayLabel("2026-11-09T18:44:00-06:00", "2026-11-10").label === "Yesterday · Mon, Nov 9" &&
+    rowDayLabel("2026-11-10T20:45:00-06:00", "2026-11-10").label === "Today · Tue, Nov 10",
+  "Nov 10 rows stay Today and Nov 9 rows stay Yesterday on the Nov 10 catch-up",
+);
+assert(
+  visibleDeskItems(nt.items, { today: "2026-11-11", mode: "catchup" }).map((item) => item.id).join() ===
+    "2026-11-10-mdb-spotlight,2026-11-10-kkr-dollar,2026-11-10-frog-dollar,2026-11-10-tgt-flow",
+  "Nov 11 midnight catch-up keeps yesterday's Nov 10 rows with date labels and drops Nov 9",
+);
+assert(
+  rowDayLabel("2026-11-10T20:45:00-06:00", "2026-11-11").label === "Yesterday · Tue, Nov 10",
+  "Nov 10 rows stay Yesterday on the Nov 11 catch-up",
 );
 
 /* Default New Today is two Chicago calendar days. Yesterday keeps its own date. */
@@ -2663,8 +2693,8 @@ const w43 = archiveGroups(filterEntries(archiveEntries, "2026-W43"));
 assert(w43[0]?.entries[0]?.kind === "pack" && w43[0].entries[0].title === "2026-W43 Soft ↔ Crowded" && w43[0].gap === "", "W43 leads with its pack");
 const archivePacks = archiveGroups(filterEntries(archiveEntries, "", "pack"));
 assert(archivePacks.every((group) => group.entries.every((entry) => entry.kind === "pack")) && archivePacks[0].week === "2026-W44", "Soft ↔ Crowded filter lists packs newest first");
-const wordHit = filterEntries(archiveEntries, "goldman", "day");
-assert(wordHit.length > 0 && wordHit.every((entry) => entry.items.every((item) => item.text.includes("goldman"))), "a word search cuts a desk day to its matching lines");
+const wordHit = filterEntries(archiveEntries, "bofa", "day");
+assert(wordHit.length > 0 && wordHit.every((entry) => entry.items.every((item) => item.text.includes("bofa"))), "a word search cuts a desk day to its matching lines");
 assert(displaySource(["W", "SJ"].join("")) === "Press note" && displaySource("GS") === "GS" && displaySource("") === "Desk", "archive press labels read as a press note");
 const archiveShown = archiveEntries.flatMap((entry) => [entry.title, entry.label, entry.summary, entry.headline ?? "", ...(entry.items ?? []).flatMap((item) => [item.title, item.summary, item.source])]).join("\n");
 assert(!bannedSource(archiveShown) && !/\bwsj\b/i.test(archiveShown), "archive shows no source names");
