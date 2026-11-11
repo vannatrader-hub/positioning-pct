@@ -1,0 +1,46 @@
+[
+  {
+    "id": "2026-11-10-mdb-spotlight",
+    "section": "options-flow",
+    "kind": "spotlight",
+    "ticker": "MDB",
+    "title": "MDB Spotlight: January $370/$430 call spreads",
+    "summary": "Long January $370/$430 call spreads at $15 debit; spot $331. Database platform into the December 1 report. Stock stop $305, stock target $430, two-month window; profit zone is MDB above $385 at January OpEx.",
+    "href": "options-flow/spotlights/#MDB",
+    "publishedAt": "2026-11-10 20:45 CT",
+    "sourceLabel": "Desk"
+  },
+  {
+    "id": "2026-11-10-kkr-dollar",
+    "section": "options-flow",
+    "kind": "dollar",
+    "ticker": "KKR",
+    "title": "KKR joins the $$$ Shopping List",
+    "summary": "2,000 May $100 puts sold to open at $10.80, after 1,200 January 2029 $90 short puts opened 10/26; size short-put open interest in the $90–$105 zone; spot $100.85. Double bottom near $85, 200-week EMA reclaimed; a move above about $105 is needed to break the base. Desk treats KKR as a top Financials name if rate concerns fade.",
+    "href": "options-flow/dollar/#KKR",
+    "publishedAt": "2026-11-10 18:03 CT",
+    "sourceLabel": "Desk"
+  },
+  {
+    "id": "2026-11-10-frog-dollar",
+    "section": "options-flow",
+    "kind": "dollar",
+    "ticker": "FROG",
+    "title": "FROG joins the $$$ Shopping List",
+    "summary": "1,000 December $105 ITM puts sold to open at $10.96 on 11/10; 650 January 2027 $95 calls bought 10/16 at $9.00 remain in open interest and are now ITM; spot $103.55. 50-day near $94 is support, $108.59 high is resistance. Desk would add on a pullback toward the 50-day and does not chase.",
+    "href": "options-flow/dollar/#FROG",
+    "publishedAt": "2026-11-10 17:44 CT",
+    "sourceLabel": "Desk"
+  },
+  {
+    "id": "2026-11-10-tgt-flow",
+    "section": "options-flow",
+    "kind": "flow",
+    "ticker": "TGT",
+    "title": "TGT ($$): Jan 2029 $200 puts sold",
+    "summary": "700 January 2029 $200 ITM puts sold 11/9 at $51.10 (~$3.5M; OI rose 700) plus 700 January 2027 $165 puts sold 11/9; spot $161.78. Mixed flow into November 18 earnings, with $170.75 as key resistance. Desk lean is the long-dated put sale; $$ Featured, not the $$$ list.",
+    "href": "options-flow/",
+    "publishedAt": "2026-11-10 17:43 CT",
+    "sourceLabel": "Desk"
+  }
+]

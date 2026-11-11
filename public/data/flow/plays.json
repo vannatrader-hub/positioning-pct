@@ -1,8 +1,60 @@
 {
-  "asOf": "2026-11-09",
-  "asOfLabel": "Tue Nov 10, 2026 midnight · CBRE and CCJ quotes Mon Nov 9 close; LH quote Fri Nov 6 close; earlier names through Thu Nov 5 close",
-  "window": "Last 3 weeks · Oct 19 – Nov 9, 2026",
+  "asOf": "2026-11-10",
+  "asOfLabel": "Wed Nov 11, 2026 midnight · KKR and FROG quotes Tue Nov 10 close; CBRE and CCJ quotes Mon Nov 9 close; LH quote Fri Nov 6 close; earlier names through Thu Nov 5 close",
+  "window": "Last 3 weeks · Oct 20 – Nov 10, 2026",
   "plays": [
+    {
+      "id": 44071,
+      "ticker": "KKR",
+      "exchange": "NYSE",
+      "name": "KKR & Co.",
+      "industry": { "broad": "Financials", "focus": "Private equity · alternatives" },
+      "date": "2026-11-10",
+      "alertedAtCt": "2026-11-10 06:03 PM CT",
+      "title": "May Puts Sold as a Financial Leader Reclaims the 200-Week EMA",
+      "confidence": "$$$",
+      "refPrice": 100.85,
+      "flow": [
+        "KKR & Co. (KKR) saw 2,000 May $100 puts sold to open at $10.80. That follows 1,200 January 2029 $90 short puts opened 10/26, with size short-put open interest clustered in the $90 to $105 zone.",
+        "KKR is an alternative-asset manager. Shares closed at $100.85 after a double bottom near $85 and a reclaim of the 200-week EMA. A move above about $105 is needed to break the base. The desk treats KKR as a top Financials name if rate concerns fade. The reference price is $100.85."
+      ],
+      "customerPurchased": [
+        { "contract": "May $100 puts", "detail": "2,000 sold @ $10.80 · 11/10", "side": "puts_sold" }
+      ],
+      "oi": [
+        { "contract": "May $100 short puts", "detail": "2,000 opened 11/10 @ $10.80" },
+        { "contract": "Jan 2029 $90 short puts", "detail": "1,200 opened 10/26" }
+      ],
+      "recommendation": "The desk wants KKR as a top Financials name if rate concerns fade, with the 200-week EMA as the hold and a breakout through about $105.",
+      "lead": { "type": "put", "action": "sold", "qty": 2000, "strike": 100, "expiry": "May", "price": 10.8 },
+      "quote": { "date": "2026-11-10", "last": 100.85, "prev": 98.09 }
+    },
+    {
+      "id": 44074,
+      "ticker": "FROG",
+      "exchange": "NASDAQ",
+      "name": "JFrog",
+      "industry": { "broad": "Technology", "focus": "DevOps · software supply chain" },
+      "date": "2026-11-10",
+      "alertedAtCt": "2026-11-10 05:44 PM CT",
+      "title": "December Put Sales and January Calls in a Software Supply-Chain Name",
+      "confidence": "$$$",
+      "refPrice": 103.55,
+      "flow": [
+        "JFrog (FROG) saw 1,000 December $105 in-the-money puts sold to open at $10.96 on 11/10. 650 January 2027 $95 calls bought at $9.00 on 10/16 remain in open interest and are now in the money.",
+        "FROG is a DevOps and software-supply-chain platform. Shares closed at $103.55, with the 50-day near $94 as support and the $108.59 high as resistance. The desk would add on a pullback toward the 50-day near $94 and does not chase here. The reference price is $103.55."
+      ],
+      "customerPurchased": [
+        { "contract": "Dec $105 puts", "detail": "1,000 sold @ $10.96 · 11/10", "side": "puts_sold" }
+      ],
+      "oi": [
+        { "contract": "Dec $105 short puts", "detail": "1,000 opened 11/10 @ $10.96" },
+        { "contract": "Jan 2027 $95 calls", "detail": "650 bought 10/16 @ $9.00 · still in open interest, now in the money" }
+      ],
+      "recommendation": "The desk wants FROG on a pullback toward the 50-day near $94 and does not chase into the $108.59 high.",
+      "lead": { "type": "put", "action": "sold", "qty": 1000, "strike": 105, "expiry": "December", "price": 10.96 },
+      "quote": { "date": "2026-11-10", "last": 103.55, "prev": 108.18 }
+    },
     {
       "id": 44053,
       "ticker": "CCJ",
@@ -483,32 +535,6 @@
       "recommendation": "MMM's turnaround now includes a growing AI data center business with Amazon on board, and with shares back above the 50 and 200 day it looks attractive on dips toward the 50 day.",
       "lead": { "type": "call", "action": "bought", "qty": 1000, "strike": 175, "expiry": "December", "price": 4.8 },
       "quote": { "date": "2026-10-26", "last": 172.79, "prev": 173.46 }
-    },
-    {
-      "id": 43739,
-      "ticker": "COIN",
-      "exchange": "NASDAQ",
-      "name": "Coinbase",
-      "industry": { "broad": "Financials", "focus": "Crypto exchange" },
-      "date": "2026-10-19",
-      "alertedAtCt": "2026-10-19 06:02 PM CT",
-      "title": "Call Buyers and Put Sellers Position in Crypto Leader Ahead of Earnings",
-      "confidence": "$$$",
-      "refPrice": 168.5,
-      "flow": [
-        "Coinbase (COIN) on 10/19 with an opening sale of 300 September 2027 $150 puts at $26.50 as shares pulled back for a second session. That follows 1500 November $175 short puts opened late in the day on 10/12 at $12.60.",
-        "COIN also has 9325 December $185 calls bought at $23 on 10/5 still holding in open interest.",
-        "Shares closed above all four of their key moving averages on 10/15 and slipped back below them the next session. COIN is -25.5% YTD and 55% below its 52 week high, with the July low at $139 as key support and the September high near $208 as resistance."
-      ],
-      "customerPurchased": [
-        { "contract": "Sep 2027 $150 puts", "detail": "300 sold / short @ $26.50 · 10/19", "side": "puts_sold" }
-      ],
-      "oi": [
-        { "contract": "Dec $185 calls", "detail": "9,325 holding · bought 10/5 at $23" }
-      ],
-      "recommendation": "COIN is a high beta way to play a crypto rebound and with December call buyers and put sellers active into the 10/29 report, the flows look attractive here.",
-      "lead": { "type": "put", "action": "sold", "qty": 300, "strike": 150, "expiry": "September 2027", "price": 26.5 },
-      "quote": { "date": "2026-10-26", "last": 159.6, "prev": 164.45 }
     }
   ]
 }

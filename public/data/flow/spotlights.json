@@ -1,17 +1,47 @@
 {
   "live": true,
-  "asOf": "2026-11-01",
-  "asOfStamp": "2026-11-01T08:47:00-06:00",
-  "barsThrough": "2026-10-27",
-  "activeWindow": { "start": "2026-10-06", "end": "2026-10-28" },
-  "sourceNote": "Status correction 2026-11-01 CT: GLD and FCX stopped out and moved to Closed. Desk closed both lines 2026-10-30 when the stock stops were hit. XYZ remains Active (posted 2026-10-27). HOOD remains Open. V close from public X bank note 2026-10-12. Chart bars through the 2026-10-27 close.",
+  "asOf": "2026-11-11",
+  "asOfStamp": "2026-11-11T00:15:00-06:00",
+  "barsThrough": "2026-11-10",
+  "activeWindow": { "start": "2026-10-20", "end": "2026-11-10" },
+  "sourceNote": "Desk auto-ship 2026-11-11 CT: MDB posted 2026-11-10 and joins Active. XYZ remains Active (posted 2026-10-27). HOOD remains Open. GLD and FCX stay Closed (stopped 2026-10-30). V close from public X bank note 2026-10-12. Chart bars through the 2026-11-10 close.",
   "sections": [
     {
       "id": "active",
       "title": "Active",
-      "hint": "Open Spotlights from October's current three-week window (Oct 6 – Oct 28) — still working.",
+      "hint": "Open Spotlights from the current three-week window (Oct 20 – Nov 10) — still working.",
       "defaultOpen": true,
       "plays": [
+        {
+          "ticker": "MDB",
+          "name": "MongoDB",
+          "title": "Call Spreads in a Database Platform into the December Report",
+          "published": "2026-11-10",
+          "status": "active",
+          "side": "calls",
+          "structure": "Long January $370/$430 call spreads",
+          "entry": "Jan $370/$430 call spreads @ $15",
+          "debit": 15,
+          "spotAtPost": 331,
+          "stop": 305,
+          "target": 430,
+          "breakeven": 385,
+          "expiryNote": "January OpEx",
+          "timeframe": "2 months",
+          "idea": [
+            "A database-platform name into the December 1 earnings report: long January $370/$430 call spreads at a $15 debit with shares near $331.",
+            "The profit zone is MDB above $385 at January OpEx. Exits are set on the stock: a $305 stop and a $430 target, with a two-month window.",
+            "Call spreads cut the debit to $15 in exchange for capping the gain at the $430 short strike."
+          ],
+          "recommendation": "Long MDB January $370/$430 call spreads at $15. Database platform into the 12/1 report; stock stop $305, stock target $430, profit zone above $385 at January OpEx.",
+          "levels": [
+            { "label": "Stop", "price": 305 },
+            { "label": "Spot at post", "price": 331 },
+            { "label": "Long strike", "price": 370 },
+            { "label": "B/E Jan OpEx", "price": 385 },
+            { "label": "Short / target", "price": 430 }
+          ]
+        },
         {
           "ticker": "XYZ",
           "name": "Block",
