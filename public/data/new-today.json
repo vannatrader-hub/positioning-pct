@@ -1,9 +1,36 @@
 {
   "timeZone": "America/Chicago",
   "dayStartsAt": "00:00",
-  "dayStart": "2026-11-10T00:00:00-06:00",
-  "updatedAt": "2026-11-11T00:15:00-06:00",
+  "dayStart": "2026-11-11T00:00:00-06:00",
+  "updatedAt": "2026-11-12T00:15:00-06:00",
   "items": [
+    {
+      "id": "2026-11-11-avav-dollar",
+      "section": "options-flow",
+      "title": "AVAV joins the $$$ Shopping List",
+      "summary": "600 January $165 OTM calls bought (~$250K) on 11/10, 300 June $150 calls (~$460K) on 11/4, and 1,000 January $145 calls bought against 1,550 $210 calls sold on 10/29; spot $124.40. Shares are down about 47% YTD, bouncing off the 200-month EMA area, with a trend inflection above about $136.",
+      "href": "options-flow/dollar/#AVAV",
+      "publishedAt": "2026-11-11T18:12:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-11-asml-dollar",
+      "section": "options-flow",
+      "title": "ASML joins the $$$ Shopping List",
+      "summary": "1,960 February $1740/$1820 call spreads bought 11/10 (OI +1,960 on the $1740 leg, +1,805 on the $1820 leg) and 700 December $1740 calls bought 11/4; spot $1,534.42. Shares are up about 43% YTD, under the 200-day near $1,600 resistance, and reclaimed the 8-day EMA after the November 5 low at $1,355.",
+      "href": "options-flow/dollar/#ASML",
+      "publishedAt": "2026-11-11T18:10:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-11-ionq-flow",
+      "section": "options-flow",
+      "title": "IONQ ($$): Jan 2029 $35 puts sold",
+      "summary": "700 January 2029 $35 ITM puts sold 11/3 at $14.20, holding in open interest, plus 8,150 January 2027 $30 short puts; spot ~$34.10. Shares are down about 24% YTD after a 52-week low on 11/5 then a rebound. Desk lean is the long-dated put sale; $$ Featured, not the $$$ list.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-11T18:08:00-06:00",
+      "sourceLabel": "Desk"
+    },
     {
       "id": "2026-11-10-mdb-spotlight",
       "section": "options-flow",
@@ -183,51 +210,6 @@
       "href": "options-flow/",
       "publishedAt": "2026-11-04T18:54:00-06:00",
       "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-03-mpwr-dollar",
-      "section": "options-flow",
-      "title": "MPWR joins the $$$ Shopping List",
-      "summary": "150 Feb $1400 calls bought (~$2.35M) on 11/3, rolling out of Nov $1200 calls, and 100 May $1300 short puts opened 8/11 in a strangle with $2260 calls; spot $1,328.30. Desk watches a breakout over ~$1400 in an AI-server power-management semi that has pulled back ~30% into a falling-wedge base holding anchored VWAP from the March lows.",
-      "href": "options-flow/dollar/#MPWR",
-      "publishedAt": "2026-11-03T18:31:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-03-vz-flow",
-      "section": "options-flow",
-      "title": "VZ ($$): Jan 2029 $38 puts sold",
-      "summary": "1,000 Jan 2029 $38 puts sold at $3.88 (~$388K) on 11/2, 10,000 Dec $44 short puts opened 10/23, and 5,000 June 2027 $47 calls bought 10/13; spot $45.24. Desk sees a high-yield telecom at a cheap free-cash-flow multiple, below the converged 50- and 200-day near $47, with a break through that targeting the ~$51.70 September high.",
-      "href": "options-flow/",
-      "publishedAt": "2026-11-03T17:04:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-03-insm-dollar",
-      "section": "options-flow",
-      "title": "INSM joins the $$$ Shopping List",
-      "summary": "5,000 Jan $110 calls bought at $8.62 on 11/3, 10,000 Jan $100/$130 call spreads bought 10/27, and 1,000 Jan $95 short puts opened 10/14; spot $104.44. Desk sees a respiratory biotech with a bronchiectasis drug at a blockbuster run-rate, holding above the 8- and 21-day EMAs, with ~$112 as resistance and the ~$93 October low as support.",
-      "href": "options-flow/dollar/#INSM",
-      "publishedAt": "2026-11-03T17:03:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-03-research-oil",
-      "section": "research",
-      "title": "Oil's war premium cracks",
-      "summary": "Brent fell 11.4% Monday, its biggest daily drop in six months, after Iran signaled a return to talks. The open question is how much of oil was pricing real supply loss versus insurance, and a gap remains between negotiations and restored Gulf flows.",
-      "href": "new-today/#nt-research",
-      "publishedAt": "2026-11-03T04:30:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-03-research-boa-power",
-      "section": "research",
-      "title": "BofA: the data-center power squeeze and the elections",
-      "summary": "BofA's utilities team sees state regulators and power-bill affordability, not which party wins, as the bigger election risk for the AI electricity buildout. Texas is the center of demand but its regulatory timetable matters most; Georgia and Ohio show how affordability politics reshape data-center economics.",
-      "href": "new-today/#nt-research",
-      "publishedAt": "2026-11-03T02:10:00-06:00",
-      "sourceLabel": "BoA"
     }
   ]
 }

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "2026-11-11-avav-dollar",
+    "section": "options-flow",
+    "kind": "dollar",
+    "ticker": "AVAV",
+    "title": "AVAV joins the $$$ Shopping List",
+    "summary": "600 January $165 OTM calls bought (~$250K) on 11/10, 300 June $150 calls (~$460K) on 11/4, and 1,000 January $145 calls bought against 1,550 $210 calls sold on 10/29; spot $124.40. Shares are down about 47% YTD, bouncing off the 200-month EMA area, with a trend inflection above about $136.",
+    "href": "options-flow/dollar/#AVAV",
+    "publishedAt": "2026-11-11 18:12 CT",
+    "sourceLabel": "Desk"
+  },
+  {
+    "id": "2026-11-11-asml-dollar",
+    "section": "options-flow",
+    "kind": "dollar",
+    "ticker": "ASML",
+    "title": "ASML joins the $$$ Shopping List",
+    "summary": "1,960 February $1740/$1820 call spreads bought 11/10 (OI +1,960 on the $1740 leg, +1,805 on the $1820 leg) and 700 December $1740 calls bought 11/4; spot $1,534.42. Shares are up about 43% YTD, under the 200-day near $1,600 resistance, and reclaimed the 8-day EMA after the November 5 low at $1,355.",
+    "href": "options-flow/dollar/#ASML",
+    "publishedAt": "2026-11-11 18:10 CT",
+    "sourceLabel": "Desk"
+  },
+  {
+    "id": "2026-11-11-ionq-flow",
+    "section": "options-flow",
+    "kind": "flow",
+    "ticker": "IONQ",
+    "title": "IONQ ($$): Jan 2029 $35 puts sold",
+    "summary": "700 January 2029 $35 ITM puts sold 11/3 at $14.20, holding in open interest, plus 8,150 January 2027 $30 short puts; spot ~$34.10. Shares are down about 24% YTD after a 52-week low on 11/5 then a rebound. Desk lean is the long-dated put sale; $$ Featured, not the $$$ list.",
+    "href": "options-flow/",
+    "publishedAt": "2026-11-11 18:08 CT",
+    "sourceLabel": "Desk"
+  }
+]

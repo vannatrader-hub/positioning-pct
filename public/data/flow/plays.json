@@ -1,8 +1,61 @@
 {
-  "asOf": "2026-11-10",
-  "asOfLabel": "Wed Nov 11, 2026 midnight · KKR and FROG quotes Tue Nov 10 close; CBRE and CCJ quotes Mon Nov 9 close; LH quote Fri Nov 6 close; earlier names through Thu Nov 5 close",
-  "window": "Last 3 weeks · Oct 20 – Nov 10, 2026",
+  "asOf": "2026-11-11",
+  "asOfLabel": "Thu Nov 12, 2026 midnight · AVAV and ASML quotes Wed Nov 11 close; KKR and FROG quotes Tue Nov 10 close; CBRE and CCJ quotes Mon Nov 9 close; LH quote Fri Nov 6 close; earlier names through Thu Nov 5 close",
+  "window": "Last 3 weeks · Oct 21 – Nov 11, 2026",
   "plays": [
+    {
+      "id": 44090,
+      "ticker": "AVAV",
+      "exchange": "NASDAQ",
+      "name": "AeroVironment",
+      "industry": { "broad": "Industrials", "focus": "Defense · unmanned systems" },
+      "date": "2026-11-11",
+      "alertedAtCt": "2026-11-11 06:12 PM CT",
+      "title": "January Calls Bought as a Defense Name Bounces Off the 200-Month EMA",
+      "confidence": "$$$",
+      "refPrice": 124.4,
+      "flow": [
+        "AeroVironment (AVAV) saw bullish unusual call buys: 600 out-of-the-money January $165 calls for about $250K on 11/10, 300 June $150 calls for about $460K on 11/4, and 1,000 January $145 calls bought against 1,550 $210 calls sold on 10/29.",
+        "AVAV is an unmanned-systems and defense contractor. Shares are down about 47% year to date and are bouncing off the 200-month EMA area. A trend inflection sits above about $136. The reference price is $124.40."
+      ],
+      "customerPurchased": [
+        { "contract": "Jan $165 calls", "detail": "600 bought · ~$250K · 11/10", "side": "calls_bought" }
+      ],
+      "oi": [
+        { "contract": "Jan $165 calls", "detail": "600 bought 11/10 · ~$250K" },
+        { "contract": "Jun $150 calls", "detail": "300 bought 11/4 · ~$460K" },
+        { "contract": "Jan $145 / $210 calls", "detail": "1,000 $145 calls bought and 1,550 $210 calls sold 10/29" }
+      ],
+      "recommendation": "The desk wants AVAV while it holds the 200-month EMA bounce, with a trend inflection above about $136.",
+      "lead": { "type": "call", "action": "bought", "qty": 600, "strike": 165, "expiry": "January", "price": null },
+      "quote": { "date": "2026-11-11", "last": 124.4, "prev": 123.5 }
+    },
+    {
+      "id": 44088,
+      "ticker": "ASML",
+      "exchange": "NASDAQ",
+      "name": "ASML Holding",
+      "industry": { "broad": "Technology", "focus": "Semis · lithography" },
+      "date": "2026-11-11",
+      "alertedAtCt": "2026-11-11 06:10 PM CT",
+      "title": "February Call Spreads in a Lithography Leader Under the 200-Day",
+      "confidence": "$$$",
+      "refPrice": 1534.42,
+      "flow": [
+        "ASML Holding (ASML) saw 1,960 February $1740/$1820 call spreads bought on 11/10, with open interest up 1,960 on the $1740 leg and 1,805 on the $1820 leg. 700 December $1740 calls were bought on 11/4.",
+        "ASML is the lithography-equipment leader. Shares are up about 43% year to date, sit under the 200-day near $1,600 resistance, and reclaimed the 8-day EMA after the November 5 low at $1,355. The reference price is $1,534.42."
+      ],
+      "customerPurchased": [
+        { "contract": "Feb $1740/$1820 call spreads", "detail": "1,960 bought · 11/10", "side": "calls_bought" }
+      ],
+      "oi": [
+        { "contract": "Feb $1740/$1820 call spread", "detail": "1,960 bought 11/10 · OI +1,960 / +1,805" },
+        { "contract": "Dec $1740 calls", "detail": "700 bought 11/4" }
+      ],
+      "recommendation": "The desk wants ASML via the February $1740/$1820 call spreads, with the 200-day near $1,600 as resistance after the reclaim of the 8-day EMA.",
+      "lead": { "type": "call", "action": "bought", "qty": 1960, "strike": 1740, "shortStrike": 1820, "expiry": "February", "price": null },
+      "quote": { "date": "2026-11-11", "last": 1534.42, "prev": 1507.85 }
+    },
     {
       "id": 44071,
       "ticker": "KKR",
