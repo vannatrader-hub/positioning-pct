@@ -365,7 +365,7 @@ for (const [ticker, want] of Object.entries(studyWant)) {
 }
 
 const flow = JSON.parse(readFileSync(join(root, "public/data/flow/plays.json"), "utf8"));
-const flowTickers = ["AVAV", "ASML", "KKR", "FROG", "CCJ", "CBRE", "LH", "SBUX", "EPD", "MPWR", "INSM", "UBS", "EXE", "DAR", "JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT", "QCOM", "MMM"];
+const flowTickers = ["GPC", "AVAV", "ASML", "KKR", "FROG", "CCJ", "CBRE", "LH", "SBUX", "EPD", "MPWR", "INSM", "UBS", "EXE", "DAR", "JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT"];
 assert(
   JSON.stringify(sortPlays(flow.plays).map((play) => play.ticker)) === JSON.stringify(flowTickers),
   `Shopping List newest alert first: ${sortPlays(flow.plays).map((play) => play.ticker)}`,
@@ -425,18 +425,6 @@ assert(
     JSON.stringify([{ contract: "Dec $160 calls", detail: "2,000 bought @ $3.54 · 10/26", side: "calls_bought" }]),
   "JCI customer purchased is the 10/26 Dec $160 call buy only",
 );
-const qcomRows = Object.fromEntries(flowBy.QCOM.customerPurchased.map((line) => [line.contract, line]));
-assert(flowBy.QCOM.customerPurchased[0]?.contract === "Feb $200 calls", "QCOM most recent customer print is the Feb $200 call buy");
-assert(/^1,200 bought · \$1\.3M/.test(qcomRows["Feb $200 calls"]?.detail) && qcomRows["Feb $200 calls"].side === "calls_bought", "QCOM Feb $200 calls: 1,200 bought for $1.3M");
-assert(/^3,500 bought · \$4\.4M · 9\/25$/.test(qcomRows["Feb $250 calls"]?.detail) && qcomRows["Feb $250 calls"].side === "calls_bought", "QCOM Feb $250 calls: 3,500 bought for $4.4M on 9/25");
-assert(
-  JSON.stringify(flowBy.QCOM.lead) === JSON.stringify({ type: "call", action: "bought", qty: 1200, strike: 200, expiry: "February", price: null }),
-  `QCOM lead is the Feb $200 call buy ${JSON.stringify(flowBy.QCOM.lead)}`,
-);
-const qcomBars = JSON.parse(readFileSync(join(root, "public/data/flow/bars/QCOM.json"), "utf8")).bars;
-const qcomLevels = chartLevels(flowBy.QCOM, qcomBars);
-assert(JSON.stringify(qcomLevels.lines.map((line) => line.value)) === "[200]", "QCOM chart draws the $200 strike");
-assert(qcomLevels.expiry === "2027-02-19", `QCOM February expiry ${qcomLevels.expiry}`);
 const cortBars = JSON.parse(readFileSync(join(root, "public/data/flow/bars/CORT.json"), "utf8")).bars;
 assert(
   JSON.stringify(chartLevels(flowBy.CORT, cortBars).lines.map((line) => line.value)) === JSON.stringify([120, 160, 130.94]),
@@ -445,7 +433,7 @@ assert(
 for (const ticker of ["KKR", "FROG"]) {
   assert(flowBy[ticker].customerPurchased.every((line) => line.detail.includes("sold")), `${ticker} short puts read as sold`);
 }
-const beWant = { CASY: 671.2, JCI: 163.54, MMM: 179.8, KKR: 89.2, FROG: 94.04, CORT: 130.94, CRWD: null, DDOG: null, EPD: null, QCOM: null, SBUX: null, LH: null, CBRE: null, CCJ: 86.74 };
+const beWant = { CASY: 671.2, JCI: 163.54, GPC: 127.92, KKR: 89.2, FROG: 94.04, CORT: 130.94, CRWD: null, DDOG: null, EPD: null, SBUX: null, LH: null, CBRE: null, CCJ: 86.74 };
 for (const [ticker, want] of Object.entries(beWant)) {
   assert(breakeven(flowBy[ticker].lead) === want, `${ticker} break-even ${breakeven(flowBy[ticker].lead)} !== ${want}`);
 }
@@ -574,9 +562,17 @@ assert(
 assert(flowBy.ASML.customerPurchased[0]?.contract === "Feb $1740/$1820 call spreads" && flowBy.ASML.customerPurchased[0]?.side === "calls_bought", "ASML Customer purchased is the Feb $1740/$1820 call spread");
 const asmlLevels = chartLevels(flowBy.ASML, JSON.parse(readFileSync(join(root, "public/data/flow/bars/ASML.json"), "utf8")).bars);
 assert(JSON.stringify(asmlLevels.lines.map((line) => line.value)) === "[1740,1820]", `ASML chart draws the $1740/$1820 spread ${asmlLevels.lines.map((line) => line.value)}`);
+assert(
+  JSON.stringify(flowBy.GPC.lead) === JSON.stringify({ type: "call", action: "bought", qty: 2550, strike: 125, expiry: "December", price: 2.92 }),
+  `GPC lead is the Dec $125 call buy ${JSON.stringify(flowBy.GPC.lead)}`,
+);
+assert(flowBy.GPC.customerPurchased[0]?.contract === "Dec $125 calls" && flowBy.GPC.customerPurchased[0]?.side === "calls_bought", "GPC Customer purchased is the Dec $125 call buy");
+const gpcLevels = chartLevels(flowBy.GPC, JSON.parse(readFileSync(join(root, "public/data/flow/bars/GPC.json"), "utf8")).bars);
+assert(JSON.stringify(gpcLevels.lines.map((line) => line.value)) === "[125,127.92]", `GPC chart draws the $125 strike and break-even ${gpcLevels.lines.map((line) => line.value)}`);
 assert(!flowBy.CSCO, "CSCO aged out of the 3-week $$$ window on the Nov 4 as-of");
 assert(!flowBy.ALAB, "ALAB aged out of the 3-week $$$ window on the Nov 5 as-of");
 assert(!flowBy.COIN, "COIN aged out of the 3-week $$$ window on the Nov 10 as-of");
+assert(!flowBy.QCOM && !flowBy.MMM, "QCOM and MMM aged out of the 3-week $$$ window on the Nov 12 as-of");
 assert(resolveExpiry("December", "2026-10-27") === "2026-12-18", "December resolves to Dec 18, 2026");
 assert(resolveExpiry("January", "2026-10-22") === "2027-01-15", "January resolves to Jan 15, 2027");
 assert(resolveExpiry("January 2028", "2026-10-25") === "2028-01-21", "January 2028 resolves to Jan 21, 2028");
@@ -1138,7 +1134,7 @@ assert(itemsForDay(nt.items ?? [], "2026-11-08").length === 2, "Nov 8 desk day l
 assert(itemsForDay(nt.items ?? [], "2026-11-09").length === 5, "Nov 9 desk day lists the CCJ and CBRE shopping-list alerts, the BURL featured alert, and the open and market wraps");
 assert(itemsForDay(nt.items ?? [], "2026-11-10").length === 4, "Nov 10 desk day lists the MDB Spotlight, the KKR and FROG shopping-list alerts, and the TGT featured alert");
 assert(itemsForDay(nt.items ?? [], "2026-11-11").length === 3, "Nov 11 desk day lists the AVAV and ASML shopping-list alerts and the IONQ featured alert");
-assert(itemsForDay(nt.items ?? [], "2026-11-12").length === 2, "Nov 12 desk day lists the COHR and AKAM featured alerts");
+assert(itemsForDay(nt.items ?? [], "2026-11-12").length === 3, "Nov 12 desk day lists the GPC shopping-list alert and the COHR and AKAM featured alerts");
 assert(
   visibleDeskItems(nt.items, { today: "2026-11-09", mode: "catchup" }).map((item) => item.id).join() ===
     "2026-11-09-ccj-dollar,2026-11-09-burl-flow,2026-11-09-cbre-dollar,2026-11-09-desk-recap,2026-11-09-desk-blitz,2026-11-08-ares-flow,2026-11-08-msi-flow",
@@ -1171,22 +1167,22 @@ assert(
 );
 assert(
   visibleDeskItems(nt.items, { today: "2026-11-12", mode: "catchup" }).map((item) => item.id).join() ===
-    "2026-11-12-cohr-flow,2026-11-12-akam-flow,2026-11-11-avav-dollar,2026-11-11-asml-dollar,2026-11-11-ionq-flow",
+    "2026-11-12-gpc-dollar,2026-11-12-cohr-flow,2026-11-12-akam-flow,2026-11-11-avav-dollar,2026-11-11-asml-dollar,2026-11-11-ionq-flow",
   "Nov 12 catch-up is today plus yesterday and keeps each row's original date",
 );
 assert(
   rowDayLabel("2026-11-11T18:12:00-06:00", "2026-11-12").label === "Yesterday · Wed, Nov 11" &&
-    rowDayLabel("2026-11-12T17:45:00-06:00", "2026-11-12").label === "Today · Thu, Nov 12",
+    rowDayLabel("2026-11-12T21:04:00-06:00", "2026-11-12").label === "Today · Thu, Nov 12",
   "Nov 12 rows stay Today and Nov 11 rows stay Yesterday on the Nov 12 catch-up",
 );
 assert(
   visibleDeskItems(nt.items, { today: "2026-11-13", mode: "catchup" }).map((item) => item.id).join() ===
-    "2026-11-12-cohr-flow,2026-11-12-akam-flow",
-  "Nov 13 midnight catch-up keeps yesterday's Nov 12 rows with date labels and drops Nov 11",
+    "2026-11-12-gpc-dollar,2026-11-12-cohr-flow,2026-11-12-akam-flow",
+  "Nov 13 morning catch-up keeps yesterday's Nov 12 rows with date labels and drops Nov 11",
 );
 assert(
-  rowDayLabel("2026-11-12T17:45:00-06:00", "2026-11-13").label === "Yesterday · Thu, Nov 12",
-  "Nov 12 rows stay Yesterday on the Nov 13 catch-up",
+  rowDayLabel("2026-11-12T21:04:00-06:00", "2026-11-13").label === "Yesterday · Thu, Nov 12",
+  "Nov 12 GPC row stays Yesterday on the Nov 13 catch-up",
 );
 
 /* Default New Today is two Chicago calendar days. Yesterday keeps its own date. */

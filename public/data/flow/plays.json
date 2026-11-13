@@ -1,8 +1,35 @@
 {
-  "asOf": "2026-11-11",
-  "asOfLabel": "Thu Nov 12, 2026 midnight · AVAV and ASML quotes Wed Nov 11 close; KKR and FROG quotes Tue Nov 10 close; CBRE and CCJ quotes Mon Nov 9 close; LH quote Fri Nov 6 close; earlier names through Thu Nov 5 close",
-  "window": "Last 3 weeks · Oct 21 – Nov 11, 2026",
+  "asOf": "2026-11-12",
+  "asOfLabel": "Fri Nov 13, 2026 morning · GPC quote Thu Nov 12 close; AVAV and ASML quotes Wed Nov 11 close; KKR and FROG quotes Tue Nov 10 close; CBRE and CCJ quotes Mon Nov 9 close; LH quote Fri Nov 6 close; earlier names through Thu Nov 5 close",
+  "window": "Last 3 weeks · Oct 22 – Nov 12, 2026",
   "plays": [
+    {
+      "id": 44109,
+      "ticker": "GPC",
+      "exchange": "NYSE",
+      "name": "Genuine Parts",
+      "industry": { "broad": "Consumer Discretionary", "focus": "Auto parts · industrial distribution" },
+      "date": "2026-11-12",
+      "alertedAtCt": "2026-11-12 09:04 PM CT",
+      "title": "Unusual December Call Buy in a Parts Distributor Ahead of Analyst Day",
+      "confidence": "$$$",
+      "refPrice": 122.84,
+      "flow": [
+        "Genuine Parts (GPC) saw 2,550 December $125 calls bought at $2.92 on 11/12, then paid up to about $3.50. 500 March $140 calls were bought in a calendar spread against February $140 calls. 3,000 November $130 long calls already in open interest are underwater.",
+        "GPC is an auto-parts and industrial distributor. Shares pulled back and held above the 200-day and the weekly volatility stop, holding the average-price line off the May lows. A flag is forming with about $141 the level to clear. Analyst Day is Dec 8-9, the catalyst, and a planned Q1 2027 separation of the automotive and industrial (Motion) businesses is the value thesis. The reference price is $122.84."
+      ],
+      "customerPurchased": [
+        { "contract": "Dec $125 calls", "detail": "2,550 bought @ $2.92 · 11/12", "side": "calls_bought" }
+      ],
+      "oi": [
+        { "contract": "Dec $125 calls", "detail": "2,550 bought 11/12 @ $2.92, paid up to about $3.50" },
+        { "contract": "Mar $140 / Feb $140 calls", "detail": "500 March $140 calls bought in a calendar spread against February $140 calls" },
+        { "contract": "Nov $130 calls", "detail": "3,000 long calls in open interest, underwater" }
+      ],
+      "recommendation": "The December $125 calls look cheap into Analyst Day and the Q1 2027 auto and industrial (Motion) separation.",
+      "lead": { "type": "call", "action": "bought", "qty": 2550, "strike": 125, "expiry": "December", "price": 2.92 },
+      "quote": { "date": "2026-11-12", "last": 122.84, "prev": 123.75 }
+    },
     {
       "id": 44090,
       "ticker": "AVAV",
@@ -531,63 +558,6 @@
       "recommendation": "CORT has a high-impact catalyst nearing but remains one of the most impressive mid-cap biotech growth names. I caught the bottom in shares earlier this year but wish I held the position. I like the set-up here for a move to $160.",
       "lead": { "type": "call", "action": "bought", "qty": 2560, "strike": 120, "shortStrike": 160, "expiry": "January", "price": 10.94, "priceNote": "~$2.8M total" },
       "quote": { "date": "2026-10-27", "last": 87.59, "prev": 87.125 }
-    },
-    {
-      "id": 43783,
-      "ticker": "QCOM",
-      "exchange": "NASDAQ",
-      "name": "Qualcomm",
-      "industry": { "broad": "Technology", "focus": "Semiconductors" },
-      "date": "2026-10-21",
-      "alertedAtCt": "2026-10-21 08:36 PM CT",
-      "title": "Bulls Confident in Large Cap Semi Undergoing Major Portfolio Shifts",
-      "confidence": "$$$",
-      "refPrice": 177.3,
-      "flow": [
-        "Qualcomm (QCOM) will report on 11-3 and shares forming a two-week basing pattern on a breakout retest and key AVWAP level have seen plenty of bullish options positioning.",
-        "QCOM June $160 short puts opened 5000X on 9/22 for $7.8M, June $250 calls bought 4500X for $9M on 9/21 and now 9000 in open interest, 1500 March $160 short puts, mixed buys and sells of June and Jan. 2028 $300 calls, a 9/25 buy of 3500 February $250 calls for $4.4M and more recently 1200 February $200 calls bought for $1.3M and 1500 Sep. $125 short puts opened for $1.3M."
-      ],
-      "customerPurchased": [
-        { "contract": "Feb $200 calls", "detail": "1,200 bought · $1.3M · more recently", "side": "calls_bought" },
-        { "contract": "Sep $125 puts", "detail": "1,500 sold to open · $1.3M · more recently", "side": "puts_sold" },
-        { "contract": "Feb $250 calls", "detail": "3,500 bought · $4.4M · 9/25", "side": "calls_bought" }
-      ],
-      "oi": [
-        { "contract": "Jun $250 calls", "detail": "9,000 in OI · 4,500 bought 9/21 · $9M" },
-        { "contract": "Jun $160 short puts", "detail": "5,000 opened 9/22 · $7.8M" },
-        { "contract": "Mar $160 short puts", "detail": "1,500 in OI" }
-      ],
-      "recommendation": "QCOM has a clear $169 level to trade against providing a real nice risk-reward here and put sales seem more popular that call buys.",
-      "lead": { "type": "call", "action": "bought", "qty": 1200, "strike": 200, "expiry": "February", "price": null },
-      "quote": { "date": "2026-10-26", "last": 179.6, "prev": 175.91 }
-    },
-    {
-      "id": 43786,
-      "ticker": "MMM",
-      "exchange": "NYSE",
-      "name": "3M",
-      "industry": { "broad": "Industrials", "focus": "Diversified industrials" },
-      "date": "2026-10-21",
-      "alertedAtCt": "2026-10-21 06:58 PM CT",
-      "title": "Call Buyer Lines Up in Industrial Conglomerate Gaining AI Data Center Traction",
-      "confidence": "$$$",
-      "refPrice": 174.7,
-      "flow": [
-        "3M (MMM) on 10/20 saw a buyer of 1000 December $175 calls at $4.80 on earnings day, now 2,591 in open interest.",
-        "The 400 January 2028 $170 calls bought on 9/28 hold 466 in open interest, and the 425 June 2027 $140 puts sold to open on 10/8 hold 753.",
-        "Shares are +9.1% YTD and reclaimed the 200 day on 10/12, then closed back above the 50 day on 10/20 with the 8/13 high at $184.69 the next upside target."
-      ],
-      "customerPurchased": [
-        { "contract": "Dec $175 calls", "detail": "1,000 bought @ $4.80 · 10/20", "side": "calls_bought" }
-      ],
-      "oi": [
-        { "contract": "Dec $175 calls", "detail": "2,591 OI · 1,000 bought 10/20" },
-        { "contract": "Jan 2028 $170 calls", "detail": "466 OI · bought 9/28" },
-        { "contract": "Jun 2027 $140 short puts", "detail": "753 OI · sold 10/8" }
-      ],
-      "recommendation": "MMM's turnaround now includes a growing AI data center business with Amazon on board, and with shares back above the 50 and 200 day it looks attractive on dips toward the 50 day.",
-      "lead": { "type": "call", "action": "bought", "qty": 1000, "strike": 175, "expiry": "December", "price": 4.8 },
-      "quote": { "date": "2026-10-26", "last": 172.79, "prev": 173.46 }
     }
   ]
 }
