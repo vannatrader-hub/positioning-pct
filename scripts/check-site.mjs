@@ -468,6 +468,7 @@ assert(!flowBy.ARES && !flowBy.MSI, "ARES and MSI are $$ alerts and stay off the
 assert(!flowBy.BURL, "BURL is a $$ alert and stays off the $$$ watchlist");
 assert(!flowBy.TGT, "TGT is a $$ alert and stays off the $$$ watchlist");
 assert(!flowBy.IONQ, "IONQ is a $$ alert and stays off the $$$ watchlist");
+assert(!flowBy.COHR && !flowBy.AKAM, "COHR and AKAM are $$ alerts and stay off the $$$ watchlist");
 assert(
   JSON.stringify(flowBy.JAZZ.lead) === JSON.stringify({ type: "call", action: "bought", qty: 2700, strike: 240, expiry: "December 2026", price: null }),
   `JAZZ lead is the Dec 2026 $240 call buy ${JSON.stringify(flowBy.JAZZ.lead)}`,
@@ -1129,7 +1130,7 @@ assert(itemsForDay(nt.items ?? [], "2026-10-31").length === 0, "Oct 31 desk day 
 assert(itemsForDay(nt.items ?? [], "2026-11-01").length === 0, "Nov 1 desk day rolled off the eight-day New Today window");
 assert(itemsForDay(nt.items ?? [], "2026-11-02").length === 0, "Nov 2 desk day rolled off the eight-day New Today window");
 assert(itemsForDay(nt.items ?? [], "2026-11-03").length === 0, "Nov 3 desk day rolled off the eight-day New Today window");
-assert(itemsForDay(nt.items ?? [], "2026-11-04").length === 3, "Nov 4 desk day lists the EPD shopping-list alert and the TSCO and UBER featured alerts");
+assert(itemsForDay(nt.items ?? [], "2026-11-04").length === 0, "Nov 4 desk day rolled off the eight-day New Today window");
 assert(itemsForDay(nt.items ?? [], "2026-11-05").length === 3, "Nov 5 desk day lists the SBUX shopping-list alert and the PYPL and CBOE featured alerts");
 assert(itemsForDay(nt.items ?? [], "2026-11-06").length === 2, "Nov 6 desk day lists the open wrap and the market wrap");
 assert(itemsForDay(nt.items ?? [], "2026-11-07").length === 1, "Nov 7 desk day lists the LH shopping-list alert");
@@ -1137,6 +1138,7 @@ assert(itemsForDay(nt.items ?? [], "2026-11-08").length === 2, "Nov 8 desk day l
 assert(itemsForDay(nt.items ?? [], "2026-11-09").length === 5, "Nov 9 desk day lists the CCJ and CBRE shopping-list alerts, the BURL featured alert, and the open and market wraps");
 assert(itemsForDay(nt.items ?? [], "2026-11-10").length === 4, "Nov 10 desk day lists the MDB Spotlight, the KKR and FROG shopping-list alerts, and the TGT featured alert");
 assert(itemsForDay(nt.items ?? [], "2026-11-11").length === 3, "Nov 11 desk day lists the AVAV and ASML shopping-list alerts and the IONQ featured alert");
+assert(itemsForDay(nt.items ?? [], "2026-11-12").length === 2, "Nov 12 desk day lists the COHR and AKAM featured alerts");
 assert(
   visibleDeskItems(nt.items, { today: "2026-11-09", mode: "catchup" }).map((item) => item.id).join() ===
     "2026-11-09-ccj-dollar,2026-11-09-burl-flow,2026-11-09-cbre-dollar,2026-11-09-desk-recap,2026-11-09-desk-blitz,2026-11-08-ares-flow,2026-11-08-msi-flow",
@@ -1169,12 +1171,22 @@ assert(
 );
 assert(
   visibleDeskItems(nt.items, { today: "2026-11-12", mode: "catchup" }).map((item) => item.id).join() ===
-    "2026-11-11-avav-dollar,2026-11-11-asml-dollar,2026-11-11-ionq-flow",
-  "Nov 12 midnight catch-up keeps yesterday's Nov 11 rows with date labels and drops Nov 10",
+    "2026-11-12-cohr-flow,2026-11-12-akam-flow,2026-11-11-avav-dollar,2026-11-11-asml-dollar,2026-11-11-ionq-flow",
+  "Nov 12 catch-up is today plus yesterday and keeps each row's original date",
 );
 assert(
-  rowDayLabel("2026-11-11T18:12:00-06:00", "2026-11-12").label === "Yesterday · Wed, Nov 11",
-  "Nov 11 rows stay Yesterday on the Nov 12 catch-up",
+  rowDayLabel("2026-11-11T18:12:00-06:00", "2026-11-12").label === "Yesterday · Wed, Nov 11" &&
+    rowDayLabel("2026-11-12T17:45:00-06:00", "2026-11-12").label === "Today · Thu, Nov 12",
+  "Nov 12 rows stay Today and Nov 11 rows stay Yesterday on the Nov 12 catch-up",
+);
+assert(
+  visibleDeskItems(nt.items, { today: "2026-11-13", mode: "catchup" }).map((item) => item.id).join() ===
+    "2026-11-12-cohr-flow,2026-11-12-akam-flow",
+  "Nov 13 midnight catch-up keeps yesterday's Nov 12 rows with date labels and drops Nov 11",
+);
+assert(
+  rowDayLabel("2026-11-12T17:45:00-06:00", "2026-11-13").label === "Yesterday · Thu, Nov 12",
+  "Nov 12 rows stay Yesterday on the Nov 13 catch-up",
 );
 
 /* Default New Today is two Chicago calendar days. Yesterday keeps its own date. */
@@ -1193,7 +1205,7 @@ const afterMidnight = "2026-11-06T06:00:00Z";
 assert(deskDay(beforeMidnight) === "2026-11-05" && deskDay(afterMidnight) === "2026-11-06", "midnight CT rolls the desk day from Nov 5 to Nov 6");
 const beforeRoll = visibleDeskItems(nt.items, { today: deskDay(beforeMidnight), mode: "catchup" });
 const afterRoll = visibleDeskItems(nt.items, { today: deskDay(afterMidnight), mode: "catchup" });
-assert(beforeRoll.some((item) => item.id === "2026-11-05-sbux-dollar") && beforeRoll.some((item) => item.id === "2026-11-04-epd-dollar"), "before midnight, Nov 5 is today and Nov 4 is yesterday");
+assert(beforeRoll.some((item) => item.id === "2026-11-05-sbux-dollar"), "before midnight, Nov 5 is today");
 assert(beforeRoll.every((item) => ["2026-11-05", "2026-11-04"].includes(deskDay(item.publishedAt))), "the pre-midnight catch-up stays on those two dates");
 assert(!beforeRoll.some((item) => item.id.startsWith("2026-11-03")), "Nov 3 leaves the default view once Nov 4 is yesterday");
 for (const id of ["2026-11-05-sbux-dollar", "2026-11-05-pypl-flow", "2026-11-05-cboe-flow"]) {
@@ -1239,9 +1251,9 @@ assert(
   "section filter keeps the Nov 6 wraps and the three Nov 5 flow rows, newest first",
 );
 assert(visibleDeskItems(nt.items, { today: nov6Today, mode: "catchup", section: "positioning" }).length === 0, "Nov 6 positioning filter does not borrow Nov 5 flow rows");
-const nov4Only = visibleDeskItems(nt.items, { today: nov6Today, mode: "day", day: "2026-11-04" });
-assert(nov4Only.length === 3 && nov4Only.every((item) => deskDay(item.publishedAt) === "2026-11-04"), "an older desk day stays a single calendar day");
-assert(!nov4Only.some((item) => item.id.includes("2026-11-05")), "Nov 5 rows do not leak into the Nov 4 page");
+const nov5Only = visibleDeskItems(nt.items, { today: nov6Today, mode: "day", day: "2026-11-05" });
+assert(nov5Only.length === 3 && nov5Only.every((item) => deskDay(item.publishedAt) === "2026-11-05"), "an older desk day stays a single calendar day");
+assert(!nov5Only.some((item) => item.id.includes("2026-11-06")), "Nov 6 rows do not leak into the Nov 5 page");
 
 const utcTrap = { id: "utc-trap", section: "spx", publishedAt: "2026-11-06T04:30:00Z", title: "UTC date is still Thursday in Chicago" };
 const utcToday = { id: "utc-today", section: "spx", publishedAt: "2026-11-06T06:30:00Z", title: "UTC instant after Chicago midnight" };

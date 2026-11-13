@@ -1,0 +1,24 @@
+[
+  {
+    "id": "2026-11-12-cohr-flow",
+    "section": "options-flow",
+    "kind": "flow",
+    "ticker": "COHR",
+    "title": "COHR ($$): Dec $300 calls bought",
+    "summary": "1,600 December $300 calls bought at $6.19, with 350 April 2027 $185 puts sold to open; spot $232.10. Photonics platform with multiyear demand visibility. Desk lean is the December call buying; $$ Featured, not the $$$ list.",
+    "href": "options-flow/",
+    "publishedAt": "2026-11-12 17:45 CT",
+    "sourceLabel": "Desk"
+  },
+  {
+    "id": "2026-11-12-akam-flow",
+    "section": "options-flow",
+    "kind": "flow",
+    "ticker": "AKAM",
+    "title": "AKAM ($$): Dec $85/$110 call spreads",
+    "summary": "3,350 December $85/$110 call spreads bought at $4.55 on 11/9, plus 8,850 Nov 27 $90 calls bought 11/6; spot $86.60. Infrastructure software ahead of an AI compute ramp, with a recovery toward $100. Desk lean is the December call spread; $$ Featured, not the $$$ list.",
+    "href": "options-flow/",
+    "publishedAt": "2026-11-12 17:44 CT",
+    "sourceLabel": "Desk"
+  }
+]

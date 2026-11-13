@@ -1,9 +1,27 @@
 {
   "timeZone": "America/Chicago",
   "dayStartsAt": "00:00",
-  "dayStart": "2026-11-11T00:00:00-06:00",
-  "updatedAt": "2026-11-12T00:15:00-06:00",
+  "dayStart": "2026-11-12T00:00:00-06:00",
+  "updatedAt": "2026-11-13T00:15:00-06:00",
   "items": [
+    {
+      "id": "2026-11-12-cohr-flow",
+      "section": "options-flow",
+      "title": "COHR ($$): Dec $300 calls bought",
+      "summary": "1,600 December $300 calls bought at $6.19, with 350 April 2027 $185 puts sold to open; spot $232.10. Photonics platform with multiyear demand visibility. Desk lean is the December call buying; $$ Featured, not the $$$ list.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-12T17:45:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-12-akam-flow",
+      "section": "options-flow",
+      "title": "AKAM ($$): Dec $85/$110 call spreads",
+      "summary": "3,350 December $85/$110 call spreads bought at $4.55 on 11/9, plus 8,850 Nov 27 $90 calls bought 11/6; spot $86.60. Infrastructure software ahead of an AI compute ramp, with a recovery toward $100. Desk lean is the December call spread; $$ Featured, not the $$$ list.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-12T17:44:00-06:00",
+      "sourceLabel": "Desk"
+    },
     {
       "id": "2026-11-11-avav-dollar",
       "section": "options-flow",
@@ -182,33 +200,6 @@
       "summary": "325 December $360 calls bought at $16 (~$520K) on 11/5 into a 60-day high, after 350 December $340 calls (~$595K) on 10/30 and 750 June 2028 $400 calls (~$3M+) on 10/22; spot ~$353. Desk sees a +40% YTD exchange compounder pressing May highs with KPI event-contract launch ahead; add on pullbacks toward the short-term averages.",
       "href": "options-flow/",
       "publishedAt": "2026-11-05T18:16:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-04-epd-dollar",
-      "section": "options-flow",
-      "title": "EPD joins the $$$ Shopping List",
-      "summary": "10,000 March $40 calls bought (~$980K) on 11/3, ~9,000 Dec $42 and ~9,000 Jan $42 long-call open interest, plus further accumulation in Jan 2027/2028 call strikes; spot $36.50. Desk watches a breakout over ~$39 toward ~$45 in an integrated midstream gas/NGL name that broke under a rising 200-day this week but still holds a longer-term weekly bull flag (+14% YTD).",
-      "href": "options-flow/dollar/#EPD",
-      "publishedAt": "2026-11-04T21:40:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-04-tsco-flow",
-      "section": "options-flow",
-      "title": "TSCO ($$): Nov 13 $37.5 calls bought",
-      "summary": "6,000 Nov 13 (weekly) $37.5 calls bought on 11/4, rolling up from the $35s, as shares gapped to a 60-day high, 5,000 Nov $34 calls bought 10/19 (stock replacement), and 3,500 Nov $33.5 short puts opened; spot $36.60. Desk sees a rural retail / pet consumables name, down ~27% YTD and below the 200-day since February, but holding above the 8/21-day EMAs and 50-day with a bullish MACD cross. Desk watches a close through the 200-day as the trigger; traffic and pet comps improving.",
-      "href": "options-flow/",
-      "publishedAt": "2026-11-04T18:55:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-04-uber-flow",
-      "section": "options-flow",
-      "title": "UBER ($$): Jan 2029 $80 puts sold",
-      "summary": "900 Jan 2029 $80 ITM puts sold (~$1.5M) on 11/4 after Q3, 2,750 Jan $52.5 ITM calls bought (~$4M) into earnings 11/3, and large Dec $55 and $57.5 short-put open interest from late October; spot $69.90. Desk sees a mobility + delivery leader, down ~15% YTD; reclaimed the 21-day EMA on 2x volume after Q3, basing off the late-October low with the 50-day as first resistance. Cheap vs its own 10-year FCF range; desk lean is following long-dated put sellers on pullbacks.",
-      "href": "options-flow/",
-      "publishedAt": "2026-11-04T18:54:00-06:00",
       "sourceLabel": "Desk"
     }
   ]
