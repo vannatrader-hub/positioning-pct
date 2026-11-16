@@ -1,5 +1,7 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, extname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { GLOW_CROWDED_MIN, GLOW_SOFT_MAX, HOUSES, INDICATORS, SECTIONS, drift, extremeOf, isSoftCrowded, readIndicator } from "../src/desk.js";
@@ -2512,14 +2514,16 @@ for (const asOf of ["2026-11-13", "2026-11-19", "2026-11-20", "2026-11-26", "202
 }
 assert(breadthDocs.nysi.bars[0].t === "2015-10-29" && breadthDocs.nasi.bars[0].t === "2015-10-29" && breadthSpx.bars[0].t === "2015-10-29", "NYSI/NASI/SPX keep the 2015-10-29 history head");
 assert(pullBreadthSrc.includes("appendLevel") && pullBreadthSrc.includes("assertFeedFresh") && pullBreadthSrc.includes("US_MARKET_HOLIDAYS"), "breadth pull is append-only with a stale-feed guard");
+assert(pullBreadthSrc.includes("prepareBreadthWrites") && pullBreadthSrc.includes("commitBreadthWrites"), "breadth pull prepares all series in memory before an atomic commit");
 assert(readFileSync(join(root, "scripts/breadth-nightly.mjs"), "utf8").includes("assertFeedFresh"), "breadth:nightly re-checks feed freshness before seeding");
+assert(readFileSync(join(root, "scripts/breadth-nightly.mjs"), "utf8").includes("commitBreadthWrites"), "breadth:nightly stamps index via the same atomic commit helper");
 {
   const probe = spawnSync(
     process.execPath,
     [
       "--input-type=module",
       "-e",
-      `import { appendLevel, assertFeedFresh, lastCompletedWeekday } from ${JSON.stringify(pathToFileURL(join(root, "scripts/pull-breadth.mjs")).href)};
+      `import { appendLevel, assertFeedFresh, lastCompletedWeekday, US_MARKET_HOLIDAYS } from ${JSON.stringify(pathToFileURL(join(root, "scripts/pull-breadth.mjs")).href)};
 const sample = { id: "nysi", bars: [{ t: "2026-11-14", c: 1 }, { t: "2026-11-16", c: 2 }], asOf: "2026-11-16" };
 const extended = appendLevel(sample, [{ t: "2026-11-14", c: 1 }, { t: "2026-11-16", c: 2 }, { t: "2026-11-17", c: 3 }], "2026-11-17");
 if (extended.bars.at(-1).c !== 3 || extended.bars.length !== 3) throw new Error("append");
@@ -2530,11 +2534,62 @@ if (typeof lastCompletedWeekday() !== "string" || !assertFeedFresh("2099-01-01")
 let staleFailed = false;
 try { assertFeedFresh("2020-01-02", new Date("2026-11-16T22:00:00Z")); } catch { staleFailed = true; }
 if (!staleFailed) throw new Error("stale");
+if (!US_MARKET_HOLIDAYS.has("2025-01-09")) throw new Error("missing 2025-01-09 mourning closure");
+if (!US_MARKET_HOLIDAYS.has("2030-12-25") || !US_MARKET_HOLIDAYS.has("2028-07-04") || !US_MARKET_HOLIDAYS.has("2029-01-01")) throw new Error("holiday list must reach 2030");
+if (US_MARKET_HOLIDAYS.has("2028-01-01")) throw new Error("2028-01-01 is a Saturday and is not an observed NYSE holiday");
 console.log("ok");`,
     ],
     { encoding: "utf8" },
   );
   assert(probe.status === 0 && /ok/.test(probe.stdout ?? ""), `append-only / stale-feed sims ${probe.stderr || probe.stdout}`);
+}
+{
+  /* Forced NYAD overlap mismatch must leave every breadth file unchanged. */
+  const { prepareBreadthWrites, commitBreadthWrites } = await import(pathToFileURL(join(root, "scripts/pull-breadth.mjs")).href);
+  const breadthDir = join(root, "public/data/vault/breadth");
+  const scratch = mkdtempSync(join(tmpdir(), "breadth-atomic-"));
+  try {
+    cpSync(breadthDir, scratch, { recursive: true });
+    const files = readdirSync(scratch).filter((name) => name.endsWith(".json")).sort();
+    const fingerprint = (dir) =>
+      createHash("sha256")
+        .update(files.map((name) => `${name}:${readFileSync(join(dir, name))}`).join("\n"))
+        .digest("hex");
+    const before = fingerprint(scratch);
+    const nysi = JSON.parse(readFileSync(join(scratch, "nysi.json"), "utf8"));
+    const nasi = JSON.parse(readFileSync(join(scratch, "nasi.json"), "utf8"));
+    const spx = JSON.parse(readFileSync(join(scratch, "spx.json"), "utf8"));
+    const nyhl = JSON.parse(readFileSync(join(scratch, "nyhl.json"), "utf8"));
+    const nyad = JSON.parse(readFileSync(join(scratch, "nyad.json"), "utf8"));
+    const dailyFromCum = (doc) => {
+      const out = [];
+      for (let i = 1; i < doc.bars.length; i += 1) {
+        out.push({ t: doc.bars[i].t, c: doc.bars[i].c - doc.bars[i - 1].c });
+      }
+      return out;
+    };
+    const nyhlDaily = dailyFromCum(nyhl);
+    const nyadDaily = dailyFromCum(nyad);
+    nyadDaily.at(-1).c += 9999;
+    let aborted = false;
+    let abortMessage = "";
+    try {
+      const prepared = prepareBreadthWrites(
+        scratch,
+        { nysi: nysi.bars, nasi: nasi.bars, spx: spx.bars, nyhl: nyhlDaily, nyad: nyadDaily },
+        {},
+        { now: new Date("2026-11-16T22:00:00Z") },
+      );
+      commitBreadthWrites(scratch, prepared.writes);
+    } catch (error) {
+      aborted = true;
+      abortMessage = String(error.message ?? error);
+    }
+    assert(aborted && /nyad overlap/i.test(abortMessage), `NYAD overlap abort sim ${abortMessage || "no throw"}`);
+    assert(fingerprint(scratch) === before, "forced NYAD overlap mismatch leaves every breadth file unchanged");
+  } finally {
+    rmSync(scratch, { recursive: true, force: true });
+  }
 }
 
 /* Vault portfolio: personal book, gated like the other Vault pages. Open lines are still held. */

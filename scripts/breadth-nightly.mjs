@@ -5,14 +5,16 @@
  *
  * Fails non-zero (no further writes) when the feed asOf is stale vs the last
  * completed America/Chicago weekday session (1-session tolerance / holidays).
+ * Index / participation stamp updates are prepared in memory and committed
+ * together (temp then rename) only after every chart validates.
  *
  *   BREADTH_FEED="https://…" npm run breadth:nightly
  */
 import { spawnSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { assertFeedFresh, writeBreadth } from "./pull-breadth.mjs";
+import { assertFeedFresh, commitBreadthWrites, formatBreadthBody } from "./pull-breadth.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "public/data/vault/breadth");
@@ -47,31 +49,37 @@ run("seed-nasdaq-ma.mjs");
 const index = JSON.parse(readFileSync(join(out, "index.json"), "utf8"));
 const asOf = nysi.asOf;
 const ends = {};
+const writes = [];
+
 for (const chart of index.charts) {
   const doc = JSON.parse(readFileSync(join(out, chart.file), "utf8"));
   let bars = doc.bars;
+  let nextDoc = doc;
   if (chart.id.startsWith("nc") || chart.id === "ndtw") {
     const trimmed = bars.filter((bar) => bar.t <= asOf);
     if (trimmed.length !== bars.length || doc.asOf !== trimmed.at(-1)?.t) {
       bars = trimmed;
-      writeBreadth(chart.file, { ...doc, asOf: bars.at(-1).t, bars }, { spaced: false });
+      nextDoc = { ...doc, asOf: bars.at(-1).t, bars };
+      writes.push({ file: chart.file, body: formatBreadthBody(nextDoc, { spaced: false }) });
     }
   }
   const last = bars.at(-1)?.t;
   if (!last) throw new Error(`${chart.id} has no bars`);
-  const fileAsOf = chart.id.startsWith("nc") || chart.id === "ndtw" ? last : doc.asOf;
+  const fileAsOf = chart.id.startsWith("nc") || chart.id === "ndtw" ? last : nextDoc.asOf;
   if (fileAsOf !== last) throw new Error(`${chart.id} asOf ${fileAsOf} != last bar ${last}`);
   if (last > asOf) throw new Error(`${chart.id} last bar ${last} is after core asOf ${asOf}`);
   ends[chart.id] = last;
   if ("asOf" in chart) chart.asOf = last;
 }
+
 const overlay = JSON.parse(readFileSync(join(out, index.overlay.file), "utf8"));
 const overlayLast = overlay.bars.at(-1)?.t;
 if (!overlayLast || overlay.asOf !== overlayLast) {
   throw new Error(`SPX asOf ${overlay.asOf} != last bar ${overlayLast}`);
 }
 index.asOf = asOf;
-writeFileSync(join(out, "index.json"), `${JSON.stringify(index, null, 2)}\n`);
+writes.push({ file: "index.json", body: `${JSON.stringify(index, null, 2)}\n` });
+commitBreadthWrites(out, writes);
 
 const line = Object.entries(ends)
   .map(([id, day]) => `${id.toUpperCase()} ${day}`)
