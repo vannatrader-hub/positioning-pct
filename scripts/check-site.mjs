@@ -1127,14 +1127,15 @@ assert(itemsForDay(nt.items ?? [], "2026-11-01").length === 0, "Nov 1 desk day r
 assert(itemsForDay(nt.items ?? [], "2026-11-02").length === 0, "Nov 2 desk day rolled off the eight-day New Today window");
 assert(itemsForDay(nt.items ?? [], "2026-11-03").length === 0, "Nov 3 desk day rolled off the eight-day New Today window");
 assert(itemsForDay(nt.items ?? [], "2026-11-04").length === 0, "Nov 4 desk day rolled off the eight-day New Today window");
-assert(itemsForDay(nt.items ?? [], "2026-11-05").length === 3, "Nov 5 desk day lists the SBUX shopping-list alert and the PYPL and CBOE featured alerts");
-assert(itemsForDay(nt.items ?? [], "2026-11-06").length === 2, "Nov 6 desk day lists the open wrap and the market wrap");
-assert(itemsForDay(nt.items ?? [], "2026-11-07").length === 1, "Nov 7 desk day lists the LH shopping-list alert");
+assert(itemsForDay(nt.items ?? [], "2026-11-05").length === 0, "Nov 5 desk day rolled off the eight-day New Today window");
+assert(itemsForDay(nt.items ?? [], "2026-11-06").length === 0, "Nov 6 desk day rolled off the eight-day New Today window");
+assert(itemsForDay(nt.items ?? [], "2026-11-07").length === 0, "Nov 7 desk day rolled off the eight-day New Today window");
 assert(itemsForDay(nt.items ?? [], "2026-11-08").length === 2, "Nov 8 desk day lists the ARES and MSI featured alerts");
 assert(itemsForDay(nt.items ?? [], "2026-11-09").length === 5, "Nov 9 desk day lists the CCJ and CBRE shopping-list alerts, the BURL featured alert, and the open and market wraps");
 assert(itemsForDay(nt.items ?? [], "2026-11-10").length === 4, "Nov 10 desk day lists the MDB Spotlight, the KKR and FROG shopping-list alerts, and the TGT featured alert");
 assert(itemsForDay(nt.items ?? [], "2026-11-11").length === 3, "Nov 11 desk day lists the AVAV and ASML shopping-list alerts and the IONQ featured alert");
 assert(itemsForDay(nt.items ?? [], "2026-11-12").length === 3, "Nov 12 desk day lists the GPC shopping-list alert and the COHR and AKAM featured alerts");
+assert(itemsForDay(nt.items ?? [], "2026-11-15").length === 2, "Nov 15 desk day lists the BoA and Goldman Sachs research notes");
 assert(
   visibleDeskItems(nt.items, { today: "2026-11-09", mode: "catchup" }).map((item) => item.id).join() ===
     "2026-11-09-ccj-dollar,2026-11-09-burl-flow,2026-11-09-cbre-dollar,2026-11-09-desk-recap,2026-11-09-desk-blitz,2026-11-08-ares-flow,2026-11-08-msi-flow",
@@ -1184,6 +1185,20 @@ assert(
   rowDayLabel("2026-11-12T21:04:00-06:00", "2026-11-13").label === "Yesterday · Thu, Nov 12",
   "Nov 12 GPC row stays Yesterday on the Nov 13 catch-up",
 );
+assert(
+  visibleDeskItems(nt.items, { today: "2026-11-16", mode: "catchup", section: "research" }).map((item) => item.id).join() ===
+    "2026-11-15-research-gs-hedge-funds-sell,2026-11-15-research-boa-risk-off",
+  "Nov 16 catch-up Research keeps yesterday's Nov 15 bank notes with date labels",
+);
+assert(
+  rowDayLabel("2026-11-15T01:02:00-06:00", "2026-11-16").label === "Yesterday · Sun, Nov 15" &&
+    rowDayLabel("2026-11-15T10:30:00-06:00", "2026-11-16").label === "Yesterday · Sun, Nov 15",
+  "Nov 15 research rows stay Yesterday · Sun, Nov 15 on the Nov 16 catch-up",
+);
+const boaResearch = (nt.items ?? []).find((item) => item.id === "2026-11-15-research-boa-risk-off");
+const gsResearch = (nt.items ?? []).find((item) => item.id === "2026-11-15-research-gs-hedge-funds-sell");
+assert(boaResearch?.sourceLabel === "BoA" && boaResearch?.thumb === "data/new-today/thumbs/2026-11-15-boa-bull-bear.jpg", "BoA research keeps the bank label and thumb");
+assert(gsResearch?.sourceLabel === "Goldman Sachs" && !gsResearch?.thumb, "Goldman research stays text-only with the bank label");
 
 /* Default New Today is two Chicago calendar days. Yesterday keeps its own date. */
 const nov6Today = "2026-11-06";
@@ -1196,43 +1211,45 @@ assert(
   yesterdayNote(nov6Today) === "Nothing new today (Fri, Nov 6). Rows below landed yesterday (Thu, Nov 5) and keep that date.",
   `yesterday note ${yesterdayNote(nov6Today)}`,
 );
-const beforeMidnight = "2026-11-06T05:59:59Z";
-const afterMidnight = "2026-11-06T06:00:00Z";
-assert(deskDay(beforeMidnight) === "2026-11-05" && deskDay(afterMidnight) === "2026-11-06", "midnight CT rolls the desk day from Nov 5 to Nov 6");
+const nov10Today = "2026-11-10";
+assert(JSON.stringify(catchUpDays(nov10Today)) === '["2026-11-10","2026-11-09"]', "Nov 10 catch-up is today then yesterday");
+const beforeMidnight = "2026-11-10T05:59:59Z";
+const afterMidnight = "2026-11-10T06:00:00Z";
+assert(deskDay(beforeMidnight) === "2026-11-09" && deskDay(afterMidnight) === "2026-11-10", "midnight CT rolls the desk day from Nov 9 to Nov 10");
 const beforeRoll = visibleDeskItems(nt.items, { today: deskDay(beforeMidnight), mode: "catchup" });
 const afterRoll = visibleDeskItems(nt.items, { today: deskDay(afterMidnight), mode: "catchup" });
-assert(beforeRoll.some((item) => item.id === "2026-11-05-sbux-dollar"), "before midnight, Nov 5 is today");
-assert(beforeRoll.every((item) => ["2026-11-05", "2026-11-04"].includes(deskDay(item.publishedAt))), "the pre-midnight catch-up stays on those two dates");
-assert(!beforeRoll.some((item) => item.id.startsWith("2026-11-03")), "Nov 3 leaves the default view once Nov 4 is yesterday");
-for (const id of ["2026-11-05-sbux-dollar", "2026-11-05-pypl-flow", "2026-11-05-cboe-flow"]) {
+assert(beforeRoll.some((item) => item.id === "2026-11-09-ccj-dollar"), "before midnight, Nov 9 is today");
+assert(beforeRoll.every((item) => ["2026-11-09", "2026-11-08"].includes(deskDay(item.publishedAt))), "the pre-midnight catch-up stays on those two dates");
+assert(!beforeRoll.some((item) => item.id.startsWith("2026-11-07")), "Nov 7 leaves the default view once Nov 8 is yesterday");
+for (const id of ["2026-11-09-ccj-dollar", "2026-11-09-burl-flow", "2026-11-09-cbre-dollar"]) {
   const stored = (nt.items ?? []).find((item) => item.id === id);
   const shown = afterRoll.find((item) => item.id === id);
-  assert(shown === stored, `${id} shows on the Nov 6 default view without a copied stamp`);
-  assert(shown.publishedAt.startsWith("2026-11-05T"), `${id} keeps its Nov 5 publishedAt`);
-  const dated = rowDayLabel(shown.publishedAt, nov6Today);
-  assert(dated.relation === "yesterday" && dated.day === "2026-11-05" && dated.label === "Yesterday · Thu, Nov 5", `${id} stays labelled ${dated.label}`);
-  assert(dayRelation(dated.day, nov6Today) === "yesterday", `${id} is not relabelled as today`);
+  assert(shown === stored, `${id} shows on the Nov 10 default view without a copied stamp`);
+  assert(shown.publishedAt.startsWith("2026-11-09T"), `${id} keeps its Nov 9 publishedAt`);
+  const dated = rowDayLabel(shown.publishedAt, nov10Today);
+  assert(dated.relation === "yesterday" && dated.day === "2026-11-09" && dated.label === "Yesterday · Mon, Nov 9", `${id} stays labelled ${dated.label}`);
+  assert(dayRelation(dated.day, nov10Today) === "yesterday", `${id} is not relabelled as today`);
 }
 assert(
-  afterRoll.length === 5 &&
-    afterRoll.filter((item) => deskDay(item.publishedAt) === "2026-11-06").length === 2 &&
-    afterRoll.filter((item) => deskDay(item.publishedAt) === "2026-11-05").length === 3,
-  "Nov 6 default lists the two Nov 6 wraps plus the three Nov 5 flow rows",
+  afterRoll.length === 9 &&
+    afterRoll.filter((item) => deskDay(item.publishedAt) === "2026-11-10").length === 4 &&
+    afterRoll.filter((item) => deskDay(item.publishedAt) === "2026-11-09").length === 5,
+  "Nov 10 default lists the four Nov 10 rows plus the five Nov 9 rows",
 );
-assert(!afterRoll.some((item) => item.id.startsWith("2026-11-04")), "Nov 4 drops out of the default view at the Nov 6 midnight rollover");
-const publicNov6 = visibleDeskItems(nt.items, { today: nov6Today, mode: "catchup", publicOnly: true });
-assert(JSON.stringify(publicNov6.map((item) => item.id)) === "[]", "public /new-today/ on Nov 6 lists no eligible row");
-const nov5Public = (nt.items ?? []).filter(
-  (item) => deskDay(item.publishedAt) === "2026-11-05" && PUBLIC_NT_SECTIONS.some((section) => section.id === item.section),
+assert(!afterRoll.some((item) => item.id.startsWith("2026-11-08")), "Nov 8 drops out of the default view at the Nov 10 midnight rollover");
+const publicNov10 = visibleDeskItems(nt.items, { today: nov10Today, mode: "catchup", publicOnly: true });
+assert(JSON.stringify(publicNov10.map((item) => item.id)) === "[]", "public /new-today/ on Nov 10 lists no eligible row");
+const nov9Public = (nt.items ?? []).filter(
+  (item) => deskDay(item.publishedAt) === "2026-11-09" && PUBLIC_NT_SECTIONS.some((section) => section.id === item.section),
 );
-assert(nov5Public.length === 0, "Nov 5 has no Positioning, SPX, or Research row for the public page");
+assert(nov9Public.length === 0, "Nov 9 has no Positioning, SPX, or Research row for the public page");
 const tradeCopy = /\$\d|\bcalls\b|\bputs\b|\bstrike\b|\bpremium\b/i;
-for (const id of ["2026-11-05-sbux-dollar", "2026-11-05-pypl-flow", "2026-11-05-cboe-flow"]) {
+for (const id of ["2026-11-09-ccj-dollar", "2026-11-09-burl-flow", "2026-11-09-cbre-dollar"]) {
   const item = (nt.items ?? []).find((row) => row.id === id);
   assert(item.section === "options-flow" && item.href.startsWith("options-flow/"), `${id} is vault flow and links at the gated flow pages`);
   assert(!("publicTitle" in item) && !("publicSummary" in item) && !("publicHref" in item), `${id} has no public activity fields`);
   assert(tradeCopy.test(`${item.title} ${item.summary}`), `${id} copy is trade detail and stays off the public page`);
-  assert(!publicNov6.some((row) => row.id === id), `${id} is absent from the public Nov 6 page`);
+  assert(!publicNov10.some((row) => row.id === id), `${id} is absent from the public Nov 10 page`);
 }
 assert(
   PRODUCT_FEEDS.find((feed) => feed.id === "flow-plays").surfaces.join() === "vault,private",
@@ -1242,14 +1259,14 @@ for (const file of ["options-flow/index.html", "options-flow/dollar/index.html",
   assert(readFileSync(join(root, file), "utf8").includes('src="/src/vault-gate.js"'), `${file} keeps the Vault gate in front of flow detail`);
 }
 assert(
-  visibleDeskItems(nt.items, { today: nov6Today, mode: "catchup", section: "options-flow" }).map((item) => item.id).join() ===
-    "2026-11-06-desk-recap,2026-11-06-desk-blitz,2026-11-05-sbux-dollar,2026-11-05-pypl-flow,2026-11-05-cboe-flow",
-  "section filter keeps the Nov 6 wraps and the three Nov 5 flow rows, newest first",
+  visibleDeskItems(nt.items, { today: nov10Today, mode: "catchup", section: "options-flow" }).map((item) => item.id).join() ===
+    "2026-11-10-mdb-spotlight,2026-11-10-kkr-dollar,2026-11-10-frog-dollar,2026-11-10-tgt-flow,2026-11-09-ccj-dollar,2026-11-09-burl-flow,2026-11-09-cbre-dollar,2026-11-09-desk-recap,2026-11-09-desk-blitz",
+  "section filter keeps the Nov 10 and Nov 9 flow rows, newest first",
 );
-assert(visibleDeskItems(nt.items, { today: nov6Today, mode: "catchup", section: "positioning" }).length === 0, "Nov 6 positioning filter does not borrow Nov 5 flow rows");
-const nov5Only = visibleDeskItems(nt.items, { today: nov6Today, mode: "day", day: "2026-11-05" });
-assert(nov5Only.length === 3 && nov5Only.every((item) => deskDay(item.publishedAt) === "2026-11-05"), "an older desk day stays a single calendar day");
-assert(!nov5Only.some((item) => item.id.includes("2026-11-06")), "Nov 6 rows do not leak into the Nov 5 page");
+assert(visibleDeskItems(nt.items, { today: nov10Today, mode: "catchup", section: "positioning" }).length === 0, "Nov 10 positioning filter does not borrow Nov 9 flow rows");
+const nov9Only = visibleDeskItems(nt.items, { today: nov10Today, mode: "day", day: "2026-11-09" });
+assert(nov9Only.length === 5 && nov9Only.every((item) => deskDay(item.publishedAt) === "2026-11-09"), "an older desk day stays a single calendar day");
+assert(!nov9Only.some((item) => item.id.includes("2026-11-10")), "Nov 10 rows do not leak into the Nov 9 page");
 
 const utcTrap = { id: "utc-trap", section: "spx", publishedAt: "2026-11-06T04:30:00Z", title: "UTC date is still Thursday in Chicago" };
 const utcToday = { id: "utc-today", section: "spx", publishedAt: "2026-11-06T06:30:00Z", title: "UTC instant after Chicago midnight" };
@@ -1310,13 +1327,13 @@ assert(mixedOld.map((item) => item.id).join() === "old-res", "an older day filte
 const mixedSummary = catchUpSummary(mixed, nov6Today);
 assert(mixedSummary.todayCount === 2 && mixedSummary.yesterdayCount === 3 && mixedSummary.total === 5, "mixed counts split today from yesterday");
 assert(catchUpCountText(mixedSummary) === "2 today · 3 yesterday", "a mixed badge names both days");
-assert(catchUpCountText(catchUpSummary(afterRoll, nov6Today)) === "2 today · 3 yesterday", "Nov 6 catch-up names today and yesterday");
+assert(catchUpCountText(catchUpSummary(afterRoll, nov10Today)) === "4 today · 5 yesterday", "Nov 10 catch-up names today and yesterday");
 assert(emptyDeskMessage("catchup") === "Nothing new today or yesterday." && emptyDeskMessage("day") === "Nothing new that desk day.", "empty copy follows the view");
-const yChip = catchUpChip(catchUpSummary(nt.items, nov6Today), nt.updatedAt);
-assert(yChip.sub === "2 today · 3 yesterday" && yChip.lit === true && yChip.quiet === false, "Nov 6 chip names today and yesterday and pulses");
-assert(yChip.aria.includes("2 today") && yChip.aria.includes("3 yesterday") && !yChip.aria.includes("since 12"), "Nov 6 chip keeps yesterday separate");
-const publicNov6Chip = catchUpChip(catchUpSummary(publicDeskItems(nt.items), nov6Today), nt.updatedAt);
-assert(publicNov6Chip.quiet === true && publicNov6Chip.lit === false, "public Nov 6 chip stays quiet because those rows are Options Flow");
+const yChip = catchUpChip(catchUpSummary(nt.items, nov10Today), nt.updatedAt);
+assert(yChip.sub === "4 today · 5 yesterday" && yChip.lit === true && yChip.quiet === false, "Nov 10 chip names today and yesterday and pulses");
+assert(yChip.aria.includes("4 today") && yChip.aria.includes("5 yesterday") && !yChip.aria.includes("since 12"), "Nov 10 chip keeps yesterday separate");
+const publicNov10Chip = catchUpChip(catchUpSummary(publicDeskItems(nt.items), nov10Today), nt.updatedAt);
+assert(publicNov10Chip.quiet === true && publicNov10Chip.lit === false, "public Nov 10 chip stays quiet because those rows are Options Flow");
 const quietChip = catchUpChip(catchUpSummary([], nov6Today), "");
 assert(quietChip.sub === "Quiet since yesterday" && quietChip.quiet === true && quietChip.lit === false, "a two-day quiet chip says so");
 const bothChip = catchUpChip(mixedSummary, "2026-11-06T14:00:00-06:00");

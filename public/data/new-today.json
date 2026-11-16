@@ -1,9 +1,29 @@
 {
   "timeZone": "America/Chicago",
   "dayStartsAt": "00:00",
-  "dayStart": "2026-11-12T00:00:00-06:00",
-  "updatedAt": "2026-11-13T06:30:00-06:00",
+  "dayStart": "2026-11-15T00:00:00-06:00",
+  "updatedAt": "2026-11-16T17:17:23-06:00",
   "items": [
+    {
+      "id": "2026-11-15-research-gs-hedge-funds-sell",
+      "section": "research",
+      "title": "Goldman: hedge funds sold the rip, tech long/short at a record low",
+      "summary": "Goldman's latest prime-services data show professional managers covering index hedges while continuing to sell individual stocks, and pushing technology long/short exposure to the lowest level in the bank's records, even as the index rally made the selling look mistimed.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-11-15T10:30:00-06:00",
+      "sourceLabel": "Goldman Sachs"
+    },
+    {
+      "id": "2026-11-15-research-boa-risk-off",
+      "section": "research",
+      "title": "BoA: risk-off stays in place as the dollar leads",
+      "summary": "The Nov 12 bank note keeps a tactical risk-off stance. The BoA Bull & Bear Indicator is at 7.4, up from 7.2, with the equity-flow component at the 96th percentile (very bullish) and fund-manager positioning at the 100th percentile (very bullish), while global stock-index breadth is at the 21st percentile (bearish). Weekly global equity fund inflows were $98.3 billion, the largest since June 2026. Year-to-date, US stocks are about +10.9% and the dollar about +4.9%. The November fund manager cash and crowded-trade survey is not yet the basis for the site's Soft ↔ Crowded fund-manager panel, which is still the August 2026 survey.",
+      "href": "new-today/#nt-research",
+      "publishedAt": "2026-11-15T01:02:00-06:00",
+      "sourceLabel": "BoA",
+      "thumb": "data/new-today/thumbs/2026-11-15-boa-bull-bear.jpg",
+      "thumbAlt": "BoA Bull and Bear Indicator at 7.4, up from 7.2"
+    },
     {
       "id": "2026-11-12-gpc-dollar",
       "section": "options-flow",
@@ -155,60 +175,6 @@
       "summary": "1,000 January $560 calls bought at $13 (~$1.3M) on 11/5, rolling up from 2,050 January $500 calls (~$4.25M) bought 11/4 into the report; spot ~$514.50. +34% YTD, spiked to a 52-week high then faded; $548 resistance, 21-day EMA near $483 first support. Desk wants adds on pullbacks toward the 21-day.",
       "href": "options-flow/",
       "publishedAt": "2026-11-08T18:30:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-07-lh-dollar",
-      "section": "options-flow",
-      "title": "LH joins the $$$ Shopping List",
-      "summary": "400 May $410 calls, 300 May $350 calls, and 600 May $420 calls bought to open in late October (~$2.3M); spot ~$367. Diagnostics name +46% YTD, forming a post-earnings bull flag after a weekly flag that measures toward ~$420; desk wants the flag while it holds.",
-      "href": "options-flow/dollar/#LH",
-      "publishedAt": "2026-11-07T09:59:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-06-desk-recap",
-      "section": "options-flow",
-      "title": "Desk market wrap 11/6",
-      "summary": "Jobs print came in stronger and the dollar firmed; the AI complex faded after the open. NYAD stays in a sell signal, VIX held over 20, and SPY is trying to hold the rising 200-day into next week's inflation prints. Size put sellers were active in first-quarter 2027 in beaten-up quality names.",
-      "href": "options-flow/",
-      "publishedAt": "2026-11-06T14:21:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-06-desk-blitz",
-      "section": "options-flow",
-      "title": "Desk open wrap 11/6",
-      "summary": "Futures steadied after Thursday's plunge with jobs in focus; VIX still elevated after the spike. Tech led an early snapback while Europe and Asia sold off on AI-spend and valuation worries.",
-      "href": "options-flow/",
-      "publishedAt": "2026-11-06T06:40:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-05-sbux-dollar",
-      "section": "options-flow",
-      "title": "SBUX joins the $$$ Shopping List",
-      "summary": "7,500 January $105 calls remain in open interest from 7/31, with 2,000 January 2028 $95 short puts and 1,500 September $85 / $95 short puts opening; spot ~$107. Global coffeehouse turnaround (+26% YTD) probing $108–$110 resistance toward early-2025 $116 highs; desk watches strength through $110–$112 with comps, Rewards scale, and the $2B savings program as the hold.",
-      "href": "options-flow/dollar/#SBUX",
-      "publishedAt": "2026-11-05T19:56:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-05-pypl-flow",
-      "section": "options-flow",
-      "title": "PYPL ($$): Apr 2027 $67.50 calls bought",
-      "summary": "1,200 April 2027 $67.50 calls bought at $2.14 (~$256K) on 11/5, 500 January 2029 $55 ITM calls bought 10/30 (937 in OI), and 3,100 April 2027 $47.50 short puts still open from 9/14; spot $59. Desk sees a cheap payments turnaround holding the 200-day; lean is following long-dated call buyers on pullbacks toward the 50-day.",
-      "href": "options-flow/",
-      "publishedAt": "2026-11-05T18:17:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-05-cboe-flow",
-      "section": "options-flow",
-      "title": "CBOE ($$): Dec $360 calls bought",
-      "summary": "325 December $360 calls bought at $16 (~$520K) on 11/5 into a 60-day high, after 350 December $340 calls (~$595K) on 10/30 and 750 June 2028 $400 calls (~$3M+) on 10/22; spot ~$353. Desk sees a +40% YTD exchange compounder pressing May highs with KPI event-contract launch ahead; add on pullbacks toward the short-term averages.",
-      "href": "options-flow/",
-      "publishedAt": "2026-11-05T18:16:00-06:00",
       "sourceLabel": "Desk"
     }
   ]

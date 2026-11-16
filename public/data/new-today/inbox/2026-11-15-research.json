@@ -1,0 +1,22 @@
+[
+  {
+    "id": "2026-11-15-research-boa-risk-off",
+    "section": "research",
+    "title": "BoA: risk-off stays in place as the dollar leads",
+    "summary": "The Nov 12 bank note keeps a tactical risk-off stance. The BoA Bull & Bear Indicator is at 7.4, up from 7.2, with the equity-flow component at the 96th percentile (very bullish) and fund-manager positioning at the 100th percentile (very bullish), while global stock-index breadth is at the 21st percentile (bearish). Weekly global equity fund inflows were $98.3 billion, the largest since June 2026. Year-to-date, US stocks are about +10.9% and the dollar about +4.9%. The November fund manager cash and crowded-trade survey is not yet the basis for the site's Soft ↔ Crowded fund-manager panel, which is still the August 2026 survey.",
+    "href": "new-today/#nt-research",
+    "publishedAt": "2026-11-15 01:02 CT",
+    "sourceLabel": "BoA",
+    "thumb": "data/new-today/thumbs/2026-11-15-boa-bull-bear.jpg",
+    "thumbAlt": "BoA Bull and Bear Indicator at 7.4, up from 7.2"
+  },
+  {
+    "id": "2026-11-15-research-gs-hedge-funds-sell",
+    "section": "research",
+    "title": "Goldman: hedge funds sold the rip, tech long/short at a record low",
+    "summary": "Goldman's latest prime-services data show professional managers covering index hedges while continuing to sell individual stocks, and pushing technology long/short exposure to the lowest level in the bank's records, even as the index rally made the selling look mistimed.",
+    "href": "new-today/#nt-research",
+    "publishedAt": "2026-11-15 10:30 CT",
+    "sourceLabel": "Goldman Sachs"
+  }
+]
