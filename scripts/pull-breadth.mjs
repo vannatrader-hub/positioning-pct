@@ -14,8 +14,13 @@
  * last bar are added, and overlapping dates must match (within rounding) or
  * the write aborts. NYHL / NYAD daily values append onto the cumulative line
  * (and its embedded SPX context). Participation symbols are best-effort.
+ *
+ * All series are merged and validated in memory first; files are written only
+ * when every validation passes (temp files, then rename). A failed pull leaves
+ * the tree unchanged.
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { randomBytes } from "node:crypto";
+import { readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -25,11 +30,19 @@ const feed = process.env.BREADTH_FEED;
 const YEARS = 11;
 const OVERLAP_EPS = 0.005;
 
-/** US cash-equity holidays the desk treats as non-sessions (extend as needed). */
+/**
+ * US cash-equity full-session closures the desk treats as non-sessions.
+ * 2025–2028 follow published NYSE Group holiday calendars; 2029–2030 follow
+ * the same observed-holiday rules (NYSE has not yet posted those years).
+ * Includes 2025-01-09 (national day of mourning / Jimmy Carter).
+ */
 export const US_MARKET_HOLIDAYS = new Set([
-  "2025-01-01", "2025-01-20", "2025-02-17", "2025-04-18", "2025-05-26", "2025-06-19", "2025-07-04", "2025-09-01", "2025-11-27", "2025-12-25",
+  "2025-01-01", "2025-01-09", "2025-01-20", "2025-02-17", "2025-04-18", "2025-05-26", "2025-06-19", "2025-07-04", "2025-09-01", "2025-11-27", "2025-12-25",
   "2026-01-01", "2026-01-19", "2026-02-16", "2026-04-03", "2026-05-25", "2026-06-19", "2026-07-03", "2026-09-07", "2026-11-26", "2026-12-25",
   "2027-01-01", "2027-01-18", "2027-02-15", "2027-03-26", "2027-05-31", "2027-06-18", "2027-07-05", "2027-09-06", "2027-11-25", "2027-12-24",
+  "2028-01-17", "2028-02-21", "2028-04-14", "2028-05-29", "2028-06-19", "2028-07-04", "2028-09-04", "2028-11-23", "2028-12-25",
+  "2029-01-01", "2029-01-15", "2029-02-19", "2029-03-30", "2029-05-28", "2029-06-19", "2029-07-04", "2029-09-03", "2029-11-22", "2029-12-25",
+  "2030-01-01", "2030-01-21", "2030-02-18", "2030-04-19", "2030-05-27", "2030-06-19", "2030-07-04", "2030-09-02", "2030-11-28", "2030-12-25",
 ]);
 
 const CORE = [
@@ -150,13 +163,45 @@ function formatBar(bar, spaced) {
   return `    {"t": "${bar.t}", "c": ${cText}}`;
 }
 
-export function writeBreadth(file, doc, { spaced = SPACED.has(doc.id) || SPACED.has(file.replace(/\.json$/, "")) } = {}) {
+export function formatBreadthBody(doc, { spaced = SPACED.has(doc.id) } = {}) {
   const { bars, spx, ...head } = doc;
   const top = JSON.stringify(head, null, 2).slice(0, -2);
   let body = `${top},\n  "bars": [\n${bars.map((bar) => formatBar(bar, spaced)).join(",\n")}\n  ]`;
   if (spx) body += `,\n  "spx": [\n${spx.map((bar) => formatBar(bar, spaced)).join(",\n")}\n  ]`;
   body += `\n}\n`;
-  writeFileSync(join(out, file), body);
+  return body;
+}
+
+function tmpPath(dir, file) {
+  return join(dir, `.${file}.${process.pid}.${randomBytes(4).toString("hex")}.tmp`);
+}
+
+/** Write every body to a sibling temp file, then rename into place. Cleans temps on failure. */
+export function commitBreadthWrites(dir, writes) {
+  const temps = [];
+  try {
+    for (const { file, body } of writes) {
+      const tmp = tmpPath(dir, file);
+      writeFileSync(tmp, body);
+      temps.push({ tmp, file });
+    }
+    for (const { tmp, file } of temps) {
+      renameSync(tmp, join(dir, file));
+    }
+  } catch (error) {
+    for (const { tmp } of temps) {
+      try {
+        unlinkSync(tmp);
+      } catch {
+        /* best-effort cleanup */
+      }
+    }
+    throw error;
+  }
+}
+
+export function writeBreadth(file, doc, { spaced = SPACED.has(doc.id) || SPACED.has(file.replace(/\.json$/, "")), dir = out } = {}) {
+  commitBreadthWrites(dir, [{ file, body: formatBreadthBody(doc, { spaced }) }]);
 }
 
 /** Keep committed history; append only dates after the last bar; abort on overlap drift. */
@@ -189,11 +234,11 @@ export function appendCumulative(doc, daily, spxBySession, sessions, asOf) {
   const byT = new Map(bars.map((bar) => [bar.t, bar.c]));
   for (let i = 1; i < bars.length; i += 1) {
     const day = bars[i].t;
-    const feed = daily.find((bar) => bar.t === day);
-    if (!feed) continue;
+    const feedBar = daily.find((bar) => bar.t === day);
+    if (!feedBar) continue;
     const delta = bars[i].c - bars[i - 1].c;
-    if (!closeEnough(delta, feed.c)) {
-      throw new Error(`${doc.id} overlap Δ ${day}: committed ${delta} != feed ${feed.c}`);
+    if (!closeEnough(delta, feedBar.c)) {
+      throw new Error(`${doc.id} overlap Δ ${day}: committed ${delta} != feed ${feedBar.c}`);
     }
   }
   let cum = bars.at(-1).c;
@@ -216,6 +261,91 @@ export function appendCumulative(doc, daily, spxBySession, sessions, asOf) {
     throw new Error(`${doc.id} SPX context ends ${spx.at(-1)?.t}, expected ${asOf}`);
   }
   return { ...doc, asOf, bars, spx };
+}
+
+/**
+ * Merge feed bars into committed docs in memory. Returns the file bodies to
+ * write (including index.json). Throws before any filesystem mutation when a
+ * series fails validation.
+ */
+export function prepareBreadthWrites(dir, core, pct = {}, { now = new Date() } = {}) {
+  const index = JSON.parse(readFileSync(join(dir, "index.json"), "utf8"));
+  const chartById = Object.fromEntries(index.charts.map((chart) => [chart.id, chart]));
+
+  const asOf = core.nysi.at(-1).t;
+  assertFeedFresh(asOf, now);
+  for (const id of ["nasi", "spx", "nyhl", "nyad"]) {
+    const end = core[id].at(-1).t;
+    if (end < asOf) throw new Error(`NYSI ends ${asOf}, ${id} only reaches ${end}`);
+  }
+
+  const nysiDoc = JSON.parse(readFileSync(join(dir, chartById.nysi.file), "utf8"));
+  const nasiDoc = JSON.parse(readFileSync(join(dir, chartById.nasi.file), "utf8"));
+  const spxDoc = JSON.parse(readFileSync(join(dir, index.overlay.file), "utf8"));
+
+  const nysiNext = appendLevel(nysiDoc, core.nysi, asOf);
+  const nasiNext = appendLevel(nasiDoc, core.nasi, asOf);
+  const sessions = new Set(nysiNext.bars.map((bar) => bar.t));
+  const spxNext = appendLevel(
+    spxDoc,
+    core.spx.filter((bar) => bar.t <= asOf && (sessions.has(bar.t) || bar.t <= (spxDoc.bars.at(-1)?.t ?? ""))),
+    asOf,
+  );
+  if (JSON.stringify(nysiNext.bars.map((bar) => bar.t)) !== JSON.stringify(nasiNext.bars.map((bar) => bar.t))) {
+    throw new Error("NYSI and NASI sessions diverged after append");
+  }
+  if (JSON.stringify(nysiNext.bars.map((bar) => bar.t)) !== JSON.stringify(spxNext.bars.map((bar) => bar.t))) {
+    throw new Error("NYSI and SPX sessions diverged after append");
+  }
+  const spxBySession = new Map(spxNext.bars.map((bar) => [bar.t, bar.c]));
+
+  const writes = [
+    { file: chartById.nysi.file, body: formatBreadthBody(nysiNext, { spaced: false }) },
+    { file: chartById.nasi.file, body: formatBreadthBody(nasiNext, { spaced: false }) },
+    { file: index.overlay.file, body: formatBreadthBody(spxNext, { spaced: false }) },
+  ];
+
+  for (const id of CUMULATIVE) {
+    const chart = chartById[id];
+    const doc = JSON.parse(readFileSync(join(dir, chart.file), "utf8"));
+    const next = appendCumulative(doc, core[id], spxBySession, sessions, asOf);
+    writes.push({ file: chart.file, body: formatBreadthBody(next, { spaced: true }) });
+    if (chart.asOf) chart.asOf = asOf;
+  }
+
+  for (const id of PCT_IDS) {
+    const bars = pct[id];
+    if (!bars) continue;
+    const chart = chartById[id];
+    const doc = JSON.parse(readFileSync(join(dir, chart.file), "utf8"));
+    const next = {
+      ...doc,
+      asOf,
+      bars,
+      provenance: {
+        ...(doc.provenance ?? {}),
+        kind: "feed",
+        note: `End-of-day ${doc.provenance?.feedSymbol ?? chart.id} from the desk feed through ${asOf}.`,
+      },
+    };
+    writes.push({ file: chart.file, body: formatBreadthBody(next, { spaced: false }) });
+    if (chart.asOf) chart.asOf = asOf;
+  }
+
+  index.asOf = asOf;
+  writes.push({ file: "index.json", body: `${JSON.stringify(index, null, 2)}\n` });
+
+  return {
+    asOf,
+    writes,
+    summary: {
+      nysi: nysiNext.bars.at(-1).c,
+      nasi: nasiNext.bars.at(-1).c,
+      spx: spxNext.bars.at(-1).c,
+      nyhl: core.nyhl.at(-1).c,
+      nyad: core.nyad.at(-1).c,
+    },
+  };
 }
 
 async function main() {
@@ -251,70 +381,16 @@ async function main() {
     }
   }
 
-  const index = JSON.parse(readFileSync(join(out, "index.json"), "utf8"));
-  const chartById = Object.fromEntries(index.charts.map((chart) => [chart.id, chart]));
+  const prepared = prepareBreadthWrites(out, core, pct);
+  commitBreadthWrites(out, prepared.writes);
 
-  const nysiDoc = JSON.parse(readFileSync(join(out, chartById.nysi.file), "utf8"));
-  const nasiDoc = JSON.parse(readFileSync(join(out, chartById.nasi.file), "utf8"));
-  const spxDoc = JSON.parse(readFileSync(join(out, index.overlay.file), "utf8"));
-
-  const nysiNext = appendLevel(nysiDoc, core.nysi, asOf);
-  const nasiNext = appendLevel(nasiDoc, core.nasi, asOf);
-  const sessions = new Set(nysiNext.bars.map((bar) => bar.t));
-  const spxNext = appendLevel(
-    spxDoc,
-    core.spx.filter((bar) => bar.t <= asOf && (sessions.has(bar.t) || bar.t <= (spxDoc.bars.at(-1)?.t ?? ""))),
-    asOf,
-  );
-  if (JSON.stringify(nysiNext.bars.map((bar) => bar.t)) !== JSON.stringify(nasiNext.bars.map((bar) => bar.t))) {
-    throw new Error("NYSI and NASI sessions diverged after append");
-  }
-  if (JSON.stringify(nysiNext.bars.map((bar) => bar.t)) !== JSON.stringify(spxNext.bars.map((bar) => bar.t))) {
-    throw new Error("NYSI and SPX sessions diverged after append");
-  }
-  const spxBySession = new Map(spxNext.bars.map((bar) => [bar.t, bar.c]));
-
-  writeBreadth(chartById.nysi.file, nysiNext, { spaced: false });
-  writeBreadth(chartById.nasi.file, nasiNext, { spaced: false });
-  writeBreadth(index.overlay.file, spxNext, { spaced: false });
-
-  for (const id of CUMULATIVE) {
-    const chart = chartById[id];
-    const doc = JSON.parse(readFileSync(join(out, chart.file), "utf8"));
-    const next = appendCumulative(doc, core[id], spxBySession, sessions, asOf);
-    writeBreadth(chart.file, next, { spaced: true });
-    if (chart.asOf) chart.asOf = asOf;
-  }
-
-  for (const id of PCT_IDS) {
-    const bars = pct[id];
-    if (!bars) continue;
-    const chart = chartById[id];
-    const doc = JSON.parse(readFileSync(join(out, chart.file), "utf8"));
-    const next = {
-      ...doc,
-      asOf,
-      bars,
-      provenance: {
-        ...(doc.provenance ?? {}),
-        kind: "feed",
-        note: `End-of-day ${doc.provenance?.feedSymbol ?? chart.id} from the desk feed through ${asOf}.`,
-      },
-    };
-    writeBreadth(chart.file, next, { spaced: false });
-    if (chart.asOf) chart.asOf = asOf;
-  }
-
-  index.asOf = asOf;
-  writeFileSync(join(out, "index.json"), `${JSON.stringify(index, null, 2)}\n`);
-
-  const coreLine = `NYSI ${nysiNext.bars.at(-1).c} · NASI ${nasiNext.bars.at(-1).c} · NYHL Δ ${core.nyhl.at(-1).c} · NYAD Δ ${core.nyad.at(-1).c} · SPX ${spxNext.bars.at(-1).c}`;
+  const coreLine = `NYSI ${prepared.summary.nysi} · NASI ${prepared.summary.nasi} · NYHL Δ ${prepared.summary.nyhl} · NYAD Δ ${prepared.summary.nyad} · SPX ${prepared.summary.spx}`;
   if (pctErrors.length) {
-    console.warn(`breadth core through ${asOf}: ${coreLine}`);
+    console.warn(`breadth core through ${prepared.asOf}: ${coreLine}`);
     console.warn(`participation skipped (${pctErrors.length}): ${pctErrors.join(" · ")}`);
   } else {
     const pctLine = PCT_IDS.map((id) => `${id.toUpperCase()} ${pct[id].at(-1).c}`).join(" · ");
-    console.log(`breadth through ${asOf}: ${coreLine} · ${pctLine}`);
+    console.log(`breadth through ${prepared.asOf}: ${coreLine} · ${pctLine}`);
   }
 }
 
