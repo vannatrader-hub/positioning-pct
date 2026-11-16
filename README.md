@@ -175,14 +175,14 @@ Four Nasdaq participation panes sit next to that family (`#ncfd`, `#ndtw`, `#ncf
 
 `src/breadth.js` holds the math (MA, windows, ticks, percentile rank) and `src/vault-breadth.js` draws the SVG into the wall's `[data-breadth]` cards. Cards use desk labels only; no chart-vendor branding.
 
-Data lives in `public/data/vault/breadth/`: `index.json` (as-of date, `period`, `defaultRangeMonths`, `maxRangeMonths`, chart list), `nysi.json` and `nasi.json` (label, title, `ma`, `buyLine`, and daily `bars` as `{t, c}`), `ncfd.json` / `ndtw.json` / `ncfi.json` / `ncth.json` (kind `pct-above-ma`, window, rails, provenance, daily `bars`), and `spx.json` (SPX daily closes on the summation sessions). The summation seed runs eleven years through Oct 29, 2026 so the ten-year window has its MA lead-in. The participation files are a desk-computed series through Nov 2, 2026 until the EOD feed replaces them. To refresh after the close:
+Data lives in `public/data/vault/breadth/`: `index.json` (as-of date, `period`, `defaultRangeMonths`, `maxRangeMonths`, chart list), `nysi.json` and `nasi.json` (label, title, `ma`, `buyLine`, and daily `bars` as `{t, c}`), `ncfd.json` / `ndtw.json` / `ncfi.json` / `ncth.json` (kind `pct-above-ma`, window, rails, provenance, daily `bars`), `nyhl.json` / `nyad.json` (cumulative NY highs−lows and advance−decline with SPX context), and `spx.json` (SPX daily closes on the summation sessions). The summation history keeps its MA lead-in; participation stays desk-computed from Yahoo until a live feed print exists. To refresh after the close:
 
 ```bash
-BREADTH_FEED="<desk EOD text feed>" npm run pull:breadth
+BREADTH_FEED="<desk EOD text feed>" npm run breadth:nightly
 npm run check
 ```
 
-The feed address is kept in env, never in a committed file. `npm run check` pins the Oct 29, 2026 prints (NYSI −504.41, NASI −699.51 with MA(8) −769.33, SPX 7720.39), the Nov 2, 2026 participation closes, the 1Y / 10Y defaults, and the −1000 buy line. See `DATA_GAPS.md` for how the participation series was built.
+The feed address is kept in env, never in a committed file. `npm run breadth:nightly` pulls NYSI / NASI / SPX / NYHL / NYAD (appending the cumulative pair), rebuilds Nasdaq %‑above‑MA when the feed has no participation prints, and stamps `index.json` `asOf`. `npm run check` keeps the Oct 29, 2026 history prints (NYSI −504.41, NASI −699.51 with MA(8) −769.33, SPX 7720.39), checks freshness against `index.json` `asOf`, and pins the 1Y / 10Y defaults and the −1000 buy line. See `DATA_GAPS.md` for how the participation series was built.
 
 Light is the site-wide default. `src/theme.js` and every page-head boot script resolve stored `p-theme` if it is `light` or `dark`, otherwise light, then store that choice. The toggle still switches, and a stored dark choice is kept.
 

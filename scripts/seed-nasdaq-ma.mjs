@@ -18,7 +18,6 @@ const cacheDir = join("/tmp", "nasdaq-ma-cache");
 mkdirSync(cacheDir, { recursive: true });
 
 const UA = { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" };
-const AS_OF_CAP = "2026-11-02";
 const CONCURRENCY = 10;
 const SERIES = [
   { id: "ncfd", symbol: "NCFD", window: 5, universe: "nasdaq-comp", defaultRangeMonths: 24, feed: "$NCFD", label: "Nasdaq 5-day", title: "Nasdaq Comp Stocks Above 5-Day Average" },
@@ -97,7 +96,6 @@ async function loadCloses(sym) {
     const value = close[i];
     if (value == null || !Number.isFinite(value)) return;
     const day = new Date((ts + offset) * 1000).toISOString().slice(0, 10);
-    if (day > AS_OF_CAP) return;
     rows.push([day, value]);
   });
   writeFileSync(file, JSON.stringify(rows));
@@ -152,14 +150,35 @@ function writeSeries(file, doc) {
   writeFileSync(join(outDir, file), `${top},\n  "bars": [\n${lines}\n  ]\n}\n`);
 }
 
-const listedText = await fetch("https://www.nasdaqtrader.com/dynamic/symdir/nasdaqlisted.txt", { headers: UA }).then((res) => {
-  if (!res.ok) throw new Error(`nasdaqlisted ${res.status}`);
-  return res.text();
-});
+async function loadNasdaqListed() {
+  const urls = [
+    "ftp://ftp.nasdaqtrader.com/SymbolDirectory/nasdaqlisted.txt",
+    "https://nasdaqtrader.com/dynamic/symdir/nasdaqlisted.txt",
+    "https://www.nasdaqtrader.com/dynamic/symdir/nasdaqlisted.txt",
+  ];
+  let last;
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { headers: UA });
+      if (!res.ok) throw new Error(`${url} ${res.status}`);
+      const text = await res.text();
+      if (!text.startsWith("Symbol|") || text.includes("Incapsula") || text.includes("<html")) {
+        throw new Error(`${url} returned a non-directory body`);
+      }
+      return text;
+    } catch (error) {
+      last = error;
+    }
+  }
+  throw last ?? new Error("nasdaqlisted unavailable");
+}
+
+const listedText = await loadNasdaqListed();
 const ndxJson = await fetchJson("https://api.nasdaq.com/api/quote/list-type/nasdaq100");
 const ndx = ndxJson.data.data.rows.map((row) => row.symbol).filter(Boolean);
 const composite = parseListed(listedText);
 console.log(`universe: nasdaq-100 ${ndx.length} · nasdaq-comp ${composite.length}`);
+if (!ndx.length || !composite.length) throw new Error("nasdaq universe lists came back empty");
 
 const wanted = [...new Set([...ndx, ...composite])];
 let ok = 0;
@@ -184,15 +203,29 @@ const ndxBook = new Map(ndx.filter((sym) => closes.has(sym)).map((sym) => [sym, 
 const compBook = new Map(composite.filter((sym) => closes.has(sym)).map((sym) => [sym, closes.get(sym)]));
 const dateSet = new Set();
 for (const map of compBook.values()) for (const day of map.keys()) dateSet.add(day);
-const dates = [...dateSet].filter((day) => day <= AS_OF_CAP).sort();
-if (dates.at(-1) !== AS_OF_CAP) console.warn(`last computed session ${dates.at(-1)}, cap ${AS_OF_CAP}`);
+const dates = [...dateSet].sort();
+if (!dates.length) throw new Error("no Yahoo sessions in the Nasdaq Composite book");
+console.log(`computing participation through ${dates.at(-1)} (${dates.length} sessions)`);
 
 for (const spec of SERIES) {
   const book = spec.universe === "nasdaq-100" ? ndxBook : compBook;
-  const bars = pctAbove(dates, book, spec.window);
-  if (bars.length < 1500) throw new Error(`${spec.id} only ${bars.length} sessions`);
+  const computed = pctAbove(dates, book, spec.window);
+  if (computed.length < 1500) throw new Error(`${spec.id} only ${computed.length} sessions`);
+  const file = `${spec.id}.json`;
+  const priorPath = join(outDir, file);
+  let bars = computed;
+  let prior = null;
+  if (existsSync(priorPath)) {
+    prior = JSON.parse(readFileSync(priorPath, "utf8"));
+    const kept = prior.bars ?? [];
+    const lastKept = kept.at(-1)?.t;
+    if (lastKept) {
+      const extension = computed.filter((bar) => bar.t > lastKept);
+      bars = kept.concat(extension);
+    }
+  }
   const asOf = bars.at(-1).t;
-  writeSeries(`${spec.id}.json`, {
+  writeSeries(file, {
     id: spec.id,
     symbol: spec.symbol,
     label: spec.label,
@@ -215,5 +248,6 @@ for (const spec of SERIES) {
     },
     bars,
   });
-  console.log(`${spec.id} ${bars.length} sessions through ${asOf} last ${bars.at(-1).c}% · names ${book.size}`);
+  const added = prior ? bars.length - (prior.bars?.length ?? 0) : bars.length;
+  console.log(`${spec.id} ${bars.length} sessions through ${asOf} last ${bars.at(-1).c}% · names ${book.size}${prior ? ` · appended ${added}` : ""}`);
 }

@@ -5,15 +5,16 @@
  *
  *   BREADTH_FEED="https://…" npm run pull:breadth
  *
- * The feed answers `?s=<symbol>&p=D&yr=<years>&…&img=text` with a
+ * The feed answers `?s=<symbol>&p=D&yr=<years>&…&img=text&inspector=yes` with a
  * <pricedata> block of "|"-separated bars: `n start end close vol` for the
- * breadth indexes and `n start end open high low close vol` for SPX.
+ * breadth indexes and `n start end open high low close vol` for OHLC series.
  * Only completed sessions (stamped to 16:00) are kept.
  *
- * Pulled symbols: $NYSI, $NASI, $NCFD, $NDTW, $NCFI, $NCTH, $SPX.
- * NYHL / NYAD keep their committed files; this script does not overwrite them.
- * After a successful pull, each %‑above‑MA file is marked provenance.kind
- * "feed" so the wall stops reading as a desk-computed series.
+ * Core symbols ($NYSI, $NASI, $SPX, $NYHL, $NYAD) must succeed and always ship.
+ * NYHL / NYAD daily values are appended onto the committed cumulative series
+ * (and their embedded SPX context). Participation symbols ($NCFD, $NDTW,
+ * $NCFI, $NCTH) are best-effort: a miss is logged and the committed desk-
+ * computed files are left alone so `npm run seed:nasdaq-ma` can refresh them.
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -28,6 +29,17 @@ if (!feed) {
   console.error("Set BREADTH_FEED to the desk's end-of-day text feed (see README, Vault breadth wall).");
   process.exit(1);
 }
+
+const CORE = [
+  ["nysi", "$NYSI"],
+  ["nasi", "$NASI"],
+  ["spx", "$SPX"],
+  ["nyhl", "$NYHL"],
+  ["nyad", "$NYAD"],
+];
+const PCT_IDS = ["ncfd", "ndtw", "ncfi", "ncth"];
+const PCT = PCT_IDS.map((id) => [id, `$${id.toUpperCase()}`]);
+const CUMULATIVE = new Set(["nyhl", "nyad"]);
 
 async function pull(symbol) {
   const url = `${feed}?s=${encodeURIComponent(symbol)}&p=D&yr=${YEARS}&mn=0&dy=0&i=t3757734781c&img=text&inspector=yes`;
@@ -45,7 +57,12 @@ async function pull(symbol) {
     const day = cols[1];
     bars.push({ t: `${day.slice(0, 4)}-${day.slice(4, 6)}-${day.slice(6, 8)}`, c: close });
   }
-  if (bars.length < 2500) throw new Error(`${symbol} returned only ${bars.length} sessions`);
+  if (bars.length < 200) throw new Error(`${symbol} returned only ${bars.length} sessions`);
+  return bars;
+}
+
+function requireHistory(id, bars, min = 2500) {
+  if (bars.length < min) throw new Error(`${id} returned only ${bars.length} sessions`);
   return bars;
 }
 
@@ -56,47 +73,112 @@ function write(file, doc) {
   writeFileSync(join(out, file), `${top},\n  "bars": [\n${lines}\n  ]\n}\n`);
 }
 
-const PCT_IDS = ["ncfd", "ndtw", "ncfi", "ncth"];
-const pulled = Object.fromEntries(
-  await Promise.all(
-    [
-      ["nysi", "$NYSI"],
-      ["nasi", "$NASI"],
-      ["ncfd", "$NCFD"],
-      ["ndtw", "$NDTW"],
-      ["ncfi", "$NCFI"],
-      ["ncth", "$NCTH"],
-      ["spx", "$SPX"],
-    ].map(async ([id, symbol]) => [id, await pull(symbol)]),
-  ),
-);
-const asOf = pulled.nysi[pulled.nysi.length - 1].t;
-for (const id of ["nasi", ...PCT_IDS]) {
-  const end = pulled[id][pulled[id].length - 1].t;
-  if (end !== asOf) throw new Error(`NYSI ends ${asOf}, ${id} ends ${end}`);
+function appendCumulative(doc, daily, spxBySession, sessions, asOf) {
+  const bars = doc.bars.slice();
+  const spx = (doc.spx ?? []).slice();
+  const have = new Set(bars.map((bar) => bar.t));
+  let cum = bars.at(-1).c;
+  for (const bar of daily) {
+    if (bar.t <= bars.at(-1)?.t) continue;
+    if (bar.t > asOf || !sessions.has(bar.t)) continue;
+    if (have.has(bar.t)) continue;
+    const spxClose = spxBySession.get(bar.t);
+    if (spxClose == null) throw new Error(`${doc.id} missing SPX on ${bar.t}`);
+    cum += bar.c;
+    bars.push({ t: bar.t, c: cum });
+    spx.push({ t: bar.t, c: spxClose });
+    have.add(bar.t);
+  }
+  if (bars.at(-1).t !== asOf) {
+    throw new Error(`${doc.id} cumulative ends ${bars.at(-1).t}, expected ${asOf}`);
+  }
+  if (spx.at(-1)?.t !== asOf) {
+    throw new Error(`${doc.id} SPX context ends ${spx.at(-1)?.t}, expected ${asOf}`);
+  }
+  return { ...doc, asOf, bars, spx };
 }
-const sessions = new Set(pulled.nysi.map((bar) => bar.t));
-const spx = pulled.spx.filter((bar) => bar.t <= asOf && sessions.has(bar.t));
+
+const core = {};
+for (const [id, symbol] of CORE) {
+  const bars = await pull(symbol);
+  core[id] = id === "nyhl" || id === "nyad" ? bars : requireHistory(id, bars);
+}
+
+const asOf = core.nysi.at(-1).t;
+for (const id of ["nasi", "spx", "nyhl", "nyad"]) {
+  const end = core[id].at(-1).t;
+  if (end < asOf) throw new Error(`NYSI ends ${asOf}, ${id} only reaches ${end}`);
+}
+const sessions = new Set(core.nysi.map((bar) => bar.t));
+const spx = core.spx.filter((bar) => bar.t <= asOf && sessions.has(bar.t));
+if (spx.at(-1)?.t !== asOf) throw new Error(`SPX missing the NYSI as-of session ${asOf}`);
+const spxBySession = new Map(spx.map((bar) => [bar.t, bar.c]));
+
+const pct = {};
+const pctErrors = [];
+for (const [id, symbol] of PCT) {
+  try {
+    const bars = await pull(symbol);
+    const end = bars.at(-1).t;
+    if (end !== asOf) throw new Error(`NYSI ends ${asOf}, ${id} ends ${end}`);
+    if (bars.length < 1500) throw new Error(`${symbol} returned only ${bars.length} sessions`);
+    pct[id] = bars;
+  } catch (error) {
+    pctErrors.push(`${id}: ${error.message ?? error}`);
+  }
+}
 
 const index = JSON.parse(readFileSync(join(out, "index.json"), "utf8"));
-for (const chart of index.charts) {
-  const bars = pulled[chart.id];
-  if (!bars) continue;
+const chartById = Object.fromEntries(index.charts.map((chart) => [chart.id, chart]));
+
+for (const id of ["nysi", "nasi"]) {
+  const chart = chartById[id];
   const doc = JSON.parse(readFileSync(join(out, chart.file), "utf8"));
-  const next = { ...doc, asOf, bars };
-  if (PCT_IDS.includes(chart.id)) {
-    next.provenance = {
-      ...(doc.provenance ?? {}),
-      kind: "feed",
-      note: `End-of-day ${doc.provenance?.feedSymbol ?? chart.id} from the desk feed through ${asOf}.`,
-    };
-  }
+  const bars = core[id].filter((bar) => bar.t <= asOf);
+  write(chart.file, { ...doc, asOf, bars });
+}
+
+write(index.overlay.file, {
+  ...JSON.parse(readFileSync(join(out, index.overlay.file), "utf8")),
+  asOf,
+  bars: spx,
+});
+
+for (const id of CUMULATIVE) {
+  const chart = chartById[id];
+  const doc = JSON.parse(readFileSync(join(out, chart.file), "utf8"));
+  const next = appendCumulative(doc, core[id], spxBySession, sessions, asOf);
   write(chart.file, next);
   if (chart.asOf) chart.asOf = asOf;
 }
-const overlay = JSON.parse(readFileSync(join(out, index.overlay.file), "utf8"));
-write(index.overlay.file, { ...overlay, asOf, bars: spx });
+
+for (const id of PCT_IDS) {
+  const bars = pct[id];
+  if (!bars) continue;
+  const chart = chartById[id];
+  const doc = JSON.parse(readFileSync(join(out, chart.file), "utf8"));
+  const next = {
+    ...doc,
+    asOf,
+    bars,
+    provenance: {
+      ...(doc.provenance ?? {}),
+      kind: "feed",
+      note: `End-of-day ${doc.provenance?.feedSymbol ?? chart.id} from the desk feed through ${asOf}.`,
+    },
+  };
+  write(chart.file, next);
+  if (chart.asOf) chart.asOf = asOf;
+}
+
 index.asOf = asOf;
 writeFileSync(join(out, "index.json"), `${JSON.stringify(index, null, 2)}\n`);
-const pct = PCT_IDS.map((id) => `${id.toUpperCase()} ${pulled[id].at(-1).c}`).join(" · ");
-console.log(`breadth through ${asOf}: NYSI ${pulled.nysi.at(-1).c} · NASI ${pulled.nasi.at(-1).c} · ${pct} · SPX ${spx.at(-1).c}`);
+
+const coreLine = `NYSI ${core.nysi.at(-1).c} · NASI ${core.nasi.at(-1).c} · NYHL Δ ${core.nyhl.at(-1).c} · NYAD Δ ${core.nyad.at(-1).c} · SPX ${spx.at(-1).c}`;
+if (pctErrors.length) {
+  console.warn(`breadth core through ${asOf}: ${coreLine}`);
+  console.warn(`participation skipped (${pctErrors.length}): ${pctErrors.join(" · ")}`);
+} else {
+  const pctLine = PCT_IDS.map((id) => `${id.toUpperCase()} ${pct[id].at(-1).c}`).join(" · ");
+  console.log(`breadth through ${asOf}: ${coreLine} · ${pctLine}`);
+}

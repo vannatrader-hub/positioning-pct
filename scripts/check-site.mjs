@@ -2388,10 +2388,12 @@ assert(JSON.stringify(RANGES.map((range) => range.label)) === '["3M","6M","1Y","
 assert(monthsBack("2026-10-29", 12) === "2025-10-29" && monthsBack("2026-03-31", 1) === "2026-02-28", "monthsBack keeps the calendar day");
 const breadthDir = join(root, "public/data/vault/breadth");
 const breadthIndex = JSON.parse(readFileSync(join(breadthDir, "index.json"), "utf8"));
-assert(breadthIndex.period === "1D" && breadthIndex.defaultRangeMonths === 12 && breadthIndex.maxRangeMonths === 120, "wall index: daily, 1Y default, 10Y range");
+assert(breadthIndex.period === "1D" && breadthIndex.defaultRangeMonths === 12 && breadthIndex.maxRangeMonths === 120, "wall index: daily, 1Y default, 10Y max");
 assert(JSON.stringify(breadthIndex.charts.map((chart) => chart.id)) === '["nysi","nasi","ncfd","ndtw","ncfi","ncth","nyhl","nyad"]' && breadthIndex.overlay.id === "spx", "wall charts are NYSI, NASI, the Nasdaq % above MA stack, NYHL, and NYAD over SPX");
+assert(/^\d{4}-\d{2}-\d{2}$/.test(breadthIndex.asOf), `wall index asOf ${breadthIndex.asOf}`);
 const breadthSpx = JSON.parse(readFileSync(join(breadthDir, breadthIndex.overlay.file), "utf8"));
 const breadthDocs = Object.fromEntries(breadthIndex.charts.map((chart) => [chart.id, JSON.parse(readFileSync(join(breadthDir, chart.file), "utf8"))]));
+const breadthCoreIds = ["nysi", "nasi", "nyhl", "nyad"];
 const breadthWant = {
   nysi: { label: "NY Summation", symbol: "NYSI", close: -504.41, ma: -605.79, chg: 43.36, pct: 7.92 },
   nasi: { label: "Nasdaq Summation", symbol: "NASI", close: -699.51, ma: -769.33, chg: 33.01, pct: 4.51 },
@@ -2413,8 +2415,6 @@ for (const [id, want] of Object.entries(breadthWant)) {
   assert(breadthSma(doc.bars, 8)[at] === want.ma, `wall ${id} Oct 29 MA(8) ${breadthSma(doc.bars, 8)[at]}`);
   const change = dayChange(doc.bars, at);
   assert(change.chg === want.chg && change.pct === want.pct, `wall ${id} Oct 29 change ${change.chg} (${change.pct}%)`);
-  const firstOfYear = doc.bars[breadthWindowStart(doc.bars, DEFAULT_MONTHS)].t;
-  assert(firstOfYear >= monthsBack(breadthIndex.asOf, 12) && firstOfYear <= "2025-11-03", `wall ${id} 1Y window opens ${firstOfYear}`);
   const read = breadthRead(doc);
   assert(read.buy === -1000 && read.touches > 0 && read.lastTouch, `wall ${id} finds closes through the buy line in ten years`);
 }
@@ -2424,8 +2424,11 @@ for (const [id, spec] of [
 ]) {
   const doc = breadthDocs[id];
   assert(doc.kind === "cumulative" && doc.average === spec.average && doc.period === spec.period && doc.defaultRangeMonths === (id === "nyhl" ? 60 : 36), `${id} is the cumulative line`);
-  assert(doc.asOf === "2026-10-30" && doc.bars.at(-1).t === "2026-10-30" && doc.spx.at(-1).t === "2026-10-30" && doc.spx.at(-1).c === 7580.07, `${id} runs through the Oct 30 close`);
+  assert(doc.asOf === breadthIndex.asOf && doc.bars.at(-1).t === breadthIndex.asOf && doc.spx.at(-1).t === breadthIndex.asOf, `${id} runs through index asOf ${breadthIndex.asOf}`);
   assert(doc.bars.length === doc.spx.length && doc.bars.every((bar, i) => bar.t === doc.spx[i].t && (i === 0 || bar.t > doc.bars[i - 1].t)), `${id} sessions line up with its S&P 500 context`);
+  const oct30 = doc.bars.find((bar) => bar.t === "2026-10-30");
+  assert(oct30 && Number.isFinite(oct30.c), `${id} keeps the Oct 30 cumulative print in history`);
+  assert(doc.spx.find((bar) => bar.t === "2026-10-30")?.c === 7580.07, `${id} keeps the Oct 30 SPX context print`);
   const avg = averageOf(doc.bars, doc);
   const crosses = averageCrosses(doc.bars.map((bar) => bar.c), avg);
   assert(crosses.some((cross) => cross.side === "above") && crosses.some((cross) => cross.side === "below"), `${id} marks crosses above and below the average`);
@@ -2443,19 +2446,42 @@ assert(bucketPctile(20) === "soft" && bucketPctile(20.01) === "mid" && bucketPct
 assert(pctileOrdinal(20) === "20th" && pctileOrdinal(21) === "21st" && pctileOrdinal(12) === "12th", "percentile ordinals keep 11–13 as th");
 for (const [id, want] of Object.entries(pctWant)) {
   const doc = breadthDocs[id];
+  const last = doc.bars.at(-1);
   assert(doc.kind === "pct-above-ma" && doc.symbol === want.symbol && doc.label === want.label && doc.window === want.window, `${id} is the participation pane`);
   assert(doc.universe === want.universe && JSON.stringify(doc.rails) === "[20,40,60,80]" && doc.softPctile === 20 && doc.crowdedPctile === 80, `${id} keeps 20/80 Soft/Crowded bands`);
-  assert(doc.defaultRangeMonths === want.months && doc.asOf === "2026-11-02" && doc.bars.at(-1).t === "2026-11-02" && doc.bars.at(-1).c === want.close, `${id} last ${doc.bars.at(-1)?.c} on ${doc.bars.at(-1)?.t}`);
-  assert(doc.provenance?.kind === "desk-computed" && doc.provenance.feedSymbol === `$${want.symbol}` && !/tradingview|darkmatter|optionshawk/i.test(JSON.stringify(doc)), `${id} is a desk-computed series with a feed replacement path`);
+  assert(doc.defaultRangeMonths === want.months && doc.asOf === last.t && last.t <= breadthIndex.asOf, `${id} last ${last?.c} on ${last?.t} (index asOf ${breadthIndex.asOf})`);
+  assert(doc.provenance?.kind && doc.provenance.feedSymbol === `$${want.symbol}` && doc.provenance.source && doc.provenance.note, `${id} carries provenance fields`);
+  assert(!/tradingview|darkmatter|optionshawk|stockcharts/i.test(JSON.stringify(doc)), `${id} stays desk-labeled without vendor branding`);
   assert(doc.bars.length >= 1500 && doc.bars.every((bar, i) => /^\d{4}-\d{2}-\d{2}$/.test(bar.t) && bar.c >= 0 && bar.c <= 100 && (i === 0 || bar.t > doc.bars[i - 1].t)), `${id} is a dated 0–100 series`);
-  assert(breadthWindowStart(doc.bars, MAX_MONTHS) >= 0 && doc.bars[breadthWindowStart(doc.bars, MAX_MONTHS)].t <= monthsBack("2026-11-02", 120), `${id} covers ten years`);
+  assert(breadthWindowStart(doc.bars, MAX_MONTHS) >= 0 && doc.bars[breadthWindowStart(doc.bars, MAX_MONTHS)].t <= monthsBack(breadthIndex.asOf, 120), `${id} covers ten years`);
+  const hist = doc.bars.find((bar) => bar.t === "2026-11-02");
+  assert(hist && hist.c === want.close, `${id} keeps the Nov 2 history print ${want.close}`);
+  const histAt = doc.bars.findIndex((bar) => bar.t === "2026-11-02");
+  const histRead = pctileRead(doc, { throughIndex: histAt });
+  assert(histRead.close === want.close && histRead.date === "2026-11-02" && Number.isFinite(histRead.pctile) && bucketPctile(histRead.pctile) === histRead.state, `${id} Nov 2 card read uses this series' historical %ile`);
   const read = pctileRead(doc);
-  assert(read.close === want.close && read.date === "2026-11-02" && Number.isFinite(read.pctile) && bucketPctile(read.pctile) === read.state, `${id} card read uses this series’ historical %ile`);
+  assert(read.date === last.t && read.close === last.c && Number.isFinite(read.pctile) && bucketPctile(read.pctile) === read.state, `${id} card read tracks the latest bar`);
 }
-assert(pctileRead(breadthDocs.ncfi).state === "soft" && pctileRead(breadthDocs.ncfi).pctile <= 20, "Nov 2 Nasdaq 50-day sits in the left-tail %ile (Soft)");
-assert(pctileRead(breadthDocs.ncfd).state === "mid", "Nov 2 Nasdaq 5-day is mid, not a raw-level washout");
-assert(readFileSync(join(root, "scripts/pull-breadth.mjs"), "utf8").includes("$NCFD") && readFileSync(join(root, "scripts/pull-breadth.mjs"), "utf8").includes("PCT_IDS"), "the breadth pull refreshes NCFD / NDTW / NCFI / NCTH and leaves NYHL / NYAD in place");
+const ncfiNov2 = breadthDocs.ncfi.bars.findIndex((bar) => bar.t === "2026-11-02");
+const ncfdNov2 = breadthDocs.ncfd.bars.findIndex((bar) => bar.t === "2026-11-02");
+assert(pctileRead(breadthDocs.ncfi, { throughIndex: ncfiNov2 }).state === "soft" && pctileRead(breadthDocs.ncfi, { throughIndex: ncfiNov2 }).pctile <= 20, "Nov 2 Nasdaq 50-day sits in the left-tail %ile (Soft)");
+assert(pctileRead(breadthDocs.ncfd, { throughIndex: ncfdNov2 }).state === "mid", "Nov 2 Nasdaq 5-day is mid, not a raw-level washout");
+for (const chart of breadthIndex.charts) {
+  const doc = breadthDocs[chart.id];
+  const last = doc.bars.at(-1).t;
+  assert(last <= breadthIndex.asOf, `${chart.id} last bar ${last} is not after index asOf ${breadthIndex.asOf}`);
+  if (breadthCoreIds.includes(chart.id)) {
+    assert(last === breadthIndex.asOf && doc.asOf === breadthIndex.asOf, `${chart.id} is a core series pinned to index asOf`);
+  }
+  if (chart.asOf != null) assert(chart.asOf === doc.asOf && chart.asOf === last, `${chart.id} index asOf matches the file`);
+}
+assert(breadthSpx.bars.at(-1).t === breadthIndex.asOf && breadthSpx.asOf === breadthIndex.asOf, "SPX overlay matches index asOf");
+const pullBreadthSrc = readFileSync(join(root, "scripts/pull-breadth.mjs"), "utf8");
+assert(pullBreadthSrc.includes("$NCFD") && pullBreadthSrc.includes("PCT_IDS") && pullBreadthSrc.includes("appendCumulative"), "the breadth pull ships core including NYHL/NYAD append and treats participation as best-effort");
+assert(!pullBreadthSrc.includes("stockcharts.com") && !readFileSync(join(root, "scripts/breadth-nightly.mjs"), "utf8").includes("stockcharts.com"), "breadth scripts never embed the feed URL");
+assert(!readFileSync(join(root, "scripts/seed-nasdaq-ma.mjs"), "utf8").includes("AS_OF_CAP"), "nasdaq MA seed has no hardcoded as-of cap");
 assert(packageJson.scripts["seed:nasdaq-ma"] === "node scripts/seed-nasdaq-ma.mjs", "npm run seed:nasdaq-ma rebuilds the computed participation series");
+assert(packageJson.scripts["breadth:nightly"] === "node scripts/breadth-nightly.mjs", "npm run breadth:nightly runs the weeknight pull + seed");
 
 /* Vault portfolio: personal book, gated like the other Vault pages. Open lines are still held. */
 const bookFile = "vault/portfolio/index.html";
