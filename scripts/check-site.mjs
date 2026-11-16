@@ -2305,6 +2305,12 @@ const volPage = readFileSync(join(root, "vol/index.html"), "utf8");
 assert(publicWall.includes(">Vol Stress</h2>") && publicWall.includes("NY Highs − Lows") && publicWall.includes("NY Advance − Decline"), "the public Dashboard wall names Vol Stress, NY highs−lows, and advance−decline");
 assert(!/Spot Vol Beta|UV_|desk estimate|svb-dial/i.test(publicWall + volPage), "the public wall hides the gauge, the formula, and the old name");
 assert(!publicWall.includes("on the day") && !publicWall.includes("MA(8)"), "the public wall does not ship the breadth status strip");
+for (const [name, html] of [
+  ["Dashboard", publicWall],
+  ["/vol/", volPage],
+]) {
+  assert(!/buy[- ]line/i.test(html) && !html.includes("MA(8)") && !html.includes("At the buy line"), `public ${name} markup has no buy-line or MA(8) tip-sheet wording on the breadth cards`);
+}
 const familyWall = readFileSync(join(root, "insight/vol/index.html"), "utf8");
 assert(FAMILY_ENTRY === "m4c8q" && familyWall.includes(`data-family-entry="${FAMILY_ENTRY}"`) && familyWall.includes('src="/src/hub-gate.js"') && familyWall.includes('id="vault-content"'), "the gauge stays on the family wall");
 assert(svbJs.includes("isFamilySurface") && svbJs.includes("publicBody") && svbJs.includes("svbDial("), "family renders the gauge and the public card renders the desk number");
@@ -2819,6 +2825,13 @@ const breadthJs = readFileSync(join(root, "src/vault-breadth.js"), "utf8");
 for (const piece of ["data/vault/breadth/", 'input.type = "range"', "MAX_MONTHS", "BUY ", "buyLine", "$SPX", "MA(", "directionRuns", "[data-breadth]", "onDeskReady", "bw-cross", "pct-above-ma", "PCT_LINE"]) {
   assert(breadthJs.includes(piece), `breadth cards render ${piece}`);
 }
+/* Public Dashboard + /vol/: tip-sheet Above/Below zero only. Family Hub keeps buy-line / MA(8). */
+assert(breadthJs.includes("const plain = !isFamilySurface()"), "breadth cards gate the tip-sheet on isFamilySurface");
+assert(breadthJs.includes("const atBuy = !plain && read.atBuy"), "public surfaces never chip 'At the buy line'");
+assert(breadthJs.includes('"Above zero"') && breadthJs.includes('"Below zero"'), "public tip-sheet signal is Above/Below zero");
+assert(breadthJs.includes("At the buy line") && breadthJs.includes("buy line") && /MA\(\$\{doc\.ma\}\)/.test(breadthJs), "family Hub still ships buy-line and MA(8) detail");
+assert(familyWall.includes(`data-family-entry="${FAMILY_ENTRY}"`) && familyWall.includes('src="/src/vault-breadth.js"'), "Hub vol page is the family surface that unlocks the full breadth read");
+
 for (const file of ["src/vault-breadth.js", "src/breadth.js", "scripts/pull-breadth.mjs", "scripts/seed-nasdaq-ma.mjs"]) {
   const text = readFileSync(join(root, file), "utf8");
   assert(!/stockcharts|<img\b|<iframe|©|tradingview|darkmatter|optionshawk/i.test(text), `${file} carries chart-vendor branding or an embed`);

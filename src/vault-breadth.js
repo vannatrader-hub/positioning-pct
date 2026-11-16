@@ -839,8 +839,10 @@ function readLine(doc, { plain = false } = {}) {
   }
   const read = breadthRead(doc);
   const line = el("p", "bw-read");
-  const status = el("span", `bw-status ${read.atBuy ? "is-buy" : read.close < 0 ? "is-weak" : "is-firm"}`);
-  status.textContent = read.atBuy ? "At the buy line" : read.close < 0 ? "Below zero" : "Above zero";
+  /* Public / Vault: tip-sheet signal only. Family Hub keeps buy-line / MA(8) detail. */
+  const atBuy = !plain && read.atBuy;
+  const status = el("span", `bw-status ${atBuy ? "is-buy" : read.close < 0 ? "is-weak" : "is-firm"}`);
+  status.textContent = atBuy ? "At the buy line" : read.close < 0 ? "Below zero" : "Above zero";
   line.append(status, el("strong", "bw-read-value", minus(fixed(read.close))));
   if (!plain) {
     line.append(
