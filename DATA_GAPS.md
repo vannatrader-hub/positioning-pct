@@ -18,10 +18,10 @@ History starts once enough names have an N-session average (5d from Nov 2014, 20
 To replace the computed files with the desk EOD INDEX feed:
 
 ```bash
-BREADTH_FEED="<desk EOD text feed>" npm run pull:breadth
+BREADTH_FEED="<desk EOD text feed>" npm run breadth:nightly
 ```
 
-That pull writes `$NCFD`, `$NDTW`, `$NCFI`, and `$NCTH` and marks `provenance.kind` `"feed"`. Re-running `node scripts/seed-nasdaq-ma.mjs` rebuilds the computed series. Neither path should be described on the product surface as a live quote.
+The weeknight script pulls core breadth (including NYHL / NYAD daily appends), then rebuilds participation from Yahoo when the feed has no `$NCFD` / `$NDTW` / `$NCFI` / `$NCTH` prints. A successful feed hit for those symbols marks `provenance.kind` `"feed"`. Neither path should be described on the product surface as a live quote.
 
 ## Soft ↔ Crowded — not extended
 
