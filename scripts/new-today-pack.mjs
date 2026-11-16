@@ -39,7 +39,9 @@
  * updatedAt only when the item list changes. Public labels are Desk, a bank
  * or outlet from SOURCE_LABELS, or X. Copy is scrubbed before it is written.
  * Vault-owned ids (vol-stress-*, soft-crowded-*) are refreshed in place when
- * the artifact changes. Watcher rows are append-only.
+ * the artifact changes. Watcher rows are append-only. Retention stays wide
+ * enough for the shared catch-up window in src/new-today-window.js: today plus
+ * the previous weekday, or Friday through the weekend/Monday.
  *
  * On 2026-11-01 the box watcher roots were not mounted, so no Oct 30–31
  * session wrap, flow ticket, or chart note was backfilled. The committed
@@ -50,7 +52,7 @@ import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, w
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { SOURCE_LABELS, deskDay, deskDayStart } from "../src/new-today-window.js";
+import { SOURCE_LABELS, catchUpDays, catchUpRange, deskDay, deskDayStart } from "../src/new-today-window.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DESK_TZ = "America/Chicago";
@@ -740,6 +742,26 @@ export function runSelfTest() {
   const twice = mergeFeed(once.feed, [flow], new Date("2026-11-01T19:00:00Z"));
   if (once.added.length !== 1 || twice.added.length || twice.changed) throw new Error("pack merge is not idempotent");
   if (once.feed.items[0].id !== twice.feed.items[0].id) throw new Error("dedupe dropped the row");
+  if (JSON.stringify(catchUpDays("2026-11-07")) !== '["2026-11-07","2026-11-06"]') {
+    throw new Error("Saturday catch-up must cover Friday and Saturday");
+  }
+  if (JSON.stringify(catchUpDays("2026-11-08")) !== '["2026-11-08","2026-11-07","2026-11-06"]') {
+    throw new Error("Sunday catch-up must cover Friday through Sunday");
+  }
+  if (JSON.stringify(catchUpDays("2026-11-09")) !== '["2026-11-09","2026-11-08","2026-11-07","2026-11-06"]') {
+    throw new Error("Monday catch-up must cover Friday through Monday");
+  }
+  if (JSON.stringify(catchUpDays("2026-11-10")) !== '["2026-11-10","2026-11-09"]') {
+    throw new Error("Tuesday catch-up must stay today plus the previous weekday");
+  }
+  if (JSON.stringify(catchUpDays("2026-11-13")) !== '["2026-11-13","2026-11-12"]') {
+    throw new Error("Friday catch-up must stay today plus the previous weekday");
+  }
+  const mondayRange = catchUpRange("2026-11-09");
+  if (mondayRange.start !== Date.parse("2026-11-06T00:00:00-06:00") || mondayRange.end !== Date.parse("2026-11-10T00:00:00-06:00")) {
+    throw new Error("Monday window must run Friday 12:00 AM CT through Monday 11:59 PM CT");
+  }
+  if (KEEP_DAYS < catchUpDays("2026-11-09").length) throw new Error("pack retention must cover the Monday catch-up window");
   return "new-today pack self-test ok";
 }
 

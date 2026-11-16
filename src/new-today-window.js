@@ -46,6 +46,24 @@ function shiftDay(day, delta) {
   return new Date(Date.UTC(y, m - 1, d + delta)).toISOString().slice(0, 10);
 }
 
+/** Sunday = 0 … Saturday = 6 for a YYYY-MM-DD calendar date (noon UTC avoids DST edges). */
+export function deskWeekday(day) {
+  if (typeof day !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(day)) return null;
+  const [y, m, d] = day.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d, 12)).getUTCDay();
+}
+
+/** Monday catch-up covers Friday through Monday. */
+export function isMondayCatchUp(today) {
+  return deskWeekday(today) === 1;
+}
+
+/** Saturday, Sunday, and Monday back the window to the previous Friday and use "since Friday" copy. */
+export function usesSinceFriday(today) {
+  const weekday = deskWeekday(today);
+  return weekday === 0 || weekday === 1 || weekday === 6;
+}
+
 function toInstant(value) {
   const instant = value instanceof Date ? value : new Date(value);
   return Number.isNaN(instant.getTime()) ? null : instant;
@@ -115,19 +133,45 @@ export function itemsForDay(items, day) {
   return itemsForDays(items, [day]);
 }
 
-/** Default New Today dates: the Chicago calendar day, then the previous one. */
+/**
+ * Default New Today dates, newest first (America/Chicago calendar dates).
+ * Monday: Mon, Sun, Sat, Fri. Sunday: Sun, Sat, Fri. Saturday: Sat, Fri.
+ * Tue–Fri: today plus the previous weekday (the previous calendar day on those dates).
+ */
 export function catchUpDays(today) {
+  const weekday = deskWeekday(today);
+  if (weekday === 1) return [today, shiftDay(today, -1), shiftDay(today, -2), shiftDay(today, -3)];
+  if (weekday === 0) return [today, shiftDay(today, -1), shiftDay(today, -2)];
   return [today, prevDeskDay(today)];
+}
+
+/** Half-open [oldest midnight CT, next midnight after today) for the catch-up window. */
+export function catchUpRange(today) {
+  const days = catchUpDays(today);
+  const oldest = days.at(-1);
+  const newest = days[0];
+  return {
+    days,
+    start: Date.parse(deskDayStart(oldest)),
+    end: Date.parse(deskDayStart(nextDeskDay(newest))),
+  };
 }
 
 /**
  * "today", "yesterday", or "earlier" for a Chicago calendar date.
- * A prior day stays yesterday; it is never reported as today.
+ * A prior day stays yesterday or earlier; it is never reported as today.
+ * On weekend/Monday windows, only the previous calendar day is "yesterday";
+ * older Friday/Saturday rows keep earlier date labels.
  */
 export function dayRelation(day, today) {
   if (day === today) return "today";
   if (day === prevDeskDay(today)) return "yesterday";
   return "earlier";
+}
+
+/** Short prior-window word for counts and empty copy. Missing today defaults to yesterday. */
+export function priorWindowWord(today) {
+  return usesSinceFriday(today) ? "since Friday" : "yesterday";
 }
 
 /** Visible date label. Today and Yesterday keep the original calendar date beside the word. */
@@ -140,9 +184,9 @@ export function rowDayLabel(publishedAt, today) {
 }
 
 /**
- * Rows for one New Today view. Catch-up is today and yesterday. A day view is one
- * calendar date. Section and the public Options Flow cut both narrow that set.
- * publishedAt is left as stored.
+ * Rows for one New Today view. Catch-up is today plus the previous weekday, or the
+ * Friday-backed weekend/Monday window. A day view is one calendar date. Section and
+ * the public Options Flow cut both narrow that set. publishedAt is left as stored.
  */
 export function visibleDeskItems(items, { today, mode = "catchup", day, section, publicOnly = false } = {}) {
   const source = publicOnly ? publicDeskItems(items) : (items ?? []);
@@ -155,68 +199,93 @@ export function catchUpSummary(items, today) {
   const days = catchUpDays(today);
   const rows = itemsForDays(items, days);
   const todayCount = rows.filter((item) => deskDay(item.publishedAt) === days[0]).length;
-  const yesterdayCount = rows.filter((item) => deskDay(item.publishedAt) === days[1]).length;
-  return { days, rows, todayCount, yesterdayCount, total: todayCount + yesterdayCount };
+  const yesterdayCount = rows.length - todayCount;
+  return {
+    days,
+    rows,
+    today,
+    todayCount,
+    yesterdayCount,
+    total: rows.length,
+    sinceFridayWindow: usesSinceFriday(today),
+  };
 }
 
-/** Badge and section counts. Yesterday-only totals are not called new today. */
+/** Badge and section counts. Prior-only totals are not called new today. */
 export function catchUpCountText(summary, { quiet = "Quiet" } = {}) {
-  const { todayCount, yesterdayCount, total } = summary;
+  const { todayCount, yesterdayCount, total, today, days } = summary;
+  const prior = priorWindowWord(today ?? days?.[0]);
   if (!total) return quiet;
-  if (todayCount && yesterdayCount) return `${todayCount} today · ${yesterdayCount} yesterday`;
+  if (todayCount && yesterdayCount) {
+    return prior === "yesterday" ? `${todayCount} today · ${yesterdayCount} yesterday` : `${todayCount} today · ${yesterdayCount} since Friday`;
+  }
   if (todayCount) return `${todayCount} today`;
-  return `${yesterdayCount} from yesterday`;
+  return prior === "yesterday" ? `${yesterdayCount} from yesterday` : `${yesterdayCount} since Friday`;
 }
 
 export function catchUpChip(summary, updatedAt) {
   const stamp = updatedAt ? `Feed updated ${dayLabel(deskDay(updatedAt))} · ${ctTime(updatedAt)}` : "Feed time is not stamped";
-  const { todayCount, yesterdayCount, total } = summary;
-  let sub = "Quiet since yesterday";
-  let detail = "nothing new on the Desk today or yesterday";
+  const { todayCount, yesterdayCount, total, today, days } = summary;
+  const prior = priorWindowWord(today ?? days?.[0]);
+  let sub = prior === "yesterday" ? "Quiet since yesterday" : "Quiet since Friday";
+  let detail = prior === "yesterday" ? "nothing new on the Desk today or yesterday" : "nothing new on the Desk today or since Friday";
   if (todayCount && yesterdayCount) {
-    sub = `${todayCount} today · ${yesterdayCount} yesterday`;
-    detail = `${todayCount} today and ${yesterdayCount} yesterday`;
+    sub = prior === "yesterday" ? `${todayCount} today · ${yesterdayCount} yesterday` : `${todayCount} today · ${yesterdayCount} since Friday`;
+    detail = prior === "yesterday" ? `${todayCount} today and ${yesterdayCount} yesterday` : `${todayCount} today and ${yesterdayCount} since Friday`;
   } else if (todayCount) {
     sub = `${todayCount} today`;
-    detail = `${todayCount} today, none yesterday`;
+    detail = prior === "yesterday" ? `${todayCount} today, none yesterday` : `${todayCount} today, none since Friday`;
   } else if (yesterdayCount) {
-    sub = `${yesterdayCount} from yesterday`;
-    detail = `nothing new today. ${yesterdayCount} from yesterday`;
+    sub = prior === "yesterday" ? `${yesterdayCount} from yesterday` : `${yesterdayCount} since Friday`;
+    detail = prior === "yesterday" ? `nothing new today. ${yesterdayCount} from yesterday` : `nothing new today. ${yesterdayCount} since Friday`;
   }
   const aria = `New Today: ${detail}. ${stamp}.`;
   return { sub, aria, title: aria, lit: todayCount > 0, quiet: total === 0, stamp };
 }
 
-export function feedLine(updatedAt, { quiet, mode }) {
+export function feedLine(updatedAt, { quiet, mode, today } = {}) {
+  const prior = mode === "catchup" ? priorWindowWord(today) : "yesterday";
+  const quietCatch = prior === "yesterday" ? "nothing new today or yesterday" : "nothing new today or since Friday";
   if (!updatedAt) {
     if (!quiet) return "Feed time is not stamped.";
-    return mode === "catchup" ? "Feed time is not stamped. Nothing new today or yesterday." : "Feed time is not stamped. Nothing new that desk day.";
+    return mode === "catchup" ? `Feed time is not stamped. Nothing new today or ${prior === "yesterday" ? "yesterday" : "since Friday"}.` : "Feed time is not stamped. Nothing new that desk day.";
   }
   const stamp = `Feed updated ${dayLabel(deskDay(updatedAt))} · ${ctTime(updatedAt)}`;
   if (!quiet) return stamp;
-  return mode === "catchup" ? `${stamp} · nothing new today or yesterday` : `${stamp} · nothing new that desk day`;
+  return mode === "catchup" ? `${stamp} · ${quietCatch}` : `${stamp} · nothing new that desk day`;
 }
 
-export function emptyDeskMessage(mode) {
-  return mode === "catchup" ? "Nothing new today or yesterday." : "Nothing new that desk day.";
+export function emptyDeskMessage(mode, today) {
+  if (mode !== "catchup") return "Nothing new that desk day.";
+  return priorWindowWord(today) === "yesterday" ? "Nothing new today or yesterday." : "Nothing new today or since Friday.";
 }
 
 export function emptyDayMessage(relation) {
-  return relation === "today" ? "Nothing new today." : "Nothing new yesterday.";
+  if (relation === "today") return "Nothing new today.";
+  if (relation === "yesterday") return "Nothing new yesterday.";
+  return "Nothing new that desk day.";
 }
 
-export function sectionEmptyMessage(section, mode) {
+export function sectionEmptyMessage(section, mode, today) {
   if (mode !== "catchup") return section.empty;
-  if (section.id === "research") return "No research charts or bank notes today or yesterday.";
-  return `Nothing new in ${section.title} today or yesterday.`;
+  const prior = priorWindowWord(today);
+  const tail = prior === "yesterday" ? "today or yesterday" : "today or since Friday";
+  if (section.id === "research") return `No research charts or bank notes ${tail}.`;
+  return `Nothing new in ${section.title} ${tail}.`;
 }
 
 export function yesterdayNote(today) {
-  const prior = prevDeskDay(today);
+  const days = catchUpDays(today);
+  if (days.length > 2) {
+    const oldest = days.at(-1);
+    const newestPrior = days[1];
+    return `Nothing new today (${dayLabel(today)}). Rows below landed ${dayLabel(oldest)} → ${dayLabel(newestPrior)} and keep those dates.`;
+  }
+  const prior = days[1];
   return `Nothing new today (${dayLabel(today)}). Rows below landed yesterday (${dayLabel(prior)}) and keep that date.`;
 }
 
-/** URL state. No day, or a day that is not strictly earlier, is the two-day catch-up. */
+/** URL state. No day, or a day that is not strictly earlier, is the default catch-up window. */
 export function readDeskState(search, today) {
   const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
   const asked = params.get("day");
@@ -237,17 +306,25 @@ export function deskStateUrl(state) {
   return query ? `?${query}` : "./";
 }
 
-/** Earlier than the oldest day on screen. Catch-up already shows yesterday, so this opens the day before it. */
+/** Earlier than the oldest day on screen. Catch-up already shows its prior days, so this opens the day before the oldest. */
 export function earlierState(state) {
-  const anchor = state.mode === "catchup" ? prevDeskDay(state.today) : state.day;
+  const anchor = state.mode === "catchup" ? catchUpDays(state.today).at(-1) : state.day;
   return { ...state, mode: "day", day: prevDeskDay(anchor) };
 }
 
-/** The next single desk day, or the two-day catch-up once the next day is today. */
+/**
+ * The next single desk day, or the catch-up once the next day reaches today.
+ * On Fri-backed weekend/Monday windows, Later skips days already inside the catch-up
+ * (so Thursday jumps back to catch-up instead of stepping Fri → Sat → Sun).
+ */
 export function laterState(state) {
   if (state.mode !== "day") return null;
   const next = nextDeskDay(state.day);
   if (next >= state.today) return { ...state, mode: "catchup", day: state.today };
+  const windowDays = catchUpDays(state.today);
+  if (windowDays.includes(next) && next !== prevDeskDay(state.today)) {
+    return { ...state, mode: "catchup", day: state.today };
+  }
   return { ...state, mode: "day", day: next };
 }
 
@@ -268,9 +345,14 @@ export function windowLabel(day) {
   return `${dayLabel(day)} · 12:00 AM CT → ${dayLabel(day)} · 11:59 PM CT`;
 }
 
-/** Today and yesterday as two calendar days, each midnight to 11:59 PM CT. */
+/** Catch-up window as calendar days, each midnight to 11:59 PM CT. Fri-backed windows name the Friday open. */
 export function catchUpWindowLabel(today) {
-  const [current, prior] = catchUpDays(today);
+  const days = catchUpDays(today);
+  if (usesSinceFriday(today)) {
+    const oldest = days.at(-1);
+    return `${dayLabel(oldest)} · 12:00 AM CT → ${dayLabel(days[0])} · 11:59 PM CT`;
+  }
+  const [current, prior] = days;
   return `Today ${dayLabel(current)} · Yesterday ${dayLabel(prior)} · 12:00 AM CT through 11:59 PM CT`;
 }
 
