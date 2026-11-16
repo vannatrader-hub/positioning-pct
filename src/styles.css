@@ -6348,7 +6348,8 @@ a.nt-row:hover {
   border-color: var(--line-strong);
 }
 
-.nt-day.is-yesterday { color: var(--muted); }
+.nt-day.is-yesterday,
+.nt-day.is-earlier { color: var(--muted); }
 
 .nt-dayhead {
   margin: 14px 0 8px;

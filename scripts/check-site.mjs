@@ -14,7 +14,7 @@ import { VAULT_ALLOWLIST, isAllowlisted } from "../src/vault-allowlist.js";
 import { FAMILY_ALLOWLIST, FAMILY_ENTRY } from "../src/family-allowlist.js";
 import { PRODUCT_FEEDS } from "../src/product-feeds.js";
 import { errorCopy, nextStep } from "../src/vault-signin.js";
-import { NT_SECTIONS, PUBLIC_NT_SECTIONS, SOURCE_LABELS, catchUpChip, catchUpCountText, catchUpDays, catchUpSummary, catchUpWindowLabel, dayRelation, deskDay, deskDayStart, deskStateUrl, deskWindow, earlierState, emptyDeskMessage, feedLine, itemsForDay, laterState, publicDeskItems, readDeskState, rowDayLabel, visibleDeskItems, windowLabel, yesterdayNote } from "../src/new-today-window.js";
+import { NT_SECTIONS, PUBLIC_NT_SECTIONS, SOURCE_LABELS, catchUpChip, catchUpCountText, catchUpDays, catchUpRange, catchUpSummary, catchUpWindowLabel, dayRelation, deskDay, deskDayStart, deskStateUrl, deskWindow, earlierState, emptyDeskMessage, feedLine, isMondayCatchUp, itemsForDay, laterState, priorWindowWord, publicDeskItems, readDeskState, rowDayLabel, usesSinceFriday, visibleDeskItems, windowLabel, yesterdayNote } from "../src/new-today-window.js";
 import { itemFromSoftCrowded, itemFromVolStress, planNewToday, runSelfTest, scrubCopy } from "./new-today-pack.mjs";
 import { BUY_LINE, CROWDED_PCTILE, DEFAULT_MONTHS, MAX_MONTHS, PCT_RAILS, RANGES, SOFT_PCTILE, averageCrosses, averageOf, breadthRead, bucketPctile, dayChange, monthsBack, percentileRank, pctileOrdinal, pctileRead, sma as breadthSma, windowStart as breadthWindowStart } from "../src/breadth.js";
 import { CSR_PARAMS, biasOf, csrPanel, csrSeries, cycleOf, panelText, regimeOf as csrRegimeOf, zColor } from "../src/csr.js";
@@ -1012,10 +1012,10 @@ assert(
 const ntPage = readFileSync(join(root, "new-today/index.html"), "utf8");
 const homePage = readFileSync(join(root, "index.html"), "utf8");
 assert(ntPage.includes("12:00 AM through 11:59 PM"), "New Today lede describes the calendar desk day");
-assert(ntPage.includes("today and yesterday") && ntPage.includes("Each row keeps"), "New Today lede includes yesterday and keeps the original calendar day");
+assert(ntPage.includes("today and yesterday") && ntPage.includes("Friday through Monday") && ntPage.includes("Each row keeps"), "New Today lede includes yesterday, the Monday window, and keeps the original calendar day");
 assert(
-  readFileSync(join(root, `${FAMILY_ENTRY}/new-today/index.html`), "utf8").includes("today and yesterday"),
-  "private New Today lede includes yesterday",
+  readFileSync(join(root, `${FAMILY_ENTRY}/new-today/index.html`), "utf8").includes("Friday through Monday"),
+  "private New Today lede includes the Monday window",
 );
 for (const [file, text] of [
   ["new-today/index.html", ntPage],
@@ -1032,7 +1032,7 @@ assert(ntPage.includes('data-surface="public"') && ntPage.includes('id="nt-fresh
 assert(readFileSync(join(root, "src/new-today-window.js"), "utf8").includes("Feed updated"), "New Today copy names when the feed was updated");
 assert(readFileSync(join(root, "src/new-today.js"), "utf8").includes("rowDayLabel"), "New Today rows keep a Today or Yesterday label");
 const chipJs = readFileSync(join(root, "src/new-today-chip.js"), "utf8");
-assert(chipJs.includes("catchUpChip"), "the Dashboard chip counts today and yesterday");
+assert(chipJs.includes("catchUpChip"), "the Dashboard chip counts the shared catch-up window");
 assert(chipJs.includes("onDeskReady"), "the New Today chip mounts after the Vault gate clones the template");
 assert(chipJs.includes('dataset.public === "1"'), "only data-public=1 chips drop Options Flow");
 assert(
@@ -1140,7 +1140,7 @@ assert(itemsForDay(nt.items ?? [], "2026-11-15").length === 2, "Nov 15 desk day 
 assert(
   visibleDeskItems(nt.items, { today: "2026-11-09", mode: "catchup" }).map((item) => item.id).join() ===
     "2026-11-09-ccj-dollar,2026-11-09-burl-flow,2026-11-09-cbre-dollar,2026-11-09-desk-recap,2026-11-09-desk-blitz,2026-11-08-ares-flow,2026-11-08-msi-flow",
-  "Nov 9 catch-up is today plus yesterday and keeps each row's original date",
+  "Nov 9 catch-up lists the live Mon/Sun rows still in the feed",
 );
 assert(
   rowDayLabel("2026-11-09T18:44:00-06:00", "2026-11-09").label === "Today · Mon, Nov 9" &&
@@ -1287,21 +1287,43 @@ const dstRows = [
   { id: "sf-today", section: "positioning", publishedAt: "2026-03-09T05:00:00Z" },
 ];
 assert(deskDay("2026-11-01T01:30:00-05:00") === "2026-11-01" && deskDay("2026-11-01T01:30:00-06:00") === "2026-11-01", "both fall-back 1:30 AM hours stay on Nov 1");
+assert(isMondayCatchUp("2026-11-02"), "Nov 2 2026 is Monday after the fall-back");
+assert(
+  JSON.stringify(catchUpDays("2026-11-02")) === '["2026-11-02","2026-11-01","2026-10-31","2026-10-30"]',
+  "Monday after fall-back still covers Friday through Monday",
+);
 const fallCatch = visibleDeskItems(dstRows, { today: "2026-11-02", mode: "catchup" });
-assert(fallCatch.map((item) => item.id).join() === "fb-next,fb-after,fb-before", `fall-back catch-up ${fallCatch.map((item) => item.id).join()}`);
+assert(fallCatch.map((item) => item.id).join() === "fb-next,fb-after,fb-before,fb-prior", `fall-back Monday catch-up ${fallCatch.map((item) => item.id).join()}`);
 assert(rowDayLabel(fallCatch[0].publishedAt, "2026-11-02").relation === "today", "Nov 2 12:30 AM CST is today after the fall-back");
-assert(fallCatch.slice(1).every((item) => rowDayLabel(item.publishedAt, "2026-11-02").relation === "yesterday"), "both Nov 1 hours are yesterday on Nov 2");
-assert(!fallCatch.some((item) => item.id === "fb-prior"), "Oct 31 is outside the Nov 2 catch-up");
+assert(fallCatch.filter((item) => item.id.startsWith("fb-a") || item.id === "fb-before").every((item) => rowDayLabel(item.publishedAt, "2026-11-02").relation === "yesterday"), "both Nov 1 hours are yesterday on Nov 2");
+assert(rowDayLabel("2026-10-31T23:00:00-05:00", "2026-11-02").relation === "earlier" && rowDayLabel("2026-10-31T23:00:00-05:00", "2026-11-02").label === "Sat, Oct 31", "Oct 31 stays a Saturday label on the Monday after fall-back");
+const fallRange = catchUpRange("2026-11-02");
+assert(fallRange.start === Date.parse(deskDayStart("2026-10-30")) && fallRange.end === Date.parse(deskDayStart("2026-11-03")), "fall-back Monday range is Fri midnight through Tue midnight CT");
 assert(deskDay("2026-03-08T06:30:00Z") === "2026-03-08" && deskDay("2026-03-08T07:30:00Z") === "2026-03-08", "spring-forward keeps 1:30 AM CST and 2:30 AM CDT on Mar 8");
 assert(deskDay("2026-03-09T04:30:00Z") === "2026-03-08" && deskDay("2026-03-09T05:00:00Z") === "2026-03-09", "Mar 9 04:30Z is still Mar 8 in Chicago; 05:00Z is Mar 9");
-const springCatch = visibleDeskItems(dstRows, { today: "2026-03-09", mode: "catchup" });
-assert(springCatch.map((item) => item.id).join() === "sf-today,sf-edge,sf-late,sf-early", `spring-forward catch-up ${springCatch.map((item) => item.id).join()}`);
+assert(isMondayCatchUp("2026-03-09"), "Mar 9 2026 is Monday after spring-forward");
+assert(
+  JSON.stringify(catchUpDays("2026-03-09")) === '["2026-03-09","2026-03-08","2026-03-07","2026-03-06"]',
+  "Monday after spring-forward covers Friday through Monday",
+);
+const springCatch = visibleDeskItems(
+  [
+    ...dstRows,
+    { id: "sf-sat", section: "spx", publishedAt: "2026-03-07T18:00:00-06:00" },
+    { id: "sf-fri", section: "positioning", publishedAt: "2026-03-06T18:00:00-06:00" },
+  ],
+  { today: "2026-03-09", mode: "catchup" },
+);
+assert(springCatch.map((item) => item.id).join() === "sf-today,sf-edge,sf-late,sf-early,sf-sat,sf-fri", `spring-forward Monday catch-up ${springCatch.map((item) => item.id).join()}`);
 assert(rowDayLabel("2026-03-09T04:30:00Z", "2026-03-09").relation === "yesterday", "the UTC Mar 9 stamp before Chicago midnight is yesterday");
 assert(rowDayLabel("2026-03-09T05:00:00Z", "2026-03-09").label.startsWith("Today"), "Chicago midnight on Mar 9 is today");
+assert(rowDayLabel("2026-03-06T18:00:00-06:00", "2026-03-09").label === "Fri, Mar 6", "Friday in a spring-forward week keeps its date label");
+const springRange = catchUpRange("2026-03-09");
+assert(springRange.start === Date.parse(deskDayStart("2026-03-06")) && springRange.end === Date.parse(deskDayStart("2026-03-10")), "spring-forward Monday range is Fri midnight through Tue midnight CT");
 assert(catchUpDays("2026-03-01")[1] === "2026-02-28", "yesterday of Mar 1 2026 is Feb 28");
 assert(catchUpDays("2024-03-01")[1] === "2024-02-29", "yesterday of Mar 1 2024 is Feb 29");
 assert(catchUpDays("2026-01-01")[1] === "2025-12-31", "yesterday of Jan 1 is Dec 31");
-assert(catchUpDays("2026-11-02")[1] === "2026-11-01", "yesterday of the post-fallback day is the 25-hour day");
+assert(catchUpDays("2026-11-02")[1] === "2026-11-01", "yesterday of the post-fallback Monday is the 25-hour day");
 
 const mixed = [
   { id: "today-pos", section: "positioning", publishedAt: "2026-11-06T15:00:00-06:00" },
@@ -1329,7 +1351,10 @@ const mixedSummary = catchUpSummary(mixed, nov6Today);
 assert(mixedSummary.todayCount === 2 && mixedSummary.yesterdayCount === 3 && mixedSummary.total === 5, "mixed counts split today from yesterday");
 assert(catchUpCountText(mixedSummary) === "2 today · 3 yesterday", "a mixed badge names both days");
 assert(catchUpCountText(catchUpSummary(afterRoll, nov10Today)) === "4 today · 5 yesterday", "Nov 10 catch-up names today and yesterday");
-assert(emptyDeskMessage("catchup") === "Nothing new today or yesterday." && emptyDeskMessage("day") === "Nothing new that desk day.", "empty copy follows the view");
+assert(emptyDeskMessage("catchup") === "Nothing new today or yesterday." && emptyDeskMessage("day") === "Nothing new that desk day.", "empty copy follows the view when today is omitted");
+assert(emptyDeskMessage("catchup", nov6Today) === "Nothing new today or yesterday.", "Friday empty copy still names yesterday");
+assert(emptyDeskMessage("catchup", "2026-11-09") === "Nothing new today or since Friday.", "Monday empty copy names Friday");
+assert(priorWindowWord(undefined) === "yesterday" && priorWindowWord(null) === "yesterday" && priorWindowWord("") === "yesterday", "missing today defaults prior wording to yesterday");
 const yChip = catchUpChip(catchUpSummary(nt.items, nov10Today), nt.updatedAt);
 assert(yChip.sub === "4 today · 5 yesterday" && yChip.lit === true && yChip.quiet === false, "Nov 10 chip names today and yesterday and pulses");
 assert(yChip.aria.includes("4 today") && yChip.aria.includes("5 yesterday") && !yChip.aria.includes("since 12"), "Nov 10 chip keeps yesterday separate");
@@ -1337,24 +1362,93 @@ const publicNov10Chip = catchUpChip(catchUpSummary(publicDeskItems(nt.items), no
 assert(publicNov10Chip.quiet === true && publicNov10Chip.lit === false, "public Nov 10 chip stays quiet because those rows are Options Flow");
 const quietChip = catchUpChip(catchUpSummary([], nov6Today), "");
 assert(quietChip.sub === "Quiet since yesterday" && quietChip.quiet === true && quietChip.lit === false, "a two-day quiet chip says so");
+const quietMondayChip = catchUpChip(catchUpSummary([], "2026-11-09"), "");
+assert(quietMondayChip.sub === "Quiet since Friday", "a Monday quiet chip names Friday");
+const quietSaturdayChip = catchUpChip(catchUpSummary([], "2026-11-07"), "");
+assert(quietSaturdayChip.sub === "Quiet since Friday", "a Saturday quiet chip names Friday");
 const bothChip = catchUpChip(mixedSummary, "2026-11-06T14:00:00-06:00");
 assert(bothChip.lit === true && bothChip.sub === "2 today · 3 yesterday", "today's rows light the chip and the subtitle keeps yesterday separate");
-assert(!feedLine(nt.updatedAt, { quiet: false, mode: "catchup" }).includes("nothing new"), "a catch-up with rows does not say the desk is empty");
-assert(feedLine(nt.updatedAt, { quiet: true, mode: "catchup" }).endsWith("nothing new today or yesterday"), "a quiet catch-up names both days");
+assert(!feedLine(nt.updatedAt, { quiet: false, mode: "catchup", today: nov6Today }).includes("nothing new"), "a catch-up with rows does not say the desk is empty");
+assert(feedLine(nt.updatedAt, { quiet: true, mode: "catchup", today: nov6Today }).endsWith("nothing new today or yesterday"), "a quiet catch-up names both days");
+assert(feedLine(nt.updatedAt, { quiet: true, mode: "catchup", today: "2026-11-09" }).endsWith("nothing new today or since Friday"), "a quiet Monday catch-up names Friday");
 assert(feedLine("2026-11-06T00:14:03-06:00", { quiet: false, mode: "day" }).startsWith("Feed updated"), "the feed line still names the update");
 
 const homeState = readDeskState("", nov6Today);
-assert(homeState.mode === "catchup" && homeState.day === nov6Today && homeState.view === "sections" && deskStateUrl(homeState) === "./", "the default URL is the two-day catch-up");
+assert(homeState.mode === "catchup" && homeState.day === nov6Today && homeState.view === "sections" && deskStateUrl(homeState) === "./", "the default URL is the catch-up");
 assert(readDeskState("?day=2026-11-06", nov6Today).mode === "catchup", "asking for today stays on the catch-up");
 assert(readDeskState("?day=nope", nov6Today).mode === "catchup", "a bad day stays on the catch-up");
 const earlier = earlierState(homeState);
-assert(earlier.mode === "day" && earlier.day === "2026-11-04" && deskStateUrl(earlier) === "?day=2026-11-04", "Earlier from the catch-up opens the day before yesterday");
+assert(earlier.mode === "day" && earlier.day === "2026-11-04" && deskStateUrl(earlier) === "?day=2026-11-04", "Earlier from the Friday catch-up opens the day before yesterday");
 const yesterdayState = readDeskState("?day=2026-11-05&view=all", nov6Today);
 assert(yesterdayState.mode === "day" && yesterdayState.day === "2026-11-05" && yesterdayState.view === "all", "an explicit yesterday URL is one desk day");
 assert(laterState(yesterdayState).mode === "catchup" && deskStateUrl(laterState(yesterdayState)) === "?view=all", "Later from yesterday returns to the catch-up and keeps All");
 assert(laterState(earlier).mode === "day" && laterState(earlier).day === "2026-11-05", "Later from the day before yesterday opens yesterday alone");
 assert(deskStateUrl({ ...homeState, view: "all" }) === "?view=all", "All on the catch-up stays free of a day param");
 assert(laterState(homeState) === null, "the catch-up has no later day");
+
+/* Fixed-date window fixtures: weekend/Monday windows, midnight flip, Later skip. Independent of the live feed. */
+const windowFixture = [
+  { id: "fx-mon", section: "options-flow", publishedAt: "2026-11-09T18:00:00-06:00" },
+  { id: "fx-sun", section: "options-flow", publishedAt: "2026-11-08T18:00:00-06:00" },
+  { id: "fx-sat", section: "options-flow", publishedAt: "2026-11-07T12:00:00-06:00" },
+  { id: "fx-fri", section: "options-flow", publishedAt: "2026-11-06T14:00:00-06:00" },
+  { id: "fx-thu", section: "positioning", publishedAt: "2026-11-05T15:00:00-06:00" },
+  { id: "fx-tue", section: "research", publishedAt: "2026-11-10T16:00:00-06:00" },
+];
+assert(isMondayCatchUp("2026-11-09") && !isMondayCatchUp("2026-11-10") && !isMondayCatchUp("2026-11-13"), "Monday catch-up is CT Monday only");
+assert(usesSinceFriday("2026-11-07") && usesSinceFriday("2026-11-08") && usesSinceFriday("2026-11-09") && !usesSinceFriday("2026-11-10"), "Sat/Sun/Mon use since-Friday wording");
+assert(JSON.stringify(catchUpDays("2026-11-07")) === '["2026-11-07","2026-11-06"]', "Saturday catch-up is Sat+Fri");
+assert(JSON.stringify(catchUpDays("2026-11-08")) === '["2026-11-08","2026-11-07","2026-11-06"]', "Sunday catch-up is Sun+Sat+Fri");
+assert(JSON.stringify(catchUpDays("2026-11-09")) === '["2026-11-09","2026-11-08","2026-11-07","2026-11-06"]', "Monday catch-up is Mon through Fri");
+assert(JSON.stringify(catchUpDays("2026-11-10")) === '["2026-11-10","2026-11-09"]', "Tuesday catch-up is today plus the previous weekday");
+assert(JSON.stringify(catchUpDays("2026-11-13")) === '["2026-11-13","2026-11-12"]', "Friday catch-up is today plus the previous weekday");
+assert(priorWindowWord("2026-11-07") === "since Friday" && priorWindowWord("2026-11-08") === "since Friday", "Saturday and Sunday prior copy says since Friday");
+assert(catchUpWindowLabel("2026-11-07") === "Fri, Nov 6 · 12:00 AM CT → Sat, Nov 7 · 11:59 PM CT", `Saturday window label ${catchUpWindowLabel("2026-11-07")}`);
+assert(catchUpWindowLabel("2026-11-08") === "Fri, Nov 6 · 12:00 AM CT → Sun, Nov 8 · 11:59 PM CT", `Sunday window label ${catchUpWindowLabel("2026-11-08")}`);
+assert(catchUpWindowLabel("2026-11-09") === "Fri, Nov 6 · 12:00 AM CT → Mon, Nov 9 · 11:59 PM CT", `Monday window label ${catchUpWindowLabel("2026-11-09")}`);
+assert(
+  visibleDeskItems(windowFixture, { today: "2026-11-09", mode: "catchup" }).map((item) => item.id).join() === "fx-mon,fx-sun,fx-sat,fx-fri",
+  "Monday fixture catch-up includes Fri/Sat/Sun/Mon",
+);
+assert(
+  rowDayLabel("2026-11-06T14:00:00-06:00", "2026-11-09").label === "Fri, Nov 6" &&
+    rowDayLabel("2026-11-07T12:00:00-06:00", "2026-11-09").label === "Sat, Nov 7" &&
+    rowDayLabel("2026-11-08T18:00:00-06:00", "2026-11-09").label === "Yesterday · Sun, Nov 8" &&
+    rowDayLabel("2026-11-09T18:00:00-06:00", "2026-11-09").label === "Today · Mon, Nov 9",
+  "Monday fixture keeps original Fri/Sat labels and never relabels them as today",
+);
+assert(
+  visibleDeskItems(windowFixture, { today: "2026-11-07", mode: "catchup" }).map((item) => item.id).join() === "fx-sat,fx-fri",
+  "Saturday fixture catch-up is Sat+Fri",
+);
+assert(
+  visibleDeskItems(windowFixture, { today: "2026-11-08", mode: "catchup" }).map((item) => item.id).join() === "fx-sun,fx-sat,fx-fri",
+  "Sunday fixture catch-up keeps Friday",
+);
+assert(!visibleDeskItems(windowFixture, { today: "2026-11-10", mode: "catchup" }).some((item) => ["fx-sun", "fx-sat", "fx-fri"].includes(item.id)), "Tuesday drops the weekend");
+const mondayFixtureSummary = catchUpSummary(windowFixture, "2026-11-09");
+assert(mondayFixtureSummary.todayCount === 1 && mondayFixtureSummary.yesterdayCount === 3 && mondayFixtureSummary.sinceFridayWindow === true, "Monday fixture summary counts Fri–Sun as prior");
+assert(catchUpCountText(mondayFixtureSummary) === "1 today · 3 since Friday", "Monday fixture badge names since Friday");
+assert(catchUpCountText(catchUpSummary(windowFixture, "2026-11-07")) === "1 today · 1 since Friday", "Saturday fixture badge names since Friday");
+assert(catchUpChip(catchUpSummary(windowFixture, "2026-11-07"), "").sub === "1 today · 1 since Friday", "Saturday chip wording says since Friday");
+assert(visibleDeskItems(windowFixture, { today: "2026-11-09", mode: "catchup", section: "options-flow" }).length === 4, "Options Flow filter on Monday uses the Fri–Mon fixture window");
+assert(earlierState(readDeskState("", "2026-11-09")).day === "2026-11-05", "Earlier from Monday catch-up opens Thursday before Friday");
+assert(laterState(earlierState(readDeskState("", "2026-11-09"))).mode === "catchup", "Later from Thursday on Monday skips Fri/Sat/Sun and returns to catch-up");
+const beforeMonday = "2026-11-09T05:59:59Z";
+const afterMonday = "2026-11-09T06:00:00Z";
+assert(deskDay(beforeMonday) === "2026-11-08" && deskDay(afterMonday) === "2026-11-09", "midnight CT rolls Sunday Nov 8 into Monday Nov 9");
+assert(JSON.stringify(catchUpDays(deskDay(beforeMonday))) === '["2026-11-08","2026-11-07","2026-11-06"]', "pre-midnight Sunday opens Fri–Sun");
+assert(JSON.stringify(catchUpDays(deskDay(afterMonday))) === '["2026-11-09","2026-11-08","2026-11-07","2026-11-06"]', "post-midnight Monday opens Friday through Monday");
+const beforeMondayRoll = visibleDeskItems(windowFixture, { today: deskDay(beforeMonday), mode: "catchup" });
+const afterMondayRoll = visibleDeskItems(windowFixture, { today: deskDay(afterMonday), mode: "catchup" });
+assert(beforeMondayRoll.map((item) => item.id).join() === "fx-sun,fx-sat,fx-fri", "Sunday midnight edge keeps Fri–Sun fixtures");
+assert(afterMondayRoll.map((item) => item.id).join() === "fx-mon,fx-sun,fx-sat,fx-fri", "Monday midnight brings Monday into the Fri-backed window");
+assert(rowDayLabel("2026-11-06T14:00:00-06:00", "2026-11-09").label === "Fri, Nov 6", "Friday fixture keeps Fri label after the Monday midnight roll");
+const tokyoMonday = "2026-11-09T14:00:00+09:00";
+const laSunday = "2026-11-08T21:00:00-08:00";
+assert(deskDay(tokyoMonday) === "2026-11-08" && deskDay(laSunday) === "2026-11-08", "Tokyo afternoon Monday and LA evening Sunday are still Sunday in Chicago");
+assert(JSON.stringify(catchUpDays(deskDay(tokyoMonday))) === JSON.stringify(catchUpDays(deskDay(laSunday))), "Chicago Sunday window is identical from Tokyo/LA stamps");
+assert(JSON.stringify(catchUpDays(deskDay(tokyoMonday))) === '["2026-11-08","2026-11-07","2026-11-06"]', "Tokyo/LA Sunday stamps open the Fri–Sun window");
 const ntReadme = readFileSync(join(root, "README.md"), "utf8");
 assert(ntReadme.includes("npm run new-today:pack"), "README shows the New Today pack command");
 assert(ntReadme.includes("Midnight auto-ship") && ntReadme.includes("6:30 AM CT") && ntReadme.includes("Afternoon auto-ship"), "README tells midnight, morning, and afternoon auto-ship to run the same pack");

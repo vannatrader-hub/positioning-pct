@@ -8,6 +8,7 @@ import {
   catchUpWindowLabel,
   ctTime,
   dayLabel,
+  dayRelation,
   deskDay,
   deskStateUrl,
   earlierState,
@@ -93,21 +94,14 @@ function list(items, options) {
 
 function countText(rows, state) {
   if (state.mode !== "catchup") return rows.length ? `${rows.length} new` : "None";
-  const [today, yesterday] = catchUpDays(state.today);
-  return catchUpCountText(
-    {
-      todayCount: rows.filter((item) => deskDay(item.publishedAt) === today).length,
-      yesterdayCount: rows.filter((item) => deskDay(item.publishedAt) === yesterday).length,
-      total: rows.length,
-    },
-    { quiet: "None" },
-  );
+  return catchUpCountText(catchUpSummary(rows, state.today), { quiet: "None" });
 }
 
 function dayTitle(day, today) {
-  const relation = day === today ? "today" : "yesterday";
-  const word = relation === "today" ? "Today" : "Yesterday";
-  return { relation, text: `${word} · ${dayLabel(day)}` };
+  const relation = dayRelation(day, today);
+  if (relation === "today") return { relation, text: `Today · ${dayLabel(day)}` };
+  if (relation === "yesterday") return { relation, text: `Yesterday · ${dayLabel(day)}` };
+  return { relation, text: dayLabel(day) };
 }
 
 function withFlowBase(items) {
@@ -132,7 +126,7 @@ function render(state, items, updatedAt) {
   const summary = state.mode === "catchup" ? catchUpSummary(rows, state.today) : null;
   const onCatchUp = state.mode === "catchup";
   const fresh = document.querySelector("#nt-fresh");
-  if (fresh) fresh.textContent = feedLine(updatedAt, { quiet: rows.length === 0, mode: state.mode });
+  if (fresh) fresh.textContent = feedLine(updatedAt, { quiet: rows.length === 0, mode: state.mode, today: state.today });
 
   const pill = $("#nt-pill");
   pill.replaceChildren(document.createTextNode(onCatchUp ? "New Today " : `Desk day ${dayLabel(state.day)} `));
@@ -163,7 +157,7 @@ function render(state, items, updatedAt) {
   const body = $("#nt-body");
   body.replaceChildren();
   if (!rows.length) {
-    body.append(el("p", "nt-empty is-all", emptyDeskMessage(state.mode)));
+    body.append(el("p", "nt-empty is-all", emptyDeskMessage(state.mode, state.today)));
     return;
   }
 
@@ -202,7 +196,7 @@ function render(state, items, updatedAt) {
     head.append(title, el("span", "section-count", countText(sectionRows, state)));
     section.append(head);
     if (!sectionRows.length) {
-      section.append(el("p", "nt-empty", sectionEmptyMessage(meta, state.mode)));
+      section.append(el("p", "nt-empty", sectionEmptyMessage(meta, state.mode, state.today)));
     } else if (onCatchUp) {
       for (const day of catchUpDays(state.today)) {
         const group = sectionRows.filter((item) => deskDay(item.publishedAt) === day);
