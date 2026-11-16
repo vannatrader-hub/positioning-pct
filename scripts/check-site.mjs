@@ -679,7 +679,9 @@ const chartCards = [...chartsPage.matchAll(/<article class="pchart[^"]*" id="([^
 assert(JSON.stringify(chartCards.map((match) => match[1])) === JSON.stringify(CHART_IDS), `charts page cards ${chartCards.map((match) => match[1])}`);
 assert(chartCards.every((match) => match[1] === match[2]), "chart card ids match data-chart");
 const chartNav = [...chartsPage.matchAll(/<a href="#([^"]+)" data-target="\1">/g)].map((match) => match[1]);
-assert(JSON.stringify(chartNav) === JSON.stringify(CHART_IDS), `charts secnav ${chartNav}`);
+assert(JSON.stringify(chartNav) === JSON.stringify([...CHART_IDS, "flow-show"]), `charts secnav ${chartNav}`);
+assert(chartsPage.includes('id="flow-show"') && chartsPage.includes('id="flow-show-body"'), "charts page keeps the Flow Show section");
+assert(chartsPage.includes('id="flow-show-title">Flow Show</h2>'), "charts page names Flow Show");
 for (const chart of CHARTS) {
   const card = chartsPage.split(`id="${chart.id}"`)[1]?.split("</article>")[0] ?? "";
   assert(card.includes(`>${chart.title.replace(/&/g, "&amp;")}</h2>`), `chart ${chart.id} title "${chart.title}"`);
@@ -740,6 +742,9 @@ assert(!chartsPage.includes("Data from"), "charts page has no Data from placehol
 const chartsScript = readFileSync(join(root, "src/charts.js"), "utf8");
 const chartSvg = readFileSync(join(root, "src/chart-svg.js"), "utf8");
 const siteStyles = readFileSync(join(root, "src/styles.css"), "utf8");
+const flowShowScript = readFileSync(join(root, "src/flow-show.js"), "utf8");
+assert(chartsScript.includes("mountFlowShow") && flowShowScript.includes("data/flow-show/"), "charts page mounts Flow Show from the edition manifest");
+assert(siteStyles.includes(".flow-show-grid") && siteStyles.includes(".flow-show-card"), "Flow Show has layout styles");
 assert(chartsScript.includes('scrub.setAttribute("aria-valuetext", text)') && chartsScript.includes("sectorAsOf"), "sectors slider aria-valuetext tracks the as-of string");
 assert(!chartsScript.includes("Data from"), "charts script has no Data from placeholder");
 assert(chartSvg.includes('bar.dataset.state = "na"') && chartSvg.includes('value.textContent = "N/A"'), "missing sector print draws an N/A stub");
@@ -761,12 +766,37 @@ assert(
   `risk appetite panel ${riskData.reads.map((read) => `${read.houseLabel} ${read.value}`)}`,
 );
 for (const read of riskData.reads) assert(read.basis === "Desk estimate" || read.basis.startsWith("Ref chart"), `${read.id} basis "${read.basis}"`);
+const gsRisk = INDICATORS.find((indicator) => indicator.id === "gs-risk-appetite");
+assert(!gsRisk.bankChartPoints, "GS risk appetite has no invented bank-chart points");
+assert(gsRisk.ref == null && gsRisk.values.length === WEEKS.length && gsRisk.values.at(-1) === 0.9, "weekly GS risk appetite path still ends Oct 23 at +0.9 z");
+assert(riskData.reads[0].path.length === WEEKS.length && riskData.reads[0].value === "+0.9", "risk appetite live read stays on the Oct 23 weekly print");
+assert(creditChart(7).cdx.path.length === WEEKS.length && creditChart(7).cdx.value === "351", "credit stress weekly path is unchanged");
 const facts = chartFacts();
 assert(JSON.stringify(Object.keys(facts)) === JSON.stringify(CHART_IDS), "hub has a live fact for every chart");
 assert(Object.values(facts).every((text) => /^(JPM|MS|GS|BoA|Desk) · /.test(text)), "every hub chart fact leads with its house");
+assert(facts["risk-appetite"] === "GS · risk appetite +0.9 z · 73rd %ile", `risk appetite hub fact stays on the Oct 23 weekly print, got ${facts["risk-appetite"]}`);
 for (let week = 0; week < WEEKS.length; week += 1) {
   assert(softVolChart("desk", week).week === week && creditChart(week).cdx.path.length === WEEKS.length, `charts follow week ${week}`);
 }
+
+const flowShowIndex = JSON.parse(readFileSync(join(root, "public/data/flow-show/index.json"), "utf8"));
+assert(flowShowIndex.sku === "flow-show" && flowShowIndex.latest === "2026-11-12", "Flow Show index names the Nov 12 edition");
+assert(flowShowIndex.editions.some((row) => row.id === "2026-11-12" && row.href === "2026-11-12.json"), "Flow Show index lists the Nov 12 manifest");
+const flowShowEdition = JSON.parse(readFileSync(join(root, "public/data/flow-show/2026-11-12.json"), "utf8"));
+assert(flowShowEdition.charts.length === 3, `Flow Show Nov 12 has 3 charts, got ${flowShowEdition.charts.length}`);
+assert(JSON.stringify(flowShowEdition.charts.map((chart) => chart.id)) === JSON.stringify(["semis-gs-pb-exposure", "boa-bull-bear", "boa-global-equity-fund-flows"]), "Flow Show keeps the clean GS semis and BoA tiles only");
+const flowBanks = new Set(flowShowEdition.charts.map((chart) => chart.bank));
+assert(["GS", "BoA"].every((bank) => flowBanks.has(bank)) && !flowBanks.has("Citi"), `Flow Show banks ${[...flowBanks]}`);
+for (const chart of flowShowEdition.charts) {
+  assert(chart.bank && chart.caption && chart.src && chart.alt, `Flow Show chart ${chart.id} is complete`);
+  assert(!/^https?:/i.test(chart.src) && existsSync(join(root, "public", chart.src)), `Flow Show crop missing for ${chart.id}: ${chart.src}`);
+  if (chart.asOf != null || chart.asOfLabel != null) {
+    assert(chart.asOf && chart.asOfLabel, `Flow Show chart ${chart.id} as-of needs both fields when present`);
+  }
+}
+assert(flowShowEdition.charts.find((chart) => chart.id === "semis-gs-pb-exposure")?.asOfLabel === "Nov 6, 2026", "semis tile keeps the printed as-of");
+assert(!siteStyles.includes(".h-citi"), "Flow Show does not invent a Citi house chip");
+assert(chartsPage.includes("as-of date appears only when the chart itself prints one"), "Flow Show lede does not claim every tile prints an as-of");
 
 for (const page of ["positioning/index.html", "positioning/desk/index.html", "positioning/charts/index.html"]) {
   assert(viteConfig.includes(`"${page}"`), `vite builds ${page}`);
@@ -1216,6 +1246,11 @@ assert(
     "2026-11-15-research-gs-hedge-funds-sell,2026-11-15-research-boa-risk-off",
   "Nov 16 catch-up Research keeps yesterday's Nov 15 bank notes with date labels",
 );
+const flowShowResearch = (nt.items ?? []).find((item) => item.id === "2026-11-16-research-flow-show-nov12");
+assert(flowShowResearch?.href === "positioning/charts/#flow-show" && flowShowResearch?.sourceLabel === "Desk", "Flow Show research row links the charts section");
+assert(flowShowResearch?.section === "research", "Flow Show research row stays under Research");
+assert(/Three cropped bank charts/.test(flowShowResearch?.summary ?? ""), "Flow Show research row names the three-tile pack");
+assert(itemsForDay(nt.items ?? [], "2026-11-16").some((item) => item.id === flowShowResearch.id), "Nov 16 New Today keeps the Flow Show research row");
 assert(
   rowDayLabel("2026-11-15T01:02:00-06:00", "2026-11-16").label === "Yesterday · Sun, Nov 15" &&
     rowDayLabel("2026-11-15T10:30:00-06:00", "2026-11-16").label === "Yesterday · Sun, Nov 15",

@@ -21,6 +21,7 @@ import { OVERLAY_COLORS, TONE, drawLines, drawResidual, drawSectors, gaugeSvg, m
 import softVolSeries from "../public/data/vault/soft-vol/series.json" with { type: "json" };
 import softVolLatest from "../public/data/vault/soft-vol/latest.json" with { type: "json" };
 import { formatSigned, liveRead, tipLines } from "./soft-vol.js";
+import { mountFlowShow } from "./flow-show.js";
 
 const STORAGE_KEY = "positioning-pct-source";
 const LATEST = WEEKS.length - 1;
@@ -765,6 +766,7 @@ buildCredit();
 buildFundManagers();
 buildRisk();
 paint();
+mountFlowShow();
 
 const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
 if (target) target.scrollIntoView({ behavior: "instant", block: "start" });
