@@ -3,12 +3,16 @@
  * BREADTH_FEED, rebuild the desk-computed Nasdaq %‑above‑MA series from Yahoo,
  * then stamp index.json asOf / per-chart asOf from the written files.
  *
+ * Fails non-zero (no further writes) when the feed asOf is stale vs the last
+ * completed America/Chicago weekday session (1-session tolerance / holidays).
+ *
  *   BREADTH_FEED="https://…" npm run breadth:nightly
  */
 import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { assertFeedFresh, writeBreadth } from "./pull-breadth.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "public/data/vault/breadth");
@@ -29,17 +33,18 @@ if (!process.env.BREADTH_FEED) {
 }
 
 run("pull-breadth.mjs");
-run("seed-nasdaq-ma.mjs");
 
-function writeSeries(file, doc) {
-  const { bars, ...head } = doc;
-  const lines = bars.map((bar) => `    ${JSON.stringify(bar)}`).join(",\n");
-  const top = JSON.stringify(head, null, 2).slice(0, -2);
-  writeFileSync(join(out, file), `${top},\n  "bars": [\n${lines}\n  ]\n}\n`);
+const nysi = JSON.parse(readFileSync(join(out, "nysi.json"), "utf8"));
+try {
+  assertFeedFresh(nysi.asOf);
+} catch (error) {
+  console.error(error.message ?? error);
+  process.exit(1);
 }
 
+run("seed-nasdaq-ma.mjs");
+
 const index = JSON.parse(readFileSync(join(out, "index.json"), "utf8"));
-const nysi = JSON.parse(readFileSync(join(out, "nysi.json"), "utf8"));
 const asOf = nysi.asOf;
 const ends = {};
 for (const chart of index.charts) {
@@ -49,7 +54,7 @@ for (const chart of index.charts) {
     const trimmed = bars.filter((bar) => bar.t <= asOf);
     if (trimmed.length !== bars.length || doc.asOf !== trimmed.at(-1)?.t) {
       bars = trimmed;
-      writeSeries(chart.file, { ...doc, asOf: bars.at(-1).t, bars });
+      writeBreadth(chart.file, { ...doc, asOf: bars.at(-1).t, bars }, { spaced: false });
     }
   }
   const last = bars.at(-1)?.t;

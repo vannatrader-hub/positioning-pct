@@ -1,6 +1,7 @@
+import { spawnSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, extname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { GLOW_CROWDED_MIN, GLOW_SOFT_MAX, HOUSES, INDICATORS, SECTIONS, drift, extremeOf, isSoftCrowded, readIndicator } from "../src/desk.js";
 import { CANON, JPM_MONITOR_REF, WEEKS, buildReading, formatWeek, ordinal } from "../src/readings.js";
 import { STRUCTURES, creditSpreadMath, leapMath, price } from "../src/study.js";
@@ -2415,6 +2416,9 @@ for (const [id, want] of Object.entries(breadthWant)) {
   assert(breadthSma(doc.bars, 8)[at] === want.ma, `wall ${id} Oct 29 MA(8) ${breadthSma(doc.bars, 8)[at]}`);
   const change = dayChange(doc.bars, at);
   assert(change.chg === want.chg && change.pct === want.pct, `wall ${id} Oct 29 change ${change.chg} (${change.pct}%)`);
+  const yearAgo = monthsBack(breadthIndex.asOf, 12);
+  const firstOfYear = doc.bars[breadthWindowStart(doc.bars, DEFAULT_MONTHS)].t;
+  assert(firstOfYear >= yearAgo && (Date.parse(`${firstOfYear}T12:00:00Z`) - Date.parse(`${yearAgo}T12:00:00Z`)) / 86400000 <= 10, `wall ${id} 1Y window opens ${firstOfYear} near ${yearAgo}`);
   const read = breadthRead(doc);
   assert(read.buy === -1000 && read.touches > 0 && read.lastTouch, `wall ${id} finds closes through the buy line in ten years`);
 }
@@ -2453,7 +2457,7 @@ for (const [id, want] of Object.entries(pctWant)) {
   assert(doc.provenance?.kind && doc.provenance.feedSymbol === `$${want.symbol}` && doc.provenance.source && doc.provenance.note, `${id} carries provenance fields`);
   assert(!/tradingview|darkmatter|optionshawk|stockcharts/i.test(JSON.stringify(doc)), `${id} stays desk-labeled without vendor branding`);
   assert(doc.bars.length >= 1500 && doc.bars.every((bar, i) => /^\d{4}-\d{2}-\d{2}$/.test(bar.t) && bar.c >= 0 && bar.c <= 100 && (i === 0 || bar.t > doc.bars[i - 1].t)), `${id} is a dated 0–100 series`);
-  assert(breadthWindowStart(doc.bars, MAX_MONTHS) >= 0 && doc.bars[breadthWindowStart(doc.bars, MAX_MONTHS)].t <= monthsBack(breadthIndex.asOf, 120), `${id} covers ten years`);
+  assert(doc.bars[0].t <= monthsBack(breadthIndex.asOf, 120), `${id} covers ten years (first bar ${doc.bars[0].t})`);
   const hist = doc.bars.find((bar) => bar.t === "2026-11-02");
   assert(hist && hist.c === want.close, `${id} keeps the Nov 2 history print ${want.close}`);
   const histAt = doc.bars.findIndex((bar) => bar.t === "2026-11-02");
@@ -2477,11 +2481,44 @@ for (const chart of breadthIndex.charts) {
 }
 assert(breadthSpx.bars.at(-1).t === breadthIndex.asOf && breadthSpx.asOf === breadthIndex.asOf, "SPX overlay matches index asOf");
 const pullBreadthSrc = readFileSync(join(root, "scripts/pull-breadth.mjs"), "utf8");
-assert(pullBreadthSrc.includes("$NCFD") && pullBreadthSrc.includes("PCT_IDS") && pullBreadthSrc.includes("appendCumulative"), "the breadth pull ships core including NYHL/NYAD append and treats participation as best-effort");
+assert(pullBreadthSrc.includes("ncfd") && pullBreadthSrc.includes("PCT_IDS") && pullBreadthSrc.includes("appendCumulative") && pullBreadthSrc.includes("appendLevel"), "the breadth pull ships core including NYHL/NYAD append and treats participation as best-effort");
 assert(!pullBreadthSrc.includes("stockcharts.com") && !readFileSync(join(root, "scripts/breadth-nightly.mjs"), "utf8").includes("stockcharts.com"), "breadth scripts never embed the feed URL");
 assert(!readFileSync(join(root, "scripts/seed-nasdaq-ma.mjs"), "utf8").includes("AS_OF_CAP"), "nasdaq MA seed has no hardcoded as-of cap");
 assert(packageJson.scripts["seed:nasdaq-ma"] === "node scripts/seed-nasdaq-ma.mjs", "npm run seed:nasdaq-ma rebuilds the computed participation series");
 assert(packageJson.scripts["breadth:nightly"] === "node scripts/breadth-nightly.mjs", "npm run breadth:nightly runs the weeknight pull + seed");
+
+for (const asOf of ["2026-11-13", "2026-11-19", "2026-11-20", "2026-11-26", "2026-11-27", "2026-12-03", "2026-12-04", "2026-12-10", "2026-12-11", "2026-12-17", "2026-12-18"]) {
+  for (const id of Object.keys(pctWant)) {
+    assert(breadthDocs[id].bars[0].t <= monthsBack(asOf, 120), `${id} covers ten years when asOf is ${asOf} (first ${breadthDocs[id].bars[0].t} vs ${monthsBack(asOf, 120)})`);
+  }
+  assert(breadthDocs.nysi.bars[0].t <= monthsBack(asOf, 120), `nysi covers ten years when asOf is ${asOf}`);
+}
+assert(breadthDocs.nysi.bars[0].t === "2015-10-29" && breadthDocs.nasi.bars[0].t === "2015-10-29" && breadthSpx.bars[0].t === "2015-10-29", "NYSI/NASI/SPX keep the 2015-10-29 history head");
+assert(pullBreadthSrc.includes("appendLevel") && pullBreadthSrc.includes("assertFeedFresh") && pullBreadthSrc.includes("US_MARKET_HOLIDAYS"), "breadth pull is append-only with a stale-feed guard");
+assert(readFileSync(join(root, "scripts/breadth-nightly.mjs"), "utf8").includes("assertFeedFresh"), "breadth:nightly re-checks feed freshness before seeding");
+{
+  const probe = spawnSync(
+    process.execPath,
+    [
+      "--input-type=module",
+      "-e",
+      `import { appendLevel, assertFeedFresh, lastCompletedWeekday } from ${JSON.stringify(pathToFileURL(join(root, "scripts/pull-breadth.mjs")).href)};
+const sample = { id: "nysi", bars: [{ t: "2026-11-14", c: 1 }, { t: "2026-11-16", c: 2 }], asOf: "2026-11-16" };
+const extended = appendLevel(sample, [{ t: "2026-11-14", c: 1 }, { t: "2026-11-16", c: 2 }, { t: "2026-11-17", c: 3 }], "2026-11-17");
+if (extended.bars.at(-1).c !== 3 || extended.bars.length !== 3) throw new Error("append");
+let overlapFailed = false;
+try { appendLevel(sample, [{ t: "2026-11-16", c: 9 }], "2026-11-16"); } catch { overlapFailed = true; }
+if (!overlapFailed) throw new Error("overlap");
+if (typeof lastCompletedWeekday() !== "string" || !assertFeedFresh("2099-01-01").ok) throw new Error("fresh helpers");
+let staleFailed = false;
+try { assertFeedFresh("2020-01-02", new Date("2026-11-16T22:00:00Z")); } catch { staleFailed = true; }
+if (!staleFailed) throw new Error("stale");
+console.log("ok");`,
+    ],
+    { encoding: "utf8" },
+  );
+  assert(probe.status === 0 && /ok/.test(probe.stdout ?? ""), `append-only / stale-feed sims ${probe.stderr || probe.stdout}`);
+}
 
 /* Vault portfolio: personal book, gated like the other Vault pages. Open lines are still held. */
 const bookFile = "vault/portfolio/index.html";
