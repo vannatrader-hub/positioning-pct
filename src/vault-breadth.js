@@ -27,6 +27,8 @@ import {
   rangeLabel,
   signed,
   sma,
+  summationChip,
+  isPublicChipSurface,
   ticks,
   utc,
   windowStart,
@@ -809,7 +811,7 @@ function levelText(value) {
   return minus(fixed(value));
 }
 
-function readLine(doc, { plain = false } = {}) {
+function readLine(doc, { plain = false, publicChip = false } = {}) {
   if (doc.kind === "pct-above-ma") {
     const read = pctileRead(doc);
     const line = el("p", "bw-read");
@@ -839,8 +841,9 @@ function readLine(doc, { plain = false } = {}) {
   }
   const read = breadthRead(doc);
   const line = el("p", "bw-read");
-  const status = el("span", `bw-status ${read.atBuy ? "is-buy" : read.close < 0 ? "is-weak" : "is-firm"}`);
-  status.textContent = read.atBuy ? "At the buy line" : read.close < 0 ? "Below zero" : "Above zero";
+  const chip = summationChip(read, { publicChip });
+  const status = el("span", `bw-status ${chip.tone}`);
+  status.textContent = chip.text;
   line.append(status, el("strong", "bw-read-value", minus(fixed(read.close))));
   if (!plain) {
     line.append(
@@ -854,9 +857,10 @@ function readLine(doc, { plain = false } = {}) {
 
 function fillCard(card, doc, spx, defaults) {
   const plain = !isFamilySurface();
+  const publicChip = isPublicChipSurface();
   const pct = doc.kind === "pct-above-ma";
   const head = card.querySelector(".pchart-head");
-  const { line, read } = readLine(doc, { plain });
+  const { line, read } = readLine(doc, { plain, publicChip });
   head.append(line);
 
   const state = { months: clampMonths(Number(card.dataset.months) || doc.defaultRangeMonths || defaults.months), overlay: !pct };

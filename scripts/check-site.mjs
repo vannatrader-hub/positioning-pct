@@ -18,7 +18,7 @@ import { PRODUCT_FEEDS } from "../src/product-feeds.js";
 import { errorCopy, nextStep } from "../src/vault-signin.js";
 import { NT_SECTIONS, PUBLIC_NT_SECTIONS, SOURCE_LABELS, catchUpChip, catchUpCountText, catchUpDays, catchUpRange, catchUpSummary, catchUpWindowLabel, dayRelation, deskDay, deskDayStart, deskStateUrl, deskWindow, earlierState, emptyDeskMessage, feedLine, isMondayCatchUp, itemsForDay, laterState, priorWindowWord, publicDeskItems, readDeskState, rowDayLabel, usesSinceFriday, visibleDeskItems, windowLabel, yesterdayNote } from "../src/new-today-window.js";
 import { itemFromSoftCrowded, itemFromVolStress, planNewToday, runSelfTest, scrubCopy } from "./new-today-pack.mjs";
-import { BUY_LINE, CROWDED_PCTILE, DEFAULT_MONTHS, MAX_MONTHS, PCT_RAILS, RANGES, SOFT_PCTILE, averageCrosses, averageOf, breadthRead, bucketPctile, dayChange, monthsBack, percentileRank, pctileOrdinal, pctileRead, sma as breadthSma, windowStart as breadthWindowStart } from "../src/breadth.js";
+import { BUY_LINE, CROWDED_PCTILE, DEFAULT_MONTHS, MAX_MONTHS, PCT_RAILS, RANGES, SOFT_PCTILE, averageCrosses, averageOf, breadthRead, bucketPctile, dayChange, isPublicChipSurface, monthsBack, percentileRank, pctileOrdinal, pctileRead, sma as breadthSma, summationChip, summationDetail, summationStatusLine, windowStart as breadthWindowStart } from "../src/breadth.js";
 import { CSR_PARAMS, biasOf, csrPanel, csrSeries, cycleOf, panelText, regimeOf as csrRegimeOf, zColor } from "../src/csr.js";
 import { buildPulse, creditChip, cushionOf, runwayMarker } from "../src/pulse-pack.js";
 import { DEFAULTS as MAG7_DEFAULTS, MAG7, TYPES as MAG7_TYPES, buildOscillator, fmtPct, momentum, panelAt, rangeStart, regimeOf, sma } from "../src/mag7-osc.js";
@@ -2425,6 +2425,14 @@ const volPage = readFileSync(join(root, "vol/index.html"), "utf8");
 assert(publicWall.includes(">Vol Stress</h2>") && publicWall.includes("NY Highs − Lows") && publicWall.includes("NY Advance − Decline"), "the public Dashboard wall names Vol Stress, NY highs−lows, and advance−decline");
 assert(!/Spot Vol Beta|UV_|desk estimate|svb-dial/i.test(publicWall + volPage), "the public wall hides the gauge, the formula, and the old name");
 assert(!publicWall.includes("on the day") && !publicWall.includes("MA(8)"), "the public wall does not ship the breadth status strip");
+assert(publicWall.includes('data-surface="public"') && volPage.includes('data-surface="public"'), "Dashboard and /vol/ mark the public surface for the tip-sheet chip");
+for (const [name, html] of [
+  ["Dashboard", publicWall],
+  ["/vol/", volPage],
+]) {
+  assert(!/buy[- ]line/i.test(html) && !html.includes("MA(8)") && !html.includes("At the buy line"), `public ${name} markup has no buy-line or MA(8) tip-sheet wording on the breadth cards`);
+}
+assert(wallPage.includes('<body class="is-vault">') && !wallPage.includes('data-surface="public"'), "Vault wall is not the public chip surface");
 const familyWall = readFileSync(join(root, "insight/vol/index.html"), "utf8");
 assert(FAMILY_ENTRY === "m4c8q" && familyWall.includes(`data-family-entry="${FAMILY_ENTRY}"`) && familyWall.includes('src="/src/hub-gate.js"') && familyWall.includes('id="vault-content"'), "the gauge stays on the family wall");
 assert(svbJs.includes("isFamilySurface") && svbJs.includes("publicBody") && svbJs.includes("svbDial("), "family renders the gauge and the public card renders the desk number");
@@ -2992,6 +3000,67 @@ const breadthJs = readFileSync(join(root, "src/vault-breadth.js"), "utf8");
 for (const piece of ["data/vault/breadth/", 'input.type = "range"', "MAX_MONTHS", "BUY ", "buyLine", "$SPX", "MA(", "directionRuns", "[data-breadth]", "onDeskReady", "bw-cross", "pct-above-ma", "PCT_LINE"]) {
   assert(breadthJs.includes(piece), `breadth cards render ${piece}`);
 }
+/* Public chip only on Dashboard+/vol/. Strip stays main: plain = !isFamilySurface() (Vault plain, Hub full). */
+assert(breadthJs.includes("const plain = !isFamilySurface()"), "strip gating matches main (Vault plain, Hub full)");
+assert(breadthJs.includes("isPublicChipSurface") && breadthJs.includes("summationChip(read, { publicChip })"), "chip text uses the public-only flag");
+assert(!breadthJs.includes("isPublicPlainSurface"), "public-plain strip gate is gone");
+assert(!/status\.textContent = read\.atBuy \?/.test(breadthJs), "chip no longer keys off read.atBuy alone");
+assert(!isPublicChipSurface({ body: {} }) && !isPublicChipSurface({ body: { dataset: {} } }), "missing data-surface defaults to main chip, never unlocks public tip-sheet");
+assert(isPublicChipSurface({ body: { dataset: { surface: "public" } } }), "Dashboard//vol/ set data-surface=public for the plain chip");
+
+const atBuyRead = { atBuy: true, close: -1100, chg: -1, ma: -900, aboveMa: false, gap: -100, buy: -1000 };
+assert(summationChip(atBuyRead, { publicChip: true }).text === "Below zero", "public chip at-buy is Below zero");
+assert(summationChip(atBuyRead, { publicChip: false }).text === "At the buy line", "Vault/Hub chip at-buy stays At the buy line");
+assert(summationChip({ atBuy: false, close: 12 }, { publicChip: true }).text === "Above zero", "public chip above zero");
+/* Mutation: forcing the public flag on Vault, or switching the chip back to read.atBuy, must fail these. */
+assert(summationChip(atBuyRead, { publicChip: isPublicChipSurface({ body: { className: "is-vault", dataset: {} } }) }).text === "At the buy line", "Vault body without data-surface=public still chips At the buy line");
+assert(summationChip(atBuyRead, { publicChip: true }).text !== "At the buy line", "mutation: publicChip true must not chip At the buy line");
+assert(summationChip(atBuyRead, { publicChip: false }).text !== "Below zero", "mutation: Vault/Hub must not chip Below zero at-buy");
+
+function mainChipText(read) {
+  return read.atBuy ? "At the buy line" : read.close < 0 ? "Below zero" : "Above zero";
+}
+const atBuyDoc = structuredClone(breadthDocs.nysi);
+atBuyDoc.bars = atBuyDoc.bars.map((bar, i, all) => (i === all.length - 1 ? { ...bar, c: -1100 } : bar));
+for (const [label, doc] of [
+  ["live NYSI", breadthDocs.nysi],
+  ["live NASI", breadthDocs.nasi],
+  ["at-buy NYSI", atBuyDoc],
+]) {
+  const vault = summationStatusLine(doc, { plain: true, publicChip: false });
+  const hub = summationStatusLine(doc, { plain: false, publicChip: false });
+  const pub = summationStatusLine(doc, { plain: true, publicChip: true });
+  const mainRead = breadthRead(doc);
+  assert(vault.chip === mainChipText(mainRead) && vault.detail === "", `Vault ${label} chip+strip match main (plain strip, main chip)`);
+  assert(hub.chip === mainChipText(mainRead) && hub.detail === summationDetail(mainRead, doc), `Hub ${label} chip+strip match main (full strip)`);
+  assert(pub.chip === (mainRead.close < 0 ? "Below zero" : "Above zero") && pub.detail === "", `public ${label} chip is plain tip-sheet only`);
+  assert(!/buy line|MA\(8\)/i.test(pub.text), `public ${label} rendered text has no buy-line or MA(8)`);
+  assert(vault.text === `${mainChipText(mainRead)} ${vault.value}`, `Vault ${label} rendered output matches main`);
+  assert(hub.text === `${mainChipText(mainRead)} ${hub.value}${summationDetail(mainRead, doc)}`, `Hub ${label} rendered output matches main`);
+}
+
+const mainBreadthJs = spawnSync("git", ["show", "origin/main:src/vault-breadth.js"], { encoding: "utf8", cwd: root }).stdout ?? "";
+assert(mainBreadthJs.includes("function drawChart"), "origin/main vault-breadth is available for chart diff");
+function fnBody(source, name) {
+  const start = source.indexOf(`function ${name}(`);
+  assert(start >= 0, `find ${name}`);
+  let depth = 0;
+  const open = source.indexOf("{", start);
+  for (let i = open; i < source.length; i += 1) {
+    if (source[i] === "{") depth += 1;
+    else if (source[i] === "}") {
+      depth -= 1;
+      if (depth === 0) return source.slice(start, i + 1);
+    }
+  }
+  return "";
+}
+for (const name of ["drawChart", "drawCumulative", "drawPctChart"]) {
+  assert(fnBody(breadthJs, name) === fnBody(mainBreadthJs, name), `${name} is byte-identical to main (legend, BUY −1000, aria-label unchanged)`);
+}
+assert(familyWall.includes(`data-family-entry="${FAMILY_ENTRY}"`) && familyWall.includes('src="/src/vault-breadth.js"'), "Hub vol page keeps the family surface for the full strip");
+assert(wallPage.includes('src="/src/vault-breadth.js"') && !wallPage.includes('data-surface="public"'), "Vault wall stays off the public chip flag");
+
 for (const file of ["src/vault-breadth.js", "src/breadth.js", "scripts/pull-breadth.mjs", "scripts/seed-nasdaq-ma.mjs"]) {
   const text = readFileSync(join(root, file), "utf8");
   assert(!/stockcharts|<img\b|<iframe|©|tradingview|darkmatter|optionshawk/i.test(text), `${file} carries chart-vendor branding or an embed`);

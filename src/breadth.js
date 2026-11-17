@@ -258,3 +258,38 @@ export function breadthRead(doc) {
     touches: touches.length,
   };
 }
+
+function minusAscii(text) {
+  return String(text).replace(/^-/, "−").replace(/ -/g, " −");
+}
+
+/** True only when the page sets data-surface=public (Dashboard, /vol/). Missing surface → false (main chip). */
+export function isPublicChipSurface(doc = globalThis.document) {
+  return doc?.body?.dataset?.surface === "public";
+}
+
+/**
+ * NYSI/NASI status chip. `publicChip` is Dashboard//vol/ only: tip-sheet Above/Below zero.
+ * Vault and Hub keep main’s At the buy line when atBuy.
+ */
+export function summationChip(read, { publicChip = false } = {}) {
+  const atBuy = !publicChip && !!read.atBuy;
+  return {
+    tone: atBuy ? "is-buy" : read.close < 0 ? "is-weak" : "is-firm",
+    text: atBuy ? "At the buy line" : read.close < 0 ? "Below zero" : "Above zero",
+  };
+}
+
+/** Hub-only detail after the chip+value. Vault/public leave this off (plain strip). */
+export function summationDetail(read, doc) {
+  return ` ${minusAscii(signed(read.chg))} on the day · ${read.aboveMa ? "above" : "below"} MA(${doc.ma}) ${minusAscii(fixed(read.ma))} · ${read.atBuy ? `${minusAscii(fixed(-read.gap))} under` : `${fixed(read.gap)} over`} the ${minusAscii(String(read.buy))} buy line`;
+}
+
+/** Rendered tip-sheet / status line text for check-site (no DOM). */
+export function summationStatusLine(doc, { plain = false, publicChip = false } = {}) {
+  const read = breadthRead(doc);
+  const chip = summationChip(read, { publicChip });
+  const value = minusAscii(fixed(read.close));
+  const detail = plain ? "" : summationDetail(read, doc);
+  return { read, chip: chip.text, tone: chip.tone, value, detail, text: `${chip.text} ${value}${detail}`.trim() };
+}
