@@ -2,7 +2,7 @@
   "timeZone": "America/Chicago",
   "dayStartsAt": "00:00",
   "dayStart": "2026-11-16T00:00:00-06:00",
-  "updatedAt": "2026-11-16T17:50:00-06:00",
+  "updatedAt": "2026-11-17T15:42:48-06:00",
   "items": [
     {
       "id": "2026-11-16-research-flow-show-nov12",
@@ -166,24 +166,6 @@
       "summary": "Futures firmer to start the week as oil kept falling and metals bid; VIX dropped again. Europe recovered some of last week's losses and Nikkei bounced after last week's slide. CPI is next.",
       "href": "options-flow/",
       "publishedAt": "2026-11-09T06:47:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-08-ares-flow",
-      "section": "options-flow",
-      "title": "ARES ($$): Mar 2027 $110 puts sold",
-      "summary": "600 March 2027 $110 puts sold at $6.58 on 10/28, still in open interest, after 1,250 December $115 ITM short puts opened 10/14 (~$1.2M); spot $134. Shares are down 17% YTD, bounced off the 10/15 low and reclaimed the 50- and 200-day on 10/29. Desk lean is selling puts on pullbacks toward the moving averages.",
-      "href": "options-flow/",
-      "publishedAt": "2026-11-08T18:30:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-08-msi-flow",
-      "section": "options-flow",
-      "title": "MSI ($$): Jan $560 calls bought",
-      "summary": "1,000 January $560 calls bought at $13 (~$1.3M) on 11/5, rolling up from 2,050 January $500 calls (~$4.25M) bought 11/4 into the report; spot ~$514.50. +34% YTD, spiked to a 52-week high then faded; $548 resistance, 21-day EMA near $483 first support. Desk wants adds on pullbacks toward the 21-day.",
-      "href": "options-flow/",
-      "publishedAt": "2026-11-08T18:30:00-06:00",
       "sourceLabel": "Desk"
     }
   ]
