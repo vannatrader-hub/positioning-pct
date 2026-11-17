@@ -1,9 +1,18 @@
 {
   "timeZone": "America/Chicago",
   "dayStartsAt": "00:00",
-  "dayStart": "2026-11-15T00:00:00-06:00",
-  "updatedAt": "2026-11-16T17:17:23-06:00",
+  "dayStart": "2026-11-16T00:00:00-06:00",
+  "updatedAt": "2026-11-16T17:50:00-06:00",
   "items": [
+    {
+      "id": "2026-11-16-research-flow-show-nov12",
+      "section": "research",
+      "title": "Flow Show: Nov 12 weekly bank chart pack",
+      "summary": "Three cropped bank charts from the Nov 12 pack are on Positioning charts: GS prime-book semis exposure, plus BoA Bull & Bear and global equity fund flows.",
+      "href": "positioning/charts/#flow-show",
+      "publishedAt": "2026-11-16T17:50:00-06:00",
+      "sourceLabel": "Desk"
+    },
     {
       "id": "2026-11-15-research-gs-hedge-funds-sell",
       "section": "research",

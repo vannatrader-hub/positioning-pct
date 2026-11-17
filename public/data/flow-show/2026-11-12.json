@@ -1,0 +1,32 @@
+{
+  "id": "2026-11-12",
+  "editionDate": "2026-11-12",
+  "label": "Nov 12, 2026",
+  "title": "Weekly bank chart pack",
+  "summary": "Three desk crops from the Nov 12 pack: GS prime-book semis exposure, plus BoA Bull & Bear and global equity fund flows.",
+  "charts": [
+    {
+      "id": "semis-gs-pb-exposure",
+      "bank": "GS",
+      "caption": "Prime book semis and semi-equip net US exposure.",
+      "asOf": "2026-11-06",
+      "asOfLabel": "Nov 6, 2026",
+      "src": "flow-show/2026-11-12/semis-gs-pb-exposure.png",
+      "alt": "GS prime book semis and semi equipment net exposure"
+    },
+    {
+      "id": "boa-bull-bear",
+      "bank": "BoA",
+      "caption": "Bull & Bear Indicator at 7.4, with components and history.",
+      "src": "flow-show/2026-11-12/boa-bull-bear-7.4.jpg",
+      "alt": "BoA Bull and Bear Indicator at 7.4 with component table and history"
+    },
+    {
+      "id": "boa-global-equity-fund-flows",
+      "bank": "BoA",
+      "caption": "Global equity fund flows, weekly and four-week average.",
+      "src": "flow-show/2026-11-12/boa-global-equity-fund-flows.jpg",
+      "alt": "BoA global equity fund flows weekly bars and four-week average"
+    }
+  ]
+}

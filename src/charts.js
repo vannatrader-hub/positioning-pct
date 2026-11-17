@@ -21,6 +21,7 @@ import { OVERLAY_COLORS, TONE, drawLines, drawResidual, drawSectors, gaugeSvg, m
 import softVolSeries from "../public/data/vault/soft-vol/series.json" with { type: "json" };
 import softVolLatest from "../public/data/vault/soft-vol/latest.json" with { type: "json" };
 import { formatSigned, liveRead, tipLines } from "./soft-vol.js";
+import { mountFlowShow } from "./flow-show.js";
 
 const STORAGE_KEY = "positioning-pct-source";
 const LATEST = WEEKS.length - 1;
@@ -766,6 +767,18 @@ buildFundManagers();
 buildRisk();
 paint();
 
-const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
-if (target) target.scrollIntoView({ behavior: "instant", block: "start" });
-watchSections();
+function jumpToHash() {
+  const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (!target) return;
+  const header = document.querySelector(".topbar");
+  // Match the sticky topbar height so the section clears chrome and still wins watchSections
+  // (spy line is header.bottom + 24). Fallback keeps #flow-show above Risk appetite on load.
+  const margin = Math.ceil((header?.getBoundingClientRect().height ?? 160) + 8);
+  target.style.scrollMarginTop = `${margin}px`;
+  target.scrollIntoView({ behavior: "instant", block: "start" });
+}
+
+mountFlowShow().finally(() => {
+  jumpToHash();
+  watchSections();
+});

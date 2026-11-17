@@ -7149,3 +7149,111 @@ a.nt-row:hover .nt-arrow { background: var(--ink); color: var(--p-on-ink); }
   color: var(--mh-meta);
   font-size: 11px;
 }
+
+/* Flow Show · weekly bank chart packs on Positioning charts */
+.flow-show {
+  margin-top: 48px;
+  padding-top: 8px;
+  /* Fallback; charts.js sets an inline scroll-margin from the live sticky topbar height. */
+  scroll-margin-top: 132px;
+}
+#flow-show,
+#flow-show-title {
+  scroll-margin-top: 132px;
+}
+@media (max-width: 720px) {
+  .flow-show,
+  #flow-show,
+  #flow-show-title {
+    scroll-margin-top: 220px;
+  }
+}
+
+.flow-show-head { margin-bottom: 8px; }
+.flow-show-head h2 {
+  margin: 8px 0 0;
+  font-size: 28px;
+  letter-spacing: -0.03em;
+}
+
+.flow-show-body { margin-top: 18px; }
+
+.flow-show-edition-head {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.flow-show-edition-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--p-meta);
+  letter-spacing: 0.02em;
+}
+
+.flow-show-edition-title {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
+.flow-show-edition-summary {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--p-body);
+  font-size: 14.5px;
+  line-height: 1.45;
+}
+
+.flow-show-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.flow-show-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 18px 18px 16px;
+  background: var(--p-card);
+  border: 1px solid var(--p-line);
+  border-radius: var(--radius, 14px);
+  box-shadow: var(--shadow);
+}
+
+.flow-show-figure { margin: 0; display: grid; gap: 10px; }
+
+.flow-show-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  background: var(--p-card-mute);
+  border: 1px solid var(--p-line);
+}
+
+.flow-show-cap {
+  display: grid;
+  gap: 2px;
+}
+
+.flow-show-title {
+  font-size: 14.5px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  color: var(--p-ink);
+}
+
+.flow-show-status {
+  margin: 0;
+  color: var(--p-meta);
+  font-size: 14px;
+}
+
+@media (max-width: 720px) {
+  .flow-show-grid { grid-template-columns: 1fr; }
+}

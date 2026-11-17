@@ -1,0 +1,13 @@
+{
+  "sku": "flow-show",
+  "title": "Flow Show",
+  "blurb": "Weekly bank chart packs, cropped to the desk print.",
+  "editions": [
+    {
+      "id": "2026-11-12",
+      "label": "Nov 12, 2026",
+      "href": "2026-11-12.json"
+    }
+  ],
+  "latest": "2026-11-12"
+}
