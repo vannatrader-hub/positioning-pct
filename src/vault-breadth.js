@@ -27,10 +27,13 @@ import {
   rangeLabel,
   signed,
   sma,
+  summationChip,
+  isPublicChipSurface,
   ticks,
   utc,
   windowStart,
 } from "./breadth.js";
+import { isFamilySurface } from "./family-entry.js";
 import { onDeskReady } from "./when-mounted.js";
 
 const DATA = `${import.meta.env.BASE_URL}data/vault/breadth/`;
@@ -808,7 +811,7 @@ function levelText(value) {
   return minus(fixed(value));
 }
 
-function readLine(doc, { plain = false } = {}) {
+function readLine(doc, { plain = false, publicChip = false } = {}) {
   if (doc.kind === "pct-above-ma") {
     const read = pctileRead(doc);
     const line = el("p", "bw-read");
@@ -838,10 +841,9 @@ function readLine(doc, { plain = false } = {}) {
   }
   const read = breadthRead(doc);
   const line = el("p", "bw-read");
-  /* Public Dashboard + /vol/: tip-sheet only. Vault and Hub keep buy-line / MA(8) detail. */
-  const atBuy = !plain && read.atBuy;
-  const status = el("span", `bw-status ${atBuy ? "is-buy" : read.close < 0 ? "is-weak" : "is-firm"}`);
-  status.textContent = atBuy ? "At the buy line" : read.close < 0 ? "Below zero" : "Above zero";
+  const chip = summationChip(read, { publicChip });
+  const status = el("span", `bw-status ${chip.tone}`);
+  status.textContent = chip.text;
   line.append(status, el("strong", "bw-read-value", minus(fixed(read.close))));
   if (!plain) {
     line.append(
@@ -853,16 +855,12 @@ function readLine(doc, { plain = false } = {}) {
   return { line, read };
 }
 
-/** Tip-sheet Above/Below zero only on the public Dashboard and /vol/. Vault and Hub stay full. */
-function isPublicPlainSurface(doc = globalThis.document) {
-  return doc?.body?.dataset?.surface === "public";
-}
-
 function fillCard(card, doc, spx, defaults) {
-  const plain = isPublicPlainSurface();
+  const plain = !isFamilySurface();
+  const publicChip = isPublicChipSurface();
   const pct = doc.kind === "pct-above-ma";
   const head = card.querySelector(".pchart-head");
-  const { line, read } = readLine(doc, { plain });
+  const { line, read } = readLine(doc, { plain, publicChip });
   head.append(line);
 
   const state = { months: clampMonths(Number(card.dataset.months) || doc.defaultRangeMonths || defaults.months), overlay: !pct };
