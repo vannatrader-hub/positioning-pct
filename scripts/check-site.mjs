@@ -1133,16 +1133,39 @@ assert(itemsForDay(nt.items ?? [], "2026-11-04").length === 0, "Nov 4 desk day r
 assert(itemsForDay(nt.items ?? [], "2026-11-05").length === 0, "Nov 5 desk day rolled off the eight-day New Today window");
 assert(itemsForDay(nt.items ?? [], "2026-11-06").length === 0, "Nov 6 desk day rolled off the eight-day New Today window");
 assert(itemsForDay(nt.items ?? [], "2026-11-07").length === 0, "Nov 7 desk day rolled off the eight-day New Today window");
-assert(itemsForDay(nt.items ?? [], "2026-11-08").length === 2, "Nov 8 desk day lists the ARES and MSI featured alerts");
-assert(itemsForDay(nt.items ?? [], "2026-11-09").length === 5, "Nov 9 desk day lists the CCJ and CBRE shopping-list alerts, the BURL featured alert, and the open and market wraps");
-assert(itemsForDay(nt.items ?? [], "2026-11-10").length === 4, "Nov 10 desk day lists the MDB Spotlight, the KKR and FROG shopping-list alerts, and the TGT featured alert");
-assert(itemsForDay(nt.items ?? [], "2026-11-11").length === 3, "Nov 11 desk day lists the AVAV and ASML shopping-list alerts and the IONQ featured alert");
-assert(itemsForDay(nt.items ?? [], "2026-11-12").length === 3, "Nov 12 desk day lists the GPC shopping-list alert and the COHR and AKAM featured alerts");
-assert(itemsForDay(nt.items ?? [], "2026-11-15").length === 2, "Nov 15 desk day lists the BoA and Goldman Sachs research notes");
+
+/* Fixed Nov 8–15 desk fixtures: day counts, catch-up windows, midnight roll, chip. Independent of the live feed. */
+const novDeskFixture = [
+  { id: "2026-11-08-ares-flow", section: "options-flow", publishedAt: "2026-11-08T18:30:00-06:00", title: "ARES ($$): Mar 2027 $110 puts sold", summary: "600 March 2027 $110 puts sold", href: "options-flow/" },
+  { id: "2026-11-08-msi-flow", section: "options-flow", publishedAt: "2026-11-08T18:30:00-06:00", title: "MSI ($$): Jan $560 calls bought", summary: "1,000 January $560 calls bought", href: "options-flow/" },
+  { id: "2026-11-09-ccj-dollar", section: "options-flow", publishedAt: "2026-11-09T18:44:00-06:00", title: "CCJ joins the $$$ Shopping List", summary: "Buyer of 10,500 Dec $85 calls at $1.74", href: "options-flow/dollar/#CCJ" },
+  { id: "2026-11-09-burl-flow", section: "options-flow", publishedAt: "2026-11-09T17:47:00-06:00", title: "BURL ($$): June 2027 $230 puts sold", summary: "June 2027 $230 puts sold; spot ~$257", href: "options-flow/" },
+  { id: "2026-11-09-cbre-dollar", section: "options-flow", publishedAt: "2026-11-09T17:47:00-06:00", title: "CBRE joins the $$$ Shopping List", summary: "December $135 calls bought; spot ~$138", href: "options-flow/dollar/#CBRE" },
+  { id: "2026-11-09-desk-recap", section: "options-flow", publishedAt: "2026-11-09T14:26:00-06:00", title: "Desk market wrap 11/9", summary: "Stocks bounced to start the week", href: "options-flow/" },
+  { id: "2026-11-09-desk-blitz", section: "options-flow", publishedAt: "2026-11-09T06:47:00-06:00", title: "Desk open wrap 11/9", summary: "Futures firmer to start the week", href: "options-flow/" },
+  { id: "2026-11-10-mdb-spotlight", section: "options-flow", publishedAt: "2026-11-10T20:45:00-06:00", title: "MDB Spotlight: January $370/$430 call spreads", summary: "Long January $370/$430 call spreads", href: "options-flow/spotlights/#MDB" },
+  { id: "2026-11-10-kkr-dollar", section: "options-flow", publishedAt: "2026-11-10T18:03:00-06:00", title: "KKR joins the $$$ Shopping List", summary: "2,000 May $100 puts sold", href: "options-flow/dollar/#KKR" },
+  { id: "2026-11-10-frog-dollar", section: "options-flow", publishedAt: "2026-11-10T17:44:00-06:00", title: "FROG joins the $$$ Shopping List", summary: "1,000 December $105 ITM puts sold", href: "options-flow/dollar/#FROG" },
+  { id: "2026-11-10-tgt-flow", section: "options-flow", publishedAt: "2026-11-10T17:43:00-06:00", title: "TGT ($$): Jan 2029 $200 puts sold", summary: "700 January 2029 $200 ITM puts sold", href: "options-flow/" },
+  { id: "2026-11-11-avav-dollar", section: "options-flow", publishedAt: "2026-11-11T18:12:00-06:00", title: "AVAV joins the $$$ Shopping List", summary: "600 January $165 OTM calls bought", href: "options-flow/dollar/#AVAV" },
+  { id: "2026-11-11-asml-dollar", section: "options-flow", publishedAt: "2026-11-11T18:10:00-06:00", title: "ASML joins the $$$ Shopping List", summary: "1,960 February $1740/$1820 call spreads bought", href: "options-flow/dollar/#ASML" },
+  { id: "2026-11-11-ionq-flow", section: "options-flow", publishedAt: "2026-11-11T18:08:00-06:00", title: "IONQ ($$): Jan 2029 $35 puts sold", summary: "700 January 2029 $35 ITM puts sold", href: "options-flow/" },
+  { id: "2026-11-12-gpc-dollar", section: "options-flow", publishedAt: "2026-11-12T21:04:00-06:00", title: "GPC joins the $$$ Shopping List", summary: "2,550 December $125 calls bought", href: "options-flow/dollar/#GPC" },
+  { id: "2026-11-12-cohr-flow", section: "options-flow", publishedAt: "2026-11-12T17:45:00-06:00", title: "COHR ($$): Dec $300 calls bought", summary: "1,600 December $300 calls bought", href: "options-flow/" },
+  { id: "2026-11-12-akam-flow", section: "options-flow", publishedAt: "2026-11-12T17:44:00-06:00", title: "AKAM ($$): Dec $85/$110 call spreads", summary: "3,350 December $85/$110 call spreads bought", href: "options-flow/" },
+  { id: "2026-11-15-research-gs-hedge-funds-sell", section: "research", publishedAt: "2026-11-15T10:30:00-06:00", title: "Goldman: hedge funds sold the rip", summary: "Goldman's latest prime-services data", href: "new-today/#nt-research", sourceLabel: "Goldman Sachs" },
+  { id: "2026-11-15-research-boa-risk-off", section: "research", publishedAt: "2026-11-15T01:02:00-06:00", title: "BoA: risk-off stays in place", summary: "The Nov 12 bank note keeps a tactical risk-off stance", href: "new-today/#nt-research", sourceLabel: "BoA", thumb: "data/new-today/thumbs/2026-11-15-boa-bull-bear.jpg" },
+];
+assert(itemsForDay(novDeskFixture, "2026-11-08").length === 2, "Nov 8 desk day lists the ARES and MSI featured alerts");
+assert(itemsForDay(novDeskFixture, "2026-11-09").length === 5, "Nov 9 desk day lists the CCJ and CBRE shopping-list alerts, the BURL featured alert, and the open and market wraps");
+assert(itemsForDay(novDeskFixture, "2026-11-10").length === 4, "Nov 10 desk day lists the MDB Spotlight, the KKR and FROG shopping-list alerts, and the TGT featured alert");
+assert(itemsForDay(novDeskFixture, "2026-11-11").length === 3, "Nov 11 desk day lists the AVAV and ASML shopping-list alerts and the IONQ featured alert");
+assert(itemsForDay(novDeskFixture, "2026-11-12").length === 3, "Nov 12 desk day lists the GPC shopping-list alert and the COHR and AKAM featured alerts");
+assert(itemsForDay(novDeskFixture, "2026-11-15").length === 2, "Nov 15 desk day lists the BoA and Goldman Sachs research notes");
 assert(
-  visibleDeskItems(nt.items, { today: "2026-11-09", mode: "catchup" }).map((item) => item.id).join() ===
+  visibleDeskItems(novDeskFixture, { today: "2026-11-09", mode: "catchup" }).map((item) => item.id).join() ===
     "2026-11-09-ccj-dollar,2026-11-09-burl-flow,2026-11-09-cbre-dollar,2026-11-09-desk-recap,2026-11-09-desk-blitz,2026-11-08-ares-flow,2026-11-08-msi-flow",
-  "Nov 9 catch-up lists the live Mon/Sun rows still in the feed",
+  "Nov 9 fixture catch-up lists the Mon/Sun rows",
 );
 assert(
   rowDayLabel("2026-11-09T18:44:00-06:00", "2026-11-09").label === "Today · Mon, Nov 9" &&
@@ -1150,7 +1173,7 @@ assert(
   "Nov 9 rows stay Today and Nov 8 rows stay Yesterday",
 );
 assert(
-  visibleDeskItems(nt.items, { today: "2026-11-10", mode: "catchup" }).map((item) => item.id).join() ===
+  visibleDeskItems(novDeskFixture, { today: "2026-11-10", mode: "catchup" }).map((item) => item.id).join() ===
     "2026-11-10-mdb-spotlight,2026-11-10-kkr-dollar,2026-11-10-frog-dollar,2026-11-10-tgt-flow,2026-11-09-ccj-dollar,2026-11-09-burl-flow,2026-11-09-cbre-dollar,2026-11-09-desk-recap,2026-11-09-desk-blitz",
   "Nov 10 catch-up is today plus yesterday and keeps each row's original date",
 );
@@ -1160,7 +1183,7 @@ assert(
   "Nov 10 rows stay Today and Nov 9 rows stay Yesterday on the Nov 10 catch-up",
 );
 assert(
-  visibleDeskItems(nt.items, { today: "2026-11-11", mode: "catchup" }).map((item) => item.id).join() ===
+  visibleDeskItems(novDeskFixture, { today: "2026-11-11", mode: "catchup" }).map((item) => item.id).join() ===
     "2026-11-11-avav-dollar,2026-11-11-asml-dollar,2026-11-11-ionq-flow,2026-11-10-mdb-spotlight,2026-11-10-kkr-dollar,2026-11-10-frog-dollar,2026-11-10-tgt-flow",
   "Nov 11 catch-up is today plus yesterday and keeps each row's original date",
 );
@@ -1170,7 +1193,7 @@ assert(
   "Nov 11 rows stay Today and Nov 10 rows stay Yesterday on the Nov 11 catch-up",
 );
 assert(
-  visibleDeskItems(nt.items, { today: "2026-11-12", mode: "catchup" }).map((item) => item.id).join() ===
+  visibleDeskItems(novDeskFixture, { today: "2026-11-12", mode: "catchup" }).map((item) => item.id).join() ===
     "2026-11-12-gpc-dollar,2026-11-12-cohr-flow,2026-11-12-akam-flow,2026-11-11-avav-dollar,2026-11-11-asml-dollar,2026-11-11-ionq-flow",
   "Nov 12 catch-up is today plus yesterday and keeps each row's original date",
 );
@@ -1180,7 +1203,7 @@ assert(
   "Nov 12 rows stay Today and Nov 11 rows stay Yesterday on the Nov 12 catch-up",
 );
 assert(
-  visibleDeskItems(nt.items, { today: "2026-11-13", mode: "catchup" }).map((item) => item.id).join() ===
+  visibleDeskItems(novDeskFixture, { today: "2026-11-13", mode: "catchup" }).map((item) => item.id).join() ===
     "2026-11-12-gpc-dollar,2026-11-12-cohr-flow,2026-11-12-akam-flow",
   "Nov 13 morning catch-up keeps yesterday's Nov 12 rows with date labels and drops Nov 11",
 );
@@ -1189,7 +1212,7 @@ assert(
   "Nov 12 GPC row stays Yesterday on the Nov 13 catch-up",
 );
 assert(
-  visibleDeskItems(nt.items, { today: "2026-11-16", mode: "catchup", section: "research" }).map((item) => item.id).join() ===
+  visibleDeskItems(novDeskFixture, { today: "2026-11-16", mode: "catchup", section: "research" }).map((item) => item.id).join() ===
     "2026-11-15-research-gs-hedge-funds-sell,2026-11-15-research-boa-risk-off",
   "Nov 16 catch-up Research keeps yesterday's Nov 15 bank notes with date labels",
 );
@@ -1198,8 +1221,8 @@ assert(
     rowDayLabel("2026-11-15T10:30:00-06:00", "2026-11-16").label === "Yesterday · Sun, Nov 15",
   "Nov 15 research rows stay Yesterday · Sun, Nov 15 on the Nov 16 catch-up",
 );
-const boaResearch = (nt.items ?? []).find((item) => item.id === "2026-11-15-research-boa-risk-off");
-const gsResearch = (nt.items ?? []).find((item) => item.id === "2026-11-15-research-gs-hedge-funds-sell");
+const boaResearch = novDeskFixture.find((item) => item.id === "2026-11-15-research-boa-risk-off");
+const gsResearch = novDeskFixture.find((item) => item.id === "2026-11-15-research-gs-hedge-funds-sell");
 assert(boaResearch?.sourceLabel === "BoA" && boaResearch?.thumb === "data/new-today/thumbs/2026-11-15-boa-bull-bear.jpg", "BoA research keeps the bank label and thumb");
 assert(gsResearch?.sourceLabel === "Goldman Sachs" && !gsResearch?.thumb, "Goldman research stays text-only with the bank label");
 
@@ -1219,13 +1242,13 @@ assert(JSON.stringify(catchUpDays(nov10Today)) === '["2026-11-10","2026-11-09"]'
 const beforeMidnight = "2026-11-10T05:59:59Z";
 const afterMidnight = "2026-11-10T06:00:00Z";
 assert(deskDay(beforeMidnight) === "2026-11-09" && deskDay(afterMidnight) === "2026-11-10", "midnight CT rolls the desk day from Nov 9 to Nov 10");
-const beforeRoll = visibleDeskItems(nt.items, { today: deskDay(beforeMidnight), mode: "catchup" });
-const afterRoll = visibleDeskItems(nt.items, { today: deskDay(afterMidnight), mode: "catchup" });
+const beforeRoll = visibleDeskItems(novDeskFixture, { today: deskDay(beforeMidnight), mode: "catchup" });
+const afterRoll = visibleDeskItems(novDeskFixture, { today: deskDay(afterMidnight), mode: "catchup" });
 assert(beforeRoll.some((item) => item.id === "2026-11-09-ccj-dollar"), "before midnight, Nov 9 is today");
 assert(beforeRoll.every((item) => ["2026-11-09", "2026-11-08"].includes(deskDay(item.publishedAt))), "the pre-midnight catch-up stays on those two dates");
 assert(!beforeRoll.some((item) => item.id.startsWith("2026-11-07")), "Nov 7 leaves the default view once Nov 8 is yesterday");
 for (const id of ["2026-11-09-ccj-dollar", "2026-11-09-burl-flow", "2026-11-09-cbre-dollar"]) {
-  const stored = (nt.items ?? []).find((item) => item.id === id);
+  const stored = novDeskFixture.find((item) => item.id === id);
   const shown = afterRoll.find((item) => item.id === id);
   assert(shown === stored, `${id} shows on the Nov 10 default view without a copied stamp`);
   assert(shown.publishedAt.startsWith("2026-11-09T"), `${id} keeps its Nov 9 publishedAt`);
@@ -1240,15 +1263,15 @@ assert(
   "Nov 10 default lists the four Nov 10 rows plus the five Nov 9 rows",
 );
 assert(!afterRoll.some((item) => item.id.startsWith("2026-11-08")), "Nov 8 drops out of the default view at the Nov 10 midnight rollover");
-const publicNov10 = visibleDeskItems(nt.items, { today: nov10Today, mode: "catchup", publicOnly: true });
+const publicNov10 = visibleDeskItems(novDeskFixture, { today: nov10Today, mode: "catchup", publicOnly: true });
 assert(JSON.stringify(publicNov10.map((item) => item.id)) === "[]", "public /new-today/ on Nov 10 lists no eligible row");
-const nov9Public = (nt.items ?? []).filter(
+const nov9Public = novDeskFixture.filter(
   (item) => deskDay(item.publishedAt) === "2026-11-09" && PUBLIC_NT_SECTIONS.some((section) => section.id === item.section),
 );
 assert(nov9Public.length === 0, "Nov 9 has no Positioning, SPX, or Research row for the public page");
 const tradeCopy = /\$\d|\bcalls\b|\bputs\b|\bstrike\b|\bpremium\b/i;
 for (const id of ["2026-11-09-ccj-dollar", "2026-11-09-burl-flow", "2026-11-09-cbre-dollar"]) {
-  const item = (nt.items ?? []).find((row) => row.id === id);
+  const item = novDeskFixture.find((row) => row.id === id);
   assert(item.section === "options-flow" && item.href.startsWith("options-flow/"), `${id} is vault flow and links at the gated flow pages`);
   assert(!("publicTitle" in item) && !("publicSummary" in item) && !("publicHref" in item), `${id} has no public activity fields`);
   assert(tradeCopy.test(`${item.title} ${item.summary}`), `${id} copy is trade detail and stays off the public page`);
@@ -1262,12 +1285,12 @@ for (const file of ["options-flow/index.html", "options-flow/dollar/index.html",
   assert(readFileSync(join(root, file), "utf8").includes('src="/src/vault-gate.js"'), `${file} keeps the Vault gate in front of flow detail`);
 }
 assert(
-  visibleDeskItems(nt.items, { today: nov10Today, mode: "catchup", section: "options-flow" }).map((item) => item.id).join() ===
+  visibleDeskItems(novDeskFixture, { today: nov10Today, mode: "catchup", section: "options-flow" }).map((item) => item.id).join() ===
     "2026-11-10-mdb-spotlight,2026-11-10-kkr-dollar,2026-11-10-frog-dollar,2026-11-10-tgt-flow,2026-11-09-ccj-dollar,2026-11-09-burl-flow,2026-11-09-cbre-dollar,2026-11-09-desk-recap,2026-11-09-desk-blitz",
   "section filter keeps the Nov 10 and Nov 9 flow rows, newest first",
 );
-assert(visibleDeskItems(nt.items, { today: nov10Today, mode: "catchup", section: "positioning" }).length === 0, "Nov 10 positioning filter does not borrow Nov 9 flow rows");
-const nov9Only = visibleDeskItems(nt.items, { today: nov10Today, mode: "day", day: "2026-11-09" });
+assert(visibleDeskItems(novDeskFixture, { today: nov10Today, mode: "catchup", section: "positioning" }).length === 0, "Nov 10 positioning filter does not borrow Nov 9 flow rows");
+const nov9Only = visibleDeskItems(novDeskFixture, { today: nov10Today, mode: "day", day: "2026-11-09" });
 assert(nov9Only.length === 5 && nov9Only.every((item) => deskDay(item.publishedAt) === "2026-11-09"), "an older desk day stays a single calendar day");
 assert(!nov9Only.some((item) => item.id.includes("2026-11-10")), "Nov 10 rows do not leak into the Nov 9 page");
 
@@ -1357,10 +1380,11 @@ assert(emptyDeskMessage("catchup") === "Nothing new today or yesterday." && empt
 assert(emptyDeskMessage("catchup", nov6Today) === "Nothing new today or yesterday.", "Friday empty copy still names yesterday");
 assert(emptyDeskMessage("catchup", "2026-11-09") === "Nothing new today or since Friday.", "Monday empty copy names Friday");
 assert(priorWindowWord(undefined) === "yesterday" && priorWindowWord(null) === "yesterday" && priorWindowWord("") === "yesterday", "missing today defaults prior wording to yesterday");
-const yChip = catchUpChip(catchUpSummary(nt.items, nov10Today), nt.updatedAt);
+const nov10ChipStamp = "2026-11-10T21:00:00-06:00";
+const yChip = catchUpChip(catchUpSummary(novDeskFixture, nov10Today), nov10ChipStamp);
 assert(yChip.sub === "4 today · 5 yesterday" && yChip.lit === true && yChip.quiet === false, "Nov 10 chip names today and yesterday and pulses");
 assert(yChip.aria.includes("4 today") && yChip.aria.includes("5 yesterday") && !yChip.aria.includes("since 12"), "Nov 10 chip keeps yesterday separate");
-const publicNov10Chip = catchUpChip(catchUpSummary(publicDeskItems(nt.items), nov10Today), nt.updatedAt);
+const publicNov10Chip = catchUpChip(catchUpSummary(publicDeskItems(novDeskFixture), nov10Today), nov10ChipStamp);
 assert(publicNov10Chip.quiet === true && publicNov10Chip.lit === false, "public Nov 10 chip stays quiet because those rows are Options Flow");
 const quietChip = catchUpChip(catchUpSummary([], nov6Today), "");
 assert(quietChip.sub === "Quiet since yesterday" && quietChip.quiet === true && quietChip.lit === false, "a two-day quiet chip says so");
@@ -2956,7 +2980,7 @@ const w43 = archiveGroups(filterEntries(archiveEntries, "2026-W43"));
 assert(w43[0]?.entries[0]?.kind === "pack" && w43[0].entries[0].title === "2026-W43 Soft ↔ Crowded" && w43[0].gap === "", "W43 leads with its pack");
 const archivePacks = archiveGroups(filterEntries(archiveEntries, "", "pack"));
 assert(archivePacks.every((group) => group.entries.every((entry) => entry.kind === "pack")) && archivePacks[0].week === "2026-W44", "Soft ↔ Crowded filter lists packs newest first");
-const wordHit = filterEntries(archiveEntries, "kkr", "day");
+const wordHit = filterEntries(newTodayDays(novDeskFixture), "kkr", "day");
 assert(wordHit.length > 0 && wordHit.every((entry) => entry.items.every((item) => item.text.includes("kkr"))), "a word search cuts a desk day to its matching lines");
 assert(displaySource(["W", "SJ"].join("")) === "Press note" && displaySource("GS") === "GS" && displaySource("") === "Desk", "archive press labels read as a press note");
 const archiveShown = archiveEntries.flatMap((entry) => [entry.title, entry.label, entry.summary, entry.headline ?? "", ...(entry.items ?? []).flatMap((item) => [item.title, item.summary, item.source])]).join("\n");
