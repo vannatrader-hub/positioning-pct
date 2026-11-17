@@ -797,6 +797,17 @@ for (const chart of flowShowEdition.charts) {
 assert(flowShowEdition.charts.find((chart) => chart.id === "semis-gs-pb-exposure")?.asOfLabel === "Nov 6, 2026", "semis tile keeps the printed as-of");
 assert(!siteStyles.includes(".h-citi"), "Flow Show does not invent a Citi house chip");
 assert(chartsPage.includes("as-of date appears only when the chart itself prints one"), "Flow Show lede does not claim every tile prints an as-of");
+assert(
+  flowShowScript.includes('el("span", "basis", `As of ${chart.asOfLabel}`)') &&
+    !flowShowScript.includes('el("span", "flow-show-asof"'),
+  "Flow Show shows as-of once in the card basis, not again in the caption",
+);
+assert(chartsScript.includes("mountFlowShow().finally") && chartsScript.includes("watchSections()"), "hash jump and watchSections run after Flow Show load settles");
+assert(chartsScript.includes("scrollMarginTop") && chartsScript.includes("jumpToHash"), "hash jump sizes scroll-margin from the sticky topbar");
+{
+  const semisPng = readFileSync(join(root, "public/flow-show/2026-11-12/semis-gs-pb-exposure.png"));
+  assert(semisPng.readUInt32BE(16) === 520 && semisPng.readUInt32BE(20) === 366, "semis crop keeps the full 520×366 source rows");
+}
 
 for (const page of ["positioning/index.html", "positioning/desk/index.html", "positioning/charts/index.html"]) {
   assert(viteConfig.includes(`"${page}"`), `vite builds ${page}`);

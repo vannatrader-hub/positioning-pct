@@ -39,7 +39,6 @@ function card(chart) {
   figure.append(img);
   const caption = el("figcaption", "flow-show-cap");
   caption.append(el("strong", "flow-show-title", chart.caption));
-  if (chart.asOfLabel) caption.append(el("span", "flow-show-asof", chart.asOfLabel));
   figure.append(caption);
   article.append(top, figure);
   return article;

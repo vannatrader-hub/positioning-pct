@@ -766,8 +766,19 @@ buildCredit();
 buildFundManagers();
 buildRisk();
 paint();
-mountFlowShow();
 
-const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
-if (target) target.scrollIntoView({ behavior: "instant", block: "start" });
-watchSections();
+function jumpToHash() {
+  const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (!target) return;
+  const header = document.querySelector(".topbar");
+  // Match the sticky topbar height so the section clears chrome and still wins watchSections
+  // (spy line is header.bottom + 24). Fallback keeps #flow-show above Risk appetite on load.
+  const margin = Math.ceil((header?.getBoundingClientRect().height ?? 160) + 8);
+  target.style.scrollMarginTop = `${margin}px`;
+  target.scrollIntoView({ behavior: "instant", block: "start" });
+}
+
+mountFlowShow().finally(() => {
+  jumpToHash();
+  watchSections();
+});

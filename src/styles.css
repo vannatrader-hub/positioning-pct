@@ -7154,12 +7154,19 @@ a.nt-row:hover .nt-arrow { background: var(--ink); color: var(--p-on-ink); }
 .flow-show {
   margin-top: 48px;
   padding-top: 8px;
-  /* Clear the sticky topbar + charts secnav (~132px) with room so #flow-show is not low. */
-  scroll-margin-top: 160px;
+  /* Fallback; charts.js sets an inline scroll-margin from the live sticky topbar height. */
+  scroll-margin-top: 132px;
 }
 #flow-show,
 #flow-show-title {
-  scroll-margin-top: 160px;
+  scroll-margin-top: 132px;
+}
+@media (max-width: 720px) {
+  .flow-show,
+  #flow-show,
+  #flow-show-title {
+    scroll-margin-top: 220px;
+  }
 }
 
 .flow-show-head { margin-bottom: 8px; }
@@ -7239,11 +7246,6 @@ a.nt-row:hover .nt-arrow { background: var(--ink); color: var(--p-on-ink); }
   font-weight: 650;
   letter-spacing: -0.015em;
   color: var(--p-ink);
-}
-
-.flow-show-asof {
-  font-size: 12px;
-  color: var(--p-meta);
 }
 
 .flow-show-status {
