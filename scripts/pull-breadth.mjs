@@ -10,10 +10,15 @@
  * breadth indexes and `n start end open high low close vol` for OHLC series.
  * Only completed sessions (stamped to 16:00) are kept.
  *
- * Core series are append-only: committed history is kept, new dates after the
- * last bar are added, and overlapping dates must match (within rounding) or
- * the write aborts. NYHL / NYAD daily values append onto the cumulative line
- * (and its embedded SPX context). Participation symbols are best-effort.
+ * Core series are append-only beyond a short tip window: committed history is
+ * kept, new dates after the last bar are added, and overlapping dates must
+ * match (within rounding) outside the window or the write aborts. Inside the
+ * last 5 trading sessions of the committed series (holiday-aware), the feed
+ * wins on small revisions and each overwrite is logged. A tip revision whose
+ * |Δ| exceeds max(per-series abs tol, 5% of |old|) still aborts — 25 points for
+ * NYSI/NASI/NYHL/NYAD-type count/summation series, 1.0 for %-above-MA series.
+ * NYHL / NYAD daily values append onto the cumulative line (and its embedded
+ * SPX context). Participation symbols are best-effort.
  *
  * All series are merged and validated in memory first; files are written only
  * when every validation passes (temp files, then rename). A failed pull leaves
@@ -29,6 +34,15 @@ const out = join(root, "public/data/vault/breadth");
 const feed = process.env.BREADTH_FEED;
 const YEARS = 11;
 const OVERLAP_EPS = 0.005;
+/** Tip overlap: last N trading sessions of the committed series (inclusive of end). */
+const OVERLAP_SESSIONS = 5;
+/**
+ * Absolute revision tolerances inside the overlap window. A tip revision fails
+ * when |new − old| > max(absTol, 0.05 · |old|).
+ * - count: NYSI / NASI / NYHL / NYAD (and SPX levels) — 25 points
+ * - pct: %-above-MA participation series — 1.0 percentage point
+ */
+const REVISION_ABS_TOL = Object.freeze({ count: 25, pct: 1 });
 
 /**
  * US cash-equity full-session closures the desk treats as non-sessions.
@@ -131,6 +145,56 @@ function closeEnough(a, b, eps = OVERLAP_EPS) {
   return Math.abs(Number(a) - Number(b)) <= eps;
 }
 
+/** Absolute tolerance for tip revisions: pct series use 1.0; everything else 25. */
+export function revisionAbsTol(id) {
+  if (PCT_IDS.includes(id) || id === "ndtw" || /^nc/.test(id)) return REVISION_ABS_TOL.pct;
+  return REVISION_ABS_TOL.count;
+}
+
+/** Allowed |Δ| for a tip revision of `old` on series `id`. */
+export function revisionTolerance(id, old) {
+  return Math.max(revisionAbsTol(id), 0.05 * Math.abs(Number(old)));
+}
+
+/**
+ * Last `sessions` US cash trading days ending at `endIso` (inclusive), walking
+ * back with the holiday list. Dates outside this set are outside the overlap
+ * window — any mismatch there fails the pull.
+ */
+export function overlapWindowDates(endIso, sessions = OVERLAP_SESSIONS) {
+  const dates = new Set();
+  if (!endIso) return dates;
+  let cursor = endIso;
+  let guard = 0;
+  while (dates.size < sessions && guard < 40) {
+    if (isWeekdayIso(cursor) && !US_MARKET_HOLIDAYS.has(cursor)) dates.add(cursor);
+    cursor = shiftIso(cursor, -1);
+    guard += 1;
+  }
+  return dates;
+}
+
+/**
+ * Decide whether a committed vs feed mismatch is an accepted tip revision.
+ * Returns { action: "match" | "revise", ... } or throws on hard failure.
+ */
+export function resolveOverlap({ id, t, old, next, window }) {
+  if (closeEnough(old, next)) return { action: "match" };
+  const delta = Math.abs(Number(old) - Number(next));
+  const tol = revisionTolerance(id, old);
+  if (!window.has(t)) {
+    throw new Error(`${id} overlap ${t}: committed ${old} != feed ${next}`);
+  }
+  if (delta > tol) {
+    throw new Error(`${id} overlap ${t}: committed ${old} != feed ${next} (Δ ${delta} > tol ${tol})`);
+  }
+  return { action: "revise", id, t, old: Number(old), new: Number(next) };
+}
+
+export function formatRevisionLog(rev) {
+  return `${rev.id} revision ${rev.t}: ${rev.old} → ${rev.new}`;
+}
+
 export async function pull(symbol, feedBase = feed) {
   const url = `${feedBase}?s=${encodeURIComponent(symbol)}&p=D&yr=${YEARS}&mn=0&dy=0&i=t3757734781c&img=text&inspector=yes`;
   const res = await fetch(url, { headers: { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)" } });
@@ -164,7 +228,7 @@ function formatBar(bar, spaced) {
 }
 
 export function formatBreadthBody(doc, { spaced = SPACED.has(doc.id) } = {}) {
-  const { bars, spx, ...head } = doc;
+  const { bars, spx, revisions: _revisions, ...head } = doc;
   const top = JSON.stringify(head, null, 2).slice(0, -2);
   let body = `${top},\n  "bars": [\n${bars.map((bar) => formatBar(bar, spaced)).join(",\n")}\n  ]`;
   if (spx) body += `,\n  "spx": [\n${spx.map((bar) => formatBar(bar, spaced)).join(",\n")}\n  ]`;
@@ -204,15 +268,24 @@ export function writeBreadth(file, doc, { spaced = SPACED.has(doc.id) || SPACED.
   commitBreadthWrites(dir, [{ file, body: formatBreadthBody(doc, { spaced }) }]);
 }
 
-/** Keep committed history; append only dates after the last bar; abort on overlap drift. */
+/**
+ * Keep committed history; append only dates after the last bar. Inside the tip
+ * overlap window the feed may revise levels (logged); older drift or tip moves
+ * beyond revisionTolerance abort before any write.
+ */
 export function appendLevel(doc, feedBars, asOf) {
-  const kept = doc.bars.slice();
-  const byT = new Map(kept.map((bar) => [bar.t, bar.c]));
+  const kept = doc.bars.map((bar) => ({ t: bar.t, c: bar.c }));
+  const indexByT = new Map(kept.map((bar, i) => [bar.t, i]));
+  const window = overlapWindowDates(kept.at(-1)?.t);
+  const revisions = [];
   for (const bar of feedBars) {
     if (bar.t > asOf) continue;
-    if (!byT.has(bar.t)) continue;
-    if (!closeEnough(byT.get(bar.t), bar.c)) {
-      throw new Error(`${doc.id} overlap ${bar.t}: committed ${byT.get(bar.t)} != feed ${bar.c}`);
+    const idx = indexByT.get(bar.t);
+    if (idx == null) continue;
+    const resolved = resolveOverlap({ id: doc.id, t: bar.t, old: kept[idx].c, next: bar.c, window });
+    if (resolved.action === "revise") {
+      kept[idx] = { t: bar.t, c: bar.c };
+      revisions.push(resolved);
     }
   }
   let last = kept.at(-1)?.t;
@@ -224,21 +297,34 @@ export function appendLevel(doc, feedBars, asOf) {
   if (kept.at(-1)?.t !== asOf) {
     throw new Error(`${doc.id} ends ${kept.at(-1)?.t}, expected ${asOf}`);
   }
-  return { ...doc, asOf, bars: kept };
+  return { ...doc, asOf, bars: kept, revisions };
 }
 
 export function appendCumulative(doc, daily, spxBySession, sessions, asOf) {
-  const bars = doc.bars.slice();
-  const spx = (doc.spx ?? []).slice();
+  const bars = doc.bars.map((bar) => ({ t: bar.t, c: bar.c }));
+  const spx = (doc.spx ?? []).map((bar) => ({ t: bar.t, c: bar.c }));
   const have = new Set(bars.map((bar) => bar.t));
-  const byT = new Map(bars.map((bar) => [bar.t, bar.c]));
+  const window = overlapWindowDates(bars.at(-1)?.t);
+  const revisions = [];
+  const dailyByT = new Map(daily.map((bar) => [bar.t, bar.c]));
   for (let i = 1; i < bars.length; i += 1) {
     const day = bars[i].t;
-    const feedBar = daily.find((bar) => bar.t === day);
-    if (!feedBar) continue;
-    const delta = bars[i].c - bars[i - 1].c;
-    if (!closeEnough(delta, feedBar.c)) {
-      throw new Error(`${doc.id} overlap Δ ${day}: committed ${delta} != feed ${feedBar.c}`);
+    if (!dailyByT.has(day)) continue;
+    const feedDaily = dailyByT.get(day);
+    const committedDaily = bars[i].c - bars[i - 1].c;
+    const resolved = resolveOverlap({
+      id: doc.id,
+      t: day,
+      old: committedDaily,
+      next: feedDaily,
+      window,
+    });
+    if (resolved.action === "revise") {
+      const adj = Number(feedDaily) - committedDaily;
+      for (let j = i; j < bars.length; j += 1) {
+        bars[j] = { t: bars[j].t, c: bars[j].c + adj };
+      }
+      revisions.push(resolved);
     }
   }
   let cum = bars.at(-1).c;
@@ -252,7 +338,6 @@ export function appendCumulative(doc, daily, spxBySession, sessions, asOf) {
     bars.push({ t: bar.t, c: cum });
     spx.push({ t: bar.t, c: spxClose });
     have.add(bar.t);
-    byT.set(bar.t, cum);
   }
   if (bars.at(-1).t !== asOf) {
     throw new Error(`${doc.id} cumulative ends ${bars.at(-1).t}, expected ${asOf}`);
@@ -260,7 +345,7 @@ export function appendCumulative(doc, daily, spxBySession, sessions, asOf) {
   if (spx.at(-1)?.t !== asOf) {
     throw new Error(`${doc.id} SPX context ends ${spx.at(-1)?.t}, expected ${asOf}`);
   }
-  return { ...doc, asOf, bars, spx };
+  return { ...doc, asOf, bars, spx, revisions };
 }
 
 /**
@@ -283,14 +368,17 @@ export function prepareBreadthWrites(dir, core, pct = {}, { now = new Date() } =
   const nasiDoc = JSON.parse(readFileSync(join(dir, chartById.nasi.file), "utf8"));
   const spxDoc = JSON.parse(readFileSync(join(dir, index.overlay.file), "utf8"));
 
+  const revisions = [];
   const nysiNext = appendLevel(nysiDoc, core.nysi, asOf);
   const nasiNext = appendLevel(nasiDoc, core.nasi, asOf);
+  revisions.push(...(nysiNext.revisions ?? []), ...(nasiNext.revisions ?? []));
   const sessions = new Set(nysiNext.bars.map((bar) => bar.t));
   const spxNext = appendLevel(
     spxDoc,
     core.spx.filter((bar) => bar.t <= asOf && (sessions.has(bar.t) || bar.t <= (spxDoc.bars.at(-1)?.t ?? ""))),
     asOf,
   );
+  revisions.push(...(spxNext.revisions ?? []));
   if (JSON.stringify(nysiNext.bars.map((bar) => bar.t)) !== JSON.stringify(nasiNext.bars.map((bar) => bar.t))) {
     throw new Error("NYSI and NASI sessions diverged after append");
   }
@@ -309,6 +397,7 @@ export function prepareBreadthWrites(dir, core, pct = {}, { now = new Date() } =
     const chart = chartById[id];
     const doc = JSON.parse(readFileSync(join(dir, chart.file), "utf8"));
     const next = appendCumulative(doc, core[id], spxBySession, sessions, asOf);
+    revisions.push(...(next.revisions ?? []));
     writes.push({ file: chart.file, body: formatBreadthBody(next, { spaced: true }) });
     if (chart.asOf) chart.asOf = asOf;
   }
@@ -338,6 +427,7 @@ export function prepareBreadthWrites(dir, core, pct = {}, { now = new Date() } =
   return {
     asOf,
     writes,
+    revisions,
     summary: {
       nysi: nysiNext.bars.at(-1).c,
       nasi: nasiNext.bars.at(-1).c,
@@ -383,6 +473,10 @@ async function main() {
 
   const prepared = prepareBreadthWrites(out, core, pct);
   commitBreadthWrites(out, prepared.writes);
+
+  for (const rev of prepared.revisions ?? []) {
+    console.log(formatRevisionLog(rev));
+  }
 
   const coreLine = `NYSI ${prepared.summary.nysi} · NASI ${prepared.summary.nasi} · NYHL Δ ${prepared.summary.nyhl} · NYAD Δ ${prepared.summary.nyad} · SPX ${prepared.summary.spx}`;
   if (pctErrors.length) {
