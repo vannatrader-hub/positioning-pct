@@ -2641,6 +2641,7 @@ for (const asOf of ["2026-11-13", "2026-11-19", "2026-11-20", "2026-11-26", "202
 assert(breadthDocs.nysi.bars[0].t === "2015-10-29" && breadthDocs.nasi.bars[0].t === "2015-10-29" && breadthSpx.bars[0].t === "2015-10-29", "NYSI/NASI/SPX keep the 2015-10-29 history head");
 assert(pullBreadthSrc.includes("appendLevel") && pullBreadthSrc.includes("assertFeedFresh") && pullBreadthSrc.includes("US_MARKET_HOLIDAYS"), "breadth pull is append-only with a stale-feed guard");
 assert(pullBreadthSrc.includes("prepareBreadthWrites") && pullBreadthSrc.includes("commitBreadthWrites"), "breadth pull prepares all series in memory before an atomic commit");
+assert(pullBreadthSrc.includes("overlapWindowDates") && pullBreadthSrc.includes("revisionTolerance") && pullBreadthSrc.includes("formatRevisionLog"), "breadth pull documents tip-window revisions with a per-series tolerance");
 assert(readFileSync(join(root, "scripts/breadth-nightly.mjs"), "utf8").includes("assertFeedFresh"), "breadth:nightly re-checks feed freshness before seeding");
 assert(readFileSync(join(root, "scripts/breadth-nightly.mjs"), "utf8").includes("commitBreadthWrites"), "breadth:nightly stamps index via the same atomic commit helper");
 {
@@ -2649,13 +2650,17 @@ assert(readFileSync(join(root, "scripts/breadth-nightly.mjs"), "utf8").includes(
     [
       "--input-type=module",
       "-e",
-      `import { appendLevel, assertFeedFresh, lastCompletedWeekday, US_MARKET_HOLIDAYS } from ${JSON.stringify(pathToFileURL(join(root, "scripts/pull-breadth.mjs")).href)};
+      `import { appendLevel, assertFeedFresh, lastCompletedWeekday, overlapWindowDates, revisionAbsTol, revisionTolerance, US_MARKET_HOLIDAYS } from ${JSON.stringify(pathToFileURL(join(root, "scripts/pull-breadth.mjs")).href)};
 const sample = { id: "nysi", bars: [{ t: "2026-11-14", c: 1 }, { t: "2026-11-16", c: 2 }], asOf: "2026-11-16" };
 const extended = appendLevel(sample, [{ t: "2026-11-14", c: 1 }, { t: "2026-11-16", c: 2 }, { t: "2026-11-17", c: 3 }], "2026-11-17");
 if (extended.bars.at(-1).c !== 3 || extended.bars.length !== 3) throw new Error("append");
 let overlapFailed = false;
-try { appendLevel(sample, [{ t: "2026-11-16", c: 9 }], "2026-11-16"); } catch { overlapFailed = true; }
+try { appendLevel(sample, [{ t: "2026-11-16", c: 999 }], "2026-11-16"); } catch { overlapFailed = true; }
 if (!overlapFailed) throw new Error("overlap");
+const tip = overlapWindowDates("2026-11-16");
+if (!tip.has("2026-11-16") || !tip.has("2026-11-10") || tip.has("2026-11-09") || tip.size !== 5) throw new Error("window");
+if (revisionAbsTol("nyhl") !== 25 || revisionAbsTol("ncfd") !== 1) throw new Error("abs tol");
+if (revisionTolerance("nyhl", -299) !== 25 || revisionTolerance("ncfd", 40) !== 2) throw new Error("tol");
 if (typeof lastCompletedWeekday() !== "string" || !assertFeedFresh("2099-01-01").ok) throw new Error("fresh helpers");
 let staleFailed = false;
 try { assertFeedFresh("2020-01-02", new Date("2026-11-16T22:00:00Z")); } catch { staleFailed = true; }
@@ -2670,8 +2675,123 @@ console.log("ok");`,
   assert(probe.status === 0 && /ok/.test(probe.stdout ?? ""), `append-only / stale-feed sims ${probe.stderr || probe.stdout}`);
 }
 {
-  /* Forced NYAD overlap mismatch must leave every breadth file unchanged. */
-  const { prepareBreadthWrites, commitBreadthWrites } = await import(pathToFileURL(join(root, "scripts/pull-breadth.mjs")).href);
+  /* Tip-window revision fixtures: accept small recent drifts, reject old / oversized ones, never write on failure. */
+  const {
+    appendCumulative,
+    appendLevel,
+    formatRevisionLog,
+    prepareBreadthWrites,
+    commitBreadthWrites,
+  } = await import(pathToFileURL(join(root, "scripts/pull-breadth.mjs")).href);
+
+  const levelDoc = {
+    id: "nysi",
+    asOf: "2026-11-16",
+    bars: [
+      { t: "2026-11-09", c: 10 },
+      { t: "2026-11-10", c: 11 },
+      { t: "2026-11-11", c: 12 },
+      { t: "2026-11-12", c: 13 },
+      { t: "2026-11-13", c: 14 },
+      { t: "2026-11-16", c: 15 },
+    ],
+  };
+  const revised = appendLevel(
+    levelDoc,
+    [
+      { t: "2026-11-09", c: 10 },
+      { t: "2026-11-10", c: 11 },
+      { t: "2026-11-11", c: 12 },
+      { t: "2026-11-12", c: 13 },
+      { t: "2026-11-13", c: 14 },
+      { t: "2026-11-16", c: 18 },
+    ],
+    "2026-11-16",
+  );
+  assert(revised.bars.at(-1).c === 18, "recent small level revision is accepted (feed wins)");
+  assert(
+    revised.revisions.length === 1 &&
+      revised.revisions[0].t === "2026-11-16" &&
+      revised.revisions[0].old === 15 &&
+      revised.revisions[0].new === 18 &&
+      formatRevisionLog(revised.revisions[0]) === "nysi revision 2026-11-16: 15 → 18",
+    "recent small revision is logged as series, date, old → new",
+  );
+
+  let oldFailed = false;
+  let oldMessage = "";
+  try {
+    appendLevel(
+      levelDoc,
+      [
+        { t: "2026-11-09", c: 99 },
+        { t: "2026-11-10", c: 11 },
+        { t: "2026-11-11", c: 12 },
+        { t: "2026-11-12", c: 13 },
+        { t: "2026-11-13", c: 14 },
+        { t: "2026-11-16", c: 15 },
+      ],
+      "2026-11-16",
+    );
+  } catch (error) {
+    oldFailed = true;
+    oldMessage = String(error.message ?? error);
+  }
+  assert(oldFailed && /nysi overlap 2026-11-09/i.test(oldMessage), `revision older than the tip window fails (${oldMessage || "no throw"})`);
+
+  let tolFailed = false;
+  let tolMessage = "";
+  try {
+    appendLevel(
+      levelDoc,
+      [
+        { t: "2026-11-09", c: 10 },
+        { t: "2026-11-10", c: 11 },
+        { t: "2026-11-11", c: 12 },
+        { t: "2026-11-12", c: 13 },
+        { t: "2026-11-13", c: 14 },
+        { t: "2026-11-16", c: 100 },
+      ],
+      "2026-11-16",
+    );
+  } catch (error) {
+    tolFailed = true;
+    tolMessage = String(error.message ?? error);
+  }
+  assert(tolFailed && /nysi overlap 2026-11-16/i.test(tolMessage) && /tol/i.test(tolMessage), `recent revision beyond tolerance fails (${tolMessage || "no throw"})`);
+
+  const cumDoc = {
+    id: "nyhl",
+    asOf: "2026-11-16",
+    bars: [
+      { t: "2026-11-09", c: 1000 },
+      { t: "2026-11-10", c: 1100 },
+      { t: "2026-11-11", c: 1200 },
+      { t: "2026-11-12", c: 1300 },
+      { t: "2026-11-13", c: 1400 },
+      { t: "2026-11-16", c: 1101 },
+    ],
+    spx: [
+      { t: "2026-11-09", c: 7000 },
+      { t: "2026-11-10", c: 7010 },
+      { t: "2026-11-11", c: 7020 },
+      { t: "2026-11-12", c: 7030 },
+      { t: "2026-11-13", c: 7040 },
+      { t: "2026-11-16", c: 7050 },
+    ],
+  };
+  const cumDaily = [
+    { t: "2026-11-10", c: 100 },
+    { t: "2026-11-11", c: 100 },
+    { t: "2026-11-12", c: 100 },
+    { t: "2026-11-13", c: 100 },
+    { t: "2026-11-16", c: -302 },
+  ];
+  const cumSessions = new Set(cumDoc.bars.map((bar) => bar.t));
+  const cumSpx = new Map(cumDoc.spx.map((bar) => [bar.t, bar.c]));
+  const cumNext = appendCumulative(cumDoc, cumDaily, cumSpx, cumSessions, "2026-11-16");
+  assert(cumNext.bars.at(-1).c === 1098 && cumNext.revisions[0]?.old === -299 && cumNext.revisions[0]?.new === -302, "NYHL tip daily revision -299 → -302 is accepted and cascaded");
+
   const breadthDir = join(root, "public/data/vault/breadth");
   const scratch = mkdtempSync(join(tmpdir(), "breadth-atomic-"));
   try {
@@ -2712,7 +2832,7 @@ console.log("ok");`,
       abortMessage = String(error.message ?? error);
     }
     assert(aborted && /nyad overlap/i.test(abortMessage), `NYAD overlap abort sim ${abortMessage || "no throw"}`);
-    assert(fingerprint(scratch) === before, "forced NYAD overlap mismatch leaves every breadth file unchanged");
+    assert(fingerprint(scratch) === before, "failed breadth run writes no files at all");
   } finally {
     rmSync(scratch, { recursive: true, force: true });
   }
