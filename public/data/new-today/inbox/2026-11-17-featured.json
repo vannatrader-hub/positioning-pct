@@ -1,0 +1,35 @@
+[
+  {
+    "id": "2026-11-17-mcd-dollar",
+    "section": "options-flow",
+    "kind": "dollar",
+    "ticker": "MCD",
+    "title": "MCD joins the $$$ Shopping List",
+    "summary": "2,500 December $285 calls bought at $3.30 to $3.35 on 11/17 in a name that rarely sees large trades (about 5,000 traded on the day); spot $275.82. Shares are forming a bull flag below the declining 200-day, with the 50% retracement at $285 as resistance and $298 the target. Cheap calls on a clean chart; the Desk lean is the December call buy.",
+    "href": "options-flow/dollar/#MCD",
+    "publishedAt": "2026-11-17 18:25 CT",
+    "sourceLabel": "Desk"
+  },
+  {
+    "id": "2026-11-17-hca-flow",
+    "section": "options-flow",
+    "kind": "flow",
+    "ticker": "HCA",
+    "title": "HCA ($$): Dec $435 puts sold",
+    "summary": "1,000 December $435 puts sold to open at $3.30 on 11/6, still in open interest, plus 100 June 2027 $500 puts sold at $42.82 on 11/13; spot $501.20. Hospital operator pulling back from the $521 high with put sellers defining support. Desk lean is selling puts on pullbacks ahead of the Jan 22 report; $$ Featured, not the $$$ list.",
+    "href": "options-flow/",
+    "publishedAt": "2026-11-17 17:31 CT",
+    "sourceLabel": "Desk"
+  },
+  {
+    "id": "2026-11-17-zts-flow",
+    "section": "options-flow",
+    "kind": "flow",
+    "ticker": "ZTS",
+    "title": "ZTS ($$): Dec $75 puts sold",
+    "summary": "12,500 December $75 puts sold to open at $0.61 on 11/13, after 10,200 December $70 puts sold at $0.32 on 11/9 (13,175 now in open interest); spot $83.50. Animal-health leader on a slow recovery with the earnings multiple near the bottom of its 10-year range. Desk lean is the December put sales to get long ahead of 2027 launches; $$ Featured, not the $$$ list.",
+    "href": "options-flow/",
+    "publishedAt": "2026-11-17 17:30 CT",
+    "sourceLabel": "Desk"
+  }
+]
