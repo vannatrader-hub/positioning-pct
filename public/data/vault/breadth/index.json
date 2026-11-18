@@ -1,7 +1,7 @@
 {
   "sku": "wall",
   "title": "Vol / breadth wall",
-  "asOf": "2026-11-16",
+  "asOf": "2026-11-17",
   "period": "1D",
   "defaultRangeMonths": 12,
   "maxRangeMonths": 120,
@@ -21,32 +21,32 @@
     {
       "id": "ncfd",
       "file": "ncfd.json",
-      "asOf": "2026-11-16"
+      "asOf": "2026-11-17"
     },
     {
       "id": "ndtw",
       "file": "ndtw.json",
-      "asOf": "2026-11-16"
+      "asOf": "2026-11-17"
     },
     {
       "id": "ncfi",
       "file": "ncfi.json",
-      "asOf": "2026-11-16"
+      "asOf": "2026-11-17"
     },
     {
       "id": "ncth",
       "file": "ncth.json",
-      "asOf": "2026-11-16"
+      "asOf": "2026-11-17"
     },
     {
       "id": "nyhl",
       "file": "nyhl.json",
-      "asOf": "2026-11-16"
+      "asOf": "2026-11-17"
     },
     {
       "id": "nyad",
       "file": "nyad.json",
-      "asOf": "2026-11-16"
+      "asOf": "2026-11-17"
     }
   ]
 }
