@@ -1,8 +1,33 @@
 {
-  "asOf": "2026-11-12",
-  "asOfLabel": "Fri Nov 13, 2026 morning · GPC quote Thu Nov 12 close; AVAV and ASML quotes Wed Nov 11 close; KKR and FROG quotes Tue Nov 10 close; CBRE and CCJ quotes Mon Nov 9 close; LH quote Fri Nov 6 close; earlier names through Thu Nov 5 close",
-  "window": "Last 3 weeks · Oct 22 – Nov 12, 2026",
+  "asOf": "2026-11-17",
+  "asOfLabel": "Tue Nov 18, 2026 midnight · MCD quote Tue Nov 17 close; GPC quote Thu Nov 12 close; AVAV and ASML quotes Wed Nov 11 close; KKR and FROG quotes Tue Nov 10 close; CBRE and CCJ quotes Mon Nov 9 close; LH quote Fri Nov 6 close; earlier names through Thu Nov 5 close",
+  "window": "Last 3 weeks · Oct 27 – Nov 17, 2026",
   "plays": [
+    {
+      "id": 44172,
+      "ticker": "MCD",
+      "exchange": "NYSE",
+      "name": "McDonald's",
+      "industry": { "broad": "Consumer Discretionary", "focus": "Restaurants · franchised fast food" },
+      "date": "2026-11-17",
+      "alertedAtCt": "2026-11-17 06:25 PM CT",
+      "title": "Upside Calls Position for Fast Food Breakout Move",
+      "confidence": "$$$",
+      "refPrice": 275.82,
+      "flow": [
+        "McDonald's (MCD) saw 2,500 December $285 calls bought at $3.30 to $3.35 on 11/17 in a name that rarely sees large trades; about 5,000 traded on the day. Open interest is otherwise mixed.",
+        "MCD is a franchised global restaurant system with royalty, rent and fee income. Shares have rallied off the October lows as safety stocks are favored, forming a bull flag below the declining 200-day and the 200-week EMA. The 50% retracement at $285 held as recent resistance, with $298 the 61.8% Fibonacci target. The reference price is $275.82."
+      ],
+      "customerPurchased": [
+        { "contract": "Dec $285 calls", "detail": "2,500 bought @ $3.30 to $3.35 · 11/17", "side": "calls_bought" }
+      ],
+      "oi": [
+        { "contract": "Dec $285 calls", "detail": "2,500 bought 11/17 @ $3.30 to $3.35, about 5,000 traded on the day" }
+      ],
+      "recommendation": "The December $285 calls look cheap on one of the cleanest charts in the group, with a move through $285 targeting $298.",
+      "lead": { "type": "call", "action": "bought", "qty": 2500, "strike": 285, "expiry": "December", "price": 3.3 },
+      "quote": { "date": "2026-11-17", "last": 275.82, "prev": 274.67 }
+    },
     {
       "id": 44109,
       "ticker": "GPC",
@@ -475,89 +500,6 @@
       "recommendation": "JCI is a core way to own data center thermal demand with a record backlog behind it, and like following the December $160 calls into a breakout over the October high.",
       "lead": { "type": "call", "action": "bought", "qty": 2000, "strike": 160, "expiry": "December", "price": 3.54 },
       "quote": { "date": "2026-10-27", "last": 155.88, "prev": 147.5 }
-    },
-    {
-      "id": 43833,
-      "ticker": "CRWD",
-      "exchange": "NASDAQ",
-      "name": "CrowdStrike",
-      "industry": { "broad": "Technology", "focus": "Cybersecurity" },
-      "date": "2026-10-25",
-      "alertedAtCt": "2026-10-25 12:23 PM CT",
-      "title": "Long Calls Accumulate in Cyber Leader as Shares Reclaim the 50 Day",
-      "confidence": "$$$",
-      "refPrice": 257.6,
-      "flow": [
-        "CrowdStrike (CRWD) on 10/20 with a late opening buy of 3000 January 2028 $255 calls for $17M that is holding in open interest.",
-        "Put sellers followed on 10/23 with 325 December 2027 $180 and 350 January 2028 $170 short puts opening, while 1880 September 2027 $360 calls bought 9/21 and 350 December 2028 $225 short puts sit in open interest.",
-        "CRWD shares are +119.8% YTD and reclaimed the 50 day moving average on 10/21 after a pullback to the 10/20 low, with the 10/6 high at $286.99 the next upside target."
-      ],
-      "customerPurchased": [
-        { "contract": "Jan 2028 $255 calls", "detail": "3,000 bought · $17M · 10/20", "side": "calls_bought" }
-      ],
-      "oi": [
-        { "contract": "Jan 2028 $255 calls", "detail": "3,000 holding · $17M" },
-        { "contract": "Sep 2027 $360 calls", "detail": "1,880 · bought 9/21" },
-        { "contract": "Dec 2028 $225 short puts", "detail": "350 in OI" }
-      ],
-      "recommendation": "CRWD is a core AI security name to own and the size long dated call buying favors adding on dips toward the 50 day into the 12/1 report.",
-      "lead": { "type": "call", "action": "bought", "qty": 3000, "strike": 255, "expiry": "January 2028", "price": null },
-      "quote": { "date": "2026-10-27", "last": 268.02, "prev": 261.83 }
-    },
-    {
-      "id": 43836,
-      "ticker": "DDOG",
-      "exchange": "NASDAQ",
-      "name": "Datadog",
-      "industry": { "broad": "Technology", "focus": "Observability software" },
-      "date": "2026-10-25",
-      "alertedAtCt": "2026-10-25 09:45 AM CT",
-      "title": "Bulls Stick with Best in Class AI Infrastructure Services Leader",
-      "confidence": "$$$",
-      "refPrice": null,
-      "flow": [
-        "Datadog (DDOG) last week with opening sales of December $230 puts 800X and December $220 puts 600X and follows a 9/3 opening sale of 500 June 2028 $310 straddles which has a strong bullish bias.",
-        "DDOG also has long January 2028 $260 calls in open interest valued near $15M and 2000 December $130 calls worth $34M.",
-        "DDOG is forming a cup and handle pattern pulling back recently but holding AVWAP off September low as support. A move through $300 would measure to a $390 upside target and Fibonacci extension targets sit at $315, $328.5 and $350."
-      ],
-      "customerPurchased": [
-        { "contract": "Dec $230 puts", "detail": "800 sold to open · last week", "side": "puts_sold" },
-        { "contract": "Dec $220 puts", "detail": "600 sold to open · last week", "side": "puts_sold" }
-      ],
-      "oi": [
-        { "contract": "Jan 2028 $260 calls", "detail": "Long · valued near $15M" },
-        { "contract": "Dec $130 calls", "detail": "2,000 · worth $34M" }
-      ],
-      "recommendation": "DDOG has long been a favorite though valuation is tricky at these levels which supports the favored play being selling puts as a willing buyer on weakness.",
-      "lead": { "type": "put", "action": "sold", "qty": 800, "strike": 230, "expiry": "December", "price": null },
-      "quote": { "date": "2026-10-26", "last": 280.24, "prev": 269.65 }
-    },
-    {
-      "id": 43802,
-      "ticker": "CORT",
-      "exchange": "NASDAQ",
-      "name": "Corcept Therapeutics",
-      "industry": { "broad": "Health Care", "focus": "Biotech" },
-      "date": "2026-10-22",
-      "alertedAtCt": "2026-10-22 04:59 PM CT",
-      "title": "Bull Spread Positions for Upside in Impressive Biotech Growth Story into Catalyst",
-      "confidence": "$$$",
-      "refPrice": 108.5,
-      "flow": [
-        "Corcept Therapeutics (CORT) with a rare large trade on 10/20 as 2560 January $120/$160 wide call spreads bought to open for around $2.8M debit.",
-        "CORT still has 4200 January $140/$95 short strangles in open interest from a 9/29 trade and a 5/27 trade bought 1000 January $80 calls and sits on a $4M position up 450%.",
-        "CORT shares are on a massive run since the March 2026 low and have now formed a large flag stalling just under the 1.618 extension level at $129 with $170 the next upside target."
-      ],
-      "customerPurchased": [
-        { "contract": "Jan $120/$160 call spreads", "detail": "2,560 bought · ~$2.8M debit · 10/20", "side": "calls_bought" }
-      ],
-      "oi": [
-        { "contract": "Jan $140/$95 short strangles", "detail": "4,200 OI · 9/29" },
-        { "contract": "Jan $80 calls", "detail": "1,000 · ~$4M position · 5/27" }
-      ],
-      "recommendation": "CORT has a high-impact catalyst nearing but remains one of the most impressive mid-cap biotech growth names. I caught the bottom in shares earlier this year but wish I held the position. I like the set-up here for a move to $160.",
-      "lead": { "type": "call", "action": "bought", "qty": 2560, "strike": 120, "shortStrike": 160, "expiry": "January", "price": 10.94, "priceNote": "~$2.8M total" },
-      "quote": { "date": "2026-10-27", "last": 87.59, "prev": 87.125 }
     }
   ]
 }

@@ -368,7 +368,7 @@ for (const [ticker, want] of Object.entries(studyWant)) {
 }
 
 const flow = JSON.parse(readFileSync(join(root, "public/data/flow/plays.json"), "utf8"));
-const flowTickers = ["GPC", "AVAV", "ASML", "KKR", "FROG", "CCJ", "CBRE", "LH", "SBUX", "EPD", "MPWR", "INSM", "UBS", "EXE", "DAR", "JAZZ", "CASY", "JCI", "CRWD", "DDOG", "CORT"];
+const flowTickers = ["MCD", "GPC", "AVAV", "ASML", "KKR", "FROG", "CCJ", "CBRE", "LH", "SBUX", "EPD", "MPWR", "INSM", "UBS", "EXE", "DAR", "JAZZ", "CASY", "JCI"];
 assert(
   JSON.stringify(sortPlays(flow.plays).map((play) => play.ticker)) === JSON.stringify(flowTickers),
   `Shopping List newest alert first: ${sortPlays(flow.plays).map((play) => play.ticker)}`,
@@ -428,15 +428,15 @@ assert(
     JSON.stringify([{ contract: "Dec $160 calls", detail: "2,000 bought @ $3.54 · 10/26", side: "calls_bought" }]),
   "JCI customer purchased is the 10/26 Dec $160 call buy only",
 );
-const cortBars = JSON.parse(readFileSync(join(root, "public/data/flow/bars/CORT.json"), "utf8")).bars;
+const mcdBars = JSON.parse(readFileSync(join(root, "public/data/flow/bars/MCD.json"), "utf8")).bars;
 assert(
-  JSON.stringify(chartLevels(flowBy.CORT, cortBars).lines.map((line) => line.value)) === JSON.stringify([120, 160, 130.94]),
-  "CORT chart draws the $120/$160 spread and its break-even",
+  JSON.stringify(chartLevels(flowBy.MCD, mcdBars).lines.map((line) => line.value)) === JSON.stringify([285, 288.3]),
+  "MCD chart draws the $285 strike and its break-even",
 );
 for (const ticker of ["KKR", "FROG"]) {
   assert(flowBy[ticker].customerPurchased.every((line) => line.detail.includes("sold")), `${ticker} short puts read as sold`);
 }
-const beWant = { CASY: 671.2, JCI: 163.54, GPC: 127.92, KKR: 89.2, FROG: 94.04, CORT: 130.94, CRWD: null, DDOG: null, EPD: null, SBUX: null, LH: null, CBRE: null, CCJ: 86.74 };
+const beWant = { CASY: 671.2, JCI: 163.54, GPC: 127.92, KKR: 89.2, FROG: 94.04, MCD: 288.3, EPD: null, SBUX: null, LH: null, CBRE: null, CCJ: 86.74 };
 for (const [ticker, want] of Object.entries(beWant)) {
   assert(breakeven(flowBy[ticker].lead) === want, `${ticker} break-even ${breakeven(flowBy[ticker].lead)} !== ${want}`);
 }
@@ -459,6 +459,7 @@ assert(!flowBy.ARES && !flowBy.MSI, "ARES and MSI are $$ alerts and stay off the
 assert(!flowBy.BURL, "BURL is a $$ alert and stays off the $$$ watchlist");
 assert(!flowBy.TGT, "TGT is a $$ alert and stays off the $$$ watchlist");
 assert(!flowBy.IONQ, "IONQ is a $$ alert and stays off the $$$ watchlist");
+assert(!flowBy.HCA && !flowBy.ZTS, "HCA and ZTS are $$ alerts and stay off the $$$ watchlist");
 assert(!flowBy.COHR && !flowBy.AKAM, "COHR and AKAM are $$ alerts and stay off the $$$ watchlist");
 assert(
   JSON.stringify(flowBy.JAZZ.lead) === JSON.stringify({ type: "call", action: "bought", qty: 2700, strike: 240, expiry: "December 2026", price: null }),
@@ -583,7 +584,6 @@ assert(resolveExpiry("", "2026-10-25") === null, "blank expiry resolves to null"
 assert(alertLabel("2026-10-27 05:15 PM CT") === "Alerted Oct 27, 5:15 PM CT", "alert label");
 const jciBars = JSON.parse(readFileSync(join(root, "public/data/flow/bars/JCI.json"), "utf8")).bars;
 assert(chartLevels(flowBy.JCI, jciBars).expiryInView, "JCI Dec expiry is marked on the chart");
-assert(!chartLevels(flowBy.CRWD, JSON.parse(readFileSync(join(root, "public/data/flow/bars/CRWD.json"), "utf8")).bars).expiryInView, "CRWD 2028 expiry stays off the axis");
 for (const file of ["src/flow-chart.js", "src/spotlights.js"]) {
   const chartSource = readFileSync(join(root, file), "utf8").toLowerCase();
   for (const phrase of ["tradingview", "candlestick", "max gain", "dip buyer"]) {

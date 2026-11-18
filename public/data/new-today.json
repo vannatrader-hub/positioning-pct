@@ -1,9 +1,36 @@
 {
   "timeZone": "America/Chicago",
   "dayStartsAt": "00:00",
-  "dayStart": "2026-11-16T00:00:00-06:00",
-  "updatedAt": "2026-11-17T15:42:48-06:00",
+  "dayStart": "2026-11-17T00:00:00-06:00",
+  "updatedAt": "2026-11-18T00:05:00-06:00",
   "items": [
+    {
+      "id": "2026-11-17-mcd-dollar",
+      "section": "options-flow",
+      "title": "MCD joins the $$$ Shopping List",
+      "summary": "2,500 December $285 calls bought at $3.30 to $3.35 on 11/17 in a name that rarely sees large trades (about 5,000 traded on the day); spot $275.82. Shares are forming a bull flag below the declining 200-day, with the 50% retracement at $285 as resistance and $298 the target. Cheap calls on a clean chart; the Desk lean is the December call buy.",
+      "href": "options-flow/dollar/#MCD",
+      "publishedAt": "2026-11-17T18:25:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-17-hca-flow",
+      "section": "options-flow",
+      "title": "HCA ($$): Dec $435 puts sold",
+      "summary": "1,000 December $435 puts sold to open at $3.30 on 11/6, still in open interest, plus 100 June 2027 $500 puts sold at $42.82 on 11/13; spot $501.20. Hospital operator pulling back from the $521 high with put sellers defining support. Desk lean is selling puts on pullbacks ahead of the Jan 22 report; $$ Featured, not the $$$ list.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-17T17:31:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-17-zts-flow",
+      "section": "options-flow",
+      "title": "ZTS ($$): Dec $75 puts sold",
+      "summary": "12,500 December $75 puts sold to open at $0.61 on 11/13, after 10,200 December $70 puts sold at $0.32 on 11/9 (13,175 now in open interest); spot $83.50. Animal-health leader on a slow recovery with the earnings multiple near the bottom of its 10-year range. Desk lean is the December put sales to get long ahead of 2027 launches; $$ Featured, not the $$$ list.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-17T17:30:00-06:00",
+      "sourceLabel": "Desk"
+    },
     {
       "id": "2026-11-16-research-flow-show-nov12",
       "section": "research",
@@ -121,51 +148,6 @@
       "summary": "700 January 2029 $200 ITM puts sold 11/9 at $51.10 (~$3.5M; OI rose 700) plus 700 January 2027 $165 puts sold 11/9; spot $161.78. Mixed flow into November 18 earnings, with $170.75 as key resistance. Desk lean is the long-dated put sale; $$ Featured, not the $$$ list.",
       "href": "options-flow/",
       "publishedAt": "2026-11-10T17:43:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-09-ccj-dollar",
-      "section": "options-flow",
-      "title": "CCJ joins the $$$ Shopping List",
-      "summary": "Buyer of 10,500 Dec $85 calls at $1.74 plus 5,000 Dec $75 calls at $4.75; spot $75.37. Uranium name, down ~18% YTD; desk sees the 200-week EMA as a bottom after the November low near $66.",
-      "href": "options-flow/dollar/#CCJ",
-      "publishedAt": "2026-11-09T18:44:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-09-burl-flow",
-      "section": "options-flow",
-      "title": "BURL ($$): June 2027 $230 puts sold",
-      "summary": "June 2027 $230 puts sold; spot ~$257. Off-price apparel retailer, down ~11% YTD after a July 52-week high near $378, with the September low near $227. Desk lean is the June 2027 $230 put sale.",
-      "href": "options-flow/",
-      "publishedAt": "2026-11-09T17:47:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-09-cbre-dollar",
-      "section": "options-flow",
-      "title": "CBRE joins the $$$ Shopping List",
-      "summary": "December $135 calls bought; spot ~$138. Commercial real estate services name, down ~14% YTD after a February 52-week high near $174, with the October low near $121. Desk wants the December $135 calls.",
-      "href": "options-flow/dollar/#CBRE",
-      "publishedAt": "2026-11-09T17:47:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-09-desk-recap",
-      "section": "options-flow",
-      "title": "Desk market wrap 11/9",
-      "summary": "Stocks bounced to start the week as oil dropped another 3% and eased inflation fears, though AI financing stayed an overhang. SPY and QQQ squeezed back to the 8-day average on a wide-range session; desk waits on this week's inflation data. A few large call books adjusted.",
-      "href": "options-flow/",
-      "publishedAt": "2026-11-09T14:26:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-09-desk-blitz",
-      "section": "options-flow",
-      "title": "Desk open wrap 11/9",
-      "summary": "Futures firmer to start the week as oil kept falling and metals bid; VIX dropped again. Europe recovered some of last week's losses and Nikkei bounced after last week's slide. CPI is next.",
-      "href": "options-flow/",
-      "publishedAt": "2026-11-09T06:47:00-06:00",
       "sourceLabel": "Desk"
     }
   ]
