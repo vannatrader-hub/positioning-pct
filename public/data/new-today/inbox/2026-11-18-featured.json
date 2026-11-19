@@ -1,0 +1,24 @@
+[
+  {
+    "id": "2026-11-18-dis-flow",
+    "section": "options-flow",
+    "kind": "flow",
+    "ticker": "DIS",
+    "title": "DIS ($$): Apr $130 calls bought",
+    "summary": "1,000 April $130 calls bought at $6.10 (~$610K), plus 600 September 2027 $100 puts sold; spot $122.40. Breakout to new highs. Desk lean is the April call buy; $$ Featured, not the $$$ list.",
+    "href": "options-flow/",
+    "publishedAt": "2026-11-18 18:10 CT",
+    "sourceLabel": "Desk"
+  },
+  {
+    "id": "2026-11-18-ko-flow",
+    "section": "options-flow",
+    "kind": "flow",
+    "ticker": "KO",
+    "title": "KO ($$): Feb 2027 $105 calls bought",
+    "summary": "5,300 February 2027 $105 calls bought at $2.26, plus 4,000 March $95 calls bought and 1,600 May $90 puts sold; spot $98.10. Near all-time highs. Desk lean is the February 2027 call buy; $$ Featured, not the $$$ list.",
+    "href": "options-flow/",
+    "publishedAt": "2026-11-18 18:09 CT",
+    "sourceLabel": "Desk"
+  }
+]

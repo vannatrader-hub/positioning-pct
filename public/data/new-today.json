@@ -1,9 +1,27 @@
 {
   "timeZone": "America/Chicago",
   "dayStartsAt": "00:00",
-  "dayStart": "2026-11-17T00:00:00-06:00",
-  "updatedAt": "2026-11-18T00:05:00-06:00",
+  "dayStart": "2026-11-18T00:00:00-06:00",
+  "updatedAt": "2026-11-19T00:05:00-06:00",
   "items": [
+    {
+      "id": "2026-11-18-dis-flow",
+      "section": "options-flow",
+      "title": "DIS ($$): Apr $130 calls bought",
+      "summary": "1,000 April $130 calls bought at $6.10 (~$610K), plus 600 September 2027 $100 puts sold; spot $122.40. Breakout to new highs. Desk lean is the April call buy; $$ Featured, not the $$$ list.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-18T18:10:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-18-ko-flow",
+      "section": "options-flow",
+      "title": "KO ($$): Feb 2027 $105 calls bought",
+      "summary": "5,300 February 2027 $105 calls bought at $2.26, plus 4,000 March $95 calls bought and 1,600 May $90 puts sold; spot $98.10. Near all-time highs. Desk lean is the February 2027 call buy; $$ Featured, not the $$$ list.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-18T18:09:00-06:00",
+      "sourceLabel": "Desk"
+    },
     {
       "id": "2026-11-17-mcd-dollar",
       "section": "options-flow",
@@ -112,42 +130,6 @@
       "summary": "700 January 2029 $35 ITM puts sold 11/3 at $14.20, holding in open interest, plus 8,150 January 2027 $30 short puts; spot ~$34.10. Shares are down about 24% YTD after a 52-week low on 11/5 then a rebound. Desk lean is the long-dated put sale; $$ Featured, not the $$$ list.",
       "href": "options-flow/",
       "publishedAt": "2026-11-11T18:08:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-10-mdb-spotlight",
-      "section": "options-flow",
-      "title": "MDB Spotlight: January $370/$430 call spreads",
-      "summary": "Long January $370/$430 call spreads at $15 debit; spot $331. Database platform into the December 1 report. Stock stop $305, stock target $430, two-month window; profit zone is MDB above $385 at January OpEx.",
-      "href": "options-flow/spotlights/#MDB",
-      "publishedAt": "2026-11-10T20:45:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-10-kkr-dollar",
-      "section": "options-flow",
-      "title": "KKR joins the $$$ Shopping List",
-      "summary": "2,000 May $100 puts sold to open at $10.80, after 1,200 January 2029 $90 short puts opened 10/26; size short-put open interest in the $90–$105 zone; spot $100.85. Double bottom near $85, 200-week EMA reclaimed; a move above about $105 is needed to break the base. Desk treats KKR as a top Financials name if rate concerns fade.",
-      "href": "options-flow/dollar/#KKR",
-      "publishedAt": "2026-11-10T18:03:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-10-frog-dollar",
-      "section": "options-flow",
-      "title": "FROG joins the $$$ Shopping List",
-      "summary": "1,000 December $105 ITM puts sold to open at $10.96 on 11/10; 650 January 2027 $95 calls bought 10/16 at $9.00 remain in open interest and are now ITM; spot $103.55. 50-day near $94 is support, $108.59 high is resistance. Desk would add on a pullback toward the 50-day and does not chase.",
-      "href": "options-flow/dollar/#FROG",
-      "publishedAt": "2026-11-10T17:44:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-10-tgt-flow",
-      "section": "options-flow",
-      "title": "TGT ($$): Jan 2029 $200 puts sold",
-      "summary": "700 January 2029 $200 ITM puts sold 11/9 at $51.10 (~$3.5M; OI rose 700) plus 700 January 2027 $165 puts sold 11/9; spot $161.78. Mixed flow into November 18 earnings, with $170.75 as key resistance. Desk lean is the long-dated put sale; $$ Featured, not the $$$ list.",
-      "href": "options-flow/",
-      "publishedAt": "2026-11-10T17:43:00-06:00",
       "sourceLabel": "Desk"
     }
   ]

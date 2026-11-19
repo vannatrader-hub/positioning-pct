@@ -460,6 +460,7 @@ assert(!flowBy.BURL, "BURL is a $$ alert and stays off the $$$ watchlist");
 assert(!flowBy.TGT, "TGT is a $$ alert and stays off the $$$ watchlist");
 assert(!flowBy.IONQ, "IONQ is a $$ alert and stays off the $$$ watchlist");
 assert(!flowBy.HCA && !flowBy.ZTS, "HCA and ZTS are $$ alerts and stay off the $$$ watchlist");
+assert(!flowBy.DIS && !flowBy.KO, "DIS and KO are $$ alerts and stay off the $$$ watchlist");
 assert(!flowBy.COHR && !flowBy.AKAM, "COHR and AKAM are $$ alerts and stay off the $$$ watchlist");
 assert(
   JSON.stringify(flowBy.JAZZ.lead) === JSON.stringify({ type: "call", action: "bought", qty: 2700, strike: 240, expiry: "December 2026", price: null }),
