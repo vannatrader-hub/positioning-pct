@@ -1,5 +1,16 @@
 [
   {
+    "id": "2026-11-18-hsic-flow",
+    "section": "options-flow",
+    "kind": "flow",
+    "ticker": "HSIC",
+    "title": "HSIC ($$$): Apr $85 calls bought",
+    "summary": "1,850 April $85 calls bought in the $5.50 to $6.70 range on 11/18, adjusting some November $75 calls from 5/8; spot $85.65. Rebound off the rising 200-day, with shares outperforming in 2026 and recent highs stalled at the 2022 highs. Unusual call volume a day after a healthcare conference presentation. Desk lean is the April call buy as a low-valuation own in a safer area, though options liquidity is thin.",
+    "href": "options-flow/",
+    "publishedAt": "2026-11-18 21:43 CT",
+    "sourceLabel": "Desk"
+  },
+  {
     "id": "2026-11-18-dis-flow",
     "section": "options-flow",
     "kind": "flow",
