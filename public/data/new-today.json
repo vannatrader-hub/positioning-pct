@@ -1,9 +1,36 @@
 {
   "timeZone": "America/Chicago",
   "dayStartsAt": "00:00",
-  "dayStart": "2026-11-18T00:00:00-06:00",
-  "updatedAt": "2026-11-19T06:35:00-06:00",
+  "dayStart": "2026-11-19T00:00:00-06:00",
+  "updatedAt": "2026-11-20T00:00:00-06:00",
   "items": [
+    {
+      "id": "2026-11-19-celh-flow",
+      "section": "options-flow",
+      "title": "CELH ($$$): Sep 2027 $47.50/$65 call spreads bought",
+      "summary": "50,000 September 2027 $47.50/$65 call spreads bought on 8/6 and still in open interest, alongside 7,000 June $35/$32.50 short strangles and more than 5,000 January $35 puts sold; spot $30.88. Energy drink leader sold off Thursday after tagging the 200-day, down about 33% YTD. Desk lean is that the name can work higher in 2027 on new product launches and international upside.",
+      "href": "options-flow/dollar/#CELH",
+      "publishedAt": "2026-11-19T19:52:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-19-tel-flow",
+      "section": "options-flow",
+      "title": "TEL ($$$): Feb $230 calls bought",
+      "summary": "2,000 February $230 calls bought for about $2M on 11/17 (open interest now 5,532), following 1,250 of the same on 11/6 and 325 February 2027 $230 calls at $10.88 on 11/2; spot $211.20. The expiry spans the Jan 20 report. Shares sit back under the 50- and 200-day with $230 as resistance and about $200 as support. Desk lean is following the February $230 call buyers into the report at a low forward multiple.",
+      "href": "options-flow/dollar/#TEL",
+      "publishedAt": "2026-11-19T17:16:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-19-bbio-flow",
+      "section": "options-flow",
+      "title": "BBIO ($$): Feb $80 calls bought",
+      "summary": "1,500 February $80 calls bought at $7.20 (~$1M), plus 650 May $75 and 550 February $85 calls bought; spot $78.20. Call buyers are stepping in ahead of a heavy catalyst calendar, with the November 27 PDUFA date first. Desk lean is owning upside calls into the launch stretch; $$ Featured, not the $$$ list.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-19T17:15:00-06:00",
+      "sourceLabel": "Desk"
+    },
     {
       "id": "2026-11-18-hsic-flow",
       "section": "options-flow",
@@ -112,33 +139,6 @@
       "summary": "3,350 December $85/$110 call spreads bought at $4.55 on 11/9, plus 8,850 Nov 27 $90 calls bought 11/6; spot $86.60. Infrastructure software ahead of an AI compute ramp, with a recovery toward $100. Desk lean is the December call spread; $$ Featured, not the $$$ list.",
       "href": "options-flow/",
       "publishedAt": "2026-11-12T17:44:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-11-avav-dollar",
-      "section": "options-flow",
-      "title": "AVAV joins the $$$ Shopping List",
-      "summary": "600 January $165 OTM calls bought (~$250K) on 11/10, 300 June $150 calls (~$460K) on 11/4, and 1,000 January $145 calls bought against 1,550 $210 calls sold on 10/29; spot $124.40. Shares are down about 47% YTD, bouncing off the 200-month EMA area, with a trend inflection above about $136.",
-      "href": "options-flow/dollar/#AVAV",
-      "publishedAt": "2026-11-11T18:12:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-11-asml-dollar",
-      "section": "options-flow",
-      "title": "ASML joins the $$$ Shopping List",
-      "summary": "1,960 February $1740/$1820 call spreads bought 11/10 (OI +1,960 on the $1740 leg, +1,805 on the $1820 leg) and 700 December $1740 calls bought 11/4; spot $1,534.42. Shares are up about 43% YTD, under the 200-day near $1,600 resistance, and reclaimed the 8-day EMA after the November 5 low at $1,355.",
-      "href": "options-flow/dollar/#ASML",
-      "publishedAt": "2026-11-11T18:10:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-11-ionq-flow",
-      "section": "options-flow",
-      "title": "IONQ ($$): Jan 2029 $35 puts sold",
-      "summary": "700 January 2029 $35 ITM puts sold 11/3 at $14.20, holding in open interest, plus 8,150 January 2027 $30 short puts; spot ~$34.10. Shares are down about 24% YTD after a 52-week low on 11/5 then a rebound. Desk lean is the long-dated put sale; $$ Featured, not the $$$ list.",
-      "href": "options-flow/",
-      "publishedAt": "2026-11-11T18:08:00-06:00",
       "sourceLabel": "Desk"
     }
   ]
