@@ -1,9 +1,36 @@
 {
   "timeZone": "America/Chicago",
   "dayStartsAt": "00:00",
-  "dayStart": "2026-11-19T00:00:00-06:00",
-  "updatedAt": "2026-11-20T00:00:00-06:00",
+  "dayStart": "2026-11-22T00:00:00-06:00",
+  "updatedAt": "2026-11-23T00:00:00-06:00",
   "items": [
+    {
+      "id": "2026-11-22-tjx-flow",
+      "section": "options-flow",
+      "title": "TJX ($$$): Dec $140 puts sold",
+      "summary": "3,000 December $140 puts sold at $7.85 on 11/11, 5,100 December $120 short puts opened at $1.04 (open interest now 6,022), December $140 put open interest 4,570; 2,000 December $145 calls bought at $2 still holding (3,307); spot $139.60. Shares are down about 9.1% YTD, rebounded off the September low, and are back above the 50-day. Desk lean agrees with the put sellers as a way to own the name into the holiday quarter and the February report.",
+      "href": "options-flow/dollar/#TJX",
+      "publishedAt": "2026-11-22T15:07:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-22-chtr-flow",
+      "section": "options-flow",
+      "title": "CHTR ($$): Dec $145 calls bought",
+      "summary": "1,000 December $145 calls bought at $7.14 to $7.30 on 11/13 (open interest 1,105), plus 190 January 2029 $70 ITM calls bought for $1.1M on 10/26; spot $128.70. Shares are down about 38.3% YTD, up about 27% off the 10/26 low near $101, with ten straight closes above the 50-day and the 11/17 high near $143 as resistance. Desk lean is that the call buyers make it worth starting upside exposure into the January report; $$ Featured, not the $$$ list.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-22T15:06:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-20-desk-recap",
+      "section": "options-flow",
+      "title": "Desk market wrap 11/20",
+      "summary": "Heavy selling Friday as the S&P broke below 7,000 to new lows and the VIX moved back above 30. Rotation out of tech into housing, staples, and insurance, with bonds bid.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-20T14:25:00-06:00",
+      "sourceLabel": "Desk"
+    },
     {
       "id": "2026-11-19-celh-flow",
       "section": "options-flow",
@@ -113,33 +140,6 @@
       "sourceLabel": "BoA",
       "thumb": "data/new-today/thumbs/2026-11-15-boa-bull-bear.jpg",
       "thumbAlt": "BoA Bull and Bear Indicator at 7.4, up from 7.2"
-    },
-    {
-      "id": "2026-11-12-gpc-dollar",
-      "section": "options-flow",
-      "title": "GPC joins the $$$ Shopping List",
-      "summary": "2,550 December $125 calls bought at $2.92 on 11/12, then paid up to about $3.50; 500 March $140 calls bought in a calendar spread against February $140 calls; 3,000 November $130 long calls in open interest are underwater; spot $122.84. Shares held the 200-day and the weekly volatility stop off the May lows; a flag is forming with about $141 to clear. Analyst Day Dec 8-9 is the catalyst.",
-      "href": "options-flow/dollar/#GPC",
-      "publishedAt": "2026-11-12T21:04:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-12-cohr-flow",
-      "section": "options-flow",
-      "title": "COHR ($$): Dec $300 calls bought",
-      "summary": "1,600 December $300 calls bought at $6.19, with 350 April 2027 $185 puts sold to open; spot $232.10. Photonics platform with multiyear demand visibility. Desk lean is the December call buying; $$ Featured, not the $$$ list.",
-      "href": "options-flow/",
-      "publishedAt": "2026-11-12T17:45:00-06:00",
-      "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-12-akam-flow",
-      "section": "options-flow",
-      "title": "AKAM ($$): Dec $85/$110 call spreads",
-      "summary": "3,350 December $85/$110 call spreads bought at $4.55 on 11/9, plus 8,850 Nov 27 $90 calls bought 11/6; spot $86.60. Infrastructure software ahead of an AI compute ramp, with a recovery toward $100. Desk lean is the December call spread; $$ Featured, not the $$$ list.",
-      "href": "options-flow/",
-      "publishedAt": "2026-11-12T17:44:00-06:00",
-      "sourceLabel": "Desk"
     }
   ]
 }
