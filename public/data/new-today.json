@@ -1,9 +1,36 @@
 {
   "timeZone": "America/Chicago",
   "dayStartsAt": "00:00",
-  "dayStart": "2026-11-22T00:00:00-06:00",
-  "updatedAt": "2026-11-23T00:00:00-06:00",
+  "dayStart": "2026-11-23T00:00:00-06:00",
+  "updatedAt": "2026-11-24T00:00:00-06:00",
   "items": [
+    {
+      "id": "2026-11-23-tyl-flow",
+      "section": "options-flow",
+      "title": "TYL ($$): Mar $410 puts sold",
+      "summary": "100 March 2027 $410 puts sold to open at $33.52 on 11/18 (open interest 151), plus about 200 March 2027 $450 calls bought at $29.83 on 11/12 and 400 March 2027 $380 calls bought at $20.65 on 10/9; spot $406.70. Shares are down about 10.4% YTD but have held above the 200-day since 10/13, sitting between the 8- and 21-day EMAs with the 50-day near $370 as support and $437 the upside target. Desk lean is the put sale on a pullback toward the 50-day; $$ Featured, not the $$$ list.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-23T17:52:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-23-cah-flow",
+      "section": "options-flow",
+      "title": "CAH ($$): Jun $220 puts sold",
+      "summary": "375 June 2027 $220 puts sold to open at $6.20 on 11/10 (open interest 498), plus 275 January 2028 $320 calls bought at $22.02 on 11/23; spot $272.00. Shares are up about 32% YTD after a raised fiscal-year outlook, with the $286.29 high from 11/5 as resistance and the 21-day EMA the first support on this pullback. Desk lean is the put sale on a pullback toward the 21-day; $$ Featured, not the $$$ list.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-23T17:51:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-23-desk-recap",
+      "section": "options-flow",
+      "title": "Desk market wrap 11/23",
+      "summary": "Tech led a sharp rebound as Asian authorities moved to support markets; semis were the standout and the VIX fell back under 30. The S&P stays below its 200-day, with resistance 7,330 and support 6,970. Size calls bought in ENTG, LRCX, MRVL, ARM; puts sold to open in WMT, TGT, BURL.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-23T14:29:00-06:00",
+      "sourceLabel": "Desk"
+    },
     {
       "id": "2026-11-22-tjx-flow",
       "section": "options-flow",
@@ -120,26 +147,6 @@
       "href": "positioning/charts/#flow-show",
       "publishedAt": "2026-11-16T17:50:00-06:00",
       "sourceLabel": "Desk"
-    },
-    {
-      "id": "2026-11-15-research-gs-hedge-funds-sell",
-      "section": "research",
-      "title": "Goldman: hedge funds sold the rip, tech long/short at a record low",
-      "summary": "Goldman's latest prime-services data show professional managers covering index hedges while continuing to sell individual stocks, and pushing technology long/short exposure to the lowest level in the bank's records, even as the index rally made the selling look mistimed.",
-      "href": "new-today/#nt-research",
-      "publishedAt": "2026-11-15T10:30:00-06:00",
-      "sourceLabel": "Goldman Sachs"
-    },
-    {
-      "id": "2026-11-15-research-boa-risk-off",
-      "section": "research",
-      "title": "BoA: risk-off stays in place as the dollar leads",
-      "summary": "The Nov 12 bank note keeps a tactical risk-off stance. The BoA Bull & Bear Indicator is at 7.4, up from 7.2, with the equity-flow component at the 96th percentile (very bullish) and fund-manager positioning at the 100th percentile (very bullish), while global stock-index breadth is at the 21st percentile (bearish). Weekly global equity fund inflows were $98.3 billion, the largest since June 2026. Year-to-date, US stocks are about +10.9% and the dollar about +4.9%. The November fund manager cash and crowded-trade survey is not yet the basis for the site's Soft ↔ Crowded fund-manager panel, which is still the August 2026 survey.",
-      "href": "new-today/#nt-research",
-      "publishedAt": "2026-11-15T01:02:00-06:00",
-      "sourceLabel": "BoA",
-      "thumb": "data/new-today/thumbs/2026-11-15-boa-bull-bear.jpg",
-      "thumbAlt": "BoA Bull and Bear Indicator at 7.4, up from 7.2"
     }
   ]
 }
