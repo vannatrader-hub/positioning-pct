@@ -1,0 +1,34 @@
+[
+  {
+    "id": "2026-11-24-gen-flow",
+    "section": "options-flow",
+    "kind": "flow",
+    "ticker": "GEN",
+    "title": "GEN ($$$): May 2027 $37 calls bought",
+    "summary": "3,500 May 2027 $37 calls bought at $1.80 on 11/24, adding to an unusual 4,000 April 2027 $35 calls bought at $1.55 on 11/18 (open interest 6,831 at that strike); spot $30.00. Shares are up about 10% YTD and have held above the 50-day and 21-day EMA for 19 straight sessions, 5.4% under the September high. Valuation sits near the low end of its 10-year range into a raised outlook; a close through the September high is the breakout trigger.",
+    "href": "options-flow/",
+    "publishedAt": "2026-11-24 18:15 CT",
+    "sourceLabel": "Desk"
+  },
+  {
+    "id": "2026-11-24-ice-flow",
+    "section": "options-flow",
+    "kind": "flow",
+    "ticker": "ICE",
+    "title": "ICE ($$): Jan 2029 $130 calls bought",
+    "summary": "A stock-replacement buyer took 375 January 2029 $130 in-the-money calls at $62.08 (about $2.3M), plus 275 January 2029 $150 calls at $48.41 on 11/24; spot $174.90. Shares have closed above the 50-day every session since 10/29 and sit 3.6% under the 11/12 high near $181, with the 21-day EMA near $171 as first support. Desk lean is the long-dated call as a stock substitute; $$ Featured, not the $$$ list.",
+    "href": "options-flow/",
+    "publishedAt": "2026-11-24 18:16 CT",
+    "sourceLabel": "Desk"
+  },
+  {
+    "id": "2026-11-24-desk-recap",
+    "section": "options-flow",
+    "kind": "recap",
+    "title": "Desk market wrap 11/24",
+    "summary": "Stocks faded as the Nvidia relief rally lost momentum and a report of new tariffs on China and the EU weighed; semis were hit hard as money rotated out of AI, while biotech, pharma and retail led. Breadth improved into the afternoon with IWM and the Dow turning green. S&P resistance 7,330 / 7,500, support 6,970 / 6,830. GDP, PCE and durable goods are due before the holiday. Size puts sold in MU, TSM, AMD, ADI; calls bought in CCCC, MRNA, BMRN.",
+    "href": "options-flow/",
+    "publishedAt": "2026-11-24 14:14 CT",
+    "sourceLabel": "Desk"
+  }
+]
