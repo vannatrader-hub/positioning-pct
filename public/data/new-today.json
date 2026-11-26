@@ -1,9 +1,36 @@
 {
   "timeZone": "America/Chicago",
   "dayStartsAt": "00:00",
-  "dayStart": "2026-11-24T00:00:00-06:00",
-  "updatedAt": "2026-11-25T00:00:00-06:00",
+  "dayStart": "2026-11-25T00:00:00-06:00",
+  "updatedAt": "2026-11-26T00:00:00-06:00",
   "items": [
+    {
+      "id": "2026-11-25-mrna-flow",
+      "section": "options-flow",
+      "title": "MRNA ($$): Feb $230 calls bought",
+      "summary": "850 February 2027 $230 calls bought at $37.28 (~$3.1M) on 11/24, plus June 2027 $270/$150 bull put spreads (2,650) opened 11/11; spot $220.80. Shares up ~649% YTD, pulled back from the ~$281 high on 11/9, three straight closes above the 50-day, support near $190. Desk lean: follow the call buyers on the pullback toward the 50-day into the cancer-therapy filing/readout. $$ Featured.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-25T17:14:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-25-vst-flow",
+      "section": "options-flow",
+      "title": "VST ($$$): Jan $87.50 puts sold",
+      "summary": "5,500 January 2027 $87.50 puts sold to open at $0.79 on 11/24, following 8,700 Dec 24 weekly $95 short puts on 11/23 and 14,600 March $85 short puts on 11/5; a 600 February $135 call buy at $8.62 on 11/23; spot $121.30. Shares -24.8% YTD, lost 50/200-day in late October but held above the 11/5 low; 50-day near $140 resistance, support at the November low near $111. Desk lean: sell puts under the November low as the entry. $$$ Featured.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-25T17:13:00-06:00",
+      "sourceLabel": "Desk"
+    },
+    {
+      "id": "2026-11-25-desk-recap",
+      "section": "options-flow",
+      "title": "Desk market wrap 11/25",
+      "summary": "Stocks opened sharply lower on fresh tariff threats and a tech-rally stall (VIX ~31), SPY sold off hard early then recovered nearly all of it; solar was the standout group and breadth flipped positive midday as the VIX fell. Trend still lower with SPY below the 8- and 21-day. S&P resistance 7,330 / support 6,970. Semis leaders AMD, SMTC, MU, ALAB, AMAT saw large long-dated puts sold to open into the selloff. Markets closed Thursday for Thanksgiving; Friday half-session.",
+      "href": "options-flow/",
+      "publishedAt": "2026-11-25T14:41:00-06:00",
+      "sourceLabel": "Desk"
+    },
     {
       "id": "2026-11-24-ice-flow",
       "section": "options-flow",
